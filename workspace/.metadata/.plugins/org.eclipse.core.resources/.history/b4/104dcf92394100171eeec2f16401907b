@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>Register</title>
+
+
+<style>
+	
+	.form-control-feedback {
+		right: 500px !important;
+	}
+	
+</style>
+
+</head>
+<body>
+
+	<section layout:fragment="top-header" class="page-header">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<ul class="breadcrumb">
+						<li>
+							<a href="#">صفحه نخست</a>
+						</li>
+
+						<li class="active">فعالسازی</li>
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<h1>فعالسازی</h1>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="content" layout:fragment="content">
+		<form id="activateForm">
+			<div class="callout callout-danger hide"><h4></h4></div>
+			<div class="container">
+				<div class="col-sm-8 col-lg-offset-2">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<div class="row">
+								<div class="col-sm-8 col-sm-offset-2">
+									<h2>فعالسازی</h2>
+
+									<input name="userId" type="hidden" th:value="${userId}" />
+									<div class="alert alert-info">لطفا برای فعالسازی حساب خود، رمز عبور مورد نظر را وارد کرده و بر روی دکمه «ذخیره» کلیک کنید.</div>
+									<div class="form-group">
+										<label class="text-muted" th:inline="text">
+											[[#{register.password}]]
+											<span class="reqired"> *</span>
+										</label>
+										<input id="password" name="password" type="password" class="form-control" data-bv-notempty="true" th:attr="data-bv-notempty-message=#{error-required(#{register.password})}" />
+									</div>
+									<div class="form-group">
+										<a class="btn btn-success" id="activateBtn" th:text="#{button.save}">ذخیره</a>
+									</div>
+								</div>
+							</div>
+							<!-- row -->
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</form>
+	</section>
+
+
+	<th:block layout:fragment="javascripts">
+
+
+		<script th:inline="javascript">
+
+			var titleModifyRelation = '<span class="label label-info"  th:remove="tag" th:text="#{relation.modify}">Modify Relation !</span>';
+
+		    $(document).ready(function() {
+
+				$('#activateForm').bootstrapValidator({
+					excluded: [':disabled'], 
+					feedbackIcons:{
+						valid: 'fa fa-check',
+						invalid: 'fa fa-times',
+						validating: 'fa fa-refresh'
+					}
+				});
+
+		    	$('#activateBtn').click(function(){
+		    		var $btn = $(this);
+		    		var isValidForm = false;		    		
+		    		$('#activateForm').find('.callout').text('').addClass('hide');
+    				$('#activateForm').data('bootstrapValidator').validate();
+    				isValidForm = $('#activateForm').data('bootstrapValidator').isValid();
+
+					if(isValidForm){ 
+		    			$btn.attr('disabled', true);
+		    			var personUuid = [[${personUuid}]];
+			    		$.post('/siteservices-web/profile/open/user/activate', $('#activateForm').serialize()).done(function(data) {
+			    			if(data.status == 'success') {
+			    				showTopleftGrowl('success', 'Create', 'Create Successful');
+			    			} else if(data.status == 'ValidationException'){
+			    				showTopleftGrowl('error', 'Error', data.invalidField);
+			    				$('#activateForm').find('.callout').text(data.invalidField + 'invalid-value').removeClass('hide');
+			    			} else if(data.status == 'ErrorCode'){
+			    				if(data.errorMessage){
+			    					showTopleftGrowl('error', 'Error', data.errorMessage);
+			    					$('#activateForm').find('.callout').text(data.errorMessage).removeClass('hide');
+			    				} else {
+			    					showTopleftGrowl('error', 'Error', data.errorCode);
+			    					$('#activateForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+			    				}
+			    			} else {
+			    				console.debug(data.status);
+			    				showTopleftGrowl('error', 'Error', data.message);
+			    				$('#activateForm').find('.callout').text((data.message ? data.message : 'delete.failed' )).removeClass('hide');
+			    			}
+			    			$btn.attr('disabled', false);
+			    		}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'activateBtn')});
+					} 
+			    		return false;
+		    	});
+		    });
+		    
+		    /*<![CDATA[*/
+	    	/*]]>*/
+    		</script>
+
+	</th:block>
+
+</body>
+</html>

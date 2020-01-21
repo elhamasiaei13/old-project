@@ -1,0 +1,98 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.identitymanagement2.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.parvanpajooh.client.accounting.model.VoucherMsg;
+import com.parvanpajooh.client.identitymanagement2.model.ObjectAccessScopeMsg;
+import com.parvanpajooh.client.identitymanagement2.model.PermissionResultMsg;
+import com.parvanpajooh.client.identitymanagement2.model.RoleMsg;
+import com.parvanpajooh.client.identitymanagement2.model.UserMsg;
+
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+/**
+ * @author ali
+ * @author dev-03
+ *
+ */
+public interface Identitymanagement2Api {
+	
+	@GET("v1/check")
+	public Call<PermissionResultMsg> check(
+			@Query("scopeId") Long scopeId, 
+			@Query("uri") String uri, 
+			@Query("actionId") String actionId);
+	
+	@GET("v1/scopebased")
+	public Call<Boolean> isScopeBased(
+			@Query("uri") String uri, 
+			@Query("actionId") String actionId);
+	
+	@GET("v1/resourceavailable")
+	public Call<Boolean> isResourceAvailable(
+			@Query("uri") String uri);
+	
+	@GET("v1/resourceactionavailable")
+	public Call<Boolean> isResourceActionAvailable(
+			@Query("uri") String uri, 
+			@Query("actionId") String actionId);
+	
+	@GET("v1/initlogin/users/{username}")
+	public Call<UserMsg> initLoginLoadUserByUsername(
+			@Path("username") String username);
+	
+	@GET("v1/users/{username}")
+	public Call<UserMsg> findUserByUsername(
+			@Path("username") String username);
+	
+	@GET("v1/scopes")
+	public Call<List<ObjectAccessScopeMsg>> loadScopes();
+	
+	@GET("v1/users")
+	public Call<List<UserMsg>> loadUsers(
+			@Query("q") String query, 
+			@Query("page") int page, 
+			@Query("size") int size);
+	
+	@GET("v1/users_by_uuid/{uuid}")
+	public Call<UserMsg> loadUserByUuid(
+			@Path("uuid") String uuid);
+	
+	@GET("v1/users_by_personuuid")
+	public Call<UserMsg> findUserByPersonUuid(
+			@Query("personUuid") String personUuid);
+	
+	@GET("v1/users/id/{id}")
+	public Call<UserMsg> getUser(
+			@Path("id") Long id);
+	
+	@GET("v1/users/ids")
+	public Call<List<UserMsg>> getUsersByIds(
+			@Query("ids") Long[] ids);
+	
+	@POST("v1/users")
+	public Call<UserMsg> createUser(
+			@Body UserMsg user);
+	
+	@GET("v1/roles")
+	public Call<List<RoleMsg>> getAllRoles(
+			@Query("term") String term);
+	
+	@GET("v1/users/rolenames")
+	public Call<List<UserMsg>> findUsersByRoleNames(
+			@Query("roleNames") String[] roleNames);
+	
+	@POST("v1/users/activate")
+	public Call<Void> activateUserAndSetPassword(
+			@Query("id") Long id,
+			@Query("password") String password);
+}

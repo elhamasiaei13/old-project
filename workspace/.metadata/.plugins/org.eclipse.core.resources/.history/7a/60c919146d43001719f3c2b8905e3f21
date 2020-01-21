@@ -1,0 +1,22 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.dao;
+
+import com.parvanpajooh.commons.platform.ejb.dao.GenericDao;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.routemanagement.model.Node;
+
+/**
+ * @author ali
+ * @author mehrdad
+ *
+ */
+public interface RecoveryCodeDao extends GenericDao<Node, Long> {
+	
+	public Node findeNodeByCodeName( String codeName ) throws ParvanDaoException;
+	
+	public Node findeNodeByName( String name ) throws ParvanDaoException;
+	
+	/*public List<Node> findeNodeByCityShortCode(String cityShortCode, Boolean active) throws ParvanDaoException;*/
+}

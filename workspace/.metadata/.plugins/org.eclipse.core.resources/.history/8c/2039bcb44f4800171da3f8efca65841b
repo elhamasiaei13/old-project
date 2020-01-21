@@ -1,0 +1,85 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.model.criteria;
+
+import java.time.LocalDateTime;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.shipment.model.PackingItemState;
+
+/**
+ * @author MO
+ *
+ */
+public class PackingItemCriteria extends BaseCriteria {
+	
+	private static final long serialVersionUID = -6871217652695005251L;
+	
+	private String currentStateCode;
+	private Long currentAssignedUserId;
+	private String waybillNumber;
+	private String[] currentStateCodes;
+	private String[] notCurrentStateCodes;
+	private String currentNodeId;
+	private LocalDateTime lastChangeStateDateFrom;
+	private LocalDateTime lastChangeStateDateTo;
+	private String consigneeCityCode;
+	
+	
+	public String getCurrentStateCode() {
+		return currentStateCode;
+	}
+	public void setCurrentStateCode(String currentStateCode) {
+		this.currentStateCode = currentStateCode;
+	}
+	public Long getCurrentAssignedUserId() {
+		return currentAssignedUserId;
+	}
+	public void setCurrentAssignedUserId(Long currentAssignedUserId) {
+		this.currentAssignedUserId = currentAssignedUserId;
+	}
+	public String getWaybillNumber() {
+		return waybillNumber;
+	}
+	public void setWaybillNumber(String waybillNumber) {
+		this.waybillNumber = waybillNumber;
+	}
+	public PackingItemState[] getCurrentStates() {
+		return currentStates;
+	}
+	public void setCurrentStates(PackingItemState[] currentStates) {
+		this.currentStates = currentStates;
+	}
+	public PackingItemState[] getNotCurrentStates() {
+		return notCurrentStates;
+	}
+	public void setNotCurrentStates(PackingItemState[] notCurrentStates) {
+		this.notCurrentStates = notCurrentStates;
+	}
+	public String getCurrentNodeId() {
+		return currentNodeId;
+	}
+	public void setCurrentNodeId(String currentNodeId) {
+		this.currentNodeId = currentNodeId;
+	}
+	public LocalDateTime getLastChangeStateDateFrom() {
+		return lastChangeStateDateFrom;
+	}
+	public void setLastChangeStateDateFrom(LocalDateTime lastChangeStateDateFrom) {
+		this.lastChangeStateDateFrom = lastChangeStateDateFrom;
+	}
+	public LocalDateTime getLastChangeStateDateTo() {
+		return lastChangeStateDateTo;
+	}
+	public void setLastChangeStateDateTo(LocalDateTime lastChangeStateDateTo) {
+		this.lastChangeStateDateTo = lastChangeStateDateTo;
+	}
+	public String getConsigneeCityCode() {
+		return consigneeCityCode;
+	}
+	public void setConsigneeCityCode(String consigneeCityCode) {
+		this.consigneeCityCode = consigneeCityCode;
+	}
+	
+}

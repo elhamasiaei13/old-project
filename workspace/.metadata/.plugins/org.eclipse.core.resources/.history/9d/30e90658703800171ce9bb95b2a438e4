@@ -1,0 +1,32 @@
+package com.parvanpajooh.transportationmanagement.model;
+
+import com.parvanpajooh.transportationmanagement.model.enums.CapacityDeterminant;
+import com.parvanpajooh.transportationmanagement.model.enums.TransportationScheduleStatus;
+import javax.annotation.Generated;
+import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.StaticMetamodel;
+
+@Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
+@StaticMetamodel(TransportationSchedule.class)
+public abstract class TransportationSchedule_ extends com.parvanpajooh.commons.platform.ejb.model.BaseModel_ {
+
+	public static volatile SingularAttribute<TransportationSchedule, Integer> departureDateInUtc;
+	public static volatile SingularAttribute<TransportationSchedule, Integer> arrivalDateInDestinationLocal;
+	public static volatile SingularAttribute<TransportationSchedule, Boolean> scheduled;
+	public static volatile SingularAttribute<TransportationSchedule, CapacityDeterminant> capacityDeterminant;
+	public static volatile SingularAttribute<TransportationSchedule, String> departureTimeInOriginLocal;
+	public static volatile SingularAttribute<TransportationSchedule, String> arrivalTimeInDestinationLocal;
+	public static volatile SingularAttribute<TransportationSchedule, Integer> version;
+	public static volatile SingularAttribute<TransportationSchedule, String> arrivalTimeInUtc;
+	public static volatile SingularAttribute<TransportationSchedule, String> uldInfo;
+	public static volatile SingularAttribute<TransportationSchedule, Double> reservableWeight;
+	public static volatile SingularAttribute<TransportationSchedule, Integer> departureDateInOriginLocal;
+	public static volatile SingularAttribute<TransportationSchedule, Double> totalWeight;
+	public static volatile SingularAttribute<TransportationSchedule, Long> id;
+	public static volatile SingularAttribute<TransportationSchedule, String> departureTimeInUtc;
+	public static volatile SingularAttribute<TransportationSchedule, Integer> arrivalDateInUtc;
+	public static volatile SingularAttribute<TransportationSchedule, String> remarks;
+	public static volatile SingularAttribute<TransportationSchedule, TransportationScheduleStatus> status;
+
+}
+

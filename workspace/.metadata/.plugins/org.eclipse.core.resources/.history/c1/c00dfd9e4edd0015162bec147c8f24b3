@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="sample-ear">
+        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
+        <wb-resource deploy-path="/" source-path="/src/main/application" tag="defaultRootSource"/>
+        <dependent-module archiveName="sample-web.war" deploy-path="/" handle="module:/resource/sample-web/sample-web">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="sample-ejb.jar" deploy-path="/" handle="module:/resource/sample-ejb/sample-ejb">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="common-ejb.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/com/parvanpajooh/common-ejb/1.0.0/common-ejb-1.0.0.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="logback-classic.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/ch/qos/logback/logback-classic/1.0.13/logback-classic-1.0.13.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="logback-core.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/ch/qos/logback/logback-core/1.0.13/logback-core-1.0.13.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="slf4j-api.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="spring-security-crypto.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-crypto/3.2.4.RELEASE/spring-security-crypto-3.2.4.RELEASE.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="spring-core.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/org/springframework/spring-core/3.2.8.RELEASE/spring-core-3.2.8.RELEASE.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+    </wb-module>
+</project-modules>

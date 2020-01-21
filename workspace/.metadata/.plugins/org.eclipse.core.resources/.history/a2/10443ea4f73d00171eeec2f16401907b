@@ -1,0 +1,41 @@
+
+accessTokenUri = https://ecourier.mahex.com/uaa/oauth/token
+
+agentAccountGroupId = 2
+
+cargoServer = ecargo.mahan-cargo.com
+
+clientAppCode = E-COURIER
+
+clientId = app
+
+clientSecret = appclientsecret
+
+ecourierServer = ecourier.mahex.com
+
+employeeAccountGroupId = 3
+
+fonts = /usr/local/ecourier/fonts
+
+layout_cachable = true
+
+serverName = ecourier.mahex.com
+
+serviceCallClientId = servicecall
+
+serviceCallClientSecret = appclientsecret
+
+serviceClientId = idm_server
+
+serviceClientSecret = idm_serversecret
+
+siteservices.defaultOrganizationId    = 31
+siteservices.register.defaultCalendar = JALALI
+siteservices.register.defaultLocal    = fa_IR
+siteservices.register.defaultZoneId   = Asia/Tehran
+
+system.name = e-Courier
+
+uaaHost = https://ecourier.mahex.com/uaa
+
+uaaLogout = https://ecourier.mahex.com/uaa/logout

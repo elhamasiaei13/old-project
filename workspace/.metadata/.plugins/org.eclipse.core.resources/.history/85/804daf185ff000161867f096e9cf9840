@@ -1,0 +1,103 @@
+package com.parvanpajooh.taskmanagement.mvc;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.parvanpajooh.common.auth.UserInfoLoader;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.taskmanagement.application.TaskApplicationService;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskDisplayDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskUpdateCommandDto;
+import com.parvanpajooh.taskmanagement.mvc.base.TaskCommandAbstractController;
+
+/**
+ * @author dev-03
+ *
+ */
+@Controller
+@RequestMapping("/tasks/update")
+public class TaskUpdateController extends TaskCommandAbstractController<TaskUpdateCommandDto> {
+
+	@EJB(mappedName = "java:global/taskmanagement-ear/taskmanagement-ejb/TaskApplicationServiceImpl")
+	private TaskApplicationService taskApplicationService;
+
+	@Override
+	protected String getName() {
+		return "taskupdate";
+	}
+
+	protected SortDirectionEnum getDefaultSortDirection() {
+		return SortDirectionEnum.Ascending;
+	}
+
+	protected String getDefaultSortCriterion() {
+		return null;
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "view/{taskKey}", method = RequestMethod.GET)
+	public String get(@PathVariable String taskKey, HttpServletRequest request, Model model) {
+		
+		//LOG
+		log.debug("Entering get(taskKey={})", taskKey);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		TaskUpdateCommandDto taskUpdateCommandDto = null;
+
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+			TaskDisplayDto taskDisplayDto = taskApplicationService.getTaskDisplayByKey(userInfo, taskKey);
+			taskUpdateCommandDto = taskApplicationService.getLastUpdateRecord(userInfo, taskKey);
+			
+			result.put("status", "success");			
+			model.addAttribute("taskDisplayDto", taskDisplayDto);
+			model.addAttribute("taskUpdateCommandDto", taskUpdateCommandDto);
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		return "taskupdate";
+	}
+	
+	@RequestMapping(value = "/save", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> saveUpdateTask(String taskKey, String remarks, TaskDisplayDto taskDisplayDto, HttpServletRequest request) {
+
+		// LOG
+		log.debug("Entering saveUpdateTask(taskDisplayDto={})", taskDisplayDto);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		try {
+			
+			TaskDisplayDto savedDisplayDto = taskApplicationService.getTaskDisplayByKey(userInfo, taskKey);
+			taskApplicationService.updateTask(userInfo, taskDisplayDto, savedDisplayDto.getTaskId(), remarks);
+			
+			result.put("status", "success");
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		// LOG
+		log.debug("Leaving saveUpdateTask()");
+		return result;
+	}
+}

@@ -1,0 +1,32 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.complaintmanagement.service;
+
+import java.util.List;
+
+import com.parvanpajooh.client.complaintmanagement.model.ComplaintCategoryMsg;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+/**
+ * @author dev-03
+ *
+ */
+public interface ComplaintManagementApi {
+	
+	
+	@GET("v1/complaintcategories")
+	public Call<List<ComplaintCategoryMsg>> findComplaintCategoriesBy(
+			@Query(value = "term") String term,
+			@Query(value = "page") int page,
+			@Query(value = "size") int size);
+
+	@GET("v1/complaintcategory/{id}")
+	public Call<ComplaintCategoryMsg> getComplaintCategory(
+			@Path("id") Long id);
+
+}

@@ -1,0 +1,182 @@
+package com.parvanpajooh.complaintmanagement.domain.model;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+
+import com.google.common.base.Objects;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.BaseModel;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseDto;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.complaintmanagement.domain.model.dto.ComplaintCategoryDto;
+
+@Entity
+@Table(name = "compliantcategory_tbl")
+public class ComplaintCategory extends BaseModel {
+
+	private static final long serialVersionUID = -7458566106822757929L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Column(length = 100)
+	private String code;
+
+	@Column(length = 100)
+	private String nameFa;
+
+	@Column(length = 100)
+	private String nameEn;
+
+	@Version
+	private Integer version;
+
+	@NotNull
+	private boolean active;
+
+	@Column(length = 1024)
+	private String description;
+
+
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "parentId", referencedColumnName = "id")
+	private ComplaintCategory parentCategory;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getNameFa() {
+		return nameFa;
+	}
+
+	public void setNameFa(String nameFa) {
+		this.nameFa = nameFa;
+	}
+
+	public String getNameEn() {
+		return nameEn;
+	}
+
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	public boolean getActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public ComplaintCategory getParentCategory() {
+		return parentCategory;
+	}
+
+	public void setParentCategory(ComplaintCategory parentCategory) {
+		this.parentCategory = parentCategory;
+	}
+
+	@Override
+	public ComplaintCategoryDto toDto() {
+		ComplaintCategoryDto dto = toDtoLite();
+
+		return dto;
+	}
+
+	@Override
+	public ComplaintCategoryDto toDtoLite() {
+
+		ComplaintCategoryDto dto = new ComplaintCategoryDto();
+
+		dto.setId(this.id);
+		dto.setCode(this.code);
+		dto.setNameFa(this.nameFa);
+		dto.setNameEn(this.nameEn);
+		dto.setDescription(this.description);
+		dto.setActive(this.active);
+		dto.setVersion(this.version);
+
+		if (Validator.isNotNull(parentCategory)) {
+			dto.setParentCategoryDto(parentCategory.toDtoLite());
+		}
+		
+		setAuditToDto(dto);
+
+		return dto;
+	}
+
+	@Override
+	public void fromDto(BaseDto baseDto) {
+		ComplaintCategoryDto compliantCategoryDto = (ComplaintCategoryDto) baseDto;
+
+		this.id = compliantCategoryDto.getId();
+		this.code = compliantCategoryDto.getCode();
+		this.nameFa = compliantCategoryDto.getNameFa();
+		this.nameEn = compliantCategoryDto.getNameEn();
+		this.description = compliantCategoryDto.getDescription();
+		this.active = compliantCategoryDto.getActive();
+		this.version = compliantCategoryDto.getVersion();
+
+		getAuditFromDto(compliantCategoryDto);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof ComplaintCategory) {
+			ComplaintCategory that = (ComplaintCategory) o;
+			return Objects.equal(this.id, that.id);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
+
+	@Override
+	public String toString() {
+		return "CompliantCategory [id=" + id + ", code=" + code + ", nameFa=" + nameFa + ", nameEn=" + nameEn
+				+ ", version=" + version + ", active=" + active + ", description=" + description + "]";
+	}
+
+}

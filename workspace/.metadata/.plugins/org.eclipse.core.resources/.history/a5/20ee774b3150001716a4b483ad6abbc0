@@ -1,0 +1,285 @@
+
+action = Action
+
+actions = Actions
+
+active = active
+
+agent = Agent
+
+breadcrumb.generalagent.detail = Agent Detail
+breadcrumb.generalagents.view  = View Agents
+breadcrumb.home                = Home
+
+broker = Broker
+
+broker.nationalId = Broker's Nationl Id
+
+button.add      = Add
+button.cancel   = Cancel
+button.close    = Close
+button.continue = continue
+button.copy     = Copy
+button.create   = Create
+button.delete   = Delete
+button.edit     = Edit
+button.export   = Export
+button.no       = No
+button.ok       = OK
+button.reset    = reset
+button.return   = Return
+button.save     = Save
+button.search   = appWideUniqueId
+button.void     = Void
+button.yes      = Yes
+
+cancel = Cancel
+
+complaint.attachment  = Attachment
+complaint.description = description
+complaint.email       = Email
+complaint.firstName   = FirstName
+complaint.fullName    = FullName
+complaint.lastName    = LastName
+complaint.result      = Result
+complaint.status      = Status
+complaint.subject     = Subject
+
+contact.accountNumber                 = Account Number
+contact.address                       = Address
+contact.birthDate                     = Birth Date
+contact.birthLocation                 = Birth Location
+contact.city                          = City
+contact.company                       = Company
+contact.contactPerson                 = Contact Person
+contact.country                       = Country
+contact.economicCode                  = code
+contact.email                         = Email
+contact.fax                           = Fax No.
+contact.firstName                     = Name
+contact.issueDate                     = Issue Date
+contact.issueId                       = Issue ID
+contact.issueLocation                 = Issue Location
+contact.jobTitle                      = Job Title
+contact.lastName                      = Last Name
+contact.legal.name                    = Name
+contact.legalNationalId               = National ID
+contact.legalNickName                 = Person name
+contact.middleName                    = Middle Name
+contact.mobile                        = Mobile No.
+contact.nationalId                    = National ID
+contact.nickName                      = Nick Name
+contact.note                          = Note
+contact.paymentMethodCodesAsConsignee = Payment Method Code As Post Paid
+contact.paymentMethodCodesAsShipper   = Payment Method Code As Pre Paid
+contact.postalCode                    = Postal Code
+contact.prefix                        = Prefix
+contact.productCodesAsConsignee       = Product Code As Consignee
+contact.productCodesAsShipper         = Product Code As Shipper
+contact.shsh                          = ID
+contact.state                         = State
+contact.suffix                        = Suffix
+contact.tel                           = Tel No.
+contact.type                          = type
+
+contactInfo.address                 = Address
+contactInfo.city                    = City
+contactInfo.contactPersonName       = Contact Person Name
+contactInfo.contactPersonNationalId = Contact Person National ID
+contactInfo.country                 = Country
+contactInfo.email                   = Email
+contactInfo.fax                     = Fax
+contactInfo.mobile                  = Mobile
+contactInfo.postalCode              = Postal Code
+contactInfo.province                = Province
+contactInfo.tel                     = Tel
+
+create = Create
+
+create-another = Create another
+
+edit = Edit
+
+edit-gunny = Edit ULD
+
+employee.remark = Employee Remark
+
+entryDate = Entry time
+
+error-already-exist = already exist
+
+error-email = The email address is not valid
+
+error-emailaddress = Invalid email address
+
+error-invalid-agent = Invalid agent
+
+error-invalid-date = The value is not a valid date
+
+error-invalid-daterange = The date is not in the range
+
+error-invalid-gunny-barcode = Please assign valid ULD barcode.
+
+error-invalid-shipment-location = This shipment is in "{0}".
+
+error-invalid-shipment-state = This shipment is in "{0}" state
+
+error-nationalId = Invalid nationl id
+
+error-no-gunny-found = No ULD found!
+
+error-no-shipment-found = No Shipment found
+
+error-not-valid = The {0} is not valid
+
+error-onlycharacter = Only alphabetic character
+
+error-onlydigit = Only digit character
+
+error-password-missmatch = Password mismatch
+
+error-required = The {0} is required
+
+error-username-length = Your username must have at least 6 and less than 15 characters
+
+error-x-already-exist = The {0} is already exist
+
+error.data-duplicate                            = Field {0} is duplicate
+error.hesab-already-assigned-to-different-agent = Selected account is already assigned to different agent 
+error.hesab-already-assigned-to-this-agent      = Selected account is already assigned to this agent 
+error.please-update-cargo                       = Please update cargo informations
+error.save.houseWaybill                         = Waybill save failed!
+
+errorCode.503         = 503
+errorCode.81000       = Could not find a user associated with this email or mobile
+errorCode.parsererror = Parser error
+errorCode.timeout     = Time out
+
+errorString.ERROR_WHILE_SAVING = An error happend during saving
+errorString.INVALID_ROUTE      = No Route with selected nodes exist
+errorString.NO_RATE_DEFINED    = No rate has been defined for selected route
+
+false = No
+
+file = File
+
+filter = Filters
+
+friday = friday
+
+friday.short = FRI
+
+gender.female = Female
+gender.male   = Male
+gender.other  = Other
+
+id = ID
+
+legal = Legal
+
+login.paragraph = This module is used to demonstrate the power of thymeleaf template engine which can be used as a complete replacement of JSP (view) in Spring MVC.
+login.welcome   = Contact Manager
+
+modify = Edit
+
+nameEn = English Name
+
+nameLocal = Name
+
+no = No
+
+objectAccessScope = Access Scope
+
+organization = Organization
+
+organization.delete         = Delete
+organization.delete.confirm = Are you sure you want to remove Organization?
+
+organizations = Organizations
+
+parent = Parent
+
+person.active                = Active
+person.appWideUniqueId       = appWideUniqueId
+person.createLegal           = Create legal person
+person.createReal            = Create Person
+person.delete                = Delete person
+person.delete.confirm        = Are you sure to delete this person?
+person.economicCode          = Economic Code
+person.firstName             = First Name
+person.firstNameEn           = English First Name
+person.firstNameLocal        = First Name
+person.fullName              = Name
+person.gender                = Gender
+person.idNumber              = ID Number
+person.issueDate             = Issue Date
+person.issueLocation         = Issue Location
+person.issueNumber           = Issue Number
+person.lastName              = Last Name
+person.lastNameEn            = English Last Name
+person.lastNameLocal         = Last Name
+person.middleNameEn          = English Middle Name
+person.middleNameLocal       = Middle Name
+person.modify                = Modify Person
+person.modifyLegal           = Edit legal person
+person.modifyReal            = Edit person
+person.nationalCode          = National Code
+person.nationalId            = National ID
+person.nickNameEn            = English Nike name
+person.nickNameLocal         = Nike name
+person.prefix                = Prefix
+person.prefix.bank           = Bank
+person.prefix.clinic         = Clinic
+person.prefix.community      = Community
+person.prefix.company        = Company
+person.prefix.cooperative    = Cooperative
+person.prefix.dr             = DR
+person.prefix.garrison       = Garrison
+person.prefix.hospital       = Hospital
+person.prefix.institution    = Institution
+person.prefix.laboratory     = Laboratory
+person.prefix.ministry       = Ministry
+person.prefix.mr             = Mr.
+person.prefix.ms             = Ms.
+person.prefix.ng             = Ng
+person.prefix.office         = Office
+person.prefix.organization   = Organization
+person.prefix.representative = Representative
+person.prefix.union          = Union
+person.registrationDate      = Registration Date
+person.registrationLocation  = Registration Location
+person.registrationNumber    = Registration Number
+person.remarks               = Remarks
+person.suffixEn              = English Suffix
+person.suffixLocal           = Prefix
+person.type                  = Type
+person.uuid                  = uuid
+person.view                  = View person
+
+persons = Persons
+
+profile.emailOrMobile = Email Or Mobile
+profile.recoveryCode  = Recovery code
+
+real = Real
+
+register.confirmPassword = Confrim Password
+register.password        = password
+
+relation = Relation
+
+relation.active          = Active
+relation.appWideTypeCode = Type
+relation.create          = Create Relation
+relation.description     = Description
+relation.fromPerson      = From Person
+relation.modify          = Edit Relation
+relation.toPerson        = To Person
+relation.validFrom       = Valid From
+relation.validTo         = Valid To
+
+remarks = Remarks
+
+title.application = E-Contact Application
+
+yes = Yes

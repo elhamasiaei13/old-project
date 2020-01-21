@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" layout:decorator="layout">
+
+	<body>
+
+		<div class="wrapper row-offcanvas row-offcanvas-left">
+
+			<div class="content-wrapper">
+			
+				<section class="content-header ui-header" layout:fragment="content-header">
+	
+				</section>
+				
+	            <!-- Main content -->
+	            <section layout:fragment="content">
+	                	<!-- BODY -->
+	                    <div class="col-8 col-sm-8 ui-body" layout:fragment="left-content">
+	                    	
+	                    </div>
+	                    <!-- ui-body -->
+	                    <!-- SIDE -->
+	                    <div class="col-6 col-sm-6 col-lg-4 ui-side" layout:fragment="right-content">
+	                    	
+	                    </div><!-- ui-side -->
+	            </section><!-- /.content -->
+	        </div><!-- /.right-side -->
+	    </div><!-- ./wrapper -->
+	    
+	</body>
+
+</html>

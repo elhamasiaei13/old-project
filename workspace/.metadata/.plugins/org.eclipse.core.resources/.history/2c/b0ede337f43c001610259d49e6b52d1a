@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+
+<head>
+    <title th:text="${config.getProperty('system.name')}"></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+
+    <link rel="shortcut icon" href="../../resources/images/Money.ico" />
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../resources/lib/bootstrap-3.3.4/css/bootstrap.min.css" th:href="@{/resources/lib/bootstrap-3.3.4/css/bootstrap.min.css}" rel="stylesheet" />
+
+    <link href="../../resources/lib/bootstrap-3.3.4/css/select.bootstrap.min.css" th:href="@{/resources/lib/bootstrap-3.3.4/css/select.bootstrap.min.css}" rel="stylesheet" />
+
+    <link href="../../resources/lib/font-awesome-4.4.0/css/font-awesome.min.css" th:href="@{/resources/lib/font-awesome-4.4.0/css/font-awesome.min.css}" rel="stylesheet" />
+
+    <!-- ion Icons CSS -->
+    <link href="../../resources/lib/ionicons-2.0.1/css/ionicons.min.css" th:href="@{/resources/lib/ionicons-2.0.1/css/ionicons.min.css}" rel="stylesheet" />
+
+    <!-- iCheck CSS -->
+    <link href="../../resources/lib/iCheck/minimal/minimal.css" th:href="@{/resources/lib/iCheck/minimal/minimal.css}" rel="stylesheet" />
+
+
+    <!-- dataTables CSS -->
+    <link href="../../resources/lib/DataTables-1.9.4/media/css/dataTables.bootstrap.css" th:href="@{/resources/lib/DataTables-1.9.4/media/css/dataTables.bootstrap.css}" rel="stylesheet" />
+
+    <!-- PNotify CSS -->
+    <link rel="stylesheet" href="../../resources/lib/PNotify/pnotify.custom.min.css" th:href="@{/resources/lib/PNotify/pnotify.custom.min.css}" />
+
+    <!-- bootstrap-strength-meter CSS -->
+    <link rel="stylesheet" href="../../resources/lib/kartik-v-strength-meter/css/strength-meter.min.css" th:href="@{/resources/lib/kartik-v-strength-meter/css/strength-meter.min.css}" />
+
+    <!-- bootstrap-fileInput CSS -->
+    <link rel="stylesheet" href="../../resources/lib/kartik-v-bootstrap-fileinput/css/fileinput.min.css" th:href="@{/resources/lib/kartik-v-bootstrap-fileinput/css/fileinput.min.css}" />
+
+    <!-- bootstrap-star-rating CSS -->
+    <link rel="stylesheet" href="../../resources/lib/kartik-v-bootstrap-star-rating/css/star-rating.min.css" th:href="@{/resources/lib/kartik-v-bootstrap-star-rating/css/star-rating.min.css}" />
+
+    <!-- bootstrap-dropdown-select CSS -->
+    <link rel="stylesheet" href="../../resources/lib/select2-4.0.3/dist/css/select2.min.css" th:href="@{/resources/lib/select2-4.0.3/dist/css/select2.min.css}" />
+
+    <!-- bootstrap-parvan CSS -->
+    <link rel="stylesheet" href="../../resources/lib/parvan/parvan-css/parvan.css" th:href="@{/resources/lib/parvan/parvan-css/parvan.css}" />
+
+    <!-- jQuery -->
+    <script src="../../resources/lib/jquery-2.1.4/jQuery-2.1.4.min.js" th:src="@{/resources/lib/jquery-2.1.4/jQuery-2.1.4.min.js}"></script>
+
+    <!-- dateTimepicker CSS -->
+    <link rel="stylesheet" href="../../resources/lib/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css" th:href="@{/resources/lib/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css}" />
+
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]><script src="../../js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+	      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+	      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+	    <![endif]-->
+
+    <script th:inline="javascript">
+        var messages = {
+            'parsererror': '<span th:text="#{errorCode.parsererror}" th:remove="tag">parsererror</span>',
+            'timeout': '<span th:text="#{errorCode.timeout}" th:remove="tag">timeout</span>',
+            '302': '<span th:text="#{errorCode.302}" th:remove="tag">302</span>',
+            '404': '<span th:text="#{errorCode.404}" th:remove="tag">404</span>',
+            '403': '<span th:text="#{errorCode.403}" th:remove="tag">403</span>',
+            '503': '<span th:text="#{errorCode.503}" th:remove="tag">503</span>',
+        };
+        var systemName = '';
+    </script>
+</head>
+
+<body>
+
+    <style type="text/css">
+        body {
+            padding-bottom: 40px;
+            color: #5a5a5a;
+            font-family: tahoma;
+            font-size: 12px;
+        }
+    </style>
+    <div class="row" dir="rtl">
+    <div class="row">
+     <div class="col-md-12" dir="rtl">
+    <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Brand</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+        <li><a href="#">Link</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">One more separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+</div>
+    </div>
+           
+        <div class="row" dir="rtl">
+                    <div class="col-md-2" dir="rtl">
+						<div class="list-group"
+							style="height: 1000px;background-color: lightgray">
+                <a class="list-group-item" th:text="#{lbl_home}"
+								th:href="@{'/mainPage/'}" style="background-color: lightgray"><i
+								class="fa fa-home fa-fw" aria-hidden="true"></i></a>
+                <a class="list-group-item list-group-item-success"
+								th:href="@{'/group/show/'}" style="background-color: lightgray">گروه‌ها</a>
+                <a class="list-group-item list-group-item-danger"
+								th:href="@{'/fiscalYear/select/'}"
+								style="background-color: lightgray">انتخاب سال مالی</a>                
+                <a class="list-group-item list-group-item-info"
+								th:href="@{'/account/show/'}"
+								style="background-color: lightgray">حساب‌ها</a>
+                <a class="list-group-item list-group-item-warning"
+								th:href="@{'/accountType/show/'}"
+								style="background-color: lightgray">نوع‌های حساب</a>
+                <a class="list-group-item list-group-item-default"
+								th:href="@{'/voucher/show/'}"
+								style="background-color: lightgray">سندها</a>
+
+            </div>
+        </div>
+            <div class="col-md-10">
+
+                <div th:if="${result}" th:object="${result}">
+                    <div th:if="*{status != 'success'}" class="alert alert-danger" role="alert" th:include="errors :: error-content" th:remove="tag"></div>
+                    <div th:if="*{status == 'success'}" class="callout callout-success" style="color:green;">update successful</div>
+                </div>
+
+                <section class="content" layout:fragment="content">
+                </section>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script src="../../resources/lib/bootstrap-3.3.4/js/bootstrap.min.js" th:src="@{/resources/lib/bootstrap-3.3.4/js/bootstrap.min.js}"></script>
+    <script src="../../resources/lib/moment.js/moment.min.js" th:src="@{/resources/lib/moment.js/moment.min.js}"></script>
+    <script src="../../resources/lib/moment.js/moment-with-locales.min.js" th:src="@{/resources/lib/moment.js/moment-with-locales.min.js}"></script>
+    <script src="../../resources/lib/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js" th:src="@{/resources/lib/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js}"></script>
+    <script src="../../resources/lib/DataTables-1.9.4/media/js/jquery.dataTables.min.js" th:src="@{/resources/lib/DataTables-1.9.4/media/js/jquery.dataTables.min.js}"></script>
+    <script src="../../resources/lib/PNotify/pnotify.custom.min.js" th:src="@{/resources/lib/PNotify/pnotify.custom.min.js}"></script>
+    <script src="../../resources/lib/cookie.js/cookie.min.js" th:src="@{/resources/lib/cookie.js/cookie.min.js}"></script>
+    <script src="../../resources/lib/slimScroll/jquery.slimscroll.min.js" th:src="@{/resources/lib/slimScroll/jquery.slimscroll.min.js}"></script>
+    <script src="../../resources/lib/iCheck/icheck.min.js" th:src="@{/resources/lib/iCheck/icheck.min.js}"></script>
+    <script src="../../resources/lib/kartik-v-bootstrap-fileinput/js/fileinput.min.js" th:src="@{/resources/lib/kartik-v-bootstrap-fileinput/js/fileinput.min.js}"></script>
+    <script src="../../resources/lib/kartik-v-strength-meter/js/strength-meter.min.js" th:src="@{/resources/lib/kartik-v-strength-meter/js/strength-meter.min.js}"></script>
+    <script src="../../resources/lib/select2-4.0.3/dist/js/select2.min.js" th:src="@{/resources/lib/select2-4.0.3/dist/js/select2.min.js}"></script>
+    <script src="../../resources/lib/parvan/parvan-js/accounting.js" th:src="@{/resources/lib/parvan/parvan-js/accounting.js}"></script>
+    <!--     <script src="../../resources/lib/parvan/parvan-js/bootstrap.js" th:src="@{/resources/lib/parvan/parvan-js/bootstrap.js}"></script>
+ -->
+    <!-- Page JavaScripts -->
+    <th:block layout:fragment="javascripts" />
+</body>
+
+</html>

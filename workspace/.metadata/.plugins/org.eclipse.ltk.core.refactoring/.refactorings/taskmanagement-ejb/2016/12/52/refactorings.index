@@ -1,0 +1,75 @@
+1482323090625	Delete elements
+1482323101411	Delete element
+1482323110090	Delete element
+1482323114620	Delete elements
+1482323117997	Delete element
+1482323148075	Delete elements
+1482323155134	Delete elements
+1482323160592	Delete element
+1482323166058	Delete elements
+1482323175911	Delete elements
+1482323184332	Delete elements
+1482323187375	Delete elements
+1482323204535	Delete elements
+1482323212409	Delete element
+1482323217592	Delete elements
+1482323220889	Delete element
+1482323256263	Delete elements
+1482323260998	Delete elements
+1482323360298	Delete elements
+1482323367357	Delete elements
+1482323383768	Delete element
+1482323516376	Delete element
+1482323571577	Delete element
+1482323674501	Delete element
+1482323677498	Delete element
+1482323717420	Delete element
+1482326725271	Rename type 'OnetimeJobDto'
+1482392953846	Delete element
+1482392978665	Delete element
+1482396819298	Rename type 'IdentityManagement2ServiceAdapter'
+1482396837868	Rename type 'IdentityManagement2ServiceAdapterRest'
+1482398659969	Rename type 'OnetimeJobServiceImpl'
+1482398676947	Rename type 'OnetimeJobService'
+1482398696814	Rename type 'OnetimeJobApplicationService'
+1482398710536	Rename type 'OnetimeJobApplicationServiceImpl'
+1482399233829	Rename type 'OnetimeJobCriteria'
+1482401943748	Rename type 'TaskDto'
+1482404315993	Copy compilation unit
+1482404350783	Rename type 'TaskCreateCommand'
+1482404550978	Rename package 'com.parvanpajooh.taskmanagement.domain.model.vo'
+1482404788016	Rename type 'WaybillNumber'
+1482405111686	Rename type 'WaybillNumberCommand'
+1482405518142	Rename type 'WaybillNumberChangeAssigneeCommand'
+1482405909746	Rename type 'WaybillNumberChangeStateCommand'
+1482406005963	Rename type 'WaybillNumberState'
+1482406272739	Rename type 'WaybillNumberGenerateCommand'
+1482406727350	Copy compilation unit
+1482406807962	Copy compilation unit
+1482406812433	Copy compilation unit
+1482406816443	Copy compilation unit
+1482406897039	Rename type 'UserType2'
+1482406967904	Rename type 'UserType3'
+1482407087608	Rename type 'Group'
+1482407569085	Copy compilation unit
+1482407899841	Rename type 'WaybillNumberCommandType'
+1482408465660	Copy compilation unit
+1482408493866	Copy compilation unit
+1482409382205	Copy compilation unit
+1482409532850	Copy compilation unit
+1482410581170	Delete elements
+1482410584562	Delete element
+1482411968160	Delete element
+1482412075312	Delete element
+1482563787568	Rename type 'WaybillNumberDisplay'
+1482568552461	Rename type 'WaybillNumberGroupRepository'
+1482568563833	Rename type 'WaybillNumberRepository'
+1482568680899	Copy compilation unit
+1482569441553	Rename type 'WaybillNumberDto'
+1482569808627	Rename type 'WaybillNumberCommandDto'
+1482579031871	Rename type 'WaybillNumberRepositoryJpa'
+1482579041170	Rename type 'WaybillNumberGroupRepositoryJpa'
+1482584139501	Rename type 'WaybillNumberGroupServiceImpl'
+1482584185608	Rename type 'WaybillNumberGroupService'
+1482584388971	Rename type 'WaybillNumberGroupApplicationService'
+1482584424318	Rename type 'WaybillNumberGroupApplicationServiceImpl'

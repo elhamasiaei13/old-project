@@ -1,0 +1,481 @@
+package com.parvanpajooh.identitymanagement2.rest;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.parvanpajooh.client.identitymanagement2.model.ObjectAccessScopeMsg;
+import com.parvanpajooh.client.identitymanagement2.model.RoleMsg;
+import com.parvanpajooh.client.identitymanagement2.model.UserMsg;
+import com.parvanpajooh.common.auth.BaseRestController;
+import com.parvanpajooh.common.convertor.JacksonObjectMapperProvider;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.util.permission.PermissionChecker;
+import com.parvanpajooh.commons.platform.ejb.util.permission.PermissionResult;
+import com.parvanpajooh.commons.platform.ejb.util.permission.exception.PrincipalException;
+import com.parvanpajooh.identitymanagement2.model.criteria.RoleCriteria;
+import com.parvanpajooh.identitymanagement2.model.criteria.UserCriteria;
+import com.parvanpajooh.identitymanagement2.model.vo.ObjectAccessScopeVO;
+import com.parvanpajooh.identitymanagement2.model.vo.RoleVO;
+import com.parvanpajooh.identitymanagement2.model.vo.UserGroupVO;
+import com.parvanpajooh.identitymanagement2.model.vo.UserVO;
+import com.parvanpajooh.identitymanagement2.service.ObjectAccessScopeService;
+import com.parvanpajooh.identitymanagement2.service.RoleService;
+import com.parvanpajooh.identitymanagement2.service.UserService;
+
+@RestController
+@RequestMapping("/v1")
+public class Idm2RestController extends BaseRestController {
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	@EJB(mappedName = "java:global/identitymanagement2-ear/identitymanagement2-ejb/PermissionCheckerImpl")
+	private PermissionChecker permissionChecker;
+
+	@EJB(mappedName = "java:global/identitymanagement2-ear/identitymanagement2-ejb/UserServiceImpl")
+	private UserService userService;
+
+	@EJB(mappedName = "java:global/identitymanagement2-ear/identitymanagement2-ejb/ObjectAccessScopeServiceImpl")
+	private ObjectAccessScopeService objectAccessScopeService;
+	
+	@EJB(mappedName = "java:global/identitymanagement2-ear/identitymanagement2-ejb/RoleServiceImpl")
+	private RoleService roleService;
+
+	@Autowired
+	protected JacksonObjectMapperProvider mapperProvider;
+
+	@RequestMapping(value = "/hello", method = RequestMethod.GET)
+	public String hello(@RequestParam(value = "name") String name) {
+		return "Hello " + name;
+	}
+
+	@RequestMapping(value = "/check", method = RequestMethod.GET)
+	public PermissionResult check(
+			@RequestHeader(value = "userName") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "scopeId", required = false) Long scopeId, 
+			@RequestParam(value = "uri") String uri,
+			@RequestParam(value = "actionId") String actionId) {
+		
+		log.debug("Entering check(userName={}, ip={}, scopeId={}, uri={}, actionId={})", userName, ip, scopeId, uri, actionId);
+
+		PermissionResult permissionResult = new PermissionResult();
+
+		try {
+			permissionChecker.check(loadUserInfo(userName, ip), scopeId, uri, actionId);
+
+			permissionResult.setStatus("authorized");
+		} catch (PrincipalException e) {
+			permissionResult.setStatus("denied");
+			permissionResult.setActionId(e.getActionId());
+			permissionResult.setMessage(e.getMessage());
+			permissionResult.setScopeId(e.getScopeId());
+			permissionResult.setUri(e.getUri());
+
+		} catch (Exception e) {
+			permissionResult.setStatus("failed");
+		}
+
+		return permissionResult;
+	}
+
+	@RequestMapping(value = "/scopebased", method = RequestMethod.GET)
+	public Boolean isScopeBased(
+			@RequestParam(value = "uri") String uri, 
+			@RequestParam(value = "actionId") String actionId) {
+		
+		return permissionChecker.isScopeBased(uri, actionId);
+	}
+
+	@RequestMapping(value = "/resourceavailable", method = RequestMethod.GET)
+	public boolean isResourceAvailable(
+			@RequestParam(value = "uri") String uri) {
+		
+		return permissionChecker.isResourceAvailable(uri);
+	}
+
+	@RequestMapping(value = "/resourceactionavailable", method = RequestMethod.GET)
+	public boolean isResourceActionAvailable(
+			@RequestParam(value = "uri") String uri, 
+			@RequestParam(value = "actionId") String actionId) {
+		
+		return permissionChecker.isResourceActionAvailable(uri, actionId);
+	}
+
+	@RequestMapping(value = "initlogin/users/{username:.+}", method = RequestMethod.GET)
+	public UserMsg initLoginLoadUserByUsername(
+			@PathVariable(value = "username") String username) {
+		
+		log.trace("Entering initLoginLoadUserByUsername(userName={})", username);
+		UserMsg result = null;
+		try {
+			UserVO user = userService.findUserByUsername(username);
+			if (user != null) {
+				result = user.toMsg();
+			}
+		} catch (Exception e) {
+			log.error("error in loadUserByUsername", e);
+		}
+		return result;
+	}
+	
+	@RequestMapping(value = "/users/{username:.+}", method = RequestMethod.GET)
+	public UserMsg findUserByUsername(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable(value = "username") String username) {
+		
+		log.trace("Entering loadUserByUsername(userName={})", username);
+		UserMsg result = null;
+		try {
+			UserVO user = userService.findUserByUsername(username);
+			if (user != null) {
+				result = user.toMsg();
+			}
+		} catch (Exception e) {
+			log.error("error in loadUserByUsername", e);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/scopes", method = RequestMethod.GET)
+	public List<ObjectAccessScopeMsg> loadScopes(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip) {
+		
+		log.trace("Entering loadScopes()");
+
+		List<ObjectAccessScopeMsg> list = null;
+
+		try {
+
+			List<BaseVO> baseVOs = objectAccessScopeService.findAll(loadUserInfo(userName, ip));
+
+			list = new ArrayList<ObjectAccessScopeMsg>();
+
+			for (BaseVO baseVO : baseVOs) {
+
+				ObjectAccessScopeVO objectAccessScopeVO = (ObjectAccessScopeVO) baseVO;
+				list.add(objectAccessScopeVO.toMsg());
+			}
+
+		} catch (Exception e) {
+			log.error("error in loadScopes", e);
+		}
+
+		return list;
+	}
+
+	@RequestMapping(value = "/users", method = RequestMethod.GET)
+	public List<UserMsg> loadUsers(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "q", required = false) String query, 
+			@RequestParam(value = "page") int page, 
+			@RequestParam(value = "size") int size,
+			@Context HttpServletResponse response) {
+		
+		log.trace("Entering loadUsers()");
+
+		List<UserMsg> userMsgs = null;
+
+		try {
+			UserCriteria criteria = new UserCriteria();
+			criteria.setSearchName(query);
+
+			SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+			String sortCriterion = "createDate";
+			if (page > 0) {
+				page = page - 1;// my pagination is zero based, but rest
+								// pagination best practice is 1-based
+			}
+
+			if (size == 0) {
+				size = 20;// it's default page size
+			}
+
+			int firstResult = page * size;
+			int maxResults = size;
+			
+			UserInfo userInfo = loadUserInfo(userName, ip);
+
+			List<BaseVO> baseVOs = userService.findByCriteria(userInfo, criteria, firstResult, maxResults, sortDirection, sortCriterion);
+			int total = userService.countByCriteria(userInfo, criteria);
+			userMsgs = new ArrayList<UserMsg>();
+			for (BaseVO baseVO : baseVOs) {
+				UserVO userVO = (UserVO) baseVO;
+				userMsgs.add(userVO.toMsg());
+			}
+			response.addIntHeader("total", total);
+		} catch (Exception e) {
+			log.error("error in loadUser", e);
+		}
+
+		return userMsgs;
+	}
+
+	@RequestMapping(value = "/roles", method = RequestMethod.GET)
+	public List<RoleMsg> getAllRoles(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "term", required = false) String term,
+			@Context HttpServletResponse response) {
+		
+		log.trace("Entering getAllRoles()");
+
+		List<RoleMsg> roleMsgs = null;
+
+		try {
+			RoleCriteria criteria = new RoleCriteria();
+			criteria.setCanonicalSearchName(term);
+			
+			UserInfo userInfo = loadUserInfo(userName, ip);
+
+			List<BaseVO> baseVOs = roleService.findByCriteria(userInfo, criteria);
+			roleService.findByCriteria(userInfo, criteria);
+			roleMsgs = new ArrayList<RoleMsg>();
+			
+			for (BaseVO baseVO : baseVOs) {
+				RoleVO roleVO = (RoleVO) baseVO;
+				roleMsgs.add(roleVO.toMsg());
+			}
+			
+		} catch (Exception e) {
+			log.error("error in getAllRoles", e);
+		}
+
+		return roleMsgs;
+	}
+	
+	@RequestMapping(value = "/users_by_uuid/{uuid}", method = RequestMethod.GET)
+	public UserMsg loadUserByUuid(
+			@PathVariable(value = "uuid") String uuid) throws ParvanServiceException {
+		
+		log.trace("Entering loadUserByUuid(uuid={})", uuid);
+
+		UserMsg result = null;
+
+		UserVO userVO = userService.loadUserByUuid(uuid);
+		result = userVO.toMsg();
+
+		return result;
+	}
+	
+	@RequestMapping(value = "/users_by_personuuid", method = RequestMethod.GET)
+	public UserMsg findUserByPersonUuid(
+			@RequestParam(value = "personUuid") String personUuid) throws ParvanServiceException {
+		
+		log.trace("Entering findUserByPersonUuid(personUuid={})", personUuid);
+		
+		UserMsg result = null;
+		
+		UserVO userVO = userService.findUserByPersonUuid(personUuid);
+		result = userVO.toMsg();
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/users/identify", method = RequestMethod.GET)
+	public UserMsg findUserByEmailOrMobile(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "identify") String identify) throws ParvanServiceException {
+		
+		log.trace("Entering findUserByEmailOrMobile(identify={})", identify);
+		
+		UserMsg result = null;
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		UserCriteria criteria = new UserCriteria();
+		criteria.set
+		UserVO userVO = userService.findByCriteria(userInfo, criteria);
+		result = userVO.toMsg();
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/users/id/{id}", method = RequestMethod.GET)
+	public UserMsg getUser(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable(value = "id") Long id) {
+		
+		//Log
+		log.debug("Entering getUser(id={})", id);
+
+		UserMsg result = null;
+
+		try {
+
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			
+			UserVO userVO = (UserVO) userService.get(userInfo, id);
+			result = userVO.toMsg();
+
+		} catch (Exception e) {
+			log.error("error in getUser", e);
+		}
+
+		return result;
+	}
+	
+	@RequestMapping(value = "/users/ids", method = RequestMethod.GET)
+	public List<UserMsg> getUsersByIds(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "ids") Long[] ids) {
+		
+		//LOG
+		log.debug("Entering getUsersByIds(ids={})", (ids != null) ? ids.toString() : "NULL");
+
+		List<UserMsg> listMsg = null;
+
+		try {
+
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			
+			List<BaseVO> listVO = userService.findByIds(userInfo, Arrays.asList(ids));
+			
+			listMsg = new ArrayList<UserMsg>();
+			for(BaseVO baseVO : listVO){
+				
+				UserVO userVO = (UserVO) baseVO;
+				listMsg.add(userVO.toMsg());
+			}			
+
+		} catch (Exception e) {
+			log.error("error in getUsersByIds", e);
+		}
+
+		return listMsg;
+	}
+	
+	@RequestMapping(value = "/users/apikey", method = RequestMethod.GET)
+	public UserMsg getUsersByApiKey(@RequestParam(value = "apikey") String apikey) {
+		log.debug("Entering getUsersByApiKey(apikey={})", apikey);
+		
+		UserMsg userMsg = null;
+		
+		try {
+			UserInfo userInfo = loadUserInfo("reyhaneh.mashadi", "127.0.0.1");
+			
+			UserVO userVO = (UserVO) userService.get(userInfo, 152L);
+			
+			userMsg = userVO.toMsg();
+			
+		} catch (Exception e) {
+			log.error("error in getUsersByApiKey", e);
+		}
+		
+		return userMsg;
+	}
+	
+	@RequestMapping(value = "/users", method = RequestMethod.POST)
+	public UserMsg createUser(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestBody UserMsg msg) throws ParvanServiceException {
+		log.trace("Entering createUser(user={})", msg);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		UserVO userVO = new UserVO();
+//		userVO.setId( msg.getId() );
+//		userVO.setUserName( msg.getUserName() );
+//		userVO.setPassword("123456");
+//		userVO.setFirstName( msg.getFirstName() );
+//		userVO.setLastName( msg.getLastName() );
+//		userVO.setDisplayName( msg.getDisplayName() );
+//		userVO.setLocale( msg.getLocale() );
+//		userVO.setZoneId( msg.getZoneId() );
+//		userVO.setCalendar( msg.getCalendar().name() );
+//		userVO.setEmail( msg.getEmail() );
+//		userVO.setPersonUuid( msg.getPersonUuid() );
+//		userVO.setActive(true);
+//		
+//		RoleVO roleVO = new RoleVO();
+//		roleVO.setId(1L);
+//		
+//		Set<RoleVO> roleVOs = new HashSet<>();
+//		roleVOs.add( roleVO );
+//		userVO.setRoles(roleVOs);
+//		
+//		UserGroupVO userGroupVO = new UserGroupVO();
+//		userGroupVO.setId(3L);
+//		
+//		userVO.setUserGroup( userGroupVO );
+		
+		userVO.fromMsg(msg);
+		userVO = (UserVO) userService.save(userInfo, userVO);
+		
+		return userVO.toMsg();
+	}
+	
+	@RequestMapping(value = "/users/rolenames", method = RequestMethod.GET)
+	public List<UserMsg> findUsersByRoleNames(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "roleNames") String[] roleNames) {
+		
+		//LOG
+		log.debug("Entering findUsersByRoleNames(roleNames={})", (roleNames != null) ? roleNames.toString() : "NULL");
+
+		List<UserMsg> listMsg = null;
+
+		try {
+
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			UserCriteria criteria = new UserCriteria();
+			criteria.setRoles(Arrays.asList(roleNames));
+			
+			List<BaseVO> listVO = userService.findByCriteria(userInfo, criteria);
+			
+			listMsg = new ArrayList<UserMsg>();
+			for(BaseVO baseVO : listVO){				
+				UserVO userVO = (UserVO) baseVO;
+				listMsg.add(userVO.toMsg());
+			}			
+
+		} catch (Exception e) {
+			log.error("error in findUsersByRoleNames", e);
+		}
+
+		return listMsg;
+	}
+	
+	@RequestMapping(value = "/users/activate", method = RequestMethod.POST)
+	public void activateUserAndSetPassword(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "id") Long id,
+			@RequestParam(value = "password") String password
+			) throws ParvanServiceException {
+		
+		//LOG
+		log.trace("Entering activateUserAndSetPassword(id={} ,password={} )", id ,password);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		userService.activateUserAndSetPassword(userInfo, id, password);
+		
+	}
+}

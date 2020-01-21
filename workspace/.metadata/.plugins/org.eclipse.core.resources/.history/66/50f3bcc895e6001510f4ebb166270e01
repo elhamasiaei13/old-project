@@ -1,0 +1,95 @@
+package com.parvanpajooh.issueManager.mvc;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.issueManager.model.Member;
+import com.parvanpajooh.issueManager.model.vo.MemberVO;
+import com.parvanpajooh.issueManager.service.MemberService;
+
+@Controller
+@RequestMapping("/")
+public class UserController {
+
+	@EJB(mappedName = "java:global/issueManager-ear/issueManager-ejb/MemberServiceImpl")
+	private MemberService memberService;
+
+	@RequestMapping(value = "/showMembers", method = RequestMethod.GET)
+	public String showUsers(Model model) throws ParvanServiceException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+
+		List<MemberVO> list = memberService.loadMembers(userInfo);
+
+		model.addAttribute("allMembers", list);
+		return "showMembers";
+	}
+
+	@RequestMapping(value = "/addMember", method = RequestMethod.GET)
+	public String showAddPage(Model model) throws ParvanServiceException {
+		model.addAttribute("member", new Member());
+		return "addMember";
+	}
+
+	@RequestMapping(value = "/addMember/save", method = { RequestMethod.POST,
+			RequestMethod.GET })
+	public String addMember(@ModelAttribute Member user, Model model)
+			throws ParvanServiceException, ParvanDaoException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+
+		user.setId(2L);
+		user.setActive(true);
+
+		memberService.saveMember(userInfo, user);
+		return "congrats";
+	}
+
+	@RequestMapping(value = "/removeMember", params = { "removeRow" }, method = {
+			RequestMethod.POST, RequestMethod.GET })
+	public String removeMember(final HttpServletRequest req)
+			throws ParvanServiceException, ParvanDaoException {
+		final Integer rowId = Integer.valueOf(req.getParameter("removeRow"));
+		memberService.removeMember(rowId.longValue());
+		return "redirect:/showMembers";
+	}
+
+	@RequestMapping(value = "/editMember", params = { "editRow" }, method = {
+			RequestMethod.POST, RequestMethod.GET })
+	public String showEditPage(final HttpServletRequest req, Model model)
+			throws ParvanServiceException, ParvanDaoException {
+		final Integer rowId = Integer.valueOf(req.getParameter("editRow"));
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+		MemberVO member = memberService.loadMember(userInfo, rowId.longValue())
+				.get(0);
+		model.addAttribute("member", new Member());
+		model.addAttribute("member", member);
+		return "editMember";
+	}
+
+	@RequestMapping(value = "/editMember/save", method = { RequestMethod.POST,
+			RequestMethod.GET })
+	public String editMember(@ModelAttribute Member member, Model model)
+			throws ParvanServiceException, ParvanDaoException {
+
+		memberService.editMember(member);
+		return "redirect:/showMembers";
+	}
+}

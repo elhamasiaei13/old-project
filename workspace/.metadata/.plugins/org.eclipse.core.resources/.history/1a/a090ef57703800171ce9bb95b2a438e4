@@ -1,0 +1,17 @@
+package com.parvanpajooh.transportationmanagement.model.enums;
+
+public enum CapacityDeterminant {
+	CAP_CON ("CAP_CON"),
+	OCC ("OCC");
+	
+	private String name;
+
+	private CapacityDeterminant(String name) {
+		this.name = name;
+	}
+
+	@Override
+    public String toString() {
+        return name;
+    }
+}

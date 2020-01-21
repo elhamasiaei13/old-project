@@ -1,0 +1,287 @@
+package com.parvanpajooh.identitymanagement2.dao.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.identitymanagement2.dao.UserDao;
+import com.parvanpajooh.identitymanagement2.model.Role;
+import com.parvanpajooh.identitymanagement2.model.Role_;
+import com.parvanpajooh.identitymanagement2.model.User;
+import com.parvanpajooh.identitymanagement2.model.User_;
+import com.parvanpajooh.identitymanagement2.model.criteria.UserCriteria;
+
+/**
+ * 
+ * @author dev-03
+ * @author ali
+ * @author MO
+ */
+
+@Stateless
+public class UserDaoJpa extends GenericDaoJpa<User, Long> implements UserDao {
+
+	public UserDaoJpa() {
+		super(User.class);
+	}
+	
+	@Override
+	public User findUserByUsername(String username) throws ParvanDaoException{
+		log.trace("Entering findUserByUsername username={}", username);
+		try {
+			TypedQuery<User> q = getEntityManager().createQuery("SELECT obj FROM User obj WHERE obj.userName = ? ", User.class);
+			q.setParameter(1, username);
+			List<User> results = q.getResultList();
+			if ( results.isEmpty() ) {
+				throw new ObjectNotFoundException();
+			}
+			if ( results.size() > 1 ) {
+				throw new ParvanDaoException("Non Unique Result");
+			}
+			return results.get(0);
+		} catch(Exception e) {
+			throw new ParvanDaoException("Error occurred while getting user by name : " + username, e);
+		}
+	}
+
+	@Override
+	public User loadUserByUuid(String uuid) throws ParvanDaoException {
+		log.trace("Entering loadUserByUuid uuid={}", uuid);
+		try {
+			TypedQuery<User> q = getEntityManager().createQuery("select obj from User obj where obj.uuid = ? ", User.class);
+			q.setParameter(1, uuid);
+			List<User> results = q.getResultList();
+			if ( results.isEmpty() ) {
+				throw new ObjectNotFoundException();
+			}
+			if ( results.size() > 1 ) {
+				throw new ParvanDaoException("Non Unique Result");
+			}
+			return results.get(0);
+		} catch(Exception e) {
+			throw new ParvanDaoException("Error occurred while getting user by uuid : " + uuid, e);
+		}
+	}
+	
+	@Override
+	public User findUserByPersonUuid(String personUuid) throws ParvanDaoException {
+		log.trace("Entering findUserByPersonUuid personUuid={}", personUuid);
+		try {
+			TypedQuery<User> q = getEntityManager().createQuery("select obj from User obj where obj.personUuid = ? ", User.class);
+			q.setParameter(1, personUuid);
+			List<User> results = q.getResultList();
+			
+			if(results.size() > 0){
+				return results.get(0);
+				
+			} else {
+				return null;
+			}
+		} catch(Exception e) {
+			throw new ParvanDaoException("Error occurred while finding user by personUuid : " + personUuid, e);
+		}
+	}
+
+	@Override
+	public boolean isUserNameAvailable(String username) throws ParvanDaoException {
+		log.trace("Entering isUserNameAvailable username={}", username);
+		
+		boolean bRet = true;
+		try {
+			// make query
+			TypedQuery<User> q = getEntityManager().createQuery("select obj from User obj where obj.userName = ? ", User.class);
+			
+			q.setParameter(1, username);
+			
+			List<User> list = q.getResultList();
+			
+			if(list != null && list.size() > 0){
+				bRet = false;
+			}
+		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting user with username: " + username, e);
+		}
+		
+		return bRet;
+	}
+
+	@Override
+	public User findUserByEmail(String email) throws ParvanDaoException {
+		log.debug("Entering findUserByEmail (email={})", email);
+		List<User> results = null;
+		User user = null;
+		
+		try {
+    		TypedQuery<User> q = getEntityManager().createQuery("select obj from User obj where obj.email = ? ", User.class);
+    		q.setParameter(1, email);
+    		results = q.getResultList();
+//    		if ( results.isEmpty() ) {
+//				throw new ObjectNotFoundException();
+//			}
+			if ( results.size() > 1 ) {
+				throw new ParvanDaoException("Non Unique Result");
+			}
+//			return results.get(0);
+			
+			if(results != null && results.size() > 0){
+				user = results.get(0);
+			}
+			
+			return user;
+			
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting user by email : " + email, e);
+		}
+	}
+	
+	@Override
+	public User findUserByMobile(String mobile) throws ParvanDaoException {
+		log.debug("Entering findUserByMobile (mobile={})", mobile);
+		List<User> results = null;
+		User user = null;
+		
+		try {
+    		TypedQuery<User> q = getEntityManager().createQuery("select obj from User obj where obj.mobile = ? ", User.class);
+    		q.setParameter(1, mobile);
+    		results = q.getResultList();
+			if ( results.size() > 1 ) {
+				throw new ParvanDaoException("Non Unique Result");
+			}
+			
+			if(results != null && results.size() > 0){
+				user = results.get(0);
+			}
+			
+			return user;
+			
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting user by mobile : " + mobile, e);
+		}
+	}
+
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<User> root, Map<String, Join> joins) {
+
+		// LOG
+		log.trace("Entering buildPredicateList( ... )");
+
+		UserCriteria userCriteria = (UserCriteria) cri;
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		// userCriteria.setActive(true);
+		Boolean active = userCriteria.getActive();
+
+		String searchName = userCriteria.getSearchName();
+		
+		List<String> roleNames = userCriteria.getRoles();
+
+		String canonicalSearchName = userCriteria.getCanonicalSearchName();
+		
+		String emailOrMobile = userCriteria.getEmailOrMobile();
+
+		// ----------------------------------------------------------------
+		// Active
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(active)) {
+			Predicate predicate = builder.equal(root.<Boolean> get(User_.active), active);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// lastName
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(searchName)) {
+			Predicate predicate = builder.or(builder.like(root.<String> get(User_.firstName), "%" + searchName + "%"),
+					builder.like(root.<String> get(User_.lastName), "%" + searchName + "%"),
+					builder.like(root.<String> get(User_.userName), "%" + searchName + "%"));
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// canonicalSearchName
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(canonicalSearchName)) {
+			List<Predicate> preList = new ArrayList<Predicate>();
+			
+			
+			String[] splited = canonicalSearchName.trim().split("\\s+");
+			
+			for(String str:splited){
+				
+				Predicate predicate = builder.or(builder.like(root.<String> get(User_.firstName), "%" + str + "%"),
+						builder.like(root.<String> get(User_.lastName), "%" + str + "%"),
+						builder.like(root.<String> get(User_.userName), "%" + str + "%"));
+				preList.add(predicate);
+				
+			}
+				predicateList.add(builder.and(preList.toArray(new Predicate[0])));			
+		}
+		
+		// ----------------------------------------------------------------
+		// roleNames
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(roleNames)) {
+
+			Join<User, Role> roleJoin = root.join(User_.roles);
+			predicateList.add(roleJoin.<String> get(Role_.name).in(roleNames));
+		}
+
+		basePredicate((BaseCriteria) userCriteria, builder, root, predicateList);
+
+		// LOG
+		log.trace("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+
+
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<User> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+
+		if(Validator.isNotNull(cri.getCreateDateFrom())){
+    		Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime>get("createDate"), cri.getCreateDateFrom());
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(cri.getCreateDateTo())){
+    		Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime>get("createDate"), cri.getCreateDateTo());
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(cri.getUpdateDateFrom())){
+    		Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime>get("updateDate"), cri.getUpdateDateFrom());
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(cri.getUpdateDateTo())){
+    		Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime>get("updateDate"), cri.getUpdateDateTo());
+    		predicateList.add(predicate);
+    	}
+	}
+
+}

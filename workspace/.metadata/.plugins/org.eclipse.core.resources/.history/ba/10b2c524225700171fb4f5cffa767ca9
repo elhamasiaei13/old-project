@@ -1,0 +1,593 @@
+package com.parvanpajooh.siteservices.model.vo;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.personmanagement.model.PersonManagementEnums;
+import com.parvanpajooh.client.personmanagement.model.PersonMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.siteservices.model.enums.Gender;
+import com.parvanpajooh.siteservices.model.enums.PersonType;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+public class VisitorVO extends BaseVO {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6829088593973278548L;
+	
+	private String uuid;
+	
+	private String appId;
+	
+	private String appWideUniqueId;
+	
+	private PersonType type;
+	
+	private Gender gender;
+	
+	private String prefix;
+	
+	private String firstNameLocal;
+	
+	private String firstNameEn;
+	
+	private String middleNameLocal;
+	
+	private String middleNameEn;
+	
+	private String lastNameLocal;
+	
+	private String lastNameEn;
+	
+	private String suffixLocal;
+	
+	private String suffixEn;
+	
+	private String nickNameLocal;
+	
+	private String nickNameEn;
+	
+	private String nationalId;
+	
+	private String economicCode;
+	
+	private String issueId;
+	
+	private String issueLocation;
+	
+	private LocalDate issueDate;
+	
+	private String remarks;
+	
+	private boolean active;
+	
+	private List<RelationVO> relatesTo;
+	
+	private List<RelationVO> relatesFrom;
+	
+	private ContactInfoVO primaryContactInfo;
+	
+	private List<ContactInfoVO> contactInfos;
+	
+	private List<PersonGroupVO> personGroups;
+	
+	private Long organizationId;
+
+	/**
+	 * @return the uuid
+	 */
+	public String getUuid() {
+		return uuid;
+	}
+
+	/**
+	 * @param uuid the uuid to set
+	 */
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	/**
+	 * @return the appId
+	 */
+	public String getAppId() {
+		return appId;
+	}
+
+	/**
+	 * @param appId the appId to set
+	 */
+	public void setAppId(String appId) {
+		this.appId = appId;
+	}
+
+	/**
+	 * @return the appWideUniqueId
+	 */
+	public String getAppWideUniqueId() {
+		return appWideUniqueId;
+	}
+
+	/**
+	 * @param appWideUniqueId the appWideUniqueId to set
+	 */
+	public void setAppWideUniqueId(String appWideUniqueId) {
+		this.appWideUniqueId = appWideUniqueId;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public PersonType getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(PersonType type) {
+		this.type = type;
+	}
+	
+	/**
+	 * @return the gender
+	 */
+	public final Gender getGender() {
+		return gender;
+	}
+
+	/**
+	 * @param gender the gender to set
+	 */
+	public final void setGender(Gender gender) {
+		this.gender = gender;
+	}
+
+	/**
+	 * @return the prefix
+	 */
+	public String getPrefix() {
+		return prefix;
+	}
+
+	/**
+	 * @param prefix the prefix to set
+	 */
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
+	}
+
+	/**
+	 * @return the firstNameLocal
+	 */
+	public String getFirstNameLocal() {
+		return firstNameLocal;
+	}
+
+	/**
+	 * @param firstNameLocal the firstNameLocal to set
+	 */
+	public void setFirstNameLocal(String firstNameLocal) {
+		this.firstNameLocal = firstNameLocal;
+	}
+
+	/**
+	 * @return the firstNameEn
+	 */
+	public String getFirstNameEn() {
+		return firstNameEn;
+	}
+
+	/**
+	 * @param firstNameEn the firstNameEn to set
+	 */
+	public void setFirstNameEn(String firstNameEn) {
+		this.firstNameEn = firstNameEn;
+	}
+
+	/**
+	 * @return the middleNameLocal
+	 */
+	public String getMiddleNameLocal() {
+		return middleNameLocal;
+	}
+
+	/**
+	 * @param middleNameLocal the middleNameLocal to set
+	 */
+	public void setMiddleNameLocal(String middleNameLocal) {
+		this.middleNameLocal = middleNameLocal;
+	}
+
+	/**
+	 * @return the middleNameEn
+	 */
+	public String getMiddleNameEn() {
+		return middleNameEn;
+	}
+
+	/**
+	 * @param middleNameEn the middleNameEn to set
+	 */
+	public void setMiddleNameEn(String middleNameEn) {
+		this.middleNameEn = middleNameEn;
+	}
+
+	/**
+	 * @return the lastNameLocal
+	 */
+	public String getLastNameLocal() {
+		return lastNameLocal;
+	}
+
+	/**
+	 * @param lastNameLocal the lastNameLocal to set
+	 */
+	public void setLastNameLocal(String lastNameLocal) {
+		this.lastNameLocal = lastNameLocal;
+	}
+
+	/**
+	 * @return the lastNameEn
+	 */
+	public String getLastNameEn() {
+		return lastNameEn;
+	}
+
+	/**
+	 * @param lastNameEn the lastNameEn to set
+	 */
+	public void setLastNameEn(String lastNameEn) {
+		this.lastNameEn = lastNameEn;
+	}
+
+	/**
+	 * @return the suffixLocal
+	 */
+	public String getSuffixLocal() {
+		return suffixLocal;
+	}
+
+	/**
+	 * @param suffixLocal the suffixLocal to set
+	 */
+	public void setSuffixLocal(String suffixLocal) {
+		this.suffixLocal = suffixLocal;
+	}
+
+	/**
+	 * @return the suffixEn
+	 */
+	public String getSuffixEn() {
+		return suffixEn;
+	}
+
+	/**
+	 * @param suffixEn the suffixEn to set
+	 */
+	public void setSuffixEn(String suffixEn) {
+		this.suffixEn = suffixEn;
+	}
+
+	/**
+	 * @return the nickNameLocal
+	 */
+	public String getNickNameLocal() {
+		return nickNameLocal;
+	}
+
+	/**
+	 * @param nickNameLocal the nickNameLocal to set
+	 */
+	public void setNickNameLocal(String nickNameLocal) {
+		this.nickNameLocal = nickNameLocal;
+	}
+
+	/**
+	 * @return the nickNameEn
+	 */
+	public String getNickNameEn() {
+		return nickNameEn;
+	}
+
+	/**
+	 * @param nickNameEn the nickNameEn to set
+	 */
+	public void setNickNameEn(String nickNameEn) {
+		this.nickNameEn = nickNameEn;
+	}
+
+	/**
+	 * @return the fullName
+	 */
+	public String getFullNameLocal() {
+		return (Validator.isNotNull(firstNameLocal) ? firstNameLocal + StringPool.SPACE : StringPool.BLANK) + 
+				(Validator.isNotNull(middleNameLocal) ? middleNameLocal + StringPool.SPACE : StringPool.BLANK) +
+				(Validator.isNotNull(lastNameLocal) ? lastNameLocal : StringPool.BLANK);
+	}
+	
+	/**
+	 * @return the fullName
+	 */
+	public String getFullNameEn() {
+		return (Validator.isNotNull(firstNameEn) ? firstNameEn + StringPool.SPACE : StringPool.BLANK) + 
+				(Validator.isNotNull(middleNameEn) ? middleNameEn + StringPool.SPACE : StringPool.BLANK) +
+				(Validator.isNotNull(lastNameEn) ? lastNameEn : StringPool.BLANK);
+	}
+
+	/**
+	 * @return the nationalId
+	 */
+	public String getNationalId() {
+		return nationalId;
+	}
+
+	/**
+	 * @param nationalId the nationalId to set
+	 */
+	public void setNationalId(String nationalId) {
+		this.nationalId = nationalId;
+	}
+
+	/**
+	 * @return the economicCode
+	 */
+	public String getEconomicCode() {
+		return economicCode;
+	}
+
+	/**
+	 * @param economicCode the economicCode to set
+	 */
+	public void setEconomicCode(String economicCode) {
+		this.economicCode = economicCode;
+	}
+
+	/**
+	 * @return the issueId
+	 */
+	public String getIssueId() {
+		return issueId;
+	}
+
+	/**
+	 * @param issueId the issueId to set
+	 */
+	public void setIssueId(String issueId) {
+		this.issueId = issueId;
+	}
+
+	/**
+	 * @return the issueLocation
+	 */
+	public String getIssueLocation() {
+		return issueLocation;
+	}
+
+	/**
+	 * @param issueLocation the issueLocation to set
+	 */
+	public void setIssueLocation(String issueLocation) {
+		this.issueLocation = issueLocation;
+	}
+
+	/**
+	 * @return the issueDate
+	 */
+	public LocalDate getIssueDate() {
+		return issueDate;
+	}
+
+	/**
+	 * @param issueDate the issueDate to set
+	 */
+	public void setIssueDate(LocalDate issueDate) {
+		this.issueDate = issueDate;
+	}
+
+	/**
+	 * @return the remarks
+	 */
+	public String getRemarks() {
+		return remarks;
+	}
+
+	/**
+	 * @param remarks the remarks to set
+	 */
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the relatesTo
+	 */
+	public List<RelationVO> getRelatesTo() {
+		return relatesTo;
+	}
+
+	/**
+	 * @param relatesTo the relatesTo to set
+	 */
+	public void setRelatesTo(List<RelationVO> relatesTo) {
+		this.relatesTo = relatesTo;
+	}
+
+	/**
+	 * @return the relatesFrom
+	 */
+	public List<RelationVO> getRelatesFrom() {
+		return relatesFrom;
+	}
+
+	/**
+	 * @param relatesFrom the relatesFrom to set
+	 */
+	public void setRelatesFrom(List<RelationVO> relatesFrom) {
+		this.relatesFrom = relatesFrom;
+	}
+
+	/**
+	 * @return the contactInfos
+	 */
+	public List<ContactInfoVO> getContactInfos() {
+		return contactInfos;
+	}
+
+	/**
+	 * @param contactInfos the contactInfos to set
+	 */
+	public void setContactInfos(List<ContactInfoVO> contactInfos) {
+		this.contactInfos = contactInfos;
+	}
+
+	/**
+	 * @return the personGroups
+	 */
+	public List<PersonGroupVO> getPersonGroups() {
+		return personGroups;
+	}
+
+	/**
+	 * @param personGroups the personGroups to set
+	 */
+	public void setPersonGroups(List<PersonGroupVO> personGroups) {
+		this.personGroups = personGroups;
+	}
+
+	/**
+	 * @return the primaryContactInfo
+	 */
+	public ContactInfoVO getPrimaryContactInfo() {
+		return primaryContactInfo;
+	}
+
+	/**
+	 * @param primaryContactInfo the primaryContactInfo to set
+	 */
+	public void setPrimaryContactInfo(ContactInfoVO primaryContactInfo) {
+		this.primaryContactInfo = primaryContactInfo;
+	}
+	
+	/**
+	 * @return the organizationId
+	 */
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	/**
+	 * @param organizationId the organizationId to set
+	 */
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public void fromMsg(PersonMsg msg) {
+		
+		this.uuid = msg.getUuid();
+		this.prefix = msg.getPrefix();
+		this.firstNameLocal = msg.getFirstNameLocal();
+		this.middleNameLocal = msg.getMiddleNameLocal();
+		this.lastNameLocal = msg.getLastNameLocal();
+		this.nickNameLocal = msg.getNickNameLocal();
+		this.nationalId = msg.getNationalId();
+		this.economicCode = msg.getEconomicCode();
+		this.remarks = msg.getRemarks();
+		this.active = msg.isActive();
+		if(Validator.isNotNull(msg.getPrimaryContactInfo())){
+			ContactInfoVO contactInfoVO = new ContactInfoVO();
+			contactInfoVO.fromMsg(msg.getPrimaryContactInfo());
+			this.primaryContactInfo = contactInfoVO;
+		}
+		if (msg.getType() != null) {
+			this.type = PersonType.valueOf(msg.getType().toString());
+		}
+	}
+	
+	public PersonMsg toMsg() {
+		PersonMsg msg = new PersonMsg();
+
+		msg.setUuid(this.uuid);
+		msg.setPrefix(this.prefix);
+		msg.setFirstNameLocal(this.firstNameLocal);
+		msg.setMiddleNameLocal(this.middleNameLocal);
+		msg.setLastNameLocal(this.lastNameLocal);
+		msg.setNationalId(this.nationalId);
+		msg.setEconomicCode(this.economicCode);
+		msg.setOrganizationId(this.getOrganizationId());
+		if (Validator.isNotNull(this.primaryContactInfo)) {
+			msg.setPrimaryContactInfo(this.primaryContactInfo.toMsg());
+		}
+		if (this.gender != null) {
+			msg.setGender(PersonManagementEnums.Gender.valueOf(this.gender.toString()));
+		}
+		if (this.type != null) {
+			msg.setType(PersonManagementEnums.PersonType.valueOf(this.type.toString()));
+		}
+		msg.setRemarks(this.remarks);
+		return msg;
+	}
+	
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+				.add("super", super.toString())
+				.add("uuid", uuid)
+				.add("appId", appId)
+				.add("appWideUniqueId", appWideUniqueId)
+				.add("type", type)
+				.add("gender", gender)
+				.add("prefix", prefix)
+				.add("firstNameLocal", firstNameLocal)
+				.add("firstNameEn", firstNameEn)
+				.add("middleNameLocal", middleNameLocal)
+				.add("middleNameEn", middleNameEn)
+				.add("lastNameLocal", lastNameLocal)
+				.add("lastNameEn", lastNameEn)
+				.add("suffixLocal", suffixLocal)
+				.add("suffixEn", suffixEn)
+				.add("nickNameLocal", nickNameLocal)
+				.add("nickNameEn", nickNameEn)
+				.add("nationalId", nationalId)
+				.add("economicCode", economicCode)
+				.add("issueId", issueId)
+				.add("issueLocation", issueLocation)
+				.add("issueDate", issueDate)
+				.add("remarks", remarks)
+				.add("active", active)
+				.add("relatesTo", relatesTo)
+				.add("relatesFrom", relatesFrom)
+				.add("primaryContactInfo", primaryContactInfo)
+				.add("contactInfos", contactInfos)
+				.add("personGroups", personGroups)
+				.add("organizationId", organizationId)
+				.toString();
+	}
+
+	
+}

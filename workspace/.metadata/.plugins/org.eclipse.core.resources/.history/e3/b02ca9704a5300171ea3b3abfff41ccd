@@ -1,0 +1,55 @@
+/**
+ * 
+ */
+package com.parvanpajooh.waybillmanagement.domain.model.dto;
+
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseDto;
+
+/**
+ * @author MO
+ *
+ */
+public class WaybillDto extends BaseDto {
+	
+	private static final long serialVersionUID = 5335976054601051530L;
+
+	private Long id;
+	
+	private String number;
+	
+	private String createUserName;
+	
+	private String updateUserName;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getNumber() {
+		return number;
+	}
+
+	public void setNumber(String number) {
+		this.number = number;
+	}
+
+	public String getCreateUserName() {
+		return createUserName;
+	}
+
+	public void setCreateUserName(String createUserName) {
+		this.createUserName = createUserName;
+	}
+
+	public String getUpdateUserName() {
+		return updateUserName;
+	}
+
+	public void setUpdateUserName(String updateUserName) {
+		this.updateUserName = updateUserName;
+	}
+}

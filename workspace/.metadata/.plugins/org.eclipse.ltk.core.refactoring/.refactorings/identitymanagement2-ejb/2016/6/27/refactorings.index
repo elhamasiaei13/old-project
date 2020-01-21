@@ -1,0 +1,42 @@
+1466919925576	Rename type 'Sample'
+1466921565029	Copy compilation unit
+1466921895757	Copy compilation unit
+1466922019792	Rename type 'SampleVO'
+1466922227879	Copy compilation unit
+1466922267037	Copy compilation unit
+1466922466791	Copy compilation unit
+1466922672171	Copy compilation unit
+1466923446689	Rename type 'AccountTypeNatureEnum'
+1466923614153	Rename type 'calendarEnum'
+1466926513227	Copy compilation unit
+1466927847339	Copy compilation unit
+1466928239040	Rename type 'permissionVO'
+1466928489960	Copy compilation unit
+1466932782906	Rename type 'SampleDao'
+1466932807379	Copy compilation unit
+1466932832309	Copy compilation unit
+1466932858873	Copy compilation unit
+1466932878589	Copy compilation unit
+1466932890945	Rename type 'ObjectAccessScope'
+1466933190108	Copy compilation unit
+1466933208207	Rename type 'SampleDaoJpa'
+1466933682308	Copy compilation unit
+1466933764381	Copy compilation unit
+1466933838174	Copy compilation unit
+1466934185218	Rename type 'SampleLocalService'
+1466934199613	Rename type 'SampleService'
+1466934225911	Rename type 'SampleLocalServiceImpl'
+1466934246913	Rename type 'SampleServiceImpl'
+1466934313914	Copy compilation unit
+1466934331821	Copy compilation unit
+1466934564543	Copy compilation unit
+1466934583233	Copy compilation unit
+1466935152523	Copy compilation unit
+1466935172076	Copy compilation unit
+1466935326784	Copy compilation unit
+1466935456329	Copy compilation unit
+1467183082411	Delete element
+1467183120718	Delete elements
+1467183132375	Delete elements
+1467183142999	Delete element
+1467194479093	Rename type 'SampleCriteria'

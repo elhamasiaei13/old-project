@@ -1,0 +1,88 @@
+package com.parvanpajooh.siteservices.service.impl;
+
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.siteservices.model.vo.ComplaintCategoryVO;
+import com.parvanpajooh.siteservices.model.vo.ComplaintVO;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+import com.parvanpajooh.siteservices.service.ComplaintManagementLocalService;
+import com.parvanpajooh.siteservices.service.adapter.ComplaintManagementServiceAdapter;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class ComplaintManagementLocalServiceImpl implements ComplaintManagementLocalService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(ComplaintManagementLocalServiceImpl.class);
+
+	@Inject
+	private ComplaintManagementServiceAdapter complaintManagementServiceAdapter;
+
+
+
+	@Override
+	public PersonVO getPerson(String uuid) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering getPerson(uuid={})", uuid);
+		PersonVO personVO = null;
+		try {
+
+			personVO = personManagementServiceAdapter.getPerson(uuid);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getPerson", e);
+		}
+
+		return personVO;
+	}
+
+
+
+	@Override
+	public ComplaintCategoryVO getComplaintCategory(Long id) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering getComplaintCategory(id={})", id);
+		ComplaintCategoryVO complaintCategoryVO = null;
+		try {
+
+			complaintCategoryVO = complaintManagementServiceAdapter.getComplaintCategory(id)
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getComplaintCategory from siteservices", e);
+		}
+
+		return complaintCategoryVO;
+		
+	}
+
+
+
+	@Override
+	public List<ComplaintVO> findComplaintCategoriesBy(String term, int page, int size) throws ParvanServiceException {
+		// TODO Auto-generated method stub
+		return null;
+		
+	}
+
+}

@@ -1,0 +1,9 @@
+package com.parvanpajooh.siteservices.service;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+
+public interface IdentityManagement2LocalService {
+
+	public PersonVO createPerson(PersonVO personVO) throws ParvanServiceException;
+}

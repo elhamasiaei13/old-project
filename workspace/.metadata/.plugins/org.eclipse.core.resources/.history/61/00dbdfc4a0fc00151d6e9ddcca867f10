@@ -1,0 +1,115 @@
+package com.parvanpajooh.issuemanager.mvc;
+
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.issuemanager.model.Group;
+import com.parvanpajooh.issuemanager.model.Membership;
+import com.parvanpajooh.issuemanager.model.vo.MemberVO;
+import com.parvanpajooh.issuemanager.model.vo.MembershipVO;
+import com.parvanpajooh.issuemanager.model.vo.TaskAssignmentVO;
+import com.parvanpajooh.issuemanager.model.vo.TypeVO;
+import com.parvanpajooh.issuemanager.service.MemberService;
+import com.parvanpajooh.issuemanager.service.MembershipService;
+import com.parvanpajooh.issuemanager.service.TypeService;
+
+@Controller
+@RequestMapping("/")
+public class MembershipController {
+
+	@EJB(mappedName = "java:global/issueManager-ear/issueManager-ejb/MemberServiceImpl")
+	private MemberService memberService;
+
+	@EJB(mappedName = "java:global/issueManager-ear/issueManager-ejb/TypeServiceImpl")
+	private TypeService typeService;
+
+	@EJB(mappedName = "java:global/issueManager-ear/issueManager-ejb/MembershipServiceImpl")
+	private MembershipService membershipService;
+
+	// private GroupService groupService;
+
+	@RequestMapping(value = "/addMembership/{id}", method = RequestMethod.GET)
+	public String showMemberships(@PathVariable Long id, Model model)
+			throws ParvanServiceException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+		List<TypeVO> typesList;
+		typesList = typeService.findByTitle("type");
+		List<MemberVO> members = memberService.loadMembers(userInfo);
+		membershipService.loadMembershipByGroupId(userInfo,Long.parseLong(id.toString()));
+		List<MembershipVO> memberships = membershipService
+				.loadMemberships(userInfo);
+		for(MemberVO memb:members){
+			for(MembershipVO membship:memberships){
+				if(memb.getId() == membship.getMemberId().getId() && id == membship.getGroupId().getId()){
+					memb.setTenantId("1");
+					break;					
+				}
+			}
+		}
+		model.addAttribute("groupId", id);
+		model.addAttribute("members", members);
+		model.addAttribute("memberships", memberships);
+		model.addAttribute("types", typesList);
+
+		return "addMembership";
+	}
+
+	@RequestMapping(value = "/deleteMembership/{id}", method = RequestMethod.GET)
+	public String showRemovePage(@PathVariable Long id,final HttpServletRequest request, Model model)
+			throws ParvanServiceException, ParvanDaoException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+		List<TypeVO> typesList;
+		typesList = typeService.findByTitle("type");
+		List<MembershipVO> memberships = membershipService
+				.loadMembershipByGroupId(userInfo, id);
+		model.addAttribute("groupId", id);
+		model.addAttribute("memberships", memberships);
+		model.addAttribute("types", typesList);
+		return "deleteMembership";
+	}
+
+	@RequestMapping(value = "/deleteMembership/save", method = {
+			RequestMethod.POST, RequestMethod.GET })
+	public String removeMemberships(final HttpServletRequest request, Model model)
+			throws ParvanServiceException, ParvanDaoException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+		String[] membersId = request.getParameterValues("checkboxItems");
+		String[] groupId = request.getParameterValues("groupId");
+		membershipService.removeMembershipByGroupId(userInfo, Long.parseLong(groupId[0]), membersId);
+		return "redirect:/showGroups";
+	}
+
+	@RequestMapping(value = "/addMembership/save", method = {
+			RequestMethod.POST, RequestMethod.GET })
+	public String editMember(Model model, final HttpServletRequest request)
+			throws ParvanServiceException, ParvanDaoException {
+
+		String[] membersId = request.getParameterValues("checkboxItems");
+		String[] typesId = request.getParameterValues("typeItems");
+		String[] groupId = request.getParameterValues("groupId");
+		membershipService.editMembership(Long.parseLong(groupId[0]), membersId,
+				typesId);
+		return "redirect:/showGroups";
+	}
+}

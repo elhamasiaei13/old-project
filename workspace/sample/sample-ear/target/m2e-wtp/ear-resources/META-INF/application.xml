@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_6.xsd" version="6">
+  <display-name>sample-ear</display-name>
+  <module>
+    <ejb>sample-ejb.jar</ejb>
+  </module>
+  <module>
+    <ejb>common-crosscutting-ejb.jar</ejb>
+  </module>
+  <module>
+    <web>
+      <web-uri>sample-web.war</web-uri>
+      <context-root>/sample-web</context-root>
+    </web>
+  </module>
+  <module>
+    <web>
+      <web-uri>sample-rest.war</web-uri>
+      <context-root>/sample-rest</context-root>
+    </web>
+  </module>
+  <library-directory>lib</library-directory>
+</application>

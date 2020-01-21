@@ -1,0 +1,294 @@
+package com.parvanpajooh.geomanagement.mvc.base;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.common.auth.UserInfoLoader;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.BaseModel;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.enums.ListExportFormatEnum;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.GenericService;
+import com.parvanpajooh.commons.util.DateUtil;
+import com.parvanpajooh.commons.util.LocaleUtil;
+import com.parvanpajooh.commons.util.StringUtil;
+import com.parvanpajooh.commons.util.ZoneIdUtil;
+
+@Controller
+public abstract class GeoManagementAbstractController<T extends BaseModel, V extends BaseVO, C extends BaseCriteria> extends GeoManagementBaseController {
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	protected abstract GenericService<T, Long> getService();
+
+	protected abstract String getName();
+
+	protected String getDefaultSortCriterion() {
+		return null;
+	}
+
+	protected SortDirectionEnum getDefaultSortDirection() {
+		return SortDirectionEnum.Ascending;
+	}
+
+	@RequestMapping(method = RequestMethod.GET)
+	public String show(HttpServletRequest request, Model model) {
+		log.debug("Entering show");
+
+		try {
+			init(request, model);
+
+		} catch (Exception e) {
+			log.error("Error in init method");
+			// TODO Mo: handle proper exceptions
+		}
+
+		model.addAttribute("rightMenu", getName());
+		return getName();
+	}
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/save", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> save(V baseVO, HttpServletRequest request) {
+		log.debug("Entering save(vo={})", baseVO);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			baseVO = (V) getService().save(userInfo, baseVO);
+
+			result.put("status", "success");
+			result.put("result", baseVO);
+
+			request.getSession().removeAttribute(getName());
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		return result;
+	}
+
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> get(@PathVariable Long id, HttpServletRequest request) {
+		log.debug("Entering get(id={})", id);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			V baseVO = (V) getService().get(userInfo, id);
+
+			result.put("status", "success");
+			result.put("result", baseVO);
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/get", method = RequestMethod.GET)
+	public @ResponseBody BaseVO getEntity(Long id, HttpServletRequest request) {
+		log.debug("Entering getEntity(id={})", id);
+		BaseVO baseVO = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			baseVO = getService().get(userInfo, id);
+
+		} catch (Exception e) {
+			log.error("Error occurred while getEntity.", e);
+		}
+		log.debug("Exiting getEntity()");
+		return baseVO;
+	}
+
+	@RequestMapping(value = "/del/{id}", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> delete(@PathVariable Long id, HttpServletRequest request) {
+		log.debug("Entering delete(id={})", id);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			getService().delete(userInfo, id);
+
+			result.put("status", "success");
+
+			request.getSession().removeAttribute(getName());
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		return result;
+	}
+
+	@RequestMapping(value = "/delall", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> delete(@RequestParam("id") Long[] ids, HttpServletRequest request) {
+		log.debug("Entering delete(ids={})", (Object) ids);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			getService().delete(userInfo, ids);
+
+			result.put("status", "success");
+
+			request.getSession().removeAttribute(getName());
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		return result;
+	}
+
+	@RequestMapping(value = "/paging", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<V> paging(@DatatablesParams DatatablesCriterias criterias, C criteria, HttpServletRequest request) {
+		log.debug("Entering paging(criteria={})", criteria);
+
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		columnDef.setSortDirection(SortDirection.DESC);
+		SortDirectionEnum sortDirection = getDefaultSortDirection();
+		String sortCriterion = columnDef.getName();
+
+		if ("0".equals(sortCriterion)) {
+			sortCriterion = getDefaultSortCriterion();
+		}
+
+		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+			sortDirection = SortDirectionEnum.Descending;
+		}
+
+		DataSet<V> dataSet;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			List<V> rows = (List<V>) getService().findByCriteria(userInfo, criteria, firstResult, maxResults, sortDirection, sortCriterion);
+
+			long totalRecords = getService().countByCriteria(userInfo, criteria);
+			dataSet = new DataSet<V>(rows, (long) rows.size(), totalRecords);
+		} catch (Exception e) {
+			log.error("error occured in record paging...", e);
+			e.printStackTrace();
+			dataSet = new DataSet<V>(new ArrayList<V>(), 0l, 0l);
+		}
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+
+	@RequestMapping(value = "/pagingSelective", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> pagingSelective(String action, Long id, HttpServletRequest request) {
+		log.debug("Entering pagingSelective(action={}, id={})", action, id);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		String name = getName();
+		name = name.substring(0, name.length() - 2);
+		name = StringUtils.capitalize(name);
+
+		changeSelected(request, name, action, id);
+
+		result.put("status", "success");
+
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	@RequestMapping(value = "/export", method = RequestMethod.POST)
+	public String export(C criteria, String[] columns, String[] keys, HttpServletRequest request, HttpServletResponse response, ModelMap model)
+			throws Exception {
+		log.debug("Entering export(criteria={}, columns={}, keys={})", criteria, columns, keys);
+
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+		List<String> fields = Arrays.asList(columns);
+		List<String> columnsNames = new ArrayList<>();
+		for (String key : keys) {
+			columnsNames.add(getMessage(key, (Object) null));
+		}
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		String time = DateUtil.getCurrentDateTime(LocaleUtil.fromLanguageId(userInfo.getLocale()), userInfo.getCalendar(),
+				ZoneIdUtil.getZoneId(userInfo.getZoneId()));
+
+		time = StringUtil.replace(time, StringPool.SLASH, StringPool.DASH);
+		time = StringUtil.replace(time, StringPool.SPACE, StringPool.DASH);
+
+		// output filename
+		String reportId = getName() + "_" + time + "_" + ".xlsx";
+
+		// generate report
+		getService().export(userInfo, out, fields, columnsNames, criteria, SortDirectionEnum.Ascending, "createDate", ListExportFormatEnum.ExcelXml);
+
+		response.setHeader("Content-Disposition", "attachment; filename=\"" + reportId + "\"");
+		response.setContentType("application/vnd.ms-excel");
+		response.setContentLength((int) out.size());
+
+		StreamUtils.copy(new ByteArrayInputStream(out.toByteArray()), response.getOutputStream());
+
+		model.clear();
+
+		log.debug("Leaving export(criteria={}, columns={})", criteria, columns);
+
+		return null;
+	}
+
+	protected void init(HttpServletRequest request, Model model) throws Exception {
+		
+	}
+}

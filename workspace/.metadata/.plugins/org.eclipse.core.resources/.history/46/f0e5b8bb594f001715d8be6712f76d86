@@ -1,0 +1,183 @@
+
+LEGAL = Legal
+
+REAL = Real
+
+actions = actions
+
+active = Active
+
+baseModel.createDate = CreateDate
+baseModel.updateDate = Update Date
+
+button.add    = Add
+button.cancel = Cancel
+button.close  = Close
+button.create = Create
+button.delete = Delete
+button.ok     = OK
+button.reset  = reset
+button.save   = Save
+button.search = search
+
+choose = Choose
+
+client.legal = Legal
+client.real  = Real
+
+contact.company        = Company
+contact.contactPerson  = Contact Person
+
+contactInfo.address    = Address
+contactInfo.city       = City
+contactInfo.email      = Email
+contactInfo.fax        = Fax
+contactInfo.mobile     = Mobile
+contactInfo.postalCode = Postal Code
+contactInfo.tel        = Phone
+
+count = Count
+
+createUser = Create User
+
+deleteConfirm = Are you sure ?
+
+dimensions = Dimensions
+
+economicCode = Economic Code
+
+error-required = The {0} is required
+
+error.data-duplicate = Field {0} is duplicate
+error.error-required = The {0} is required
+
+errorCode.10702 = Node already has another agent
+errorCode.10706 = Cannot set owner agent as parent
+errorCode.10707 = Only one root agent should be exists
+errorCode.10708 = Accountnumber is used by another agent
+errorCode.20000 = atleast one needed
+
+filter = Filter
+
+firstNameEn = First Name En
+
+firstNameLocal = Name
+
+gender = Gender
+
+gender.FEMALE = Female
+gender.MALE   = Male
+gender.OTHER  = Other
+
+header.delete = delete
+header.search = search
+
+height = Height
+
+id = id
+
+issueDate = Issue Date
+
+issueId = Issue ID
+
+issueLocation = Issue Location
+
+lastNameEn = Last Name En
+
+lastNameLocal = Last Name
+
+legal = Legal
+
+length = Length
+
+name = Name
+
+nationalId = National ID
+
+newWaybill = New Waybill
+
+nickNameEn = Nick Name En
+
+nickNameLocal = Nick Name
+
+number = Waybill Number
+
+organization = Organization
+
+packages = Packages
+
+packingType = packing type
+
+packingType.active       = active
+packingType.code         = code
+packingType.displayOrder = display order
+packingType.height       = height
+packingType.length       = length
+packingType.maxWeight    = max weight
+packingType.nameEn       = name(En)
+packingType.nameFa       = Name(\u0641\u0627)
+packingType.standard     = standard
+packingType.width        = width
+
+person.firstName             = First Name
+person.lastName              = Last Name
+person.prefix.bank           = Bank
+person.prefix.clinic         = Clinic
+person.prefix.community      = Community
+person.prefix.company        = Company
+person.prefix.cooperative    = Cooperative
+person.prefix.dr             = DR
+person.prefix.garrison       = Garrison
+person.prefix.hospital       = Hospital
+person.prefix.institution    = Institution
+person.prefix.laboratory     = Laboratory
+person.prefix.ministry       = Ministry
+person.prefix.mr             = Mr.
+person.prefix.ms             = Ms.
+person.prefix.ng             = Ng
+person.prefix.office         = Office
+person.prefix.organization   = Organization
+person.prefix.representative = Representative
+person.prefix.union          = Union
+person.type                  = Type
+
+prefix = Prefix
+
+real = Real
+
+remarks = Remarks
+
+reset = reset
+
+return = Return
+
+search = search
+
+shipment.accountNumber = Account Number
+shipment.address       = Address
+shipment.city          = City
+shipment.client        = Client
+shipment.company       = Company
+shipment.consignee     = Consignee
+shipment.contactPerson = Contact Person
+shipment.mobileNumber  = Mobile
+shipment.nationalId    = National Id
+shipment.note          = Note
+shipment.phoneNumber   = Phone
+shipment.postalCode    = Postal Code
+shipment.prefix        = Prefix
+shipment.shipper       = Shipper
+
+suffixEn = Suffix En
+
+suffixLocal = Suffix
+
+type = Type
+
+updateUser = Update User
+
+waybillNumber = Waybill Number
+
+waybills = Waybills
+
+width = Width

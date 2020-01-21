@@ -1,0 +1,23 @@
+package com.parvanpajooh.transportationmanagement2.dao;
+
+import java.util.List;
+
+import com.parvanpajooh.commons.platform.ejb.dao.GenericDao;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.transportationmanagement2.model.TransportationSchedule;
+import com.parvanpajooh.transportationmanagement2.model.criteria.TransportationScheduleCriteria;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+public interface TransportationScheduleDao extends GenericDao<TransportationSchedule, Long> {
+
+	public int countOfTransportationNumber(TransportationScheduleCriteria criteria) throws ParvanDaoException;
+
+	public List<TransportationSchedule> findByRouteNumbersAndDepartureDate(
+			List<String> carrierRouteNumbers, 
+			Integer departureDateInOriginLocal) throws ParvanDaoException;
+
+}

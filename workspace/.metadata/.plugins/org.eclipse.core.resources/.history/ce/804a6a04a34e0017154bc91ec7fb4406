@@ -1,0 +1,124 @@
+package com.parvanpajooh.common.auth;
+
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+
+public class UserDataCacheMap2UserInfoInitializer {
+
+	/**
+     * 
+     * @param userDataCacheMap
+     * @return
+     */
+    public static UserInfo initializeUserInfo(Map<String, Object> userDataCacheMap) {
+		
+		String ip = null;
+		String context = null;
+		String tenantId = null;
+		
+		Long userId = (Long) userDataCacheMap.get(UserInfoWrapper.USER_ID);
+		String userName = (String) userDataCacheMap.get(UserInfoWrapper.USER_NAME);
+		@SuppressWarnings("unchecked")
+		Set<String> userRoleNames = (Set<String>) userDataCacheMap.get(UserInfoWrapper.USER_ROLE_NAMES);
+		String userFirstName = (String) userDataCacheMap.get(UserInfoWrapper.USER_FIRST_NAME);
+		String userLastName = (String) userDataCacheMap.get(UserInfoWrapper.USER_LAST_NAME);
+		String userLocale = (String) userDataCacheMap.get(UserInfoWrapper.USER_LOCALE);
+		String userZoneId = (String) userDataCacheMap.get(UserInfoWrapper.USER_ZONE_ID);
+		String userCalendar = (String) userDataCacheMap.get(UserInfoWrapper.USER_CALENDAR);
+		Long agentId = (Long) userDataCacheMap.get(UserInfoWrapper.AGENT_ID);
+		String agentName = (String) userDataCacheMap.get(UserInfoWrapper.AGENT_NAME);
+		Long agentNodeId = (Long) userDataCacheMap.get(UserInfoWrapper.AGENT_NODE_ID);
+		String agentNodeCode = (String) userDataCacheMap.get(UserInfoWrapper.AGENT_NODE_CODE);
+		String agentNodeName = (String) userDataCacheMap.get(UserInfoWrapper.AGENT_NODE_NAME);
+		Long agentHubNodeId = (Long) userDataCacheMap.get(UserInfoWrapper.AGENT_HUB_NODE_ID);
+		String agentHubNodeCode = (String) userDataCacheMap.get(UserInfoWrapper.AGENT_HUB_NODE_CODE);
+		String agentHubNodeName = (String) userDataCacheMap.get(UserInfoWrapper.AGENT_HUB_NODE_NAME);
+		String agentCityShortCode = (String) userDataCacheMap.get(UserInfoWrapper.AGENT_CITY_SHORT_CODE);
+		Long allowedAgentOrgId = (Long) userDataCacheMap.get(UserInfoWrapper.AGENT_ALLOWED_ORG_ID);
+		@SuppressWarnings("unchecked")
+		Set<Long> allSubAgentIds = (Set<Long>) userDataCacheMap.get(UserInfoWrapper.AGENT_ALL_SUBAGENT_IDS);
+		String employeeAccountNumber = (String) userDataCacheMap.get(UserInfoWrapper.EMPLOYEE_ACCOUNT_NUMBER);
+		Long employeeId = (Long) userDataCacheMap.get(UserInfoWrapper.EMPLOYEE_ID);
+		@SuppressWarnings("unchecked")
+		Set<String> employeeGroups = (Set<String>) userDataCacheMap.get(UserInfoWrapper.EMPLOYEE_GROUPS);
+
+		// properties
+		Properties properties = new Properties();
+		if (agentId != null) {
+			properties.put(UserInfoWrapper.AGENT_ID, agentId);
+		}
+		
+		if (agentName != null) {
+			properties.put(UserInfoWrapper.AGENT_NAME, agentName);
+		}
+		
+		if (agentNodeId != null) {
+			properties.put(UserInfoWrapper.AGENT_NODE_ID, agentNodeId);
+		}
+		
+		if (agentNodeName != null) {
+			properties.put(UserInfoWrapper.AGENT_NODE_NAME, agentNodeName);
+		}
+		
+		if (agentNodeCode != null) {
+			properties.put(UserInfoWrapper.AGENT_NODE_CODE, agentNodeCode);
+		}
+		if (agentHubNodeId != null) {
+			properties.put(UserInfoWrapper.AGENT_NODE_ID, agentNodeId);
+		}
+		
+		if (agentHubNodeName != null) {
+			properties.put(UserInfoWrapper.AGENT_HUB_NODE_NAME, agentHubNodeName);
+		}
+		
+		if (agentHubNodeCode != null) {
+			properties.put(UserInfoWrapper.AGENT_HUB_NODE_CODE, agentHubNodeCode);
+		}
+		//TODO properties.put(UserInfoWrapper.AGENT_NODE_NAME, generalAgentMsg.getnoden);
+		if (agentCityShortCode != null) {
+			properties.put(UserInfoWrapper.AGENT_CITY_SHORT_CODE, agentCityShortCode);
+		}
+		//TODO properties.put(UserInfoWrapper.AGENT_CITY_NAME, generalAgentMsg.get);
+		if (allSubAgentIds != null) {
+			properties.put(UserInfoWrapper.AGENT_ALL_SUBAGENT_IDS, allSubAgentIds);
+		}
+		
+		if (allowedAgentOrgId != null) {
+			properties.put(UserInfoWrapper.AGENT_ALLOWED_ORG_ID, allowedAgentOrgId);
+		}
+		
+		if (employeeAccountNumber != null) {
+			properties.put(UserInfoWrapper.EMPLOYEE_ACCOUNT_NUMBER, employeeAccountNumber);
+		}
+		
+		if (employeeId != null) {
+			properties.put(UserInfoWrapper.EMPLOYEE_ID, employeeId);
+		}
+		
+		if (employeeGroups != null) {
+			properties.put(UserInfoWrapper.EMPLOYEE_GROUPS, employeeGroups);
+		}
+		
+		// make userInfo object and initialize it with user, agent, and employee data
+		UserInfo userInfo = new UserInfo(
+				userId,
+				//userDataCacheMap.get(UserInfoWrapper.USER_UUID),
+				userName,
+				userFirstName,
+				userLastName,
+				ip,
+				context, 
+				tenantId, 
+				userRoleNames,
+				userLocale,
+				userZoneId, 
+				userCalendar, 
+				properties);
+		
+		return userInfo;
+	}
+}

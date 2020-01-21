@@ -1,0 +1,738 @@
+package com.parvanpajooh.transportationmanagement2.service.impl;
+
+import java.io.FileInputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.commons.util.DateUtilV2;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.transportationmanagement2.dao.TransportationScheduleDao;
+import com.parvanpajooh.transportationmanagement2.model.TransportationSchedule;
+import com.parvanpajooh.transportationmanagement2.model.criteria.TransportationScheduleCriteria;
+import com.parvanpajooh.transportationmanagement2.model.enums.CapacityDeterminant;
+import com.parvanpajooh.transportationmanagement2.model.enums.TransportationScheduleStatus;
+import com.parvanpajooh.transportationmanagement2.model.vo.BulkEditTransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.GenerateTransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.RouteVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.TransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.VehicleVO;
+import com.parvanpajooh.transportationmanagement2.service.LogesticManagementLocalService;
+import com.parvanpajooh.transportationmanagement2.service.RouteManagementLocalService;
+import com.parvanpajooh.transportationmanagement2.service.TransportationScheduleLocalService;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+@Stateless
+public class TransportationScheduleLocalServiceImpl extends GenericLocalServiceImpl<TransportationSchedule, Long> implements TransportationScheduleLocalService {
+    /**
+     * Log variable for all child classes. 
+     */
+    static final Logger log = LoggerFactory.getLogger( TransportationScheduleLocalServiceImpl.class);
+	
+    private TransportationScheduleDao transportationScheduleDao;
+    
+	@Inject
+	private RouteManagementLocalService routeManagementLocalService;
+	
+	@Inject
+	private LogesticManagementLocalService logesticManagementLocalService;
+    
+//    @Inject
+//    private TransportationLocalService transportationLocalService;
+//    
+//    @Inject
+//    private VehicleLocalService vehicleLocalService;
+    
+    @Inject
+    public void setTransportationScheduleDao(TransportationScheduleDao transportationScheduleDao) {
+        this.dao = transportationScheduleDao;
+        this.transportationScheduleDao = transportationScheduleDao;
+    }
+    
+    private final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
+	private final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HHmm");
+    
+    @Override
+    public void generateTransportationSchedules(GenerateTransportationScheduleVO generateTransportationScheduleVO) throws ParvanServiceException{
+    	log.info("Entering generateTransportationSchedules(generateTransportationScheduleVO={})", generateTransportationScheduleVO);
+    	
+    	try {
+    		// get user info from current context
+    		UserInfo ecUserInfo = CurrentContext.getCurrentUserInfo().get();
+    		
+    		// load route
+    		String carrierRouteNumber = generateTransportationScheduleVO.getCarrierRouteNumber();
+    		ZoneId fromNodeTimeZoneId; 
+    		ZoneId toNodeTimeZoneId; 
+    		if (carrierRouteNumber != null) {
+    			RouteVO routeVO = routeManagementLocalService.getRouteByCarrierRouteNumber(carrierRouteNumber);
+    			
+    			String fromNodeCode = routeVO.getFromNode().getCodeName();
+    			String toNodeCode = routeVO.getToNode().getCodeName();
+    			
+    			Properties prop = new Properties();
+				try {
+					prop.load(new FileInputStream("/usr/local/ecargo/nodeCode-to-timeOffset.properties"));
+					
+				} catch (Exception e) {
+	    			throw new ParvanRecoverableException("Error occurred while loading Config: nodeCode-to-timeOffset.", e, ErrorCode.DATA_IS_INVALID);
+				}
+				
+				String fromNodeCodeTimeZoneStr = prop.getProperty(fromNodeCode);
+				String toNodeCodeTimeZoneStr = prop.getProperty(toNodeCode);
+				
+				if (fromNodeCodeTimeZoneStr == null) {
+					log.error("could not find timeZoneId for fromNodeCode [{}]", fromNodeCode);
+					throw new ParvanRecoverableException("could not find timeZoneId for origin [" + fromNodeCode + "]", ErrorCode.DATA_IS_INVALID);
+				}
+				
+				if (toNodeCodeTimeZoneStr == null) {
+					log.error("could not find timeZoneId for toNodeCode [{}]", toNodeCode);
+					throw new ParvanRecoverableException("could not find timeZoneId for destination [" + toNodeCode + "]", ErrorCode.DATA_IS_INVALID);
+				}
+				
+				try {
+					fromNodeCodeTimeZoneStr = fromNodeCodeTimeZoneStr.trim();
+					fromNodeTimeZoneId = ZoneId.of(fromNodeCodeTimeZoneStr);
+					
+				} catch (Exception e) {
+					log.error("could not parse timeZoneId [{}] for fromNodeCode [{}]", fromNodeCodeTimeZoneStr, fromNodeCode);
+					throw new ParvanRecoverableException(
+							String.format("could not parse timeZoneId [%s] for fromNodeCode [%s]", fromNodeCodeTimeZoneStr, fromNodeCode),
+							ErrorCode.DATA_IS_INVALID);
+				}
+				
+				try {
+					toNodeTimeZoneId = ZoneId.of(toNodeCodeTimeZoneStr);
+					
+				} catch (Exception e) {
+					log.error("could not parse timeZoneId [{}] for toNodeCode [{}]", toNodeCodeTimeZoneStr, toNodeCode);
+					throw new ParvanRecoverableException(
+							String.format("could not parse timeZoneId [%s] for toNodeCode [%s]", toNodeCodeTimeZoneStr, toNodeCode),
+							ErrorCode.DATA_IS_INVALID);
+				}
+    			
+    		} else {
+    			throw new ParvanUnrecoverableException("transportationId is NULL.");
+    		}
+    		
+    		// 
+    		List<Integer> dayOfWeeks = generateTransportationScheduleVO.getDayOfWeeks();
+    		
+    		DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+    		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    		String fromDateInUtcStr = generateTransportationScheduleVO.getFromDateInUtc();
+    		String toDateInUtcStr = generateTransportationScheduleVO.getToDateInUtc();
+    		
+    		String departureTimeInUtcStr = generateTransportationScheduleVO.getDepartureTimeInUtc();
+    		String arrivaleTimeInUtcStr = generateTransportationScheduleVO.getArrivalTimeInUtc();
+    		
+    		// parse fromDateInUtcStr
+    		LocalDate fromDateInUtc;
+			try {
+				fromDateInUtc = LocalDate.parse(fromDateInUtcStr, dateFormatter);
+				
+			} catch (Exception e) {
+				log.error("could not parse fromDateInUtcStr [{}]", fromDateInUtcStr);
+				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_UNPARSABLE_FROM_DATE);
+			}
+			
+			// parse toDateInUtcStr
+    		LocalDate toDateInUtc;
+			try {
+				toDateInUtc = LocalDate.parse(toDateInUtcStr, dateFormatter);
+			} catch (Exception e) {
+				log.error("could not parse toDateInUtcStr [{}]", toDateInUtcStr);
+				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_UNPARSABLE_TO_DATE);
+			}
+    		
+			// parse departureTimeInUtcStr
+    		LocalTime departureTimeInUtc;
+			try {
+				departureTimeInUtc = LocalTime.parse(departureTimeInUtcStr, timeFormatter);
+			} catch (Exception e) {
+				log.error("could not parse departureTimeInUtcStr [{}]", departureTimeInUtcStr);
+				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_UNPARSABLE_DEPARTURE_TIME);
+			}
+    		
+    		// parse arrivaleTimeInUtcStr
+    		LocalTime arrivalTimeInUtc;
+			try {
+				arrivalTimeInUtc = LocalTime.parse(arrivaleTimeInUtcStr, timeFormatter);
+			} catch (Exception e) {
+				log.error("could not parse arrivaleTimeInUtcStr [{}]", arrivaleTimeInUtcStr);
+				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_UNPARSABLE_ARRIVAL_TIME);
+			}
+    		
+			// start generating
+    		LocalDateTime departureDateTimeInUtc = LocalDateTime.of(fromDateInUtc, departureTimeInUtc);
+    		
+    		Long days = ChronoUnit.DAYS.between(fromDateInUtc, toDateInUtc);
+    		
+    		if (days == 0) {
+    			throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_NO_WEEKDAYS_INBETWEEN);
+    		}
+    		
+    		for (int i = 0; i <= days; i++) {
+    			// convert UTC to localDateTime of origin node
+        		LocalDateTime departureDateTimeInOriginLocal = DateUtilV2.utcDateTimeToLocalDateTime(departureDateTimeInUtc, fromNodeTimeZoneId);
+				
+    			int dayOfWeek = departureDateTimeInUtc.getDayOfWeek().getValue();
+    			
+    			if(dayOfWeeks.contains(dayOfWeek)){
+    				
+//    				VehicleVO vehicle = new VehicleVO();
+//    				vehicle.setId(generateTransportationScheduleVO.getVehicleId());
+    				
+    				LocalDateTime arrivalDateTimeInUtc = LocalDateTime.of(departureDateTimeInUtc.toLocalDate(), arrivalTimeInUtc);
+    	    		
+    	    		if(arrivalTimeInUtc.getHour() < departureTimeInUtc.getHour()){
+    	    			//next day
+    	    			arrivalDateTimeInUtc = arrivalDateTimeInUtc.plusDays(1L);
+    	    		} else {
+    	    			//same day
+    	    		}
+    	    		
+    	    		LocalDateTime arrivalDateTimeInDestinationLocal = DateUtilV2.utcDateTimeToLocalDateTime(arrivalDateTimeInUtc, toNodeTimeZoneId);
+    	    		
+    				TransportationScheduleVO transportationScheduleVO = new TransportationScheduleVO();
+    				
+//    				TransportationVO transportationVO = new TransportationVO();
+//    				transportationVO.setId(transportationId);
+    				
+    				transportationScheduleVO.setScheduled(generateTransportationScheduleVO.isScheduled());
+    				transportationScheduleVO.setRemarks(generateTransportationScheduleVO.getRemarks());
+//    				transportationScheduleVO.setTransportation(transportationVO);
+    				transportationScheduleVO.setCarrierRouteNumber(carrierRouteNumber);
+    				transportationScheduleVO.setCarrierCode(generateTransportationScheduleVO.getCarrierCode());
+    				transportationScheduleVO.setStatus(TransportationScheduleStatus.ACTIVE);
+    				
+//    				transportationScheduleVO.setVehicle(vehicle);
+    				transportationScheduleVO.setVehicleId(generateTransportationScheduleVO.getVehicleId());
+    				transportationScheduleVO.setTotalWeight(generateTransportationScheduleVO.getTotalWeight());
+    				transportationScheduleVO.setReservableWeight(generateTransportationScheduleVO.getReservableWeight());
+    				transportationScheduleVO.setUldInfo(generateTransportationScheduleVO.getUldInfo());
+    				transportationScheduleVO.setCapacityDeterminant(CapacityDeterminant.CAP_CON);
+    	    		
+    				transportationScheduleVO.setDepartureDateInUtc( Integer.parseInt( departureDateTimeInUtc.format(DATE_FORMAT) ) );
+    				transportationScheduleVO.setDepartureDateInOriginLocal(Integer.parseInt( departureDateTimeInOriginLocal.format(DATE_FORMAT) ));
+    				transportationScheduleVO.setDepartureTimeInUtc( departureDateTimeInUtc.format(TIME_FORMAT) );
+    				transportationScheduleVO.setDepartureTimeInOriginLocal( departureDateTimeInOriginLocal.format(TIME_FORMAT) );
+    				transportationScheduleVO.setArrivalDateInUtc( Integer.parseInt( arrivalDateTimeInUtc.format(DATE_FORMAT) ) );
+    				transportationScheduleVO.setArrivalDateInDestinationLocal( Integer.parseInt( arrivalDateTimeInDestinationLocal.format(DATE_FORMAT) ) );
+    				transportationScheduleVO.setArrivalTimeInUtc( arrivalDateTimeInUtc.format(TIME_FORMAT) );
+    				transportationScheduleVO.setArrivalTimeInDestinationLocal( arrivalDateTimeInDestinationLocal.format(TIME_FORMAT) );
+    				
+    				save(transportationScheduleVO, ecUserInfo);
+    				
+    			}
+    			
+    			departureDateTimeInUtc = departureDateTimeInUtc.plusDays(1L);
+			}
+    		
+    	} catch (ParvanServiceException e) {
+    		log.error("error in generate TransportationSchedule", e);
+    		throw e;
+    		
+    	} catch (Exception e) {
+    		log.error("error in generate TransportationSchedule", e);
+    		throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+    	log.info("Leaving generateTransportationSchedules(generateTransportationScheduleVO={})", generateTransportationScheduleVO);
+    }
+	
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+    	log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+    	
+    	TransportationScheduleVO transportationScheduleVO = (TransportationScheduleVO) baseVO;
+    	
+    	try {
+    		
+    		boolean isNew = Validator.isNull(transportationScheduleVO.getId());
+    		
+    		TransportationSchedule transportationSchedule = null;
+    		
+    		if(isNew){
+    			
+    			//validation 
+    			if(Validator.isNull(transportationScheduleVO.getDepartureDateInUtc())){
+    				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_INVALID_DEPARTURE_DATE);
+    			}
+    			
+    			if(Validator.isNull(transportationScheduleVO.getDepartureTimeInUtc())){
+    				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_INVALID_DEPARTURE_TIME);
+    			}
+    			
+    			if(Validator.isNull(transportationScheduleVO.getArrivalDateInUtc())){
+    				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_INVALID_ARRIVAL_DATE);
+    			}
+    			
+    			if(Validator.isNull(transportationScheduleVO.getArrivalTimeInUtc())){
+    				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_INVALID_ARRIVAL_TIME);
+    			}
+    			
+    			LocalDate departureDate = LocalDate.parse(transportationScheduleVO.getDepartureDateInUtc().toString(), DATE_FORMAT);
+    			LocalTime departureTime = LocalTime.parse(transportationScheduleVO.getDepartureTimeInUtc(), TIME_FORMAT);
+    			
+    			LocalDate arrivalDate = LocalDate.parse(transportationScheduleVO.getArrivalDateInUtc().toString(), DATE_FORMAT);
+    			LocalTime arrivalTime = LocalTime.parse(transportationScheduleVO.getArrivalTimeInUtc(), TIME_FORMAT);
+    			
+    			LocalDateTime departure = LocalDateTime.of(departureDate, departureTime);
+    			LocalDateTime arrival = LocalDateTime.of(arrivalDate, arrivalTime);
+    			
+    			if(transportationScheduleVO.getTotalWeight() < transportationScheduleVO.getReservableWeight()){
+    				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_INVALID_RESERVABLE_WEIGHT);
+    			}
+    			
+    			if(departure.isAfter(arrival)){
+    				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_INVALID_ARRIVAL);
+    			}
+    			
+    			transportationSchedule = new TransportationSchedule();
+    			transportationSchedule.fromVO(transportationScheduleVO);
+    			
+    			// ---------------------------------------------------
+        		// route
+        		// ---------------------------------------------------
+//        		TransportationVO transportationVO = transportationScheduleVO.getTransportation();
+        		String carrierRouteNumber = transportationScheduleVO.getCarrierRouteNumber();
+        		String carrierCode = transportationScheduleVO.getCarrierCode();
+        		log.debug("carrierRouteNumber is [{}]", carrierRouteNumber);
+        		
+        		if (Validator.isNotNull(carrierRouteNumber)) {
+        			
+        			TransportationScheduleCriteria transportationScheduleCriteria = new TransportationScheduleCriteria();
+//        			transportationScheduleCriteria.setTransportation(transportationVO);
+        			transportationScheduleCriteria.setCarrierRouteNumber(carrierRouteNumber);
+        			transportationScheduleCriteria.setCarrierCode(carrierCode);
+        			transportationScheduleCriteria.setDepartureDateInUtc(transportationScheduleVO.getDepartureDateInUtc());
+        			
+        			int count = transportationScheduleDao.countByCriteria(transportationScheduleCriteria);
+        			if(count > 0){
+        				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_DATA_EXIST);
+        			}
+        			
+        			// get transportation by id
+//        			TransportationVO transportation = routeManagementLocalService.getTransportation(transportationId);
+        			
+        			//validate duration
+        			/*Long duration = transportation.getDuration();
+        			if(duration != null){
+        				
+        				long minutes = ChronoUnit.MINUTES.between(departure, arrival);
+        				
+        				if(duration > minutes){
+        					throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_INVALID_DURATION);
+        				}
+        			}*/
+        			
+        			transportationSchedule.setCarrierRouteNumber(carrierRouteNumber);
+        			
+        			log.debug("carrierRouteNumber [{}] set to transportationSchedule", carrierRouteNumber);
+        		}
+    		}
+    		else {
+    			transportationSchedule = transportationScheduleDao.get(transportationScheduleVO.getId());
+    			//transportationSchedule.fromVO(transportationScheduleVO);
+    			//transportationSchedule.setDepartureDate(transportationScheduleVO.getDepartureDate());
+    			//transportationSchedule.setCapacityDeterminant(transportationScheduleVO.getCapacityDeterminant());
+    			transportationSchedule.setStatus(transportationScheduleVO.getStatus());
+    			transportationSchedule.setScheduled(transportationScheduleVO.isScheduled());
+    			transportationSchedule.setId(transportationScheduleVO.getId());
+    			transportationSchedule.setRemarks(transportationScheduleVO.getRemarks());
+    			transportationSchedule.setDepartureTimeInUtc(transportationScheduleVO.getDepartureTimeInUtc());
+    			transportationSchedule.setArrivalDateInUtc(transportationScheduleVO.getArrivalDateInUtc());
+    			transportationSchedule.setArrivalTimeInUtc(transportationScheduleVO.getArrivalTimeInUtc());
+    			transportationSchedule.setTotalWeight(transportationScheduleVO.getTotalWeight());
+    			transportationSchedule.setReservableWeight(transportationScheduleVO.getReservableWeight());
+    			transportationSchedule.setUldInfo(transportationScheduleVO.getUldInfo());
+    			transportationSchedule.setVersion(transportationScheduleVO.getVersion());
+    			
+    			// create history if some data changed
+    			//TODO
+    		}
+    		
+    		// ---------------------------------------------------
+			// vehicle
+			// ---------------------------------------------------
+//			VehicleVO vehicleVO = transportationScheduleVO.getVehicle();
+			Long vehicleId = transportationScheduleVO.getVehicleId();
+			log.debug("vehicleId is [{}]", vehicleId);
+			
+			if(Validator.isNotNull(vehicleId)){
+				
+				// get vehicle by id
+//				VehicleVO vehicle = vehicleLocalService.get(vehicleVO.getId());
+				
+//				transportationSchedule.setVehicle(vehicle);
+				transportationSchedule.setVehicleId(vehicleId);
+				
+				log.debug("vehicleId [{}] set to transportationSchedule", vehicleId);
+			}
+
+    		// save entity
+    		transportationSchedule = save(transportationSchedule, userInfo);
+    		
+    		transportationScheduleVO = (TransportationScheduleVO) transportationSchedule.toVO();
+    	
+    	} catch (ParvanServiceException e) {
+    		throw e;
+    		
+    	} catch (Exception e) {
+    		throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+    	
+    	return transportationScheduleVO; 
+    }
+
+	@Override
+	public TransportationScheduleVO preBulkEdit(
+			TransportationScheduleCriteria transportationScheduleCriteria)
+			throws ParvanServiceException {
+		log.info("Entering preBulkEdit(transportationScheduleCriteria={})", transportationScheduleCriteria);
+		
+		TransportationScheduleVO result = null;
+		
+		try {
+			
+			int count = transportationScheduleDao.countOfTransportationNumber(transportationScheduleCriteria);//FIXME : dev-03
+			if(count > 1){
+				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_MULTIPLE_TRANSPORTATIONNUMBER_IN_BULK_UPDATE);
+			}
+			
+			LocalDateTime nowDateInUtc = LocalDateTime.now();
+			
+			int now = Integer.parseInt( nowDateInUtc.format(DATE_FORMAT) );
+			
+			Integer departureCriteriaDateInUtc = transportationScheduleCriteria.getDepartureDateInUtc();
+			Integer departureDateFromInUtc = transportationScheduleCriteria.getIntDepartureDateFromInUtc();
+			
+			if((Validator.isNotNull(departureCriteriaDateInUtc) && departureCriteriaDateInUtc < now) || (Validator.isNotNull(departureDateFromInUtc) && departureDateFromInUtc < now)){
+				throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_PAST_DATE_IN_BULK_UPDATE);
+			}
+			
+			Set<Long> vehicleIdSet = new HashSet<>();
+			Set<String> departureTimeSetInUtc = new HashSet<>();
+			Set<Integer> arrivalDateSetInUtc = new HashSet<>();
+			Set<String> arrivalTimeSetInUtc = new HashSet<>();
+			Set<Double> totalWeightSet = new HashSet<>();
+			Set<Double> reservableWeightSet = new HashSet<>();
+			Set<String> uldInfoSet = new HashSet<>();
+			
+			List<TransportationSchedule> schedules = transportationScheduleDao.findByCriteria(transportationScheduleCriteria);
+			for (TransportationSchedule transportationSchedule : schedules) {
+				
+//				Vehicle vehicle = transportationSchedule.getVehicle();
+				Long vehicleId = transportationSchedule.getVehicleId();
+				
+				LocalDate departureDateInUtc = LocalDate.parse(transportationSchedule.getDepartureDateInUtc().toString(), DATE_FORMAT);
+    			LocalTime departureTimeInUtc = LocalTime.parse(transportationSchedule.getDepartureTimeInUtc(), TIME_FORMAT);
+				
+				LocalDateTime departureInUtc = LocalDateTime.of(departureDateInUtc, departureTimeInUtc);
+				if(departureInUtc.isBefore(nowDateInUtc)){
+					throw new ParvanRecoverableException(ErrorCode.TRANSPORTATIONSCHEDULE_PAST_DATE_IN_BULK_UPDATE);
+				}
+				
+				vehicleIdSet.add(vehicleId);
+				departureTimeSetInUtc.add(transportationSchedule.getDepartureTimeInUtc());
+				arrivalDateSetInUtc.add(transportationSchedule.getArrivalDateInUtc());
+				arrivalTimeSetInUtc.add(transportationSchedule.getArrivalTimeInUtc());
+				totalWeightSet.add(transportationSchedule.getTotalWeight());
+				reservableWeightSet.add(transportationSchedule.getReservableWeight());
+				uldInfoSet.add(transportationSchedule.getUldInfo());
+			}
+			
+			if(schedules.size() > 0){
+				TransportationSchedule transportationSchedule = schedules.get(0);
+				
+				result = transportationSchedule.toVOLite();
+				
+				if(vehicleIdSet.size() > 1){
+					result.setVehicleId(null);
+				}
+				
+				if(departureTimeSetInUtc.size() > 1){
+					result.setDepartureTimeInUtc(null);
+				}
+				
+				if(arrivalDateSetInUtc.size() > 1){
+					result.setArrivalDateInUtc(null);
+				}
+				
+				if(arrivalTimeSetInUtc.size() > 1){
+					result.setArrivalTimeInUtc(null);
+				}
+				
+				if(totalWeightSet.size() > 1){
+					result.setTotalWeight(null);
+				}
+				
+				if(reservableWeightSet.size() > 1){
+					result.setReservableWeight(null);
+				}
+				
+				if(uldInfoSet.size() > 1){
+					result.setUldInfo(null);
+				}
+			}
+			
+		
+		} catch (ParvanServiceException e) {
+    		throw e;
+    		
+    	} catch (Exception e) {
+    		throw new ParvanUnrecoverableException("Error occurred while pre Bulk Edit.", e);
+		}
+		
+		return result;
+	}
+
+
+	@Override
+	public void bulkEdit(TransportationScheduleCriteria transportationScheduleCriteria, BulkEditTransportationScheduleVO bulkEditTransportationScheduleVO, UserInfo ecUserInfo) throws ParvanServiceException {
+    	log.info("Entering bulkEdit(transportationScheduleCriteria={}, bulkEditTransportationScheduleVO={}, userInfo={})", transportationScheduleCriteria, bulkEditTransportationScheduleVO, ecUserInfo);
+    	
+    	try {
+    		
+    		List<TransportationSchedule> transportationSchedules = findByCriteria(transportationScheduleCriteria);
+    		
+    		for (TransportationSchedule transportationSchedule : transportationSchedules) {
+    			
+    			boolean someDataChanged = false;
+    			
+    			if(Validator.isNotNull(bulkEditTransportationScheduleVO.getDepartureTimeBulkEdit())){
+    				transportationSchedule.setDepartureTimeInUtc( TIME_FORMAT.format( bulkEditTransportationScheduleVO.getDepartureTimeBulkEdit() ) );
+    				
+    				someDataChanged = true;
+    			}
+    			
+    			if(Validator.isNotNull(bulkEditTransportationScheduleVO.getArrivalDateBulkEdit())){
+    				transportationSchedule.setArrivalDateInUtc(bulkEditTransportationScheduleVO.getArrivalDateBulkEdit());
+    				
+    				someDataChanged = true;
+    			}
+    			
+    			if(Validator.isNotNull(bulkEditTransportationScheduleVO.getArrivalTimeBulkEdit())){
+    				transportationSchedule.setArrivalTimeInUtc( TIME_FORMAT.format( bulkEditTransportationScheduleVO.getArrivalTimeBulkEdit() ) );
+    				
+    				someDataChanged = true;
+    			}
+				
+    			if(Validator.isNotNull(bulkEditTransportationScheduleVO.getTotalWeightBulkEdit())){
+    				transportationSchedule.setTotalWeight(bulkEditTransportationScheduleVO.getTotalWeightBulkEdit());
+    				
+    				someDataChanged = true;
+    			}
+    			
+    			if(Validator.isNotNull(bulkEditTransportationScheduleVO.getReservableWeightBulkEdit())){
+    				transportationSchedule.setReservableWeight(bulkEditTransportationScheduleVO.getReservableWeightBulkEdit());
+    				
+    				someDataChanged = true;
+    			}
+    			
+    			if(Validator.isNotNull(bulkEditTransportationScheduleVO.getUldInfoBulkEdit())){
+    				transportationSchedule.setUldInfo(bulkEditTransportationScheduleVO.getUldInfoBulkEdit());
+    				
+    				someDataChanged = true;
+    			}
+    			
+    			// ---------------------------------------------------
+    			// vehicle
+    			// ---------------------------------------------------
+//    			VehicleVO vehicleVO = bulkEditTransportationScheduleVO.getVehicleBulkEdit();
+    			Long vehicleId = bulkEditTransportationScheduleVO.getVehicleBulkEditId();
+    			log.debug("vehicleId is [{}]", vehicleId);
+    			
+    			if(Validator.isNotNull(vehicleId)){
+    				
+    				// get vehicle by id
+//    				Vehicle vehicle = vehicleLocalService.get(vehicleVO.getId());
+    				
+    				transportationSchedule.setVehicleId(vehicleId);
+    				
+    				log.debug("vehicleId [{}] set to transportationSchedule", vehicleId);
+    				
+    				someDataChanged = true;
+    			}
+    			
+    			if(someDataChanged){
+    				transportationSchedule.setRemarks(bulkEditTransportationScheduleVO.getRemarksBulkEdit());
+    				
+	    			// create history if some data changed
+	    			
+	    			// save entity
+	    			transportationSchedule = save(transportationSchedule, ecUserInfo);
+    			}
+    			else {
+    				log.debug("there is nothing to changed.");
+    				break;
+    			}
+			}
+    		
+    	} catch (ParvanServiceException e) {
+    		throw e;
+    		
+    	} catch (Exception e) {
+    		throw new ParvanUnrecoverableException("Error occurred while bulk edit.", e);
+		}
+    	
+    	log.info("Leaving bulkEdit(transportationScheduleCriteria={}, bulkEditTransportationScheduleVO={}, userInfo={})", transportationScheduleCriteria, bulkEditTransportationScheduleVO, ecUserInfo);
+    }
+
+	@Override
+	public TransportationScheduleVO findTransportationSchedule(UserInfo userInfo, TransportationScheduleCriteria criteria)  throws ParvanServiceException {
+		log.info("Entering findTransportationSchedule(userInfo={}, criteria={})", userInfo, criteria);
+
+		try {
+			TransportationScheduleVO scheduleVo = findByCriteria(criteria).get(0).toVO();
+
+			RouteVO route = routeManagementLocalService.getRouteByCarrierRouteNumber(scheduleVo.getCarrierRouteNumber());
+
+			VehicleVO vehicle = logesticManagementLocalService.getVehicle(scheduleVo.getVehicleId());
+
+			scheduleVo.setFromNodeCode(route.getFromNode().getCodeName());
+			scheduleVo.setToNodeCode(route.getToNode().getCodeName());
+			scheduleVo.setVehicleCarrierRegister(vehicle.getCarrierRegister());
+
+			log.info("Leaving findTransportationSchedule(userInfo={}, criteria={})", userInfo, criteria);
+
+			return scheduleVo;
+
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanRecoverableException(e, ErrorCode.TRANSPORTATIONSCHEDULE_NOT_EXIST);
+			
+		} 
+	}
+
+	@Override
+	public List<TransportationScheduleVO> findByFromNodeCodeAndDepartureDate(String fromNodeCode, int hours) throws ParvanServiceException {
+		log.debug("Entering findByFromNodeCodeAndDepartureDate(fromNodeCode={}, hours={})", fromNodeCode, hours);
+		
+		List<TransportationScheduleVO> scheduleVOs = null;
+		List<TransportationSchedule> schedules = null;
+		List<String> carrierRouteNumbers = null;
+		Integer departureDateTimeInOriginLocalInt = null;
+		ZoneId hubNodeTimeZoneId;
+		
+		try {
+			carrierRouteNumbers = routeManagementLocalService.findRouteNumbersByFromNodeCode(fromNodeCode);
+
+			if (Validator.isNotNull(carrierRouteNumbers)) {
+
+				// get user info from current context
+				UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+				UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+				String hubNodeCode = userInfoWrapper.getAgentHubNodeCode();
+
+				LocalDateTime now = LocalDateTime.now();
+				LocalDateTime requiredDate = now.plusHours(hours);
+
+				Properties prop = new Properties();
+				try {
+					prop.load(new FileInputStream("/usr/local/ecargo/nodeCode-to-timeOffset.properties"));
+
+				} catch (Exception e) {
+					throw new ParvanRecoverableException("Error occurred while loading Config: nodeCode-to-timeOffset.", e, ErrorCode.DATA_IS_INVALID);
+				}
+
+				String hubNodeCodeTimeZoneStr = prop.getProperty(hubNodeCode);
+
+				if (hubNodeCodeTimeZoneStr == null) {
+					log.error("could not find timeZoneId for hubNodeCode [{}]", hubNodeCode);
+					throw new ParvanRecoverableException("could not find timeZoneId for origin [" + hubNodeCode + "]", ErrorCode.DATA_IS_INVALID);
+				}
+
+				try {
+					hubNodeCodeTimeZoneStr = hubNodeCodeTimeZoneStr.trim();
+					hubNodeTimeZoneId = ZoneId.of(hubNodeCodeTimeZoneStr);
+
+				} catch (Exception e) {
+					log.error("could not parse timeZoneId [{}] for hubNodeCode [{}]", hubNodeCodeTimeZoneStr, hubNodeCode);
+					throw new ParvanRecoverableException(
+							String.format("could not parse timeZoneId [%s] for hubNodeCode [%s]", hubNodeCodeTimeZoneStr, hubNodeCode),
+							ErrorCode.DATA_IS_INVALID);
+				}
+
+				// convert UTC to localDateTime of hub node
+				LocalDateTime departureDateTimeInOriginLocal = DateUtilV2.utcDateTimeToLocalDateTime(requiredDate, hubNodeTimeZoneId);
+
+				departureDateTimeInOriginLocalInt = Integer.parseInt(departureDateTimeInOriginLocal.format(DATE_FORMAT));
+
+				schedules = transportationScheduleDao.findByRouteNumbersAndDepartureDate(carrierRouteNumbers, departureDateTimeInOriginLocalInt);
+
+				scheduleVOs = new ArrayList<TransportationScheduleVO>();
+				for (TransportationSchedule schedule : schedules) {
+					scheduleVOs.add(schedule.toVO());
+				}
+			}
+
+			return scheduleVOs;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findTransportationSchedulesBy", e);
+		}
+		
+	}
+
+	@Override
+	public List<TransportationScheduleVO> findByToNodeCodeAndDepartureDate(String toNodeCode, int hours) throws ParvanServiceException {
+		log.debug("Entering findByToNodeCodeAndArrivalDate(toNodeCode={}, hours={})", toNodeCode, hours);
+
+		List<TransportationScheduleVO> scheduleVOs = null;
+		List<TransportationSchedule> schedules = null;
+		List<String> carrierRouteNumbers = null;
+
+		try {
+
+			carrierRouteNumbers = routeManagementLocalService.findRouteNumbersByToNodeCode(toNodeCode);
+
+			if (Validator.isNotNull(carrierRouteNumbers)) {
+				schedules = transportationScheduleDao.findByRouteNumbersAndArrivalDate(carrierRouteNumbers, hours);
+			}
+
+			scheduleVOs = new ArrayList<TransportationScheduleVO>();
+			for (TransportationSchedule schedule : schedules) {
+				scheduleVOs.add(schedule.toVO());
+			}
+
+			return scheduleVOs;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findByToNodeCodeAndArrivalDate", e);
+		}
+	}
+}

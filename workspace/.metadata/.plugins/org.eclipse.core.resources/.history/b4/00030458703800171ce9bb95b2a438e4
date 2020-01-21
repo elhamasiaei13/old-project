@@ -1,0 +1,20 @@
+package com.parvanpajooh.transportationmanagement.service;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.transportationmanagement.model.vo.CarrierVO;
+
+/**
+ * @author dev-03
+ *
+ */
+public interface CarrierManagementService {
+
+	public PageList<CarrierVO> findCarriers(UserInfo userInfo ,String term , int page , int size) throws ParvanServiceException;
+
+	public CarrierVO findCarrierByCode(UserInfo userInfo, String carrierCode) throws ParvanServiceException;
+
+	public CarrierVO get(UserInfo userInfo, Long id) throws ParvanServiceException;
+
+}

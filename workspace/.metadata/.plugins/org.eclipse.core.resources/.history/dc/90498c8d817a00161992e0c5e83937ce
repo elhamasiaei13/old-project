@@ -1,0 +1,623 @@
+package com.parvanpajooh.dialects.processor;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.thymeleaf.Arguments;
+import org.thymeleaf.context.WebContext;
+import org.thymeleaf.dom.Element;
+import org.thymeleaf.dom.Node;
+import org.thymeleaf.dom.Text;
+import org.thymeleaf.processor.ElementNameProcessorMatcher;
+
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.util.GetterUtil;
+import com.parvanpajooh.commons.util.StringUtil;
+import com.parvanpajooh.commons.util.Validator;
+
+public class TableProcessor extends ParvanProcessor {
+
+	public TableProcessor(String elementName) {
+		super(elementName);
+	}
+	
+	public TableProcessor(ElementNameProcessorMatcher matcher) {
+		super(matcher);
+	}
+
+	@Override
+	protected List<Node> getMarkupSubstitutes(Arguments arguments,
+			Element element) {
+		/*
+         * Obtain the Spring application context. Being a SpringMVC-based
+         * application, we know that the IContext implementation being
+         * used is SpringWebContext, and so we can directly cast and ask it
+         * to return the AppCtx.
+         */
+        //final ApplicationContext appCtx =
+        //    ((SpringWebContext)arguments.getContext()).getApplicationContext();
+		final WebContext webCtx = ((WebContext)arguments.getContext());
+
+		String basePath = webCtx.getServletContext().getRealPath("/");
+		HttpServletRequest request = webCtx.getHttpServletRequest();
+		String contextPath = request.getContextPath();
+		HttpSession session = request.getSession();
+		
+        /*
+         * Obtain the HeadlineRepository bean from the application context, and ask
+         * it for the current list of headlines.
+         */
+        //final HeadlineRepository headlineRepository = appCtx.getBean(HeadlineRepository.class);
+
+        /*
+         * Read the 'order' attribute from the tag. This optional attribute in our tag
+         * will allow us to determine whether we want to show a random headline or
+         * only the latest one ('latest' is default).
+         */
+        final String entity = element.getAttributeValue(ENTITY);
+        final String table = element.getAttributeValue(TABLE);
+        final String customObjectActions = element.getAttributeValue("customObjectActions");
+        final String customSearch = element.getAttributeValue("customSearch");
+        final String enableExport = element.getAttributeValue("enableExport");
+        final String inlineParam = element.getAttributeValue("inlineParam");
+        final String displaylength = element.getAttributeValue("displaylength");
+        Node childNode = element.getFirstChild();
+        
+		JSONObject entityJson = getEntityJson(basePath, entity);
+		
+		Map<String, JSONObject> actions = getActions(entityJson);
+		
+		if(Validator.isNotNull(childNode) && childNode instanceof Text){
+			Text textElem = (Text) childNode;
+			
+			String inlineContent = textElem.getContent();
+			
+			if(Validator.isNotNull(inlineParam)){
+				String param = StringUtil.replace(inlineParam, "[[", StringPool.BLANK);
+				param = StringUtil.replace(param, "]]", StringPool.BLANK);
+				
+				inlineContent = StringUtil.replace(inlineContent, inlineParam, (String)request.getAttribute(param));
+			}
+			
+			
+			JSONObject jsonObject = (JSONObject) parseJsonData(inlineContent);
+			
+			Map<String, JSONObject> newActions = getActions(jsonObject);
+			
+			overrideActions(actions, newActions);
+		}
+		
+		JSONArray fields = (JSONArray) entityJson.get(FIELDS);
+		
+		// get fields map
+		Map<String, JSONObject> fieldsMap = getFieldsMap(entityJson);
+		
+		JSONArray dataTables = (JSONArray) entityJson.get(DATA_TABLES);
+		
+		JSONObject tableJson = null;
+		
+		for (int i = 0; i < dataTables.size(); i++) {
+			JSONObject thisTable = (JSONObject) dataTables.get(i);
+			String name = (String) thisTable.get(NAME);
+			if(name.equals(table)){
+				tableJson = thisTable;
+				break;
+			}
+		}
+		
+		Map<String, JSONObject> fieldsIds = new HashMap<String, JSONObject>();
+		
+		//override custom fields
+		overrideFields(tableJson, fieldsMap, fieldsIds);
+		
+		//sort
+		sortFields(fields);
+		
+		//if(formJson == null)
+		//	throw new Exception(String.format("no form defined by name: {}", entity));
+		
+		String upperEntity = StringUtil.upperCaseFirstLetter(entity);
+		
+		Map<String, List<Long>> selectPool = (Map<String, List<Long>>) session.getAttribute("entity-selectPool");
+		if(selectPool == null){
+			selectPool = new HashMap<>();
+		}
+		
+		List<Long> ids = selectPool.get(upperEntity + "-selected");
+		if(ids == null){
+			ids = new ArrayList<>();
+		}
+		
+		String selectArray = "var selected" + upperEntity + " = {";
+		for (int i = 0; i < ids.size(); i++) {
+			Long id = ids.get(i);
+			
+			if(i > 0){
+				selectArray += ",";
+			}
+			selectArray += "'" + id + "':" + id ;
+		}
+		selectArray += "};";
+		
+        /*
+         * Create the DOM structure that will be substituting our custom tag.
+         * The headline will be shown inside a '<div>' tag, and so this must
+         * be created first and then a Text node must be added to it.
+         */
+		
+		final Element tableElem = new Element(TABLE);
+        tableElem.setAttribute(ID, entity + "Table");
+        tableElem.setAttribute(CLASS, "table table-hover table-bordered table-condensed drop-shadow");
+        tableElem.setAttribute("dt:serverSide", "true");
+        tableElem.setAttribute("dt:filterable", "false");
+        tableElem.setAttribute("dt:lengthChange", "true");
+        tableElem.setAttribute("dt:processing", "true");
+        tableElem.setAttribute("dt:scrollcollapse", "true");
+        tableElem.setAttribute("dt:autowidth", "false");
+        tableElem.setAttribute("dt:displayLength", (Validator.isNotNull(displaylength) ? displaylength : "10"));
+        tableElem.setAttribute("dt:url", "@{"+actions.get("paging").get("url")+"}");
+        tableElem.setAttribute("dt:table", "true");
+        //tableElem.setAttribute("dt:serverParam", "'get"+upperEntity+"ExtraParams'");
+        //tableElem.setAttribute("dt:ajaxParams", "ajax#customAjaxParams");
+        tableElem.setAttribute("dt:ajaxParams", "get"+upperEntity+"ExtraParams");
+        tableElem.setAttribute("dt:theme", "bootstrap3");
+        tableElem.setAttribute("dt:pagingType", "full_numbers");
+        
+        final Element theadElem = createElement(THEAD, tableElem);
+        
+        final Element trElem = createElement(TR, theadElem);
+        
+        // check for batch actions
+        if(hasSelectiveBatchActions(actions)){
+        	final Element selectThElem = createElement(TH, "text-center", null, trElem);
+        	selectThElem.setAttribute("dt:renderFunction", "'rowCheckbox'");
+        	selectThElem.setAttribute("dt:sortable", "false");
+        	selectThElem.setAttribute("width", "50px");
+        	
+        	final Element inputElem = createElement(INPUT, selectThElem);
+        	inputElem.setAttribute(ID, "selectAll" + upperEntity);
+        	inputElem.setAttribute(TYPE, "checkbox");
+        	inputElem.setAttribute(NAME, "allIds");
+        	inputElem.setAttribute(ONCHANGE, "toggleSelecteAll"+upperEntity+"(this)");
+        }
+        
+        // check for has any actions
+        final Element noThElem = createElement(TH, "text-center", "#", trElem);
+        noThElem.setAttribute("width", "30px");
+        noThElem.setAttribute("dt:sortable", "false");
+        noThElem.setAttribute("style", "max-width: 30px;");
+        
+        if(hasObjectActions(entityJson)){
+        	final Element actionsThElem = createElement(TH, "text-center", getMessage(arguments, "actions", null), trElem);
+        	actionsThElem.setAttribute("dt:renderFunction", "'"+entity+"RowActions'");
+        	actionsThElem.setAttribute("dt:sortable", "false");
+        	actionsThElem.setAttribute("width", "52px");
+        }
+        
+        
+        for (int i = 0; i < fields.size(); i++) {
+			JSONObject field = (JSONObject) fields.get(i);
+			
+			if(!GetterUtil.getBoolean(field.get(ENABLED), false)){
+				continue;
+			}
+			
+			final Element thElem = createElement(TH, "text-center", getMessage(arguments, (String) field.get(TITLE), null) , trElem);
+	        thElem.setAttribute("dt:property", (String) field.get(NAME));
+	        thElem.setAttribute("dt:sortable", String.valueOf(field.get("sortable")));
+	        if(Validator.isNotNull(field.get(SIZE))){
+	        	thElem.setAttribute(WIDTH, String.valueOf(field.get(SIZE)));
+	        }
+	        if(Validator.isNotNull(field.get("mask"))){
+	        	thElem.setAttribute("dt:format", String.valueOf(field.get("mask")));
+	        }
+	        if(Validator.isNotNull(field.get("cssClass"))){
+	        	thElem.setAttribute(CLASS, String.valueOf(field.get("cssClass")));
+	        }
+	        if(Validator.isNotNull(field.get("sortInitDirection"))){
+	        	thElem.setAttribute("dt:sortInitDirection", String.valueOf(field.get("sortInitDirection")));
+	        }
+	        
+	        if(Validator.isNotNull(field.get("renderFunction"))){
+	        	thElem.setAttribute("dt:renderFunction", "'"+(String) field.get("renderFunction")+"'");
+	        }
+	        /*
+			<th dt:renderFunction="'rowLastStatus'" dt:property="'lastTrackVO.status'" class="text-center" width="130px" th:text="#{current.status}" >وضعیت فعلی</th>
+			*/
+		}
+        
+        if(hasSelectiveBatchActions(actions)){
+        	
+        	JSONObject batchUpdateActions = actions.get("batchUpdate");
+        	JSONObject batchDeleteActions = actions.get("batchDelete");
+        	
+        	if((batchUpdateActions != null && ((Boolean)batchUpdateActions.get("enabled")) == true) 
+        			|| (batchDeleteActions != null && ((Boolean)batchDeleteActions.get("enabled")) == true)){
+        		final Element tfootElem = createElement(TFOOT, tableElem);
+        		
+        		final Element tfootTrElem = createElement(TR, tfootElem);
+        		
+        		final Element tdElem = createElement(TD, tfootTrElem);
+        		tdElem.setAttribute("colspan", "2");
+        		
+        		final Element actionsTdElem = createElement(TD, tfootTrElem);
+        		actionsTdElem.setAttribute("style", "text-align: center;");
+        		
+        		final Element spanElem = createElement(DIV, "text-center", null, actionsTdElem);
+        		
+        		if(batchUpdateActions != null && ((Boolean)batchUpdateActions.get("enabled")) == true){
+	        		final Element editButtonElem = createElement(A, "btn btn-primary btn-xs", null, spanElem);
+	        		editButtonElem.setAttribute(TYPE, A);
+	        		editButtonElem.setAttribute(ONCLICK, "batchUpdate"+upperEntity+"Modal()");
+	        		
+	        		final Element editIElem = createElement(I, "fa fa-pencil", null, editButtonElem);
+        		}
+        		
+        		if(batchDeleteActions != null && ((Boolean)batchDeleteActions.get("enabled")) == true){
+	        		final Element delButtonElem = createElement(A, "btn btn-danger btn-xs", null, spanElem);
+	        		delButtonElem.setAttribute(TYPE, A);
+	        		delButtonElem.setAttribute(ONCLICK, "deleteSelected"+upperEntity+"s()");
+	        		
+	        		final Element delIElem = createElement(I, "fa fa-times", null, delButtonElem);
+        		}
+        		
+        		final Element lastTdElem = createElement(TD, tfootTrElem);
+        		lastTdElem.setAttribute("colspan", "20");
+        		
+        	}
+        	
+        }
+        
+        final Element configElem = new Element(DIV);
+        configElem.setAttribute("dt:conf", entity + "Table");
+        
+        final Element configTypeDrawElem = createElement(DIV, configElem);
+        configTypeDrawElem.setAttribute("dt:confType", "callback");
+        configTypeDrawElem.setAttribute("dt:type", "draw");
+        configTypeDrawElem.setAttribute("dt:function", "myCustomDrawCallback");
+        
+        /*final Element configTypeFooterElem = createElement(DIV, configElem);
+        configTypeFooterElem.setAttribute("dt:confType", "callback");
+        configTypeFooterElem.setAttribute("dt:type", "footer");
+        configTypeFooterElem.setAttribute("dt:function", "footerCallback");*/
+        
+        /*
+         * The abstract IAttrProcessor implementation we are using defines
+         * that a list of nodes will be returned, and that these nodes
+         * will substitute the tag we are processing.
+         */
+        final List<Node> nodes = new ArrayList<Node>();
+        
+        Element headerElem = null;
+        if(hasBatchActions(actions) || hasSelectiveBatchActions(actions)){
+        	List<JSONObject> list = getActiveBatchActions(entityJson);
+        	List<JSONObject> listSelective = getActiveSelectiveBatchActions(entityJson);
+        	
+        	headerElem = new Element(DIV);
+        	headerElem.setAttribute("class", "row");
+        	
+        	Element leftColElem = createElement(DIV, "col-md-6 table-header-select text-left", StringPool.SPACE, headerElem);
+        	Element rightColElem = createElement(DIV, "col-md-6 table-header-links text-right", StringPool.BLANK, headerElem);
+        	
+        	for (JSONObject jsonObject : list) {
+        		String name = (String) jsonObject.get("name");
+        		
+        		if ("export".equals(name)) {
+        			// override display of export based on "enableExport" attribute
+        			if (enableExport != null) {
+        				if (!"true".equals(enableExport)) {
+        					continue;
+        				}
+        			}
+        			
+        			// add form with proper action for export buttons
+        			final Element divElem = new Element(DIV);
+    	        	divElem.setAttribute(CLASS, "hide");
+    	        	final Element formElem = new Element(FORM);
+    	        	formElem.setAttribute("th:action", "@{"+actions.get("export").get("url")+"}");
+    	        	formElem.setAttribute("target", "_blank");
+    	        	formElem.setAttribute(ID, "export" + upperEntity + "Form");
+    	        	formElem.setAttribute("method", "post");
+    	        	divElem.addChild(formElem);
+    	        	nodes.add(divElem); 
+        		}
+        		
+        		String nameKey = (String) jsonObject.get("nameKey");
+        		String icon = (String) jsonObject.get("icon");
+        		String cssClass = (String) jsonObject.get("cssClass");
+        		if(Validator.isNull(cssClass)){
+        			cssClass = "btn-default";
+        		}
+        		
+        		String title = name;
+        		if(Validator.isNotNull(nameKey)){
+        			title = getMessage(arguments, nameKey, null);
+        		}
+        		
+    			final Element actionBtn = createElement(A, "btn " + cssClass, title + " ", rightColElem);
+    			actionBtn.setAttribute("onclick", name+upperEntity+"()");
+    			if(icon != null){
+    				final Element actionIconBtn = createElement(I, icon, null, actionBtn);
+    			}
+    			
+    			//headerElem.addChild(new Text(" "));
+			}
+        	
+        	for (JSONObject jsonObject : listSelective) {
+        		String name = (String) jsonObject.get("name");
+        		String nameKey = (String) jsonObject.get("nameKey");
+        		String icon = (String) jsonObject.get("icon");
+        		String cssClass = (String) jsonObject.get("cssClass");
+        		if(Validator.isNull(cssClass)){
+        			cssClass = "btn-default";
+        		}
+        		
+        		String title = name;
+        		if(Validator.isNotNull(nameKey)){
+        			title = getMessage(arguments, nameKey, null);
+        		}
+        		
+        		final Element actionBtn = createElement(A, "btn " + cssClass, title + " ", rightColElem);
+        		actionBtn.setAttribute("onclick", name+upperEntity+"()");
+        		if(icon != null){
+        			final Element actionIconBtn = createElement(I, icon, null, actionBtn);
+        		}
+        		
+        		//headerElem.addChild(new Text(" "));
+        	}
+        }
+
+        if(headerElem != null){
+        	nodes.add(headerElem); 
+        }
+        nodes.add(configElem);
+        nodes.add(tableElem); 
+        
+        String linebreak = "\n";
+        
+        StringBuilder scripts = new StringBuilder();
+        
+        /*scripts.append("jQuery(document).ready(function(){").append(linebreak);
+        
+        scripts.append("$.fn.dataTableExt.oApi.fnReloadAjax = function ( oSettings, sNewSource, fnCallback, bStandingRedraw ){").append(linebreak);
+        scripts.append("    console.debug('fnReloadAjax');").append(linebreak);
+        scripts.append("    if ( $.fn.dataTable.versionCheck ) {").append(linebreak);
+        scripts.append("        var api = new $.fn.dataTable.Api( oSettings );").append(linebreak);
+        scripts.append("        if ( sNewSource ) {").append(linebreak);
+        scripts.append("            api.ajax.url( sNewSource ).load( fnCallback, !bStandingRedraw );").append(linebreak);
+        scripts.append("        } else {").append(linebreak);
+        scripts.append("            api.ajax.reload( fnCallback, !bStandingRedraw );").append(linebreak);
+        scripts.append("        }").append(linebreak);
+        scripts.append("        return;").append(linebreak);
+        scripts.append("    }").append(linebreak);
+    	 
+        scripts.append("    if ( sNewSource !== undefined && sNewSource !== null ) {").append(linebreak);
+        scripts.append("        oSettings.sAjaxSource = sNewSource;").append(linebreak);
+        scripts.append("    }").append(linebreak);
+    	 
+        scripts.append("    if ( oSettings.oFeatures.bServerSide ) {").append(linebreak);
+        scripts.append("        this.fnDraw();").append(linebreak);
+        scripts.append("        return;").append(linebreak);
+        scripts.append("    }").append(linebreak);
+    	 
+        scripts.append("    this.oApi._fnProcessingDisplay( oSettings, true );").append(linebreak);
+        scripts.append("    var that = this;").append(linebreak);
+        scripts.append("    var iStart = oSettings._iDisplayStart;").append(linebreak);;
+        scripts.append("    var aData = [];").append(linebreak);
+    	 
+        scripts.append("    this.oApi._fnServerParams( oSettings, aData );").append(linebreak);
+    	 
+        scripts.append("    oSettings.fnServerData.call( oSettings.oInstance, oSettings.sAjaxSource, aData, function(json) {").append(linebreak);
+        scripts.append("        that.oApi._fnClearTable( oSettings );").append(linebreak);
+    	 
+        scripts.append("        var aData =  (oSettings.sAjaxDataProp !== '') ?").append(linebreak);
+        scripts.append("            that.oApi._fnGetObjectDataFn( oSettings.sAjaxDataProp )( json ) : json;").append(linebreak);
+    	 
+        scripts.append("        for ( var i=0 ; i<aData.length ; i++ ){").append(linebreak);
+        scripts.append("            that.oApi._fnAddData( oSettings, aData[i] );").append(linebreak);
+        scripts.append("        }").append(linebreak);
+    	         
+        scripts.append("        oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();").append(linebreak);
+    	 
+        scripts.append("        that.fnDraw();").append(linebreak);
+    	 
+        scripts.append("        if ( bStandingRedraw === true ){").append(linebreak);
+        scripts.append("            oSettings._iDisplayStart = iStart;").append(linebreak);
+        scripts.append("            that.oApi._fnCalculateEnd( oSettings );").append(linebreak);
+        scripts.append("            that.fnDraw( false );").append(linebreak);
+        scripts.append("        }").append(linebreak);
+    	 
+        scripts.append("        that.oApi._fnProcessingDisplay( oSettings, false );").append(linebreak);
+    	 
+        scripts.append("        if ( typeof fnCallback == 'function' && fnCallback !== null ) {").append(linebreak);
+        scripts.append("            fnCallback( oSettings );").append(linebreak);
+        scripts.append("        }").append(linebreak);
+        scripts.append("    }, oSettings );").append(linebreak);
+        scripts.append("};").append(linebreak);
+        
+        
+		//scripts.append("$('[data-inputmask]').inputmask();").append(linebreak);
+		scripts.append("});").append(linebreak);*/
+		
+		scripts.append("function doSearch() {").append(linebreak);
+		scripts.append("	try{").append(linebreak);
+		scripts.append("	//oTable_" + entity + "Table.ajax.reload();").append(linebreak);
+		scripts.append("	//oTable_" + entity + "Table.draw();").append(linebreak);
+		scripts.append("	oTable_" + entity + "Table.ajax.reload();").append(linebreak);
+		scripts.append("	} catch(Error){console.debug(Error);}").append(linebreak);
+		scripts.append("}").append(linebreak);
+		
+		scripts.append("function myCustomDrawCallback(settings){").append(linebreak);
+		scripts.append("	var classMap = [];").append(linebreak);
+		scripts.append("	for ( var i=0, iLen=settings.aoColumns.length ; i<iLen ; i++ ){").append(linebreak);
+		scripts.append("		if(settings.aoColumns[i].nTh.className.indexOf('responsiveCol') > -1)").append(linebreak);
+		scripts.append("			classMap.push(i);").append(linebreak);
+		scripts.append("	}").append(linebreak);
+		scripts.append("	var iStart = settings._iDisplayStart+1;").append(linebreak);
+		scripts.append("	for ( var i=0, iLen=settings.aiDisplay.length ; i<iLen ; i++ )").append(linebreak);
+		scripts.append("	{").append(linebreak);
+		scripts.append("		for ( var j=0; j<classMap.length ; j++ ){").append(linebreak);
+		scripts.append("			$('td:eq('+classMap[j]+')', settings.aoData[ settings.aiDisplay[i] ].nTr ).addClass('responsiveCol');").append(linebreak);
+		scripts.append("		}").append(linebreak);
+		if(hasSelectiveBatchActions(actions)){
+			scripts.append("		$('td:eq(1)', settings.aoData[ settings.aiDisplay[i] ].nTr ).html( iStart + i );").append(linebreak);
+		} else {
+			scripts.append("		$('td:eq(0)', settings.aoData[ settings.aiDisplay[i] ].nTr ).html( iStart + i );").append(linebreak);
+		}
+		//scripts.append("		$('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( iStart + i );").append(linebreak);
+		scripts.append("	}").append(linebreak);
+		scripts.append("	$('#" + upperEntity+"Table input[type=checkbox], #" + upperEntity+"Table input[type=radio]').iCheck({checkboxClass: \"icheckbox_minimal\",radioClass: \"iradio_minimal\"});").append(linebreak);
+		scripts.append("	$('#" + upperEntity+"Table input[type=checkbox], #" + upperEntity+"Table input[type=radio]').on('ifChanged', function(event){$(this).trigger('change');});").append(linebreak);
+		scripts.append("	return false;").append(linebreak);
+		scripts.append("}").append(linebreak);
+		
+		if(Validator.isNull(customSearch) || "false".equals(customSearch)){
+			scripts.append("function get"+upperEntity+"ExtraParams() {").append(linebreak);
+			scripts.append("	return {").append(linebreak);
+			scripts.append("		\"data\" : function(data){").append(linebreak);
+			
+	    	for (String id : fieldsIds.keySet()) {
+	    		JSONObject field = fieldsIds.get(id);
+	    		
+				id = StringUtil.replace(id, "[]", "");
+				
+	    		scripts.append("customPush(data,'"+field.get(NAME)+"', $('#"+id+"').val());").append(linebreak);
+	    	}
+	    	scripts.append("		}").append(linebreak);
+	    	scripts.append("	};").append(linebreak);
+	    	scripts.append("}").append(linebreak);
+		}
+		
+		if(hasObjectActions(entityJson)){
+			
+			boolean hasModifyAction = false;
+			boolean hasDeleteAction = false;
+			
+			JSONObject modifyAction = actions.get("modify");
+			if(modifyAction != null && (Boolean)modifyAction.get(ENABLED)){
+				hasModifyAction = true;
+			}
+			
+			JSONObject deleteAction = actions.get("delete");
+			if(deleteAction != null && (Boolean)deleteAction.get(ENABLED)){
+				hasDeleteAction = true;
+			}
+			
+			if(Validator.isNull(customObjectActions) || "false".equals(customObjectActions)){
+				scripts.append("function "+entity+"RowActions(data, type, full) {").append(linebreak);
+				//scripts.append("	var d = '<a class=\"btn btn-xs btn-success\" href=\"javascript:;\" onclick=\"showTracks('+full.id+','+full.hwbNumber+')\"><i class=\"fa fa-eye\"></i></a> ';").append(linebreak);//TODO
+				scripts.append("	var d = '<div style=\"white-space: nowrap;\">';").append(linebreak);
+				if(hasModifyAction){
+					scripts.append("	d += '<a class=\"btn btn-xs btn-primary\" title=\""+getMessage(arguments, StringUtil.lowerCaseFirstLetter(entity) + ".modify", null)+"\" href=\"javascript:;\" onclick=\"modify"+upperEntity+"('+full.id+')\"><i class=\"fa fa-pencil\"></i></a> ';").append(linebreak);
+				}
+				if(hasDeleteAction){
+					scripts.append("	d += '<a class=\"btn btn-xs btn-danger\" title=\""+getMessage(arguments, StringUtil.lowerCaseFirstLetter(entity) + ".delete", null)+"\" href=\"javascript:;\" onclick=\"delete"+upperEntity+"('+full.id+')\"><i class=\"fa fa-times\"></i></a> ';").append(linebreak);
+				}
+				scripts.append("	d += '</div>'").append(linebreak);
+				scripts.append("	return d;").append(linebreak);
+				scripts.append("}").append(linebreak);
+			}
+		}
+		
+		if(hasSelectiveBatchActions(actions)){
+			scripts.append(selectArray).append(linebreak);
+		}
+		
+		if(hasSelectiveBatchActions(actions)){
+			scripts.append("function rowCheckbox(entity, type, full) {").append(linebreak);
+			scripts.append("	var isSelected = (selected" + upperEntity + "[full.id] !== undefined ? true : false);").append(linebreak);
+			scripts.append("	var d = '<div class=\"text-center\" style=\"white-space: nowrap;\">';").append(linebreak);
+			scripts.append("	d += '<input onchange=\"toggleSelect"+upperEntity+"('+full.id+')\" type=\"checkbox\" value=\"'+full.id+'\" name=\"ids\" '+(isSelected ? 'checked=\"checked\"' : '')+'/>';").append(linebreak);
+			scripts.append("	d += '</div>'").append(linebreak);
+			scripts.append("	return d;").append(linebreak);
+			scripts.append("}").append(linebreak);
+		}
+		
+		if(hasSelectiveBatchActions(actions)){
+			scripts.append("function toggleSelecteAll"+upperEntity+"(elem){").append(linebreak);
+			scripts.append("	var action=($(elem).prop('checked') ? 'select' : 'deselect');").append(linebreak);
+			scripts.append("	var ids = [];").append(linebreak);
+			scripts.append("	$('#" + entity + "Table input[type=\"checkbox\"][name=\"ids\"]').each(function(i, v){").append(linebreak);
+			scripts.append("		ids.push($(v).val());").append(linebreak);
+			scripts.append("	").append(linebreak);
+			scripts.append("	});").append(linebreak);
+			scripts.append("	$('#" + entity + "Table input[type=\"checkbox\"][name=\"ids\"]').prop('checked', $(elem).prop('checked'));").append(linebreak);
+			scripts.append("	$('#" + entity + "Table input[type=\"checkbox\"][name=\"ids\"]').iCheck('update');").append(linebreak);
+			scripts.append("	toggleRowSelect"+upperEntity+"(action, ids);").append(linebreak);
+			scripts.append("}").append(linebreak);
+			
+			scripts.append("function toggleSelect"+upperEntity+"(id){").append(linebreak);
+			scripts.append("	if($('#selectAll"+upperEntity+"').prop('checked')){").append(linebreak);
+			scripts.append("		$('#selectAll"+upperEntity+"').iCheck('uncheck');").append(linebreak);
+			scripts.append("	}").append(linebreak);
+			scripts.append("	$('#" + entity + "Table input[value=\"'+id+'\"]').toggle('checked');").append(linebreak);
+			scripts.append("	$('#" + entity + "Table input[value=\"'+id+'\"]').iCheck('update');").append(linebreak);
+			scripts.append("	var action=($('#" + entity + "Table input[value=\"'+id+'\"]').prop('checked') ? 'select' : 'deselect');").append(linebreak);
+			scripts.append("	toggleRowSelect"+upperEntity+"(action, [id]);").append(linebreak);
+			scripts.append("}").append(linebreak);
+			
+			scripts.append("function toggleRowSelect"+upperEntity+"(action, ids){").append(linebreak);
+			scripts.append("	var data = 'action=' + action;").append(linebreak);
+			scripts.append("	$.each(ids, function(i, v) {").append(linebreak);
+			scripts.append("		data += '&id=' + v;").append(linebreak);
+			scripts.append("	});").append(linebreak);
+			scripts.append("	$.post('"+contextPath+actions.get("paging").get("url")+"Selective', data).done(function(data) {").append(linebreak);
+			scripts.append("		if(data.status == 'success') {").append(linebreak);
+			scripts.append("			if(action == 'select'){").append(linebreak);
+			scripts.append("				$.each(ids, function(i, v) {").append(linebreak);
+			scripts.append("					selected"+upperEntity+"[v] = v;").append(linebreak);
+			scripts.append("				});").append(linebreak);
+			scripts.append("			} else {").append(linebreak);
+			scripts.append("				$.each(ids, function(i, v) {").append(linebreak);
+			scripts.append("					delete selected"+upperEntity+"[v];").append(linebreak);
+			scripts.append("				});").append(linebreak);
+			scripts.append("			}").append(linebreak);
+			scripts.append("			try{").append(linebreak);
+			scripts.append("				$.each(ids, function(i, v) {").append(linebreak);
+			scripts.append("					afterSuccesstoggleSelectRow"+upperEntity+"(action, v);").append(linebreak);
+			scripts.append("				});").append(linebreak);
+			scripts.append("			}catch(Error){}").append(linebreak);
+			scripts.append("			//showTopleftGrowl('success', 'Success', 'selected');").append(linebreak);
+			scripts.append("		} else if(data.status == 'fail'){").append(linebreak);
+			scripts.append("				showError(data.status);").append(linebreak);
+			scripts.append("		} else if(data.status == 'ErrorCode'){").append(linebreak);
+			scripts.append("			if(data.errorMessage){").append(linebreak);
+			scripts.append("				showTopleftGrowl('error', 'Error', data.errorMessage);").append(linebreak);
+			scripts.append("			} else {").append(linebreak);
+			scripts.append("				showTopleftGrowl('error', 'Error', messages[data.errorCode]);").append(linebreak);
+			scripts.append("			}").append(linebreak);
+			scripts.append("		} else {").append(linebreak);
+			scripts.append("			console.debug(data.status);").append(linebreak);
+			scripts.append("			showTopleftGrowl('error', 'Error', (data.message ? data.message : 'Select failed'));").append(linebreak);
+			scripts.append("		}").append(linebreak);
+			scripts.append("	}).fail(failAjax);").append(linebreak);
+			scripts.append("}").append(linebreak);
+		}
+		
+		if(scripts.length() > 0){
+			
+			final Element scriptElement = new Element("script");
+			
+			scripts.insert(0, "/*<![CDATA[*/").append(linebreak);
+			scripts.append("/*]]>*/").append(linebreak);
+			
+			scriptElement.addChild(new Text(scripts.toString(), null, null, true));
+			
+			nodes.add(scriptElement); 
+		}
+
+        return nodes;
+	}
+
+	@Override
+	public int getPrecedence() {
+		return 1000;
+	}
+}

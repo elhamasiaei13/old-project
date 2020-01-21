@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete 2 elements from project &apos;geomanagement-ejb&apos;&#x0A;- Original project: &apos;geomanagement-ejb&apos;&#x0A;- Original elements:&#x0A;     com.parvanpajooh.geomanagement.service.adapter.RarIdentityManagement2ServiceAdapter.java&#x0A;     com.parvanpajooh.geomanagement.service.adapter.RarIdentityManagement2ServiceAdapterRest.java" description="Delete elements" element1="/src\/main\/java&lt;com.parvanpajooh.geomanagement.service.adapter{RarIdentityManagement2ServiceAdapter.java" element2="/src\/main\/java&lt;com.parvanpajooh.geomanagement.service.adapter{RarIdentityManagement2ServiceAdapterRest.java" elements="2" flags="589830" id="org.eclipse.jdt.ui.delete" resources="0" stamp="1496144406771" subPackages="false" version="1.0"/>
+</session>

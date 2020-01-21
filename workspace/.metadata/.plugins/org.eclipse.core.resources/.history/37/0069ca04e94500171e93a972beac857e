@@ -1,0 +1,24 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.model.criteria;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+
+/**
+ * @author Mohammad
+ *
+ */
+public class PackingItemCriteria extends BaseCriteria{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1398889630806340120L;
+	
+	private String code;
+	
+	private String standard;
+	
+	
+}

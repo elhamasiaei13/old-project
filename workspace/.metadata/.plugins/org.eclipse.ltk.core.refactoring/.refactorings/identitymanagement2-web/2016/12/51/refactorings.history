@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;identitymanagement2-web/src/main/resources/Messages.properties&apos; to &apos;Messages_fa.properties&apos;" description="Rename resource &apos;Messages.properties&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/main/resources/Messages.properties" name="Messages_fa.properties" stamp="1481801844054" updateReferences="true"/>
+</session>

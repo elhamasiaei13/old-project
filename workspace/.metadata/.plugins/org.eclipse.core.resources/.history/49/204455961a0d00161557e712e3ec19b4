@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>ShowTasks</title>
+</head>
+
+<body>
+	<section class="content" layout:fragment="content">
+
+		<div class="row" >
+   		 	<h2 th:text="#{tasks_list}"></h2>      
+		</div>
+			
+		<div class="panel panel-default">
+		  <div class="panel-heading">جستجو</div>
+		  <div class="panel-body">
+		   <form class="form-inline"> 
+		    <div class="form-group">
+		    <div class="row">
+                <div class="col-md-3">
+			    	<label  style="float:right;margin-right:5px;">عنوان و توضیح</label> 
+			    	</div> 				        
+			    	<div class="col-md-3">
+	             		 <input id="subject" class="form-control" type="text"  placeholder="Type Here..."/>                                           
+	     			</div>
+     			</div>
+
+     			<div class="row">
+     			<div class="col-md-3">
+				    <label  style="float:right;margin-right:5px;">وضعیت</label>
+				    </div>
+				    <div class="col-md-3">
+	       			<select id="taskStatusEnum"  style="margin: 5px">
+		     		 	 <option th:text="#{lookup_option}"></option>
+		       	    	 <option th:each="s : ${T(com.parvanpajooh.issuemanager.model.enums.TaskStatusEnum).values()}" th:value="${s}" th:text="${s.value}" >name</option>
+	   	    		</select>
+	   	    		</div>
+   	    		</div>
+
+   	    		<div class="row">
+   	    		<div class="col-md-3">
+	   	    		<label  style="float:right;margin-right:5px;">انتساب به</label>		
+	   	    		</div>	
+	   	    		<div class="col-md-3">     
+	       			<select id="memberId"  style="margin: 5px">
+		     		 	 <option th:text="#{lookup_option}"></option>
+		       	    	 <option th:each="memb : ${members}" th:value="${memb.id}" th:text="${memb.firstName}+${memb.lastName}" >name</option>
+	   	    		</select>
+	   	    		</div>
+   	    		</div>
+   	    		<div class="row">
+   	    		<div class="col-md-3">
+				    <label  style="float:right;margin-right:5px;">گروه</label>
+				    </div>
+				    <div class="col-md-3">
+	       			<select id="groupId"  style="margin: 5px">
+		     		 	 <option th:text="#{lookup_option}"></option>
+		       	    	 <option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.name}" >name</option>
+	   	    		</select>
+	   	    		</div>
+   	    		</div>
+   	    		
+   	    		<div class="row">
+   	    			<div class="col-md-3">
+	   	    		<label  style="float:right;margin-right:5px;">تاریخ سررسید از </label>
+	   	    		</div>
+	   	    		<div class="col-md-4">
+					<input type="text" class="form-control datepicker" id="fromDueDate"/>
+					</div>
+					<div class="col-md-1">
+					<label  style="float:right;margin-right:5px;"> تا </label>
+					</div>
+					<div class="col-md-3">
+					<input type="text" class="form-control datepicker" id="toDueDate"/>
+					</div>
+				</div>		
+				
+				<div class="row">
+   	    			<div class="col-md-3">
+	   	    		<label  style="float:right;margin-right:5px;">تاریخ ایجاد </label>
+	   	    		</div>
+	   	    		<div class="col-md-4">
+					<input type="text" class="form-control datepicker" id="fromDueDate"/>
+					</div>
+				</div>				               
+			</div>
+		 </form>
+		 </div>
+		   <input id="submit" type="submit" value="جستجو" onclick="doSearch()" />
+		</div>
+		
+		 		    
+  		
+  		<a class="btn btn-lg btn-success" href="/issuemanager-web/addTask/" >
+  			<i class="fa fa-plus" aria-hidden="true" th:text="#{btn_add}"></i>
+  		</a>
+  		<br></br>
+  		<br></br>
+  		
+		<table id="TaskTable" class="table table-hover table-bordered table-condensed drop-shadow" dt:serverside="true" dt:url="@{/paging}" dt:table="true" dt:proccessing="true" dt:filter="false" dt:serverparams="'getExtraParams'">
+		
+			
+		   <thead>
+
+             <tr dir="rtl">
+				<th dt:property="id" th:text="#{table_column_id}"></th>
+				<th dt:renderFunction="'actionRenderer1'"></th>
+				<th dt:property="subject" th:text="#{table_column_subject}"></th>
+				<th dt:property="description" th:text="#{table_column_description}"></th>
+				<th dt:property="taskAssignment.taskStatusEnum" th:text="#{table_column_status}"></th>
+				<th dt:property="taskAssignment.member.username" th:text="#{table_column_assign_to}"></th>
+				<th dt:property="createUserId" th:text="#{table_column_username}"></th>
+				<th dt:property="createDate" th:text="#{table_column_createdate}"></th>
+				<th dt:property="updateDate" th:text="#{table_column_updatedate}"></th>
+			 </tr>
+		   </thead>
+		   
+		   <tbody dt:cbk:draw="'myCustomDrawCallback'" dt:cbk:footer="'footerCallback'">	
+		   </tbody>
+		   
+		</table>
+		
+		<br></br> 
+		<br></br>
+
+		<a class="btn btn-lg btn-success" href="/issuemanager-web/addTask/" >
+  			<i class="fa fa-plus" aria-hidden="true" th:text="#{btn_add}"></i>
+  		</a>
+  		
+		<form th:action="@{/removeTask}" method="post" id="deleteTaskForm">
+			<input name="taskId" type="hidden" id="deleteTaskId" />
+		</form>
+		<form th:action="@{/finalRemoveTask}" method="post" id="finlaDeleteTaskForm">
+			<input name="taskId" type="hidden" id="finalDeleteTaskId" />
+		</form>
+
+		<script>
+		
+		//<![CDATA[
+		
+
+		
+		function actionRenderer1(data, type, full){
+			var d = '<div class="btn-group">'
+ 			d = d + '<a class="btn btn-primary" href="/issuemanager-web/taskDetails/' +full.id + '"><i class="fa fa-cog" title="Details" aria-hidden="true"></i><span class="sr-only">Details</span></a>'; 
+			d = d + '<a class="btn btn-default" href="/issuemanager-web/editTask/' +full.id + '"><i class="fa fa-pencil-square-o" title="Edit" aria-hidden="true"></i><span class="sr-only">Edit</span></a>';
+			d = d + '<a onclick="deleteTask(' + full.id + ')" class="btn btn-danger"><i class="fa fa-trash-o" title="Delete" aria-hidden="true"></i><span class="sr-only">Delete</span></a>';
+			d = d + '</div>';  
+			return d;
+		}
+		
+                
+		function deleteTask(id){
+			if(confirm('Are you sure you want to delete this item?')){
+
+				$('#deleteTaskId').val(id);
+				$('#deleteTaskForm').submit();
+			}
+		}
+		
+		function doSearch() {
+				 								
+			oTable_TaskTable.fnReloadAjax();
+		}
+
+	    function getExtraParams( aoData ) {
+	    	
+ 			var choose =  "انتخاب کنید";
+			var e = document.getElementById("memberId").value;
+			if(e != choose){						
+				$('#memberId').val(e);
+			}
+			else{
+				$('#memberId').val(null);
+			} 	
+
+ 			var e = document.getElementById("taskStatusEnum").value;
+			if(e != choose){						
+				$('#taskStatusEnum').val(e);
+			}
+			else{
+				$('#taskStatusEnum').val(null);
+			}
+			var e = document.getElementById("groupId").value;
+			if(e != choose){						
+				$('#groupId').val(e);
+			}
+			else{
+				$('#groupId').val(null);
+			}
+	    	aoData.push({ 'name': 'subject', 'value': $('#subject').val()}
+ 	        ,{ 'name': 'currentTaskStatus', 'value': $('#taskStatusEnum').val()} 
+	        ,{ 'name': 'taskAssignment.member.id', 'value': $('#memberId').val()}     
+	        ,{ 'name': 'group.id', 'value': $('#groupId').val()}
+	        ,{ 'name': 'dueDate', 'value': $('#fromDueDate').val()}   
+	       /*  ,{ 'name': 'toDueDate', 'value': $('#toDueDate').val()}    */     
+	    	);
+	    }
+
+		jQuery(document).ready(function(){
+			$.fn.dataTableExt.oApi.fnReloadAjax = function ( oSettings, sNewSource, fnCallback, bStandingRedraw ){
+			    if ( $.fn.dataTable.versionCheck ) {
+					var api = new $.fn.dataTable.Api( oSettings );
+					if ( sNewSource ) {
+					    api.ajax.url( sNewSource ).load( fnCallback, !bStandingRedraw );
+					} else {
+					    api.ajax.reload( fnCallback, !bStandingRedraw );
+					}
+					return;
+			    }
+			    if ( sNewSource !== undefined && sNewSource !== null ) {
+					oSettings.sAjaxSource = sNewSource;
+			    }
+			    if ( oSettings.oFeatures.bServerSide ) {
+					oSettings.oApi._fnDraw(oSettings);
+					return;
+			    }
+			    this.oApi._fnProcessingDisplay( oSettings, true );
+			    var that = this;
+			    var iStart = oSettings._iDisplayStart
+			    var aData = [];
+			    this.oApi._fnServerParams( oSettings, aData );
+			    oSettings.fnServerData.call( oSettings.oInstance, oSettings.sAjaxSource, aData, function(json) {
+				that.oApi._fnClearTable( oSettings );
+				var aData =  (oSettings.sAjaxDataProp !== '') ?
+				    that.oApi._fnGetObjectDataFn( oSettings.sAjaxDataProp )( json ) : json;
+				for ( var i=0 ; i<aData.length ; i++ ){
+				    that.oApi._fnAddData( oSettings, aData[i] );
+				}
+				oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
+				that.fnDraw();
+				if ( bStandingRedraw === true ){
+				    oSettings._iDisplayStart = iStart;
+				    that.oApi._fnCalculateEnd( oSettings );
+				    that.fnDraw( false );
+				}
+				that.oApi._fnProcessingDisplay( oSettings, false );
+				if ( typeof fnCallback == 'function' && fnCallback !== null ) {
+				    fnCallback( oSettings );
+				}
+			    }, oSettings );
+			};
+
+
+			$('.datepicker').datetimepicker();
+		});
+
+		
+		function footerCallback(oSettings){
+			$('div.pagination ul').addClass('pagination');
+			$('div.dataTables_wrapper div.row-fluid');
+			$('div.dataTables_wrapper div.span6').addClass('col-md-6 col-lg-6');
+		}
+
+		function myCustomDrawCallback(oSettings){
+			var classMap = [];
+			for ( var i=0, iLen=oSettings.aoColumns.length ; i<iLen ; i++ ){
+				if(oSettings.aoColumns[i].nTh.className.indexOf('responsiveCol') > -1)
+					classMap.push(i);
+			}
+			var iStart = oSettings._iDisplayStart+1;
+			for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
+			{
+				for ( var j=0; j<classMap.length ; j++ ){
+					$('td:eq('+classMap[j]+')', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).addClass('responsiveCol');
+				}
+				$('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( iStart + i );
+			}
+			$('#TaskTable input[type=checkbox], #TaskTable input[type=radio]').iCheck({checkboxClass: "icheckbox_minimal",radioClass: "iradio_minimal"});
+			$('#TaskTable input[type=checkbox], #TaskTable input[type=radio]').on('ifChanged', function(event){$(this).trigger('change');});
+			return false;
+		}
+
+		//]]>
+		</script>
+
+	</section>
+</body>
+</html>

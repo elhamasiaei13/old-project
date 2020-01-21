@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;com.parvanpajooh.agentmanagement.common.AmUserInfo&apos; to &apos;AccountingUserInfo&apos;&#x0A;- Original project: &apos;accounting-ejb&apos;&#x0A;- Original element: &apos;com.parvanpajooh.agentmanagement.common.AmUserInfo&apos;&#x0A;- Renamed element: &apos;com.parvanpajooh.agentmanagement.common.AccountingUserInfo&apos;&#x0A;- Update references to refactored element&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;AmUserInfo&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src\/main\/java&lt;com.parvanpajooh.agentmanagement.common{AmUserInfo.java[AmUserInfo" matchStrategy="1" name="AccountingUserInfo" qualified="false" references="true" similarDeclarations="false" stamp="1473340430833" textual="false" version="1.0"/>
+</session>

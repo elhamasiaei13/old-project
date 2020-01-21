@@ -1,0 +1,25 @@
+package com.parvanpajooh.sample.service;
+
+import java.util.List;
+
+import com.parvanpajooh.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.ecourier.service.GenericLocalService;
+import com.parvanpajooh.sample.model.User;
+import com.parvanpajooh.sample.model.vo.UserVO;
+
+
+/**
+ * 
+ * @author ali
+ *
+ */
+public interface MemberLocalService extends GenericLocalService<User, Long> {
+
+	public List<UserVO> loadSamples() throws ParvanServiceException;
+
+	public void saveUser(User user) throws ParvanServiceException, ParvanDaoException;
+	
+	public void sort(Long[] ids) throws ParvanServiceException;
+	
+}

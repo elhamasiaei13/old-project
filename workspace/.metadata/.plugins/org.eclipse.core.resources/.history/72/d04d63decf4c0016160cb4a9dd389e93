@@ -1,0 +1,71 @@
+package com.parvanpajooh.issuemanager.service.impl;
+@Singleton
+@Lock(LockType.READ) // allows timers to execute in parallel
+@Startup
+public class TimingJob {
+/**
+    * Log variable for all child classes.
+    */
+   private static final Logger log = LoggerFactory.getLogger(TimingJob.class);
+   
+   private static boolean RESOLE_LOST_AND_FOUND__IS_RUNNING = false;
+   private static boolean INDEX_MANIFEST__IS_RUNNING = false;
+   
+   @Inject
+private ManifestService manifestService;
+   
+   @Inject
+private LostAndFoundLocalService lostAndFoundLocalService;
+   
+   public TimingJob() {
+    log.debug("LostAndFound Job Created.");
+   }
+   
+   @Schedule(second="0", minute="0,10,20,30,40,50", hour="*", info="LOST_AND_FOUND_RESOLVER", persistent=false)
+   public void checkAndResolved(Timer timer) {
+    log.debug("start running job checkAndResolved [{}]", LocalDateTime.now());
+   
+    try {
+    if (RESOLE_LOST_AND_FOUND__IS_RUNNING) {
+    log.debug("ignoring timer due to currently running job. [{}]", timer.getInfo());    
+   
+    } else {
+       
+    // run job
+    RESOLE_LOST_AND_FOUND__IS_RUNNING = true;
+    lostAndFoundLocalService.checkAndResolved();
+    }
+   
+} catch (ParvanServiceException e) {
+log.error("Error while running resolve-lost-and-found job", e);
+
+} catch (Exception e) {
+log.error("Error while running resolve-lost-and-found job", e);
+
+} finally {
+RESOLE_LOST_AND_FOUND__IS_RUNNING = false;
+}
+   }
+   
+   @Schedule(minute="*/30", hour="*", info="MANIFEST_INDEX", persistent=false)
+   public void indexManifest(Timer timer) {
+    log.debug("start running job indexManifest [{}]", LocalDateTime.now());
+   
+    try {
+        if (INDEX_MANIFEST__IS_RUNNING) {
+        log.debug("ignoring timer due to currently running job. [{}]", timer.getInfo());    
+       
+        } else {
+        // run job
+        INDEX_MANIFEST__IS_RUNNING = true;
+        manifestService.index();
+        }
+
+} catch (ParvanServiceException e) {
+log.error("Error while running index-manifest job", e);
+
+} finally {
+INDEX_MANIFEST__IS_RUNNING = false;
+}
+   
+   }

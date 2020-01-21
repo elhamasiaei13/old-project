@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	layout:decorator="filter-layout" ddl:bundle-includes="bootstrapValidator,select2">
+
+	<head>
+		<title>Geo Type List</title>
+		  	
+		<script  th:inline="javascript">
+	   	/*<![CDATA[*/
+		  	function getGeoTypeExtraParams() {
+		  		return {
+		  		    "data" : function(data){
+		  				customPush(data, 'parentType.id', $('#parentTypeidFilter').val());
+						customPush(data, 'code', $('#codeFilter').val());
+						customPush(data, 'nameFa', $('#nameFaFilter').val());
+						customPush(data, 'nameEn', $('#nameEnFilter').val());
+		  		    }
+		  		};
+			}
+			/*]]>*/
+		</script>
+	</head>
+
+	<body th:with="rightMenu='admin', subRightMenu='geoTypes'">
+		<section layout:fragment="top-header" class="fixed-header">
+			<div class="ui-header-image pull-left">
+            	<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/geomanagement-web/resources/images/globe.png" style="width: 48px; height: 48px;" />
+           	</div>
+            <div class="ui-header-title">
+                <div class="split-left">
+                    <h3>
+                        <small>Search</small>
+                    </h3>
+                    <h3>Geo Types</h3>
+                </div>
+                <div class="split-right">
+                	<a data-toggle="modal" onclick="createGeoType();" class="btn btn-success" >
+						<i class="fa fa-plus">&nbsp;&nbsp;</i><span th:text="#{geoType.create}">جدید</span>
+					</a>
+                </div>
+            </div>
+		</section>
+		
+		<!-- Main content -->
+		<!-- BODY -->
+		<section class="content" layout:fragment="content">
+			<div class="box box-primary">
+				<div class="box-header">
+					<h3 class="box-title" th:text="#{search}">Search</h3>
+	                <div class="box-tools pull-right">
+	                	<button title="" data-widget="collapse" class="btn btn-primary btn-xs" ><i class="fa fa-minus"></i></button>
+	               	</div>
+               	</div>
+               	<div class="box-body" style="display: block;">
+                   	<dy:form entity="GeoType" form="search" type="search"/>
+               	</div><!-- /.box-body -->
+           	</div>
+           	
+			<div class="box">
+				<div class="box-body table-responsive">
+					<dy:table entity="GeoType" table="list" customSearch="true"/>
+				</div>
+			</div>
+			
+			<div class="modal fade" id="createGeoTypeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" th:text="#{geoType.create}">جدید</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <dy:form entity="GeoType" form="create" type="create"/>
+		                </div>
+		                <div class="modal-footer checkbox">
+		                	<label class="create-another" for="createGeoType-create-another">
+		                		<input type="checkbox" id="createGeoType-create-another" value="true"/>
+		                		<span th:text="#{create-another}" th:remove="tag">Create another</span>
+		                	</label>
+		                	
+		                    <button type="button" class="btn btn-primary" th:text="#{button.save}" id="createGeoTypeBtn">Save</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+			
+			<div class="modal fade" id="modifyGeoTypeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" th:text="#{geoType.modify}">ویرایش اطلاعات</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <dy:form entity="GeoType" form="modify" type="modify"/>
+		                </div>
+		                <div class="modal-footer">
+		                    <button type="button" class="btn btn-primary" th:text="#{button.save}" id="modifyGeoTypeBtn">Save</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+			
+			<div class="modal fade" id="deleteGeoTypeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" th:text="#{geoType.delete}">حذف</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <dy:form entity="GeoType" form="delete" type="delete"/>
+		                </div>
+		                <div class="modal-footer">
+		                    <button type="button" class="btn btn-primary" th:text="#{button.delete}" id="deleteGeoTypeBtn">Delete</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+		    
+		</section>
+	</body>
+</html>

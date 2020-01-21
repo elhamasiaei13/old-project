@@ -1,0 +1,47 @@
+package com.parvanpajooh.agentmanagement.mvc;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+import com.parvanpajooh.agentmanagement.mvc.base.AmBaseController;
+import com.parvanpajooh.common.auth.UserServiceAdapter;
+import com.parvanpajooh.common.util.ParamUtil;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.util.Validator;
+
+@ControllerAdvice
+public class GlobalController extends AmBaseController {
+	
+	@Autowired
+	private UserServiceAdapter userServiceAdapter;
+	
+	@ModelAttribute("userInfo")
+	public UserInfo populateUserInfo(HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+		
+		return getUserInfo(request);
+	}
+	
+	@ModelAttribute("objectAccessScopes")
+	public List<IdmProtos.ObjectAccessScope> loadObjectAccessScopes(HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+		@SuppressWarnings("unchecked")
+		List<IdmProtos.ObjectAccessScope> objectAccessScopes = (List<IdmProtos.ObjectAccessScope>) request.getSession().getAttribute("objectAccessScopes");
+		
+		boolean doRefresh = ParamUtil.getBoolean(request, "doRefresh", false);
+		
+		if(Validator.isNull(objectAccessScopes) || doRefresh){
+			
+			objectAccessScopes = userServiceAdapter.loadScopes(getUserInfo(request));
+			
+			request.getSession().setAttribute("objectAccessScopes", objectAccessScopes);
+		}
+		
+		return objectAccessScopes;
+	}
+}

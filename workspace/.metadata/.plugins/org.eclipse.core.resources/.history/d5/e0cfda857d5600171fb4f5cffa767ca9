@@ -1,0 +1,177 @@
+package com.parvanpajooh.taskmanagement.domain.service.Impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroup;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroupRole;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskGroupDto;
+import com.parvanpajooh.taskmanagement.domain.repository.TaskGroupRepository;
+import com.parvanpajooh.taskmanagement.domain.repository.TaskGroupRoleRepository;
+import com.parvanpajooh.taskmanagement.domain.repository.TaskRepository;
+import com.parvanpajooh.taskmanagement.domain.service.TaskGroupService;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class TaskGroupServiceImpl extends GenericLocalServiceImpl<TaskGroup, Long>implements TaskGroupService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(TaskGroupServiceImpl.class);
+
+	private TaskGroupRepository taskGroupRepository;
+
+	@Inject
+	private TaskGroupRoleRepository taskGroupRoleRepository;
+
+	@Inject
+	private TaskRepository taskRepository;
+
+	@Inject
+	public void setTaskGroupRepository(TaskGroupRepository taskGroupRepository) {
+		this.dao = taskGroupRepository;
+		this.taskGroupRepository = taskGroupRepository;
+	}
+
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering save( baseVO={}, userInfo={})", baseVO, userInfo);
+		TaskGroupDto taskGroupDto = (TaskGroupDto) baseVO;
+
+		try {
+
+			TaskGroup taskGroup = new TaskGroup();
+
+			taskGroup.fromVO(baseVO);
+
+			// save entity
+			TaskGroup entity = super.save(taskGroup, userInfo);
+
+			taskGroupDto = entity.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method save(): ret={}", taskGroupDto);
+
+		return taskGroupDto;
+	}
+
+	@Override
+	public TaskGroup updateNameAndRemarks(TaskGroupDto taskGroupDto) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering save( taskGroupDto={})", taskGroupDto);
+
+		// get user info from current context
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+
+		TaskGroup taskGroup = null;
+
+		try {
+
+			taskGroup = get(taskGroupDto.getId());
+			taskGroup.setName(taskGroupDto.getName());
+			taskGroup.setRemarks(taskGroupDto.getRemarks());
+
+			// save entity
+			taskGroup = super.save(taskGroup, userInfo);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while update taskGroup.", e);
+		}
+
+		return taskGroup;
+	}
+
+	@Override
+	public void delete(TaskGroup object, UserInfo userInfo) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering delete( object={})", object);
+
+		try {
+
+			boolean hasChildren = taskRepository.findTaskByGroupId(object.getId());
+
+			if (Validator.equals(hasChildren, true)) {
+				throw new ParvanDaoException(ErrorCode.TASKMANAGEMENT_GROUP_DELETE__GROUP_ALREADY_USED_BY_SOME_TASK);
+			}
+
+			// delete entity
+			super.delete(object, userInfo);
+
+		} catch (ParvanDaoException e) {
+			if (Validator.isNotNull(e.getErrorCode())) {
+				throw new ParvanRecoverableException(e.getErrorCode());
+			} else {
+				throw new ParvanUnrecoverableException("Error occurred while delete object.", e);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while delete object.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method delete()");
+	}
+
+	@Override
+	public void addRoles(Long groupId, String[] roleNames) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering addRoles( roleNames={})", (roleNames != null) ? roleNames.toString() : "");
+		List<TaskGroupRole> taskGroupRoles = new ArrayList<TaskGroupRole>();
+
+		try {
+
+			if (Validator.isNotNull(roleNames)) {
+				TaskGroup taskGroup = taskGroupRepository.get(groupId);
+				for (String roleName : roleNames) {
+
+					TaskGroupRole taskGroupRole = new TaskGroupRole();
+					taskGroupRole.setTaskGroup(taskGroup);
+					taskGroupRole.setRoleName(roleName);
+					taskGroupRoles.add(taskGroupRole);
+
+				}
+
+				// save taskGroupRoles
+				taskGroupRoleRepository.saveRoles(groupId, taskGroupRoles);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while update taskGroup.", e);
+		}
+	}
+}

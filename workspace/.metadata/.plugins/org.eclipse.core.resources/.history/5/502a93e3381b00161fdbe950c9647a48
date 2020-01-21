@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>Task Details</title>
+
+</head>
+
+<body>
+	<section class="content" layout:fragment="content">
+	
+	<form action="#" class="form-horizontal" th:object="${task}" method="post">
+	  
+	  <blockquote>
+		  <p>
+		   <i class="fa fa-tasks" aria-hidden="true"></i>
+		   <i class="text" th:text="*{group.name}" ></i> 
+		   <i class="fa fa-long-arrow-left" aria-hidden="true"></i>		   		   		  
+		   <i class="text" th:text="*{id}" ></i> 
+		   <i class="fa fa-long-arrow-left" aria-hidden="true"></i>	
+		   <i class="text" th:text="*{subject}" ></i>
+		  </p>
+		</blockquote>
+
+		<div id="navigationTabs" class="tabs" ng-multi-transclude="tabs">
+				<div class="ui menu attached headerWrapperTabs myWorkTabs ng-scope" name="tabs">
+					<div class="btn-group">		  
+			  			
+			  			<a  class="btn btn-info  btn-lg"  th:href="@{'/addAttachment/'+ ${id}}">
+							<i class="text" >افزودن پیوست</i>
+						</a>
+						<a class="btn btn-info btn-lg"  th:href="@{'/changeStatus/'+ ${id}}">
+							<i class="text" th:text="#{title_change_status}"></i>
+						</a>
+						<a class="btn btn-info btn-lg"  th:href="@{'/assignTo/'+ ${id}}">
+							<i class="text" th:text="#{title_change_assignto}"></i>
+						</a>
+						<a  class="btn btn-info  btn-lg"  th:href="@{'/comment/'+ ${id}}">
+							<i class="text" th:text="#{title_comments}"></i>
+						</a>			
+					</div>
+					<div class="right menu">
+					</div>
+				</div>
+		</div>		
+		
+		
+
+	    <div class="row">
+				<div class="col-md-8">
+
+					<div class="row">
+						<input name="taskId" th:value="${id}"  type="hidden"/> 
+						<input type="hidden" class="input-small" th:value="${id}" th:field="*{id}" placeholder="Subject" readonly="true" />
+						<ul class="list-group" th:if="*{description != ''}">
+							<li class="list-group-item" id="description" th:text="*{description}" name="description" placeholder="شرح" />
+							<li class="list-group-item" th:if="${attachmentsHistory!=null}">
+								<div  th:each="attach : ${attachmentsHistory}">
+									<a th:if="${attach.name != null}" th:text="${attach.createUserId}"></a>
+									<a target="_blank" th:if="${attach.name != null}" th:text="${attach.name}" 
+									th:href="@{'/downloadAttachment/'+${attach.id}}" ></a>	
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div class="row">
+						<div id="content">
+							<ul class="nav nav-tabs">
+								<li class="active">								
+									<a href="#commentTask" data-toggle="tab"><span class="fa fa-comments-o" aria-hidden="true"></span> یادداشت‌ها <span class="badge" th:text="${commentSize}"></span></a>
+								</li>
+								<li>
+							 		<a href="#commentsChangeAssignTo" data-toggle="tab"><span class="fa fa-history" aria-hidden="true"></span>  تاریخچه تغییر انتساب <span class="badge" th:text="${taskAssignmentSize}"></span></a>
+								</li>
+								<li>
+									<a href="#commentsChangeStatus" data-toggle="tab"><span class="fa fa-history" aria-hidden="true"> </span>  تاریخچه تغییر وضعیت <span class="badge" th:text="${statusHistorySize}"></span> </a>
+								</li>
+								<li>
+									<a href="#attachmentsHistory" data-toggle="tab"><span class="fa fa-history" aria-hidden="true"> </span>  تاریخچه پیوست‌ها <span class="badge" th:text="${taskAttachmentSize}"></span> </a>
+								</li>
+							</ul>
+
+							<div id="my-tab-content" class="tab-content">
+
+								<div class="tab-pane active" id="commentTask">
+									<ul class="list-group">
+										<div th:each="comment : ${comments}">
+										
+											<li class="list-group-item">
+												<div class="media">
+													<div class="media-right media-top">
+														<img class="media-object"
+															th:src="@{'/image/'+${comment.createUserId}}" />
+													</div>
+													<div class="media-body">
+														<strong target="_blank" class="text-primary" th:text="${comment.createUser}"></strong>
+														<small>&nbsp;&nbsp;یادداشت گذاشت&nbsp;&nbsp;</small>
+														
+														<abbr class="timeago" th:title="${comment.updateDate}" dir="ltr"/><br/>															
+														<code target="_blank" th:text="'#'+${comment.id}"></code>														
+														<a  class="list-group-item"  data-toggle="dropdown" th:text="${comment.description}"/>
+														 <ul class="dropdown-menu">
+														    <li>
+														    	<a th:href="@{'/editComment/'+${comment.id}}">Edit</a>
+														    	<!-- <a href="editCommentModal.html" data-toggle="modal"  data-target="#exampleModal">Edit</a> -->
+														    </li>
+														    <li>
+														    	<a th:href="@{'/removeComment/'+${comment.id}}" type="submit" onclick="return confirm('Are you sure you want to delete this items?')">Delete</a>
+														    	<!-- <a th:onclick="'deleteComment('+${comment.id}+','+${comment.taskId.id}+')'">Delete</a> -->
+														    	
+														    </li>
+														  </ul>
+													</div>
+												</div>
+											</li>
+										</div>
+									</ul>
+								</div>
+								
+								  <div id="exampleModal" class="modal fade text-center">
+								    <div class="modal-dialog">
+								      <div class="modal-content">
+								      </div>
+								    </div>
+								  </div>
+
+
+
+								<div class="tab-pane" id="commentsChangeAssignTo">
+									<ul class="list-group">
+										<div th:each="comment : ${commentsChangeAssignTo}">
+											<li class="list-group-item">
+												
+												<div class="row">
+													<div class="col-md-1" >
+														<img class="img-rounded" th:src="@{'/image/'+${comment.createUserId}}" />
+													</div>
+													
+													<div class="col-md-11" >
+														<div class="row">
+															<div class="col-md-12" >
+																<strong target="_blank" class="text-primary" th:text="${comment.createUser}"></strong>
+																<small>&nbsp;&nbsp;تغییر انتساب داد&nbsp;&nbsp;</small>
+																<!-- <small th:text="${comment.updateDate}"></small> -->																
+													           	<abbr class="timeago" th:title="${comment.updateDate}" dir="ltr"/><br/>													       	   													       	   
+															</div>
+														</div>
+														
+														<div class="row" bgcolor="#eee">
+															<div class="col-md-1"  >
+																<div class="pull-left">
+																	از:
+																</div>
+															</div>
+															<div class="col-md-4" >
+																<div class="row">
+																	<div class="col-md-2" >
+																		<img class="img-rounded" th:if="${comment.memberFrom != null}" th:src="@{'/image/'+${comment.memberFrom.id}}" width="20" height="20" />
+																	</div>
+																	<div class="col-md-10" >
+																		<del th:if="${comment.memberFrom != null}" th:text="${comment.memberFrom.username}"></del>
+																	</div>
+																</div>
+															</div>
+															<div class="col-md-2" >&nbsp;</div>
+															<div class="col-md-1"  >
+																<div class="pull-left">
+																	به:
+																</div>
+															</div>
+															<div class="col-md-4" >
+																<div class="row">
+																	<div class="col-md-2" >
+																		<img class="img-rounded" th:src="@{'/image/'+${comment.memberTo.id}}" width="20" height="20" />
+																	</div>
+																	<div class="col-md-10" >
+																		<strong th:if="${comment.memberTo != null}" th:text="${comment.memberTo.username}"></strong>
+																	</div>
+																</div>
+															</div>
+														</div>
+														
+														<div class="row">
+															<div class="col-md-12" >
+																<i  th:if="${comment.comment != null}" th:text="${comment.comment}"></i>
+															</div>
+														</div>
+													</div>														
+												</div>																								
+											</li>
+										</div>
+									</ul>
+								</div>
+
+
+								<div class="tab-pane" id="commentsChangeStatus">
+									<ul class="list-group">
+										<div th:each="comment : ${commentsChangeStatus}">
+										
+											<li class="list-group-item">
+													
+													<div class="row">
+														<div class="col-md-1" >
+															<img class="img-rounded" th:src="@{'/image/'+${comment.createUserId}}" />
+														</div>
+														
+														<div class="col-md-11" >
+															<div class="row">
+																<div class="col-md-12" >
+																	<strong target="_blank" class="text-primary" th:text="${comment.createUser}"></strong>
+																	<small>&nbsp;&nbsp;تغییر وضعیت داد&nbsp;&nbsp;</small>
+																	<!-- <small th:text="${comment.updateDate}"></small> -->
+																	<abbr class="timeago" th:title="${comment.updateDate}" dir="ltr"/><br/>
+																</div>
+															</div>
+															
+															<div class="row">
+																<div class="col-md-1"  >
+																	<div class="pull-left">
+																		از:
+																	</div>
+																</div>
+																<div class="col-md-2" >																	
+																	<del class="text-lowercase" th:if="${comment.fromStatus != null}" th:text="${comment.fromStatus}"></del>											
+																</div>
+																<!-- <div class="col-md-2" >&nbsp;</div> -->
+																<div class="col-md-1"  >
+																	<div class="pull-left">
+																		به:
+																	</div>
+																</div>
+																<div class="col-md-2" >
+																	<strong class="text-lowercase" th:if="${comment.toStatus != null}" th:text="${comment.toStatus}"></strong>
+																</div>
+															</div>
+															
+															<div class="row">
+																<div class="col-md-12" >
+																	<i  th:if="${comment.comment != null}" th:text="${comment.comment}"></i>
+																</div>
+															</div>
+														</div>															
+													</div>																										
+												</li>
+										</div>
+									</ul>
+								</div>
+										
+
+								<div class="tab-pane" id="attachmentsHistory">
+									<ul class="list-group">
+										<div th:each="attach : ${attachmentsHistory}">
+											<li class="list-group-item">
+												
+												<div class="row">
+													<div class="col-md-1" >
+														<img class="img-rounded" th:src="@{'/image/'+${attach.createUserId}}" />
+													</div>
+													
+													<div class="col-md-11" >
+														<div class="row">
+															<div class="col-md-12" >
+																<strong target="_blank" class="text-primary" th:text="${attach.createUser}"></strong>
+																<small>&nbsp;&nbsp;پیوست اضافه کرد&nbsp;&nbsp;</small>																
+													           	<abbr class="timeago" th:title="${attach.updateDate}" dir="ltr"/><br/>													       	   													       	   
+															</div>
+														</div>
+														
+														<a  class="list-group-item"  data-toggle="dropdown" th:text="${comment.description}"/>
+														 <ul class="dropdown-menu">
+														    <li>
+														    	<a th:href="@{'/editComment/'+${comment.id}}">Edit</a>
+														    	<a href="editCommentModal.html" data-toggle="modal"  data-target="#exampleModal">Edit</a>
+														    </li>
+														    <li>
+														    	<a th:href="@{'/removeComment/'+${comment.id}}" type="submit" onclick="return confirm('Are you sure you want to delete this items?')">Delete</a>
+														    	<a th:onclick="'deleteComment('+${comment.id}+','+${comment.taskId.id}+')'">Delete</a>
+														    	
+														    </li>
+														  </ul>
+														  
+														<div class="row">
+															<a  class="list-group-item">
+																<div class="col-md-12" >
+																	<a target="_blank" th:if="${attach.name != null}" th:text="${attach.name}" th:href="@{'/downloadAttachment/'+${attach.id}}" ></a>
+																</div>
+																<div class="col-md-12" >
+																	<i  th:if="${attach.comment != null}" th:text="${attach.comment}"></i>
+																</div>
+															</a>
+															<ul class="dropdown-menu">
+															    <li>
+															    	<a th:href="@{'/removeAttachment/'+${attach.id}}" type="submit" onclick="return confirm('Are you sure you want to delete this items?')">Delete</a>
+															    	<a th:onclick="'deleteAttachment('+${attach.id}+','+${comment.taskId.id}+')'">Delete</a>
+															    	
+															    </li>
+														  	</ul>
+														</div>
+													</div>														
+												</div>																								
+											</li>
+										</div>
+									</ul>									
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+    
+
+				<div class="col-md-4" >
+					
+						<div class="panel panel-default">
+						
+							<div class="panel-heading" >								
+								<div class="text-center" th:text="*{currentTaskStatus}">
+								</div>
+							</div>
+							<div class="panel-body">
+								<div class="row">
+									<label th:text="#{lbl_reporter}" class="col-sm-6 control-label"></label>
+									<div class="col-sm-6">
+										<input th:value="*{createUserId}" />
+									</div>
+								</div>
+								<div class="row">
+									<label th:text="#{lbl_assignto}" class="col-sm-6 control-label"></label>
+									<div class="col-sm-6">
+										<input th:attr="value=*{currentMember == null ? ' ' : currentMember.username}" />
+									</div>
+								</div>
+	
+								<div class="row">
+									<label th:text="#{lbl_status}" class="col-sm-6 control-label"></label>
+									<div class="col-sm-6">
+										<input th:attr="value=*{currentTaskStatus.value}" />
+									</div>
+								</div>
+	
+								<div class="row">
+									<label th:text="#{lbl_creatdate}" class="col-sm-6 control-label"></label>
+									<div class="col-sm-6">
+										<input th:value="*{createDate}" />
+									</div>
+								</div>
+	
+								<div class="row">
+									<label th:text="#{lbl_updatedate}" class="col-sm-6 control-label"></label>
+									<div class="col-sm-6">
+										<input th:value="*{updateDate}" />
+									</div>
+								</div>
+	
+								<div class="row">
+									<label th:text="#{lbl_dodate}" class="col-sm-6 control-label"></label>
+									<div class="col-sm-6">
+										<input th:value="*{dueDate}" />
+									</div>
+								</div>
+							</div>						
+					</div>
+				</div>
+			</div>
+					
+		</form>
+
+	<script>
+	//<![CDATA[
+
+
+		function memberSelected(){
+			var e=document.getElementById("memberId").value;
+			var e2=document.getElementById("statusId").value;
+			$('#memberId').val(e);
+			$('#statusId').val(e2);
+		}
+	     var hidden = false;
+		 function showComment(){
+			        hidden = !hidden;
+			        if(hidden) {
+			            document.getElementById('commentInputId').style.visibility = 'hidden';
+			            document.getElementById('saveCommentBtnId').style.visibility = 'hidden';
+			        } else {
+			            document.getElementById('commentInputId').style.visibility = 'visible';
+			            document.getElementById('saveCommentBtnId').style.visibility = 'visible';
+			        }
+	     }
+		 function statusSelected(){				
+				var e=document.getElementById("statusId").value;
+				$('#statusId').val(e);
+		 }
+		 function saveComment(){
+
+			 $('#saveCommentFormId').submit();
+		 }
+
+
+		 (function timeAgo(selector) {
+
+			    var templates = {
+			        prefix: "",
+			        suffix: " ago",
+			        seconds: "less than a minute",
+			        minute: "about a minute",
+			        minutes: "%d minutes",
+			        hour: "about an hour",
+			        hours: "about %d hours",
+			        day: "a day",
+			        days: "%d days",
+			        month: "about a month",
+			        months: "%d months",
+			        year: "about a year",
+			        years: "%d years"
+			    };
+			    var template = function(t, n) {
+			        return templates[t] && templates[t].replace(/%d/i, Math.abs(Math.round(n)));
+			    };
+
+			    var timer = function(time) {
+			        if (!time)
+			            return;
+			        time = time.replace(/\.\d+/, ""); // remove milliseconds
+			        time = time.replace(/-/, "/").replace(/-/, "/");
+			        time = time.replace(/T/, " ").replace(/Z/, " UTC");
+			        time = time.replace(/([\+\-]\d\d)\:?(\d\d)/, " $1$2"); // -04:00 -> -0400
+			        time = new Date(time * 1000 || time);
+
+			        var now = new Date();
+			        var seconds = ((now.getTime() - time) * .001) >> 0;
+			        var minutes = seconds / 60;
+			        var hours = minutes / 60;
+			        var days = hours / 24;
+			        var years = days / 365;
+
+			        return templates.prefix + (
+			                seconds < 45 && template('seconds', seconds) ||
+			                seconds < 90 && template('minute', 1) ||
+			                minutes < 45 && template('minutes', minutes) ||
+			                minutes < 90 && template('hour', 1) ||
+			                hours < 24 && template('hours', hours) ||
+			                hours < 42 && template('day', 1) ||
+			                days < 30 && template('days', days) ||
+			                days < 45 && template('month', 1) ||
+			                days < 365 && template('months', days / 30) ||
+			                years < 1.5 && template('year', 1) ||
+			                template('years', years)
+			                ) + templates.suffix;
+			    };
+
+			    var elements = document.getElementsByClassName('timeago');
+			    for (var i in elements) {
+			        var $this = elements[i];
+			        if (typeof $this === 'object') {
+			            $this.innerHTML = timer($this.getAttribute('title') || $this.getAttribute('datetime'));
+			        }
+			    }
+			    // update time every minute
+			    setTimeout(timeAgo, 60000);
+
+			})();
+			//]]>
+	</script>	
+	</section>
+</body>
+</html>

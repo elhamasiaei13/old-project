@@ -1,0 +1,19 @@
+1492060857636	Delete element
+1492069969084	Delete element
+1492074461888	Rename resource 'cargo-ds.xml'
+1492074583560	Delete element
+1492074594048	Delete element
+1492074604044	Delete element
+1492250644641	Rename package 'adapter'
+1492250710549	Rename package 'com.parvanpajooh.logesticmng.adapter'
+1492250777610	Rename type 'IdentityManagement2ServiceAdapter'
+1492250790848	Rename type 'IdentityManagement2ServiceAdapterRest'
+1492250799227	Rename type 'carrierServiceAdapter'
+1492254511761	Rename type 'AccountingLocalServiceImpl'
+1492254525665	Rename type 'AccountingServiceImpl'
+1492254585359	Rename type 'CarrierServiceAdapter'
+1492254592342	Rename type 'CarrierServiceAdapterRest'
+1492254790220	Rename type 'AccountingLocalService'
+1492254817934	Rename type 'AccountingService'
+1492255725362	Rename type 'CarrierLocalService'
+1492255734097	Rename type 'CarrierService'

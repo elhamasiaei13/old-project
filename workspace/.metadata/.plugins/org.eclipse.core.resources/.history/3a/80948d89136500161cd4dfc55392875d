@@ -1,0 +1,2238 @@
+{
+  "entity": [
+    {
+      "name": "User",
+      "actions": [
+        {
+          "name": "create",
+          "url": "/identitymanagement2-web/user/save",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "modify",
+          "url": "/identitymanagement2-web/user/save",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "delete",
+          "url": "/identitymanagement2-web/user/del",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "view",
+          "url": "/identitymanagement2-web/user/",
+          "enabled": false,
+          "type": "object"
+        },
+        {
+          "name": "paging",
+          "url": "/user/paging",
+          "enabled": true,
+          "type": "table"
+        },
+        {
+          "name": "changePassword",
+          "url": "/identitymanagement2-web/user/profile",
+          "enabled": true,
+          "type": "object"
+        },
+         {
+          "name": "resetPassword",
+          "url": "/identitymanagement2-web/user/resetPassword",
+          "enabled": true,
+          "type": "object"
+        }
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": true,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "version",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "firstName",
+          "dataType": "string",
+          "order": 1,
+          "size": 200,
+          "inputType": "text",
+          "title": "user.firstName",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "lastName",
+          "dataType": "string",
+          "order": 2,
+          "size": 200,
+          "inputType": "text",
+          "title": "user.lastName",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "accessControl": {
+          	"enabled": true,
+          	"uri": "com.parvanpajooh.identitymanagement2.model.User.lastName"
+          },
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "canonicalSearchName",
+          "dataType": "string",
+          "order": 3,
+          "size": 200,
+          "inputType": "text",
+          "title": "user.canonicalSearchName",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "userName",
+          "dataType": "string",
+          "order": 4,
+          "size": 200,
+          "inputType": "text",
+          "title": "user.userName",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "displayName",
+          "dataType": "string",
+          "order": 5,
+          "size": 200,
+          "inputType": "text",
+          "title": "user.displayName",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "email",
+          "dataType": "string",
+          "order": 6,
+          "size": 200,
+          "inputType": "text",
+          "title": "user.email",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "newPassword",
+          "dataType": "string",
+          "order": 7,
+          "size": 200,
+          "inputType": "password",
+          "title": "user.newPassword",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": false,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+         {
+          "name": "confirmNewPassword",
+          "dataType": "string",
+          "order": 7,
+          "size": 200,
+          "inputType": "password",
+          "title": "user.confirmNewPassword",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": false,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+         {
+          "name": "password",
+          "dataType": "string",
+          "order": 7,
+          "size": 200,
+          "inputType": "password",
+          "title": "user.password",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": false,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "userGroupId",
+          "dataType": "long",
+          "order": 8,
+          "size": 300,
+          "inputType": "select2",
+          "title": "user.userGroupName",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "url",
+            "url": "/identitymanagement2-web/userGroup/paging",
+            "allowClear": true,
+            "placeholder": "choose",
+            "exteraParam": [
+              	"'columns[1][data]': 'id'",
+                "start: (page - 1) * 20",
+                "length: 20",
+                "'order[1][column]': 1",
+                "'order[1][dir]': 'asc'",
+                "parentCode: $('#contactstateModify').val()",
+              "term: term"
+            ],
+            "formatResult": "function(aaData){return aaData.name;}",
+            "formatSelection": "function(aaData){if (aaData.name) {return aaData.name} else {return aaData.id};}",
+            "initSelectionUrl": "/identitymanagement2-web/userGroup/get",
+            "initSelectionExteraParam": [
+              "id: id"
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [
+            {
+              "name": "notempty",
+              "attr": [
+                {
+                  "messageKey": "error-required"
+                }
+              ]
+            }
+          ],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "objectAccessScopeId",
+          "dataType": "long",
+          "order": 6,
+          "size": 0,
+          "inputType": "select2",
+          "title": "objectAccessScope",
+          "hint": "objectAccessScope",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "firstRow": {
+              "text": "&nbsp;",
+              "value": ""
+            },
+            "sourceType": "session",
+            "key": "objectAccessScopes",
+            "dataType": "list",
+            "converter": "com.parvanpajooh.identitymanagement2.converter.ObjectAccessScopeConverter"
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [
+            {
+              "name": "notempty",
+              "attr": [
+                {
+                  "messageKey": "error-required"
+                }
+              ]
+            }
+          ],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "createDate",
+          "dataType": "date",
+          "order": 4,
+          "size": 80,
+          "inputType": "hidden",
+          "title": "createDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "updateDate",
+          "dataType": "date",
+          "order": 9,
+          "size": 80,
+          "inputType": "hidden",
+          "title": "updateDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "active",
+          "dataType": "boolean",
+          "order": 10,
+          "size": 80,
+          "inputType": "checkbox",
+          "title": "active",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        }
+      ],
+      "forms": [
+        {
+          "name": "search",
+          "type": "search",
+          "fields": [
+            {
+              "name": "canonicalSearchName",
+              "validators": [],
+              "enabled": true
+            },
+            {
+              "name": "active",
+              "inputType": "select2",
+              "size": 100,
+              "values": {
+                "sourceType": "inline",
+                "data": [
+                  {
+                    "text": "&nbsp;",
+                    "value": ""
+                  },
+                  {
+                    "text": "بله",
+                    "value": "true"
+                  },
+                  {
+                    "text": "خیر",
+                    "value": "false"
+                  }
+                ]
+              },
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "create",
+          "type": "create",
+          "fields": [
+            {
+              "name": "firstName",
+              "validators": [
+	            {
+	              "name": "notempty",
+	              "attr": [
+	                {
+	                  "messageKey": "error-required"
+	                }
+	              ]
+	            }
+	          ],
+              "enabled": true
+            },
+            {
+              "name": "lastName",
+              "validators": [
+	            {
+	              "name": "notempty",
+	              "attr": [
+	                {
+	                  "messageKey": "error-required"
+	                }
+	              ]
+	            }
+	          ],
+              "enabled": true
+            },
+            {
+              "name": "userName",
+              "validators": [
+	            {
+	              "name": "notempty",
+	              "attr": [
+	                {
+	                  "messageKey": "error-required"
+	                }
+	              ]
+	            }
+	          ],
+              "enabled": true
+            },
+            {
+              "name": "email",
+              "enabled": true
+            },
+            {
+              "name": "password",
+              "enabled": true
+            },
+            {
+              "name": "userGroupId",
+              "enabled": true
+            },
+            {
+              "name": "objectAccessScopeId",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "modify",
+          "type": "modify",
+          "fields": [
+            {
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            },
+            {
+              "name": "firstName",
+              "validators": [
+	            {
+	              "name": "notempty",
+	              "attr": [
+	                {
+	                  "messageKey": "error-required"
+	                }
+	              ]
+	            }
+	          ],
+              "enabled": true
+            },
+            {
+              "name": "lastName",
+              "validators": [
+	            {
+	              "name": "notempty",
+	              "attr": [
+	                {
+	                  "messageKey": "error-required"
+	                }
+	              ]
+	            }
+	          ],
+              "enabled": true
+            },
+            {
+              "name": "userName",
+              "validators": [
+	            {
+	              "name": "notempty",
+	              "attr": [
+	                {
+	                  "messageKey": "error-required"
+	                }
+	              ]
+	            }
+	          ],
+              "enabled": true
+            },
+            {
+              "name": "email",
+              "enabled": true
+            },
+            {
+              "name": "userGroupId",
+              "enabled": true
+            },
+            {
+              "name": "objectAccessScopeId",
+              "enabled": true
+            },
+            {
+              "name": "active",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "delete",
+          "type": "delete",
+          "fields": [
+            {
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "resetPassword",
+          "type": "modify",
+          "fields": [
+			{
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            },
+            {
+              "name": "newPassword",
+              "validators": [
+	            {
+	              "name": "notempty",
+	              "attr": [
+	                {
+	                  "messageKey": "error-required"
+	                }
+	              ]
+	            }
+	          ],
+              "enabled": true
+            }
+          ]
+        },
+    	{
+          "name": "changePassword",
+          "type": "create",
+          "fields": [
+
+            {
+              "name": "newPassword",
+              "validators": [
+	            {
+	              "name": "notempty",
+	              "attr": [
+	                {
+	                  "messageKey": "error-required"
+	                }
+	              ]
+	            }
+	          ],
+              "enabled": true
+            },
+            {
+              "name": "confirmNewPassword",
+              "validators": [
+	            {
+	              "name": "notempty",
+	              "attr": [
+	                {
+	                  "messageKey": "error-required"
+	                }
+	              ]
+	            }
+	          ],
+              "enabled": true
+            },
+            {
+              "name": "password",
+             "validators": [
+	            {
+	              "name": "notempty",
+	              "attr": [
+	                {
+	                  "messageKey": "error-required"
+	                }
+	              ]
+	            }
+	          ],
+              "enabled": true
+            }
+          ]
+        }
+      ],
+      "data-tables": [
+        {
+          "name": "list",
+          "fields": [
+            {
+              "name": "createDate",
+              "enabled": true
+            },
+            {
+              "name": "updateDate",
+              "enabled": true
+            },
+            {
+              "name": "firstName",
+              "size": 80,
+              "enabled": true
+            },
+            {
+              "name": "lastName",
+              "size": 80,
+              "enabled": true
+            },
+            {
+              "name": "userName",
+              "size": 80,
+              "enabled": true
+            },
+            {
+              "name": "userGroupId",
+              "size": 80,
+              "enabled": true
+            },
+            {
+              "name": "objectAccessScopeId",
+              "size": 80,
+              "enabled": true
+            },
+            {
+              "name": "active",
+              "renderFunction": "booleanRender",
+              "size": 30,
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "UserGroup",
+      "actions": [
+        {
+          "name": "create",
+          "url": "/identitymanagement2-web/userGroup/save",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "modify",
+          "url": "/identitymanagement2-web/userGroup/save",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "delete",
+          "url": "/identitymanagement2-web/userGroup/del",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "view",
+          "url": "/identitymanagement2-web/userGroup/",
+          "enabled": false,
+          "type": "object"
+        },
+        {
+          "name": "paging",
+          "url": "/userGroup/paging",
+          "enabled": true,
+          "type": "table"
+        }
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": true,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "version",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "name",
+          "dataType": "string",
+          "order": 1,
+          "size": 80,
+          "inputType": "text",
+          "title": "userGroup.name",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "description",
+          "dataType": "string",
+          "order": 2,
+          "size": 600,
+          "inputType": "textarea",
+          "title": "userGroup.description",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "canonicalSearchName",
+          "dataType": "string",
+          "order": 3,
+          "size": 200,
+          "inputType": "text",
+          "title": "userGroup.canonicalSearchName",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "createDate",
+          "dataType": "date",
+          "order": 4,
+          "size": 80,
+          "inputType": "hidden",
+          "title": "createDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "updateDate",
+          "dataType": "date",
+          "order": 5,
+          "size": 80,
+          "inputType": "hidden",
+          "title": "updateDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "active",
+          "dataType": "boolean",
+          "order": 6,
+          "size": 80,
+          "inputType": "checkbox",
+          "title": "active",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        }
+      ],
+      "forms": [
+        {
+          "name": "search",
+          "type": "search",
+          "fields": [
+            {
+              "name": "canonicalSearchName",
+              "validators": [],
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "create",
+          "type": "create",
+          "fields": [
+            {
+              "name": "name",
+              "enabled": true
+            },
+            {
+              "name": "description",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "modify",
+          "type": "modify",
+          "fields": [
+            {
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            },
+            {
+              "name": "name",
+              "enabled": true
+            },
+            {
+              "name": "description",
+              "enabled": true,
+              
+            }
+          ]
+        },
+        {
+          "name": "delete",
+          "type": "delete",
+          "fields": [
+            {
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            }
+          ]
+        }
+      ],
+      "data-tables": [
+        {
+          "name": "list",
+          "fields": [
+            {
+              "name": "createDate",
+              "enabled": true
+            },
+            {
+              "name": "updateDate",
+              "enabled": true
+            },
+            {
+              "name": "name",
+              "size": 80,
+              "enabled": true
+            },
+            {
+              "name": "description",
+              "size": 200,
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Role",
+      "actions": [
+        {
+          "name": "create",
+          "url": "/identitymanagement2-web/role/save",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "modify",
+          "url": "/identitymanagement2-web/role/save",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "changePass",
+          "url": "/identitymanagement2-web/role/changePass",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "delete",
+          "url": "/identitymanagement2-web/role/del",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "view",
+          "url": "/identitymanagement2-web/role/",
+          "enabled": false,
+          "type": "object"
+        },
+        {
+          "name": "paging",
+          "url": "/role/paging",
+          "enabled": true,
+          "type": "table"
+        }
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": true,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "version",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "name",
+          "dataType": "string",
+          "order": 1,
+          "size": 100,
+          "inputType": "text",
+          "title": "role.name",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "description",
+          "dataType": "string",
+          "order": 2,
+          "size": 200,
+          "inputType": "textarea",
+          "title": "role.description",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "type",
+          "dataType": "string",
+          "order": 7,
+          "size": 200,
+          "inputType": "select2",
+          "title": "role.type",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "text": "&nbsp;",
+                "value": ""
+              },
+              {
+                "text": "omniAdmin",
+                "value": "omniAdmin"
+              },
+              {
+                "text": "guest",
+                "value": "guest"
+              },
+              {
+                "text": "normal",
+                "value": "normal"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "canonicalSearchName",
+          "dataType": "string",
+          "order": 6,
+          "size": 200,
+          "inputType": "text",
+          "title": "role.canonicalSearchName",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "createDate",
+          "dataType": "date",
+          "order": 7,
+          "size": 80,
+          "inputType": "hidden",
+          "title": "createDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "updateDate",
+          "dataType": "date",
+          "order": 8,
+          "size": 80,
+          "inputType": "hidden",
+          "title": "updateDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "active",
+          "dataType": "boolean",
+          "order": 9,
+          "size": 80,
+          "inputType": "checkbox",
+          "title": "active",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        }
+      ],
+      "forms": [
+        {
+          "name": "search",
+          "type": "search",
+          "fields": [
+            {
+              "name": "canonicalSearchName",
+              "validators": [],
+              "enabled": true
+            },
+            {
+              "name": "type",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "create",
+          "type": "create",
+          "fields": [
+            {
+              "name": "type",
+              "enabled": true
+            },
+            {
+              "name": "name",
+              "enabled": true
+            },
+            {
+              "name": "description",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "modify",
+          "type": "modify",
+          "fields": [
+            {
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            },
+            {
+              "name": "name",
+              "enabled": true
+            },
+            {
+              "name": "type",           
+              "enabled": true
+            },
+            {
+              "name": "description",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "delete",
+          "type": "delete",
+          "fields": [
+            {
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            }
+          ]
+        }
+      ],
+      "data-tables": [
+        {
+          "name": "list",
+          "fields": [
+            {
+              "name": "createDate",
+              "enabled": true
+            },
+            {
+              "name": "updateDate",
+              "enabled": true
+            },
+            {
+              "name": "name",
+              "size": 80,
+              "enabled": true
+            },
+            {
+              "name": "type",
+              "enabled": true
+            },
+            {
+              "name": "description",
+              "size": 200,
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Constraint",
+      "actions": [
+        {
+          "name": "create",
+          "url": "/identitymanagement2-web/constraint/save",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "modify",
+          "url": "/identitymanagement2-web/constraint/save",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "delete",
+          "url": "/identitymanagement2-web/constraint/del",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "view",
+          "url": "/identitymanagement2-web/constraint/",
+          "enabled": false,
+          "type": "object"
+        },
+        {
+          "name": "paging",
+          "url": "/constraint/paging",
+          "enabled": true,
+          "type": "table"
+        }
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": true,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "version",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "title",
+          "dataType": "string",
+          "order": 1,
+          "size": 300,
+          "inputType": "text",
+          "title": "constraint.title",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {},
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [
+            {
+              "name": "notempty",
+              "attr": [
+                {
+                  "messageKey": "error-required"
+                }
+              ]
+            }
+          ],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "rules",
+          "dataType": "string",
+          "order": 2,
+          "size": 300,
+          "inputType": "textarea",
+          "title": "constraint.rules",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {},
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [
+            {
+              "name": "notempty",
+              "attr": [
+                {
+                  "messageKey": "error-required"
+                }
+              ]
+            }
+          ],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "createDate",
+          "dataType": "date",
+          "order": 4,
+          "size": 80,
+          "inputType": "hidden",
+          "title": "createDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "updateDate",
+          "dataType": "date",
+          "order": 5,
+          "size": 80,
+          "inputType": "hidden",
+          "title": "updateDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "active",
+          "dataType": "boolean",
+          "order": 6,
+          "size": 80,
+          "inputType": "checkbox",
+          "title": "active",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        }
+      ],
+      "forms": [
+        {
+          "name": "search",
+          "type": "search",
+          "fields": [
+            {
+              "name": "title",
+              "validators": [],
+              "enabled": true
+            },
+            {
+              "name": "rules",
+              "inputType": "text",
+              "validators": [],
+              "enabled": true
+            },
+            {
+              "name": "active",
+              "inputType": "select2",
+              "size": 100,
+              "values": {
+                "sourceType": "inline",
+                "data": [
+                  {
+                    "text": "&nbsp;",
+                    "value": ""
+                  },
+                  {
+                    "text": "بله",
+                    "value": "true"
+                  },
+                  {
+                    "text": "خیر",
+                    "value": "false"
+                  }
+                ]
+              },
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "create",
+          "type": "create",
+          "fields": [
+            {
+              "name": "title",
+              "enabled": true
+            },
+            {
+              "name": "rules",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "modify",
+          "type": "modify",
+          "fields": [
+            {
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            },
+            {
+              "name": "title",
+              "enabled": true
+            },
+            {
+              "name": "rules",
+              "enabled": true,
+            },
+            {
+              "name": "active",
+              "enabled": true,
+              
+            }
+          ]
+        },
+        {
+          "name": "delete",
+          "type": "delete",
+          "fields": [
+            {
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            }
+          ]
+        }
+      ],
+      "data-tables": [
+        {
+          "name": "list",
+          "fields": [
+            {
+              "name": "createDate",
+              "enabled": true
+            },
+            {
+              "name": "updateDate",
+              "enabled": true
+            },
+            {
+              "name": "title",
+              "size": 80,
+              "enabled": true
+            },
+            {
+              "name": "rules",
+              "enabled": true
+            },
+            {
+              "name": "active",
+              "renderFunction": "booleanRender",
+              "size": 30,
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ObjectAccessScope",
+      "actions": [
+        {
+          "name": "create",
+          "url": "/identitymanagement2-web/objectAccessScope/save",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "modify",
+          "url": "/identitymanagement2-web/objectAccessScope/save",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "delete",
+          "url": "/identitymanagement2-web/objectAccessScope/del",
+          "enabled": true,
+          "type": "object"
+        },
+        {
+          "name": "view",
+          "url": "/identitymanagement2-web/objectAccessScope/",
+          "enabled": false,
+          "type": "object"
+        },
+        {
+          "name": "paging",
+          "url": "/objectAccessScope/paging",
+          "enabled": true,
+          "type": "table"
+        }
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": true,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "version",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "name",
+          "dataType": "string",
+          "order": 1,
+          "size": 300,
+          "inputType": "text",
+          "title": "objectAccessScope.name",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {},
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [
+            {
+              "name": "notempty",
+              "attr": [
+                {
+                  "messageKey": "error-required"
+                }
+              ]
+            }
+          ],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "code",
+          "dataType": "string",
+          "order": 1,
+          "size": 300,
+          "inputType": "text",
+          "title": "objectAccessScope.code",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {},
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [
+            {
+              "name": "notempty",
+              "attr": [
+                {
+                  "messageKey": "error-required"
+                }
+              ]
+            }
+          ],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "description",
+          "dataType": "string",
+          "order": 2,
+          "size": 300,
+          "inputType": "textarea",
+          "title": "objectAccessScope.description",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {},
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [
+            {
+              "name": "notempty",
+              "attr": [
+                {
+                  "messageKey": "error-required"
+                }
+              ]
+            }
+          ],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "createDate",
+          "dataType": "date",
+          "order": 4,
+          "size": 80,
+          "inputType": "hidden",
+          "title": "createDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "updateDate",
+          "dataType": "date",
+          "order": 5,
+          "size": 80,
+          "inputType": "hidden",
+          "title": "updateDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "active",
+          "dataType": "boolean",
+          "order": 6,
+          "size": 80,
+          "inputType": "checkbox",
+          "title": "active",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "values": {
+            "sourceType": "inline",
+            "data": [
+              {
+                "value": "true"
+              }
+            ]
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        }
+      ],
+      "forms": [
+        {
+          "name": "search",
+          "type": "search",
+          "fields": [
+            {
+              "name": "name",
+              "validators": [],
+              "enabled": true
+            },
+            {
+              "name": "code",
+              "validators": [],
+              "enabled": true
+            },
+            {
+              "name": "active",
+              "inputType": "select2",
+              "size": 100,
+              "values": {
+                "sourceType": "inline",
+                "data": [
+                  {
+                    "text": "&nbsp;",
+                    "value": ""
+                  },
+                  {
+                    "text": "بله",
+                    "value": "true"
+                  },
+                  {
+                    "text": "خیر",
+                    "value": "false"
+                  }
+                ]
+              },
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "create",
+          "type": "create",
+          "fields": [
+            {
+              "name": "name",
+              "enabled": true
+            },
+            {
+              "name": "code",
+              "enabled": true
+            },
+            {
+              "name": "description",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "modify",
+          "type": "modify",
+          "fields": [
+            {
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            },
+            {
+              "name": "name",
+              "enabled": true
+            },
+            {
+              "name": "code",
+              "enabled": true,
+            },
+            {
+              "name": "description",
+              "enabled": true,
+            },
+            {
+              "name": "active",
+              "enabled": true,
+              
+            }
+          ]
+        },
+        {
+          "name": "delete",
+          "type": "delete",
+          "fields": [
+            {
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            }
+          ]
+        }
+      ],
+      "data-tables": [
+        {
+          "name": "list",
+          "fields": [
+            {
+              "name": "createDate",
+              "enabled": true
+            },
+            {
+              "name": "updateDate",
+              "enabled": true
+            },
+            {
+              "name": "code",
+              "size": 80,
+              "enabled": true
+            },
+            {
+              "name": "name",
+              "enabled": true
+            },
+            {
+              "name": "description",
+              "enabled": true
+            },
+            {
+              "name": "active",
+              "renderFunction": "booleanRender",
+              "size": 30,
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

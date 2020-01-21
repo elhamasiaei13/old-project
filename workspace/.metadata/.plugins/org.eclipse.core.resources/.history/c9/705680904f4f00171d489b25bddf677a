@@ -1,0 +1,538 @@
+/**
+ * 
+ */
+package com.parvanpajooh.waybillmanagement.domain.service.impl;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.service.impl.GenericDomainServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+import com.parvanpajooh.commons.util.DateUtilV2;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.waybillmanagement.domain.model.Waybill;
+import com.parvanpajooh.waybillmanagement.domain.model.criteria.WaybillCriteria;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.CargoWaybillDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.CityInfoDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.ClientDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.ContactInfoDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.NodeDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.PackingItemDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.PriceItemDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.TransferNodeDto;
+import com.parvanpajooh.waybillmanagement.domain.model.enums.ChargeParty;
+import com.parvanpajooh.waybillmanagement.domain.model.enums.PersonType;
+import com.parvanpajooh.waybillmanagement.domain.model.enums.WeightUnit;
+import com.parvanpajooh.waybillmanagement.domain.repository.WaybillRepository;
+import com.parvanpajooh.waybillmanagement.domain.service.CityDomainService;
+import com.parvanpajooh.waybillmanagement.domain.service.ClientDomainService;
+import com.parvanpajooh.waybillmanagement.domain.service.NodeDomainService;
+import com.parvanpajooh.waybillmanagement.domain.service.WaybillDomainService;
+import com.parvanpajooh.waybillmanagement.domain.service.adapter.StockAdapter;
+
+/**
+ * @author MO
+ *
+ */
+public class WaybillDomainServiceImpl extends GenericDomainServiceImpl<Waybill, Long> implements WaybillDomainService {
+	
+	static final Logger log = LoggerFactory.getLogger(WaybillDomainServiceImpl.class);
+	
+	private WaybillRepository waybillRepository;
+	
+	@Inject
+    private StockAdapter stockAdapter;
+	
+	@Inject
+	private NodeDomainService nodeDomainService;
+	
+	@Inject
+	private CityDomainService cityDomainService;
+	
+	@Inject
+	private ClientDomainService clientDomainService;
+	
+	@Inject
+	public void setRepository(WaybillRepository waybillRepository) {
+		this.repository = waybillRepository;
+		this.waybillRepository = waybillRepository;
+	}
+	
+	@Override
+	public CargoWaybillDto getNewCargo() throws ParvanServiceException {
+		UserInfo userInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+		
+		CargoWaybillDto waybill = new CargoWaybillDto();
+		waybill.setIssuingDate(LocalDateTime.now());
+		
+		UserInfoWrapper uiw = new UserInfoWrapper(userInfo);
+		
+		String cityCode = uiw.getAgentCityShortCode();
+		Long hubNodeId = uiw.getAgentHubNodeId();
+		
+		waybill.setShipperCityCode(cityCode);
+		
+		waybill.setShipperPersonType(PersonType.REAL);
+		waybill.setConsigneePersonType(PersonType.REAL);
+
+		PackingItemDto packingItem = new PackingItemDto();
+		packingItem.setPieces(1);
+		packingItem.setWeightUnit(WeightUnit.KILOGRAM);
+		packingItem.setTotalCharge(BigDecimal.ZERO);
+		
+		List<PackingItemDto> packingList = new ArrayList<>(1);
+		packingList.add(packingItem);
+		waybill.setPackingList(packingList);
+		
+		waybill.setTotalOtherChargesDueAgentPPD( BigDecimal.ZERO );
+		waybill.setTotalOtherChargesDueCarrierPPD( BigDecimal.ZERO );
+		waybill.setTotalTaxPPD( BigDecimal.ZERO );
+		waybill.setTotalWeightChargePPD( BigDecimal.ZERO );
+		waybill.setTotalValuationChargePPD( BigDecimal.ZERO );
+		waybill.setTotalAmountPPD( BigDecimal.ZERO );
+
+		waybill.setTotalOtherChargesDueAgentCOLL( BigDecimal.ZERO );
+		waybill.setTotalOtherChargesDueCarrierCOLL( BigDecimal.ZERO );
+		waybill.setTotalTaxCOLL( BigDecimal.ZERO );
+		waybill.setTotalWeightChargeCOLL( BigDecimal.ZERO );
+		waybill.setTotalValuationChargeCOLL( BigDecimal.ZERO );
+		waybill.setTotalAmountCOLL( BigDecimal.ZERO );
+		
+		waybill.setOtherValueChargeParty(ChargeParty.PPD);
+		waybill.setWeightValueChargeParty(ChargeParty.PPD);
+		
+		//TODO MO: read default currency format from some setting
+		waybill.setCurrencyCode("IRR"); 
+		
+		/*List<PriceItemDto> priceItems = new ArrayList<>();
+		PriceItemDto pi = new PriceItemDto();
+		pi.setRateTypeCode("FREIGHT");
+		pi.setRateTypeEditable(true);
+		pi.setRateTypeNameEn("Feight");
+		pi.setRateTypeNameLocal("حمل");
+		pi.setRateTypeDisplayOrder(0);
+		pi.setRateTypeDisplayType(RateDisplayType.FORM);
+		pi.setRateTypeOptional(true);
+		pi.setAmount(BigDecimal.ZERO);
+		priceItems.add(pi);*/
+		
+		waybill.setPriceItems(_getDefaultPriceItems());
+		
+		//TODO MO: Set init nodes
+		if(Validator.isNotNull(hubNodeId)){
+			
+		}
+			
+		return waybill;
+	}
+
+	@Override
+	public String saveCargo(CargoWaybillDto viewWaybill) throws ParvanServiceException {
+		log.debug("Entering saveCargo : CargoWaybillDto={}", viewWaybill);
+		Waybill savingWaybill;
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		String waybillNumber = viewWaybill.getNumber();
+		try {
+			boolean isNew = Validator.isNull(viewWaybill.getId());
+			if (isNew) {
+				savingWaybill = new Waybill();
+			} else {
+				savingWaybill = get(viewWaybill.getId());
+			}
+
+			// ---------------------------------------------------
+			// init
+			// ---------------------------------------------------
+			// remove duplicate from via nodes
+			if (viewWaybill.getViaNodesList() != null) {
+				List<TransferNodeDto> viaNodes = viewWaybill.getViaNodesList();
+				TreeSet<TransferNodeDto> uniqeNodes = viaNodes.stream()
+						.distinct()
+						.collect(Collectors.toCollection(TreeSet::new));
+				
+				viewWaybill.setViaNodes(uniqeNodes);
+				
+			}
+			
+			// ---------------------------------------------------
+			// validate
+			// ---------------------------------------------------
+			Long originNodeId = null;
+			if (viewWaybill.getOriginNode() != null) {
+				originNodeId = viewWaybill.getOriginNode().getNodeId();
+			}
+			
+			Long destinationNodeId = null;
+			if (viewWaybill.getDestinationNode() != null) {
+				destinationNodeId = viewWaybill.getDestinationNode().getNodeId();
+			}
+			
+			if (originNodeId.equals(destinationNodeId)) {
+				log.info("validating waybill : origin [{}] and destination [{}] are the same", originNodeId, destinationNodeId);
+				throw new ParvanRecoverableException(ErrorCode.SAME_START_NODE_AND_END_NODE);
+			}
+			
+			final TreeSet<Long> viaNodeIds = new TreeSet<>();
+			if (viewWaybill.getViaNodes() != null) {
+				viewWaybill.getViaNodes().forEach(node -> viaNodeIds.add(node.getNodeId()));
+			}
+			
+			if (!viaNodeIds.isEmpty()) {
+				Set<Long> destAndOrigin = new HashSet<>(2);
+				destAndOrigin.add(originNodeId);
+				destAndOrigin.add(destinationNodeId);
+				if (viaNodeIds.stream().anyMatch(destAndOrigin::contains)) {
+					log.info("validating waybill : origin or destination nodes [{}] are also in via nodes [{}]",
+							destAndOrigin, viaNodeIds);
+					throw new ParvanRecoverableException(ErrorCode.VIA_NODE_SAME_AS_START_NODE_OR_END_NODE);
+				}
+			}
+			
+			String shipperCityCode = viewWaybill.getShipperCityCode();
+			String consigneeCityCode = viewWaybill.getConsigneeCityCode();
+			if (Validator.isNotNull(shipperCityCode) && Validator.isNotNull(consigneeCityCode)) {
+				if (shipperCityCode.equals(consigneeCityCode)) {
+					log.info("validating waybill : shipperCityCode [{}] and consignee city code [{}] are the same",
+							shipperCityCode, consigneeCityCode);
+					throw new ParvanRecoverableException(ErrorCode.SAME_CITY_CODE);
+				}
+			}
+			
+			// ---------------------------------------------------
+			// set members
+			// ---------------------------------------------------
+			if (originNodeId != null) {
+				NodeDto originNode = nodeDomainService.get(originNodeId);
+				TransferNodeDto transferOriginNode = viewWaybill.getOriginNode();
+				transferOriginNode.setNodeName(originNode.getName());
+				transferOriginNode.setNodeCode(originNode.getCodeName());
+			}
+			
+			if (destinationNodeId != null) {
+				NodeDto destinationNode = nodeDomainService.get(destinationNodeId);
+				TransferNodeDto transferDestinationNode = viewWaybill.getDestinationNode();
+				transferDestinationNode.setNodeName(destinationNode.getName());
+				transferDestinationNode.setNodeCode(destinationNode.getCodeName());
+			}
+			
+			if (viewWaybill.getViaNodes() != null && !viewWaybill.getViaNodes().isEmpty()) {
+				int order = 0;
+				for (TransferNodeDto viaTransferNode : viewWaybill.getViaNodes()) {
+					NodeDto viaNode = nodeDomainService.get(viaTransferNode.getNodeId());
+					viaTransferNode.setOrder(order++);
+					viaTransferNode.setNodeName(viaNode.getName());
+					viaTransferNode.setNodeCode(viaNode.getCodeName());
+				}
+			}
+			
+			if (Validator.isNotNull(viewWaybill.getStrFlightDate())) {
+				String strFlightDate = viewWaybill.getStrFlightDate();
+				LocalDate flightDate = DateUtilV2.convertStringDateToLocalDate(strFlightDate);
+				viewWaybill.setFlightDate(flightDate);
+			}
+			
+			if (Validator.isNotNull(viewWaybill.getShipperPersonUuid())) {
+				ClientDto shipper = clientDomainService.getByUuid(viewWaybill.getShipperPersonUuid());
+				String name = shipper.getFirstNameLocal() + StringPool.SPACE + shipper.getLastNameLocal();
+				viewWaybill.setShipperNationalId(shipper.getNationalId());
+				viewWaybill.setShipperPersonType(shipper.getType());
+				viewWaybill.setShipperName(name);
+				viewWaybill.setShipperNote(shipper.getRemarks());
+				if (shipper.getPrimaryContactInfo() != null) {
+					ContactInfoDto shipperContact = shipper.getPrimaryContactInfo();
+					viewWaybill.setShipperAddress(shipperContact.getAddress());
+					viewWaybill.setShipperCityCode(shipperContact.getCityCode());
+					viewWaybill.setShipperCityName(shipperContact.getCityNameLocal());
+					viewWaybill.setShipperStateCode(shipperContact.getProvinceCode());
+					viewWaybill.setShipperStateName(shipperContact.getProvinceNameLocal());
+					viewWaybill.setShipperCountryCode(shipperContact.getCountryCode());
+					viewWaybill.setShipperCountryName(shipperContact.getCountryNameLocal());
+					viewWaybill.setShipperLandlineNumber(shipperContact.getTel());
+					viewWaybill.setShipperMobileNumber(shipperContact.getMobile());
+					viewWaybill.setShipperPostalCode(shipperContact.getPostalCode());
+				}
+			}
+			
+			if (Validator.isNotNull(viewWaybill.getConsigneePersonUuid())) {
+				ClientDto consignee = clientDomainService.getByUuid(viewWaybill.getConsigneePersonUuid());
+				String name = consignee.getFirstNameLocal() + StringPool.SPACE + consignee.getLastNameLocal();
+				viewWaybill.setConsigneeNationalId(consignee.getNationalId());
+				viewWaybill.setConsigneePersonType(consignee.getType());
+				viewWaybill.setConsigneeName(name);
+				viewWaybill.setConsigneeNote(consignee.getRemarks());
+				if (consignee.getPrimaryContactInfo() != null) {
+					ContactInfoDto consigneeContact = consignee.getPrimaryContactInfo();
+					viewWaybill.setConsigneeAddress(consigneeContact.getAddress());
+					viewWaybill.setConsigneeCityCode(consigneeContact.getCityCode());
+					viewWaybill.setConsigneeCityName(consigneeContact.getCityNameLocal());
+					viewWaybill.setConsigneeStateCode(consigneeContact.getProvinceCode());
+					viewWaybill.setConsigneeStateName(consigneeContact.getProvinceNameLocal());
+					viewWaybill.setConsigneeCountryCode(consigneeContact.getCountryCode());
+					viewWaybill.setConsigneeCountryName(consigneeContact.getCountryNameLocal());
+					viewWaybill.setConsigneeLandlineNumber(consigneeContact.getTel());
+					viewWaybill.setConsigneeMobileNumber(consigneeContact.getMobile());
+					viewWaybill.setConsigneePostalCode(consigneeContact.getPostalCode());
+				}
+			}
+			
+			// ---------------------------------------------------
+			// validate and assign waybillNumber 
+			// ---------------------------------------------------
+			// if shipment dosen't have a WayBillNumber and is new, get a valid WayBillNumber from stock
+			// and assign to it. No shipment can be saved without a valid WayBillNumber; even in draft mode.
+			// Thats why a shipment must be both without WayBillNumber and new to
+			// automatically assign a WayBillNumber to it.
+			if (isNew) {
+				log.debug("waybill is New");
+				if (Validator.isNull(waybillNumber)) {
+					// user did not enter a WayBillNumber, so we must pick one from electronic WayBillNumber(s)
+					waybillNumber = stockAdapter.getFirstAvailableElectronicDomesticWaybillNumber(userInfoWrapper.getAgentId());
+					log.debug("get waybillNumber from stock : [{}]", waybillNumber);
+					savingWaybill.setNumber(waybillNumber);
+					viewWaybill.setNumber(waybillNumber);
+				} else {
+					log.debug("validate print waybillNumber : [{}]", waybillNumber);
+					// user entered a WayBillNumber, so we must check its availability in printed WayBillNumber(s)  
+					int validityState = stockAdapter.checkPrintedWaybillNumberAvailability(
+							userInfoWrapper.getAgentId(),
+							waybillNumber);
+					
+					log.debug("waybillNumber validityState : {}", validityState);
+					switch (validityState) {
+					case 1: //NOT_EXIST
+						throw new ParvanRecoverableException(waybillNumber, ErrorCode.MANUAL_WB_VLIDATION_NOT_EXIST);
+					case 2: //NOT_ASSIGNED_TO_AGENT
+						throw new ParvanRecoverableException(waybillNumber, ErrorCode.MANUAL_WB_VLIDATION_NOT_ASSIGNED_TO_AGENT);
+					case 3: //NOT_MANUAL
+						throw new ParvanRecoverableException(waybillNumber, ErrorCode.MANUAL_WB_VLIDATION_NOT_MANUAL);
+					case 4: //USED
+						throw new ParvanRecoverableException(waybillNumber, ErrorCode.MANUAL_WB_VLIDATION_USED);
+					case 5: //UNAVAILABALE
+						throw new ParvanRecoverableException(waybillNumber, ErrorCode.MANUAL_WB_VLIDATION_UNAVAILABALE);
+					}
+					viewWaybill.setNumber(waybillNumber);
+					savingWaybill.setNumber(waybillNumber);
+				}
+			} else {
+				String oldWaybillNumber = savingWaybill.getNumber();
+				log.debug("waybill exists : [{}]", oldWaybillNumber);
+				if (! waybillNumber.equals( oldWaybillNumber )) {
+					// Shipment is not new, but the waybill numbers dosen't match
+					log.error("waybill numbers dosen't match");
+					throw new ParvanRecoverableException(waybillNumber, ErrorCode.DATA_IS_INVALID);
+				}
+			}
+			
+			// ---------------------------------------------------
+			// XML marshaling and saving
+			// ---------------------------------------------------
+			String xml = _cargoWaybillDtoToXml(viewWaybill);
+			log.debug("XML marshaling done successfuly");
+			savingWaybill.setXml(xml);
+			super.save(savingWaybill);
+			log.info("waybill saved");
+			// ---------------------------------------------------
+			// update waybillNumber status in stock
+			// ---------------------------------------------------
+			if (isNew) {
+				log.debug("update stock state");
+				String eventId = UUID.randomUUID().toString();
+				stockAdapter.setWaybillNumberAsUsed(userInfoWrapper.getAgentId(), savingWaybill.getNumber(), eventId);
+			}
+			return waybillNumber;
+		} catch(ParvanServiceException e) {
+			throw e;
+		} catch(JAXBException e) {
+			log.error("error during save : ", e);
+			throw new ParvanUnrecoverableException(waybillNumber, e);
+		}
+	}
+
+	@Override
+	public CargoWaybillDto getCargo(String waybillNumber) throws ParvanServiceException {
+		CargoWaybillDto cargoWaybill = null;
+		try {
+			Waybill waybill = waybillRepository.get(waybillNumber);
+			cargoWaybill = _xmlToCargoWaybillDto(waybill.getXml());
+			cargoWaybill.setId(waybill.getId());
+			
+			if (cargoWaybill.getShipperCityCode() != null) {
+				CityInfoDto city = cityDomainService.get(cargoWaybill.getShipperCityCode());
+				cargoWaybill.setShipperCityName(city.getNameLocal());
+				cargoWaybill.setShipperStateName(city.getProvinceNameLocal());
+				cargoWaybill.setShipperCountryName(city.getCountryNameLocal());
+			}
+			
+			if (cargoWaybill.getConsigneeCityCode() != null) {
+				CityInfoDto city = cityDomainService.get(cargoWaybill.getConsigneeCityCode());
+				cargoWaybill.setConsigneeCityName(city.getNameLocal());
+				cargoWaybill.setConsigneeStateName(city.getProvinceNameLocal());
+				cargoWaybill.setConsigneeCountryName(city.getCountryNameLocal());
+			}
+			
+			if (cargoWaybill.getViaNodes() != null) {
+				List<TransferNodeDto> viaNodesList = new ArrayList<>();
+				cargoWaybill.getViaNodes().forEach(viaNode -> viaNodesList.add(viaNode));
+				cargoWaybill.setViaNodesList(viaNodesList);
+			}
+			
+			return cargoWaybill;
+		} catch (ParvanDaoException e) {
+			log.debug("Error during get cargo : ", e.getMessage());
+			ErrorCode code = e.getErrorCode();
+			if (code == null || !code.equals(ErrorCode.OBJECT_NOT_FOUND.toValue())){
+				throw new ParvanServiceException("Unknown clientException occurred while initLoginFindEmployeeByUsername", e);				
+			}else{
+				throw new ParvanUnrecoverableException(e.getMessage(), e.getErrorCode());
+			}
+		} catch (JAXBException e) {
+			log.debug("Error during get cargo : ", e.getMessage());
+			throw new ParvanUnrecoverableException(e.getMessage(), e);
+		}
+	}
+	
+	@Override
+	public PageList<Waybill> findByCriteria(WaybillCriteria criteria, int page, int size, String sortCriterion,
+			SortDirectionEnum sortDirection) throws ParvanServiceException {
+		try {
+			return waybillRepository.findByCriteria(criteria, page, size, sortCriterion, sortDirection);
+		} catch (ParvanDaoException e) {
+			throw new ParvanServiceException(e);
+		}
+	}
+	
+	@Override
+	public Map<String, String> getConfigs() throws ParvanServiceException {
+		Map<String, String> configs = new HashMap<>();
+		configs = new HashMap<>();
+		InputStream stream = null;
+		try {
+			stream = new FileInputStream("/usr/local/ecourier/configs.properties");
+        	Properties prop = new Properties();
+        	prop.load (stream);
+            Set<Object> keys = prop.keySet();
+            for (Object key : keys) {
+				String configKey = (String) key;
+				Object value = prop.get(configKey);
+				if (value != null) {
+					String configValue = (String) value;
+					configs.put(configKey, configValue);
+				}
+			}
+        } catch (Exception e) {
+        	log.warn("Could not load input file [/configs.properties].", e);
+        } finally {
+        	if (stream != null) {
+        		try {
+					stream.close();
+				} catch (Exception e) {
+					log.debug("Error during reading config file : ", e.getMessage());
+				}
+        	}
+        }
+		return configs;
+	}
+	
+	private String _cargoWaybillDtoToXml(CargoWaybillDto dto) throws JAXBException {
+        JAXBContext context = JAXBContext.newInstance(CargoWaybillDto.class);
+        Marshaller marshaller = context.createMarshaller();
+        // for debug, below flag can be set
+        //marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+        StringWriter sw = new StringWriter();
+        marshaller.marshal(dto, sw);
+        return sw.toString();
+	}
+	
+	private CargoWaybillDto _xmlToCargoWaybillDto(String xml) throws JAXBException {
+		CargoWaybillDto dto;
+        JAXBContext context = JAXBContext.newInstance(CargoWaybillDto.class);
+        Unmarshaller unmarshaller = context.createUnmarshaller();
+        StringReader sr = new StringReader(xml);
+        dto = (CargoWaybillDto) unmarshaller.unmarshal(sr);
+        return dto;
+	}
+	
+	private List<PriceItemDto> _getDefaultPriceItems() throws ParvanUnrecoverableException {
+		List<PriceItemDto> results = null;
+		try {
+			String filePath = System.getProperty("user.home");
+			if (filePath != null && filePath.length() > 0) {
+				filePath = filePath + File.separator + "defaultPriceItems.json";
+			}
+			String content = new String(Files.readAllBytes(Paths.get(filePath)));
+			ObjectMapper mapper = new ObjectMapper();
+			results = mapper.readValue(content, new TypeReference<List<PriceItemDto>>(){});
+		} catch (IOException e) {
+			log.debug(e.getMessage());
+			throw new ParvanUnrecoverableException("Error while reading default price items from file", e);
+		}
+		return results;
+	}
+
+	@Override
+	public void deleteByNumber(String waybillNumber) throws ParvanServiceException {
+		try {
+			waybillRepository.deleteByNumber(waybillNumber);
+		} catch (ParvanDaoException e) {
+			throw new ParvanUnrecoverableException(e);
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

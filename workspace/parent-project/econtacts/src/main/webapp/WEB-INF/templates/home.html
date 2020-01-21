@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>E-Contact Application</title>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" type="text/css" media="all" href="../../css/extrathyme.css" th:href="@{/css/bootstrap.min.css}"/>
+  </head>
+  <body>
+  <div th:substituteby="/logo" /> 
+   <!-- <div>
+    <img src="../../images/econtact_logo.png" alt="econtact_logo logo" title="econtact_logo logo" 
+           th:src="@{/img/econtact_logo.png}" />
+    </div> -->
+<!--Substitute Header here..... -->
+
+<header th:substituteby="/header" />
+<!-- <h3 class="brand" align="middle" th:text="${user.name}?:'Guest'">Natural</h3> -->
+<div th:substituteby="/nav" /> 
+     
+	<!-- Table will be coming if list is selected otherwise Add form will be deleted.... -->
+	
+	
+	
+	<div th:substituteby="${templateName}" /> 	
+	
+	
+	<!-- <div  th:substituteby="/table" /> -->
+	<!-- form will be coming here. -->
+
+<!-- <div th:substituteby="/addContact" />  --> 
+
+  <script src="http://code.jquery.com/jquery-latest.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
+<!-- Footer will be coming here. -->
+ </body>
+
+<footer th:substituteby="/footer" />
+ 
+</html>

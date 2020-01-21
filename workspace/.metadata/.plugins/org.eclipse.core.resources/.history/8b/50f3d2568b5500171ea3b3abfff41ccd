@@ -1,0 +1,27 @@
+package com.parvanpajooh.transportationmanagement2.service;
+
+import java.util.List;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.transportationmanagement2.model.vo.NodeVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.RouteVO;
+
+/**
+ * @author dev-03
+ *
+ */
+public interface RouteManagementService {
+	
+	public NodeVO getNodeByCode(UserInfo userInfo, String codeName) throws ParvanServiceException;
+	
+	public List<NodeVO> getAllNodes(UserInfo userInfo) throws ParvanServiceException;
+
+	public PageList<RouteVO> findRoutes(UserInfo userInfo ,String carrierCode, String term, int page , int size) throws ParvanServiceException;
+
+	public RouteVO getRoute(UserInfo userInfo, Long id) throws ParvanServiceException;
+	
+	public RouteVO getRouteByCarrierRouteNumber(UserInfo userInfo,String carrierRouteNumber) throws ParvanServiceException;
+
+}

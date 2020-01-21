@@ -1,0 +1,85 @@
+package com.parvanpajooh.siteservices.rest;
+
+import java.util.Map;
+
+import javax.validation.ConstraintViolationException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.parvanpajooh.common.auth.BaseRestController;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.util.StringUtil;
+
+@RestController
+@RequestMapping("/v1")
+public class SiteServicesRestController extends BaseRestController {
+	
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+	
+
+	@RequestMapping(value = "/hello", method = RequestMethod.GET)
+	public String hello(@RequestParam(value = "name") String name) {
+		return "Hello " + name;
+	}
+
+	protected void proccessException(Exception e, Map<String, Object> result) {
+
+		if (e instanceof ParvanRecoverableException) {
+			ParvanRecoverableException recoverableException = (ParvanRecoverableException) e;
+
+			Exception cause = (Exception) recoverableException.getCause();
+
+			if (recoverableException.getErrorCode().equals(
+					ErrorCode.DATA_IS_INVALID)) {
+				String invalidField = null;
+				if (cause != null
+						&& cause instanceof ConstraintViolationException) {
+					invalidField = ((ConstraintViolationException) cause)
+							.getConstraintViolations().iterator().next()
+							.getPropertyPath().toString();
+
+				} else {
+					invalidField = recoverableException.getMessage();
+				}
+				result.put("invalidField", invalidField);
+				result.put("status", "ValidationException");
+			} else if (recoverableException.getErrorCode().equals(
+					ErrorCode.OBJECT_EXIST)) {
+				result.put("status", "ObjectExistsException");
+			} else if (recoverableException.getErrorCode().equals(
+					ErrorCode.DATA_DUPLICATE)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error.data-duplicate", getMessage(recoverableException.getMessage(), (Object) null)));
+			} else if (recoverableException.getErrorCode().equals(
+					ErrorCode.FIELD_IS_EMPTY)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error-required", getMessage(recoverableException.getMessage(), (Object) null)));
+			} else if (recoverableException.getErrorCode().equals(
+					ErrorCode.SHIPMENT_INVALID_STATE_TRANSITION)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error-invalid-shipment-state", getMessage("trackstate." + StringUtil.upperCase(recoverableException.getMessage()), (Object) null)));
+			} else {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorMessage", recoverableException.getMessage());
+			}
+		} else {
+			log.error("error in proccessException", e);
+			result.put("status", "fail");
+		}
+	}
+
+}
+	

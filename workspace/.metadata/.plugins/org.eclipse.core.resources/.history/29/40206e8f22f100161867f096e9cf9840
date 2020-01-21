@@ -1,0 +1,184 @@
+package com.parvanpajooh.taskmanagement.domain.service;
+
+import java.util.List;
+
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.taskmanagement.domain.model.Task;
+import com.parvanpajooh.taskmanagement.domain.model.TaskCommand;
+import com.parvanpajooh.taskmanagement.domain.model.TaskDisplay;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroupCounter;
+import com.parvanpajooh.taskmanagement.domain.model.criteria.TaskCriteria;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskAttachmentCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskChangeAssigneeCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskChangeStateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCommentCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCreateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskDisplayDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskRelationCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskUpdateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType;
+
+/**
+ * @author dev-03
+ *
+ */
+public interface TaskService {
+
+	/**
+	 * method used to get all TaskDisplayDto with tasks.
+	 * 
+	 * @param tasks
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public List<TaskDisplayDto> findByTaskIds(List<String> tasks) throws ParvanServiceException;
+
+	/**
+	 * Generic method used to get all TaskDisplayDto by criteria.
+	 * 
+	 * @param criteria
+	 * @param firstResult
+	 * @param maxResults
+	 * @param sortDirection
+	 * @param sortCriterion
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public List<TaskDisplayDto> findByCriteria(TaskCriteria criteria, int firstResult, int maxResults, SortDirectionEnum sortDirection, String sortCriterion)
+			throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param criteria
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public long countByCriteria(TaskCriteria criteria) throws ParvanServiceException;
+
+	/**
+	 * Generic method to get an object based on class and identifier. An
+	 * ObjectRetrievalFailureException Runtime Exception is thrown if nothing is
+	 * found.
+	 * 
+	 * @param task
+	 *            the identifier (primary key) of the object to get
+	 * @return a populated object
+	 * @throws ParvanServiceException
+	 */
+	public TaskDto get(String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param taskCreateCommandDto
+	 * @throws ParvanServiceException
+	 */
+	public void createTask(TaskCreateCommandDto taskCreateCommandDto) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param taskUpdateCommandDto
+	 * @param taskId
+	 * @throws ParvanServiceException
+	 */
+	public void updateTask(TaskUpdateCommandDto taskUpdateCommandDto, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param taskChangeAssingeeCommandDto
+	 * @param taskId
+	 * @throws ParvanServiceException
+	 */
+	public void changeTaskAssignee(TaskChangeAssigneeCommandDto taskChangeAssingeeCommandDto, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param taskChangeStateCommandDto
+	 * @param taskId
+	 * @throws ParvanServiceException
+	 */
+	public void changeTaskState(TaskChangeStateCommandDto taskChangeStateCommandDto, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param taskCommentCommandDto
+	 * @param taskId
+	 * @throws ParvanServiceException
+	 */
+	public void addComment(TaskCommentCommandDto taskCommentCommandDto, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param taskRelationCommandDto
+	 * @param taskId
+	 * @throws ParvanServiceException
+	 */
+	public void addRelation(TaskRelationCommandDto taskRelationCommandDto, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param taskAttachmentCommandDto
+	 * @param taskId
+	 * @throws ParvanServiceException
+	 */
+	public void addAttachment(TaskAttachmentCommandDto taskAttachmentCommandDto, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param taskId
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public TaskDisplayDto getTaskDisplay(String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param taskKey
+	 * @return
+	 * @throws ParvanRecoverableException 
+	 * @throws ParvanServiceException 
+	 */
+	public TaskDisplayDto getTaskDisplayByTaskKey(String taskKey) throws ParvanServiceException;
+	
+	/**
+	 * 
+	 * @param taskGroupId
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public TaskGroupCounter getTaskGroupCounter(Long taskGroupId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public TaskCommand getTaskCommand(Long id) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param taskId
+	 * @param taskCommandType
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public List<TaskCommand> getTaskCommands(String taskId, TaskCommandType taskCommandType) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param id
+	 */
+	public void deleteTask(String id) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param taskKey
+	 * @return
+	 * @throws ParvanServiceException 
+	 */
+	public TaskUpdateCommandDto getLastUpdateRecord(String taskKey) throws ParvanServiceException;
+
+
+}

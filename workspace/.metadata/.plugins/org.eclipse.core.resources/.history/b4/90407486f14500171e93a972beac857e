@@ -1,0 +1,307 @@
+
+<ul xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:idm="http://www.parvanpajooh/thymeleaf/idm"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4"
+	layout:fragment="menu" class="nav sidebar-menu">
+	
+	<li th:title="#{createShipment}">
+		<div class="sidebar-button">
+			<a class="btn btn-success btn-lg btn-block" th:href="@{'/agent/shipment/new'}"> 
+				<span th:text="#{shipment.newShipment}">Create Shipment</span>
+			</a>
+		</div>
+	</li>
+
+
+	<li th:title="#{TrackShipment}">
+		<div class="sidebar-button">
+			<a class="btn btn-linkedin btn-lg btn-block" th:href="@{'/agent/shipment/view'}"> 
+				<span th:text="#{shipment.track}">Track Shipment</span>
+			</a>
+		</div>
+	</li>
+	
+	<li th:title="#{dashboard}">
+		<a th:href="@{'/'}"> 
+			<i class="fa fa-dashboard"></i>
+			<span th:text="#{dashboard}">Dashboard</span>
+		</a>
+	</li>
+
+
+	<li th:title="#{shipments}">
+		<a th:href="@{'/agent/shipment'}">
+			<i class="fa fa-rocket"></i>
+			<span th:text="#{shipments}">shipments</span>
+		</a>
+	</li>
+	
+	<li th:title="#{shipments}">
+		<a th:href="@{'~/personmanagement-web/person'}">
+			<i class="fa fa-users"></i>
+			<span th:text="#{clients}">clients</span>
+		</a>
+	</li>
+
+	<li th:title="#{cartable}">
+		<a th:href="@{'/agent/cartable'}">
+			<i class="fa fa-bullseye"></i>
+			<span th:text="#{cartable}">cartable</span>
+		</a>
+	</li>
+
+	<li th:title="#{pickupAcceptance}">
+		<a th:href="@{'/agent/operation/pickupAcceptance'}">
+			<i class="fa fa-check-square-o"></i>
+			<span th:text="#{pickup.acceptance}">pickupAcceptance</span>
+		</a>
+	</li>
+
+	<li th:title="#{reviewAndPrint}">
+		<a th:href="@{'/agent/reviewAndPrint'}">
+			<i class="fa fa-tag"></i>
+			<span th:text="#{reviewAndPrint}">reviewAndPrint</span>
+		</a>
+	</li>
+
+	<li th:title="#{outscan}">
+		<a th:href="@{'/agent/scan/out'}">
+			<i class="fa fa-arrow-circle-o-up"></i>
+			<span th:text="#{outscan}">outscan</span>
+		</a>
+	</li>
+
+	<li th:title="#{manifests}">
+		<a th:href="@{'/agent/manifest'}"> 
+			<i class="fa fa-clipboard"></i>
+			<span th:text="#{manifest}">manifests</span>
+		</a>
+	</li>
+
+	<li th:title="#{manifest-report}">
+		<a th:href="@{'/admin/manifest/report'}"> 
+			<i class="fa fa-file-text"></i>
+			<span th:text="#{manifest.report}">manifest-report</span>
+		</a>
+	</li>
+
+	<li th:title="#{inscan}">
+		<a th:href="@{'/agent/scan/in'}"> 
+			<i class="fa fa-arrow-circle-o-down"></i> 
+			<span th:text="#{inscan}">inscan</span>
+		</a>
+	</li>
+
+	<li th:title="#{lostAndFound}">
+		<a th:href="@{'/agent/lostAndFound'}"> 
+			<i class="ion ion-sad"></i>
+			<span th:text="#{lostAndFound}">lostAndFounds</span>
+		</a>
+	</li>
+
+	<li th:title="#{masterWaybill}"><a
+		th:href="@{'/agent/masterwaybill'}"> 
+			<i class="fa fa-plane"></i>
+			<span th:text="#{masterWaybill}">masterWaybills</span>
+		</a>
+	</li>
+
+	<li sec:authorize="hasRole('ROLE_LEDGER')" th:title="#{insurance.list}">
+		<a th:href="@{'/insurance'}"> 
+			<i class="fa fa-umbrella"></i> 
+			<span th:text="#{insurance.list}">خروجی بیمه</span>
+		</a>
+	</li>
+
+	<li sec:authorize="hasRole('ROLE_LEDGER')" th:title="#{ledger.account}">
+		<a th:href="@{'/ledger/account'}"> 
+			<i class="ion ion-android-contact"></i> 
+			<span th:text="#{ledger.account}">حسابها</span>
+		</a>
+	</li>
+
+	<li sec:authorize="hasAnyRole('ROLE_LEDGER','ROLE_ADMIN')" th:title="#{ledger.group}">
+		<a th:href="@{'/ledger/group'}">
+			<i class="ion ion-android-contacts"></i> 
+			<span th:text="#{ledger.group}">گروه حسابها</span>
+		</a>
+	</li>
+	
+	<li sec:authorize="hasAnyRole('ROLE_LEDGER','ROLE_ADMIN')" class="treeview" th:classappend="${rightMenu} == 'reports' ? 'active' : ''">
+		<a href="#">
+		    <i class="fa fa-bar-chart"></i>
+		    <span th:text="#{report}"></span>
+		    <i class="fa fa-angle-left pull-right"></i>
+		</a>
+		<ul class="treeview-menu">
+		
+			<li th:title="#{salesReport}" th:classappend="${subRightMenu} == 'salesReport' ? 'active' : ''">
+				<a th:href="@{'/ledger/salesReport'}">
+					<i class="fa fa-bar-chart"></i> 
+					<span th:text="#{salesReport}">salesReports</span>
+				</a>
+			</li>
+		
+			<li th:title="#{ledger.accountReports}" th:classappend="${subRightMenu} == 'accountReport' ? 'active' : ''">
+				<a th:href="@{'/ledger/accountReport'}"> 
+					<i class="fa fa-bar-chart"></i> 
+					<span th:text="#{ledger.accountReports}">گزارش حسابها</span>
+				</a>
+			</li>
+		
+			<li th:title="#{ledger.balanceReport}" th:classappend="${subRightMenu} == 'balanceReport' ? 'active' : ''">
+				<a th:href="@{'/ledger/balanceReport'}"> 
+					<i class="fa fa-bar-chart"></i> 
+					<span th:text="#{ledger.balanceReport}">گزارش تراز</span>
+				</a>
+			</li>
+			
+			<li th:title="#{reportsResult}">
+				<a th:href="@{'/agent/shipment/reportResult'}" th:classappend="${subRightMenu} == 'reportResult' ? 'active' : ''">
+					<i class="fa fa-bar-chart"></i> 
+					<span th:text="#{reportResult}">reportsResult</span>
+				</a>
+			</li>
+		
+		</ul>
+	</li>
+	
+	<li sec:authorize="hasAnyRole('ROLE_MANAGER','ROLE_ADMIN')" class="treeview" th:classappend="${rightMenu} == 'settings' ? 'active' : ''">
+		<a href="#">
+		    <i class="fa fa-gear"></i>
+		    <span th:text="#{settings}"></span>
+		    <i class="fa fa-angle-left pull-right"></i>
+		</a>
+		<ul class="treeview-menu">
+		
+			<li th:title="#{paymentMethod}" th:classappend="${subRightMenu} == 'paymentMethods' ? 'active' : ''">
+				<a th:href="@{/admin/paymentmethod}">
+					<i class="fa fa-credit-card"></i> 
+					<span th:text="#{paymentMethod}"></span>
+				</a>
+			</li>
+			
+			<li>
+                <a th:href="@{/admin/vehicle}" th:classappend="${subRightMenu} == 'vehicles' ? 'active' : ''">
+                    <i class="fa fa-motorcycle "></i>
+                    <span th:text="#{vehicle}"></span>
+                </a>
+           	</li>
+			
+			<li>
+                <a th:href="@{/admin/courier}" th:classappend="${subRightMenu} == 'couriers' ? 'active' : ''">
+                    <i class="fa fa-male"></i>
+                    <span th:text="#{courier}"></span>
+                </a>
+           	</li>
+           	
+           	<li th:title="#{productRuleSet}" th:classappend="${subRightMenu} == 'productRuleSet' ? 'active' : ''">
+				<a th:href="@{'/admin/productRuleSet'}">
+					<i class="fa fa-balance-scale"></i> 
+					<span th:text="#{productRuleSet}"></span>
+				</a>
+			</li>
+			
+			<li th:title="#{volumetricWeightRuleSet}" th:classappend="${subRightMenu} == 'volumetricWeightRuleSet' ? 'active' : ''">
+				<a th:href="@{'/admin/volumetricWeightRuleSet'}">
+					<i class="fa fa-crop"></i> 
+					<span th:text="#{volumetricWeightRuleSet}"></span>
+				</a>
+			</li>
+			
+		</ul>
+	</li>
+	
+	<li sec:authorize="hasAnyRole('ROLE_MANAGER','ROLE_ADMIN')" class="treeview" th:classappend="${rightMenu} == 'admin' ? 'active' : ''">
+		<a href="#">
+		    <i class="fa fa-rebel"></i>
+		    <span>Admin</span>
+		    <i class="fa fa-angle-left pull-right"></i>
+		</a>
+		<ul class="treeview-menu">
+		
+			<li th:title="#{notifies}">
+				<a th:href="@{'/admin/notify'}" th:classappend="${subRightMenu} == 'notifies' ? 'active' : ''"> 
+					<i class="fa fa-bullhorn"></i> 
+					<span th:text="#{notifies}">اعلانات</span>
+				</a>
+			</li>
+
+			<li th:title="#{online-users}" th:classappend="${subRightMenu} == 'onlineUsers' ? 'active' : ''">
+				<a th:href="@{'/admin/online'}">
+					<i class="fa fa-comment-o"></i> 
+					<span th:text="#{online-users}"></span>
+				</a>
+			</li>
+			
+			<li>
+              <a href="#"><i class="fa fa-circle-o"></i>Other Services
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
+              <ul class="treeview-menu menu-open" style="display: block;">
+              
+                <li>
+	               	<a th:href="@{'~/agentmanagement-web'}" target="_blank">
+						<i class="fa fa-arrow-circle-o-right"></i>
+						<span>Agent Management</span>
+					</a>
+               	</li>
+               	<li>
+                	<a th:href="@{'~/identitymanagement2-web'}" target="_blank">
+                		<i class="fa fa-arrow-circle-o-right"></i>
+						<span>Identity Management</span>
+               		</a>
+               	</li>
+               	<li>
+                	<a th:href="@{'~/personmanagement-web'}" target="_blank">
+                		<i class="fa fa-arrow-circle-o-right"></i>
+						<span>Person Management</span>
+               		</a>
+               	</li>
+               	<li>
+                	<a th:href="@{'~/stock2-web'}" target="_blank">
+                		<i class="fa fa-arrow-circle-o-right"></i>
+						<span>Stock</span>
+               		</a>
+               	</li>
+				<li>
+                	<a th:href="@{'~/rateAndRoute-web'}" target="_blank">
+                		<i class="fa fa-arrow-circle-o-right"></i>
+						<span>Rate and Route</span>
+               		</a>
+               	</li>
+               	<li>
+                	<a th:href="@{'~/settlement-web'}" target="_blank">
+                		<i class="fa fa-arrow-circle-o-right"></i>
+						<span>Settlement</span>
+               		</a>
+               	</li>
+               	<li>
+                	<a th:href="@{'~/accounting-web'}" target="_blank">
+                		<i class="fa fa-arrow-circle-o-right"></i>
+						<span>Accounting</span>
+               		</a>
+               	</li>
+               	<li>
+                	<a th:href="@{'~/customercontract-web'}" target="_blank">
+                		<i class="fa fa-arrow-circle-o-right"></i>
+						<span>Customer Contract</span>
+               		</a>
+               	</li>
+               	<li>
+                	<a th:href="@{'~/news-web'}" target="_blank">
+                		<i class="fa fa-arrow-circle-o-right"></i>
+						<span>News</span>
+               		</a>
+               	</li>
+               	
+              </ul>
+            </li>
+			
+		</ul>
+	</li>
+
+</ul>

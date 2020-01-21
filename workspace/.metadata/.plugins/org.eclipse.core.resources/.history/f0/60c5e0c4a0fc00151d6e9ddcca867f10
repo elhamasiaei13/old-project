@@ -1,0 +1,146 @@
+package com.parvanpajooh.issuemanager.mvc;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.issuemanager.model.Task;
+import com.parvanpajooh.issuemanager.model.TaskAssignment;
+import com.parvanpajooh.issuemanager.model.vo.TaskVO;
+import com.parvanpajooh.issuemanager.service.MemberService;
+import com.parvanpajooh.issuemanager.service.TaskAssignmentService;
+import com.parvanpajooh.issuemanager.service.TaskService;
+import com.parvanpajooh.issuemanager.service.TypeService;
+
+@Controller
+@RequestMapping("/")
+public class TaskController {
+	
+	@EJB(mappedName = "java:global/issueManager-ear/issueManager-ejb/TaskServiceImpl")
+	private TaskService taskService;
+	
+	@EJB(mappedName = "java:global/issueManager-ear/issueManager-ejb/TaskAssignmentServiceImpl")
+	private TaskAssignmentService taskAssignmentService;
+	
+	@EJB(mappedName = "java:global/issueManager-ear/issueManager-ejb/TypeServiceImpl")
+	private TypeService typeService;
+	
+	@EJB(mappedName = "java:global/issueManager-ear/issueManager-ejb/MemberServiceImpl")
+	private MemberService memberService;
+	
+	
+	@InitBinder
+	public void initBinder(WebDataBinder binder){
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(format, true));
+		binder.registerCustomEditor(Timestamp.class, new CustomDateEditor(format, true));
+	}
+	
+	@RequestMapping(value = "/login",method = RequestMethod.GET)
+	public String home(HttpServletRequest request, Model model) {
+		
+	    return "login";
+	}
+
+	@RequestMapping(value = "/showTasks", method = RequestMethod.GET)
+	public String showTasks(Model model) throws ParvanServiceException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+
+		List<TaskVO> list = taskService.loadTasks(userInfo);
+		model.addAttribute("allTasks", list);
+		return "showTasks";
+	}
+	
+	@RequestMapping(value = "/taskDetails/{id}", method = RequestMethod.GET)
+	public String taskDetails(@PathVariable Long id,Model model) throws ParvanServiceException {
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+		
+		model.addAttribute("task" ,taskService.loadTask(userInfo, id));
+//		model.addAttribute("taskAssignment" ,taskAssignmentService.loadTaskAssignmentByTaskId(userInfo,id));
+		model.addAttribute("taskAssignment" ,new TaskAssignment());
+		model.addAttribute("status",typeService.findByTitle("taskStatus"));
+		model.addAttribute("members",memberService.findAll(userInfo));
+		
+		return "taskDetails";
+	}
+
+	@RequestMapping(value = "/addTask", method = RequestMethod.GET)
+	public String showAddTaskPage(Model model) throws ParvanServiceException {
+		model.addAttribute("task", new Task());
+		return "addTask";
+	}
+
+	@RequestMapping(value = "/addTask/addTask/save", method = {RequestMethod.POST})
+	public String addTask(TaskVO task)
+			throws ParvanServiceException, ParvanDaoException {
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+		
+		/*SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		if(Validator.isNotNull(task.getStrDueDate())){
+			try {
+				Date dueDate = format.parse(task.getStrDueDate());
+				task.setDueDate(dueDate);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}*/
+
+		taskService.saveTask(userInfo, task);
+		return "redirect:/showTasks";
+	}
+	
+	@RequestMapping(value = "/editTask/{id}", method = RequestMethod.GET)
+	public String showEditPage(@PathVariable Long id,
+			final HttpServletRequest req, Model model)
+			throws ParvanServiceException, ParvanDaoException {
+	
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+		TaskVO task = taskService.loadTask(userInfo, id);
+		model.addAttribute("task", task);
+		return "editTask";
+	}
+
+	@RequestMapping(value = "/editTask/save", method = { RequestMethod.POST,
+			RequestMethod.GET })
+	public String editTask(TaskVO task, Model model)
+			throws ParvanServiceException, ParvanDaoException {
+	
+		taskService.editTask(task);
+		return "redirect:/showTasks";
+	}
+	
+	@RequestMapping(value = "/removeTask", method = RequestMethod.POST)
+	public String removeTask(final HttpServletRequest req)
+			throws ParvanServiceException, ParvanDaoException {
+		Long rowId = Long.valueOf(req.getParameter("id"));
+
+		taskService.removeTask(rowId);
+		return "redirect:/showTasks";
+	}
+}

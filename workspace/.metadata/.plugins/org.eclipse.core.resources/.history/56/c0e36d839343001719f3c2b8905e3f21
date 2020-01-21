@@ -1,0 +1,150 @@
+package com.parvanpajooh.siteservices.service.impl;
+
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.siteservices.model.RecoveryCode;
+import com.parvanpajooh.siteservices.model.criteria.RecoveryCodeCriteria;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+import com.parvanpajooh.siteservices.model.vo.RecoveryCodeVO;
+import com.parvanpajooh.siteservices.model.vo.RegisterVO;
+import com.parvanpajooh.siteservices.model.vo.UserVO;
+import com.parvanpajooh.siteservices.service.IdentityManagement2LocalService;
+import com.parvanpajooh.siteservices.service.PersonManagementLocalService;
+import com.parvanpajooh.siteservices.service.ProfileLocalService;
+import com.parvanpajooh.siteservices.service.RecoveryCodeLocalService;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class ProfileLocalServiceImpl implements ProfileLocalService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(ProfileLocalServiceImpl.class);
+
+	@Inject
+	private IdentityManagement2LocalService identityManagement2LocalService;
+
+	@Inject
+	private PersonManagementLocalService personManagementLocalService;
+
+	@Inject
+	private RecoveryCodeLocalService recoveryCodeLocalService;
+
+	@Override
+	public void register(RegisterVO registerVO) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering register( registerVO={})", registerVO);
+		PersonVO personVO = null;
+		UserVO userVO = null;
+		try {
+			// save person
+			personVO = personManagementLocalService.createPerson(registerVO);
+
+			// create user
+			userVO = identityManagement2LocalService.createUser(registerVO);
+
+			// send Email
+			// jobManagementService.sendEmail(userInfo, personVO);
+
+		} catch (ParvanServiceException e) {
+			if (Validator.isNotNull(personVO.getUuid()) && Validator.isNull(userVO)) {
+				personManagementLocalService.deletePerson(personVO.getUuid());
+			}
+			throw e;
+		}
+	}
+
+	@Override
+	public void identifyAndCreateCode(String emailOrMobile) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering identifyAndCreateCode( emailOrMobile={})", emailOrMobile);
+		UserVO userVO = null;
+		RecoveryCode recoveryCode = null;
+		LocalDateTime now = LocalDateTime.now();
+		try {
+
+			// get user info from current context
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+
+			// identify
+			userVO = identityManagement2LocalService.findUserByEmailOrMobile(emailOrMobile);
+
+			// create random recovery code
+			SecureRandom random = new SecureRandom();
+			int code = random.nextInt();
+
+			if (Validator.isNotNull(userVO)) {
+				recoveryCode = new RecoveryCode();
+				recoveryCode.setCode(String.valueOf(code));
+				recoveryCode.setEmail(userVO.getEmail());
+				recoveryCode.setUserId(userVO.getId());
+				recoveryCode.setUserName(userVO.getUserName());
+				recoveryCode.setExpireDate(now.plusDays(1l));
+				if (Validator.isEmailAddress(emailOrMobile)) {
+					recoveryCode.setRequestMethod("email");
+					recoveryCode.setEmail(emailOrMobile);
+				} else if (Validator.isPhoneNumber(emailOrMobile)) {
+					recoveryCode.setRequestMethod("mobile");
+					recoveryCode.setMobile(emailOrMobile);
+				}
+
+				// save recoveryCode
+				recoveryCodeLocalService.save(recoveryCode, userInfo);
+				
+				//send email
+				//// jobManagementService.sendEmail(userInfo, recoveryCode);
+				
+			} else {
+				throw new ParvanRecoverableException(ErrorCode.SITESERVICES_IDENTIFY__COULD_NOT_FIND_A_USER_ASSOCIATED_WITH_THIS_EMAIL_OR_MOBILE);
+			}
+
+		} catch (ParvanServiceException e) {
+			throw e;
+		}
+	}
+
+	@Override
+	public RecoveryCodeVO findRecovryCodeBy(RecoveryCodeVO recoveryCodeVO) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findRecovryCodeBy(recoveryCodeVO={})", recoveryCodeVO);
+		RecoveryCode recoveryCode = null;
+		RecoveryCodeVO rCode = null;
+
+		RecoveryCodeCriteria criteria = new RecoveryCodeCriteria();
+		criteria.setCode(recoveryCodeVO.getCode());
+		criteria.setMobile(recoveryCodeVO.getMobile());
+		criteria.setEmail(recoveryCodeVO.getEmail());
+
+		List<RecoveryCode> recoveryCodes = recoveryCodeLocalService.findByCriteria(criteria);
+
+		if (Validator.isNotNull(recoveryCodes)) {
+			rCode = new RecoveryCodeVO();
+			recoveryCode = recoveryCodes.get(0);
+			rCode = recoveryCode.toVO();
+		}
+
+		return rCode;
+	}
+}

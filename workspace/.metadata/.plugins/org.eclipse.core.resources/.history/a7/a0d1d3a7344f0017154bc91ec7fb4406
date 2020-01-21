@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables"
+xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+layout:decorator="filter-layout" ddl:bundle-includes="bootstrapValidator,select2,inputmask,autoNumeric">
+
+<head>
+	<title>Waybill</title>
+
+	  <style type="text/css">
+	  	.tt-dropdown-menu {
+		  position: absolute;
+		  top: 100%;
+		  left: 0;
+		  z-index: 1000;
+		  display: none;
+		  float: left;
+		  min-width: 160px;
+		  padding: 5px 0;
+		  margin: 2px 0 0;
+		  list-style: none;
+		  font-size: 14px;
+		  background-color: #ffffff;
+		  border: 1px solid #cccccc;
+		  border: 1px solid rgba(0, 0, 0, 0.15);
+		  border-radius: 4px;
+		  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+		  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+		  background-clip: padding-box;
+		}
+		.tt-suggestion > p {
+		  display: block;
+		  padding: 3px 20px;
+		  clear: both;
+		  font-weight: normal;
+		  line-height: 1.428571429;
+		  color: #333333;
+		  white-space: nowrap;
+		}
+		.tt-suggestion > p:hover,
+		.tt-suggestion > p:focus,
+		.tt-suggestion.tt-cursor p {
+		  color: #ffffff;
+		  text-decoration: none;
+		  outline: 0;
+		  background-color: #428bca;
+		}
+		.twitter-typeahead .tt-hint {
+		    display: block;
+		    height: 38px;
+		    padding: 8px 12px;
+		    font-size: 14px;
+		    line-height: 1.428571429;
+		    border: 1px solid transparent;
+		}
+		.twitter-typeahead { width: 100%; }
+
+		.select2-container .select2-choice {
+			height: 32px;
+			line-height: 32px;
+		}
+
+		label {
+		    box-sizing: border-box;
+		    color: #707070;
+		    display: inline-block;
+		    font-weight: normal;
+		    padding_: 2px 5px 2px 0;
+		    word-wrap: break-word;
+		}
+		
+		.form-horizontal label {
+		    text-align: right;
+		    width: 150px;
+		}
+
+		.form-group .control-label {
+			width: 100%;
+		}
+
+		.box .overlay, .overlay-wrapper .overlay {
+			    background: rgba(255, 255, 255, 0.7) none repeat scroll 0 0;
+			    border-radius: 3px;
+			    z-index: 50;
+			}
+
+			.box > .overlay, .overlay-wrapper > .overlay, .box > .loading-img, .overlay-wrapper > .loading-img {
+			    height: 100%;
+			    left: 0;
+			    position: absolute;
+			    top: 0;
+			    width: 100%;
+			}
+
+			.box .overlay > .fa, .overlay-wrapper .overlay > .fa {
+			    color: #000;
+			    font-size: 30px;
+			    left: 50%;
+			    margin-left: -15px;
+			    margin-top: -15px;
+			    position: absolute;
+			    top: 50%;
+			}
+	  </style>
+
+</head>
+
+<body th:with="rightMenu='waybills'">
+
+	<section layout:fragment="content-header">
+		<div class="fixed-header">
+			<div class="ui-header-image pull-left">
+				<img data-src="holder.js/140x140" class="img-circle" alt="140x140" th:src="@{/resources/images/plane.png}" style="width: 48px; height: 48px;" />
+			</div>
+			<div class="ui-header-title">
+				<div class="split-left">
+					<h3>
+						<small id="viewLabel">New</small>
+					</h3>
+					<h3>Waybill</h3>
+				</div>
+				<div class="split-right">
+					<div class="btn-toolbar">
+						<div id="btn-actions" style="display: inline; margin: 5px;">
+						</div>
+
+						<button th:if="${canEdit}" id="saveBtn" type="button" class="btn btn-primary" th:text="#{button.save}" onclick="save(); return false"></button>
+						<a id="cancelBtn" type="button" class="btn btn-default" th:href="${redirectUrl}" th:text="#{return}"></a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Main content -->
+	<!-- BODY -->
+	<section class="content" layout:fragment="content">
+		<div class="row">
+			<div class="col-md-12">
+				<th:block th:fragment="content">
+					<th:block th:include="common-fragments :: message-panel" />
+					<section layout:fragment="form">
+					<form id="waybillForm" th:action="@{/waybills}" role="form" method="post" th:object="${waybill}">
+					<input type="submit" value="FormSubmitBtn" id="submitBtn" style="display: none;"/>
+						<fieldset>
+							<input type="hidden" name="id" th:value="*{id}" />
+							<input type="hidden" name="version" th:value="*{version}"/>
+							<input type="hidden" name="actionCode" />
+							<input type="hidden" name="actionValidation" />
+							<input type="hidden" name="rateCalculationType" />
+							<input type="hidden" name="canEdit" th:value="${canEdit}" />
+							<!-- ############################################## -->
+							<!--                STOCK			                -->
+							<!-- ############################################## -->
+							<div class="box box-primary">
+								<div class="box-body">
+
+									<div class="row">
+							            <div class="col-md-6">
+							            	<div class="form-group">
+												<label class="col-sm-3" th:text="#{waybillNumber}">Waybill Number</label>
+												<div class="col-sm-5">
+													<input th:field="*{number}" class="form-control impactPrice" type="text"/>
+												</div>
+											</div>
+							            </div>
+							            <div class="col-md-6">
+
+							            </div>
+							        </div>
+								</div>
+							</div>
+							
+							<!-- ############################################## -->
+							<!--                SHIPPER CONSIGNEE               -->
+							<!-- ############################################## -->
+							<div class="box box-primary">
+								<div class="box-body">
+									<div class="row form-horizontal">
+										<div class="col-md-5">
+											<legend th:text="#{shipment.shipper}">Shipper</legend>
+											<th:block th:include="waybill-fragments :: shipper-compact" />
+										</div>
+										<div class="col-md-1">
+											<button class="btn btn-success" type="button" onclick="showPersonNewForm('SHIPPER');">
+												<i class="fa fa-user-plus" aria-hidden="true"></i>
+											</button>
+										</div>
+										<div class="col-md-5">
+											<legend th:text="#{shipment.consignee}">Consignee</legend>
+											<th:block th:include="waybill-fragments :: consignee-compact" />
+										</div>
+										<div class="col-md-1">
+											<button class="btn btn-success" type="button" onclick="showPersonNewForm('CONSIGNEE');">
+												<i class="fa fa-user-plus" aria-hidden="true"></i>
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							
+
+							<!-- ############################################## -->
+					        <!--                ACCOUNTING            -->
+					        <!-- ############################################## -->
+					        <div class="box box-primary">
+					        	<div class="box-body">
+					        		<div class="row">
+					        			<div class="col-md-6">
+			                                <legend>Route Detail</legend>
+			                                <div class="row">
+												<div class="col-md-6">
+													<div class="form-group">
+														<label>From</label>
+														<input name="originNode.nodeId" id="originNodeId" th:field="*{originNode.nodeId}" type="hidden" class="form-control impactPrice"/>
+													</div>
+												</div>
+												<a id="btnAddVia" class="btn btn-xs btn-success" onclick="addViaRow()" style="margin-top: 33px;"><i class="fa fa-plus"></i> VIA</a>
+											</div>
+											<section id="viaSec">
+											 	<th:block th:each="node,iterState : *{viaNodesList}">
+											 		<div th:id="${'viaSec_' + (iterState.index)}" th:attr="data-index=${iterState.index}" class="row">
+														<div class="col-md-6">
+															<div class="form-group">
+																<label>To</label>
+																<input 
+																	th:attr="data-index=${iterState.index}" 
+																	th:name="${'viaNodesList[' + iterState.index + '].nodeId'}" 
+																	th:value="${node.nodeId}" 
+																	th:id="${'viaNodeId' + (iterState.index)}" 
+																	class="form-control node impactPrice" type="hidden" />
+															</div>
+														</div>
+														<div class="col-md-5">
+															<div class="form-group">
+																<label>By</label>
+																<input 
+																	th:attr="data-index=${iterState.index}" 
+																	th:name="${'viaNodesList[' + iterState.index + '].byCarrierCode'}" 
+																	th:value="${node.byCarrierCode}" 
+																	th:id="${'viaCarrierCode' + (iterState.index)}"  
+																	class="form-control carrier" type="hidden" />
+															</div>
+														</div>
+														<a id="btnRemoveVia" class="btn btn-xs btn-danger" onclick="deleteViaRow(this)" style="margin-top: 33px;"><i class="fa fa-trash-o"></i></a>
+											 		</div>
+												</th:block>
+				        					</section>
+											<div class="row">
+				                                <div class="col-md-6">
+					                                <div class="form-group">
+				                                        <label>Destination</label>
+				                                        <input id="destinationNodeId" class="form-control impactPrice" th:field="*{destinationNode.nodeId}" type="hidden" />
+				                                    </div>
+				                                </div>
+				                                <div class="col-md-5">
+					                                <div class="form-group">
+				                                        <label>By</label>
+				                                        <input id="destinationNodeCarrier" class="form-control carrier" th:field="*{destinationNode.byCarrierCode}" type="hidden" />
+				                                    </div>
+				                                </div>
+			                                </div>
+			                                <legend>Flight</legend>
+			                                <div class="row">
+				                                <div class="col-md-6">
+					                                <div class="form-group">
+				                                    	<label>Requested Flight (First Carrier)</label>
+				                                        <input th:field="*{requestedFlight}" type="text" class="form-control unkown" />
+					                                </div>
+												</div>
+				                                <div class="col-md-6">
+					                                <div class="form-group">
+				                                    	<label>Date</label>
+				                                        <input name="strFlightDate" th:value="*{flightDate}" data-inputmask="'alias': 'yyyy-mm-dd'" class="form-control datePicker" type="text" />
+					                                </div>
+												</div>
+											</div>
+											<legend>Handling Information</legend>
+			                                <div class="row">
+				                                <div class="col-md-6">
+					                                <div class="form-group">
+				                                    	<label></label>
+				                                        <input class="form-control" th:field="*{handlingInfo}"></input>
+					                                </div>
+												</div>
+				                                <div class="col-md-6">
+					                                <div class="form-group">
+					                            		<label>SCI</label>
+					                                	<input class="form-control unkown" />
+					                            	</div>
+												</div>
+											</div>
+										</div>
+					        			<div class="col-md-6">
+						                    <legend>Accounting Information</legend>
+					                        <div class="form-group">
+				                            	<label>Note</label>
+				                                <textarea name="accountingInfo" class="form-control" th:field="*{accountingInfo}"></textarea>
+					                        </div>
+
+							                <legend>Shipping Information</legend>
+							                <div class="row">
+					                            <div class="col-md-4">
+							                		<div class="form-group">
+						                            	<label>Reference Number</label>
+						                                <input name="optionalShippingInfoReferenceNo" class="form-control" th:field="*{optionalShippingInfoReferenceNo}" />
+						                            </div>
+					                            </div>
+					                            <div class="col-md-4">
+							                		<div class="form-group">
+						                            	<label>Optional</label>
+					                                	<input name="optionalShippingInfo1" class="form-control" th:field="*{optionalShippingInfo1}" />
+						                            </div>
+					                            </div>
+					                            <div class="col-md-4">
+							                		<div class="form-group">
+						                            	<label>Optional</label>
+					                                	<input name="optionalShippingInfo2" class="form-control" th:field="*{optionalShippingInfo2}" />
+						                            </div>
+					                            </div>
+							                </div>
+
+						                    <legend>Accounting Information</legend>
+						                    <div class="row">
+					                            <div class="col-md-4">
+						                            <div class="form-group">
+						                                <label>Currency</label>
+						                                <select id="currency" class="form-control" th:field="*{currencyCode}">
+						                                	<option value="" text=" "></option>
+						                                	<option th:each="code : ${currencyCodes}"
+																	th:value="${code.key}" th:text="${code.value}">
+															</option>
+						                                </select>
+						                            </div>
+						                        </div>
+					                            <div class="col-md-4">
+				                                    <label>WT VAL:</label>
+					                                <div class="radio_ text-left">
+					                                    <label class="checkbox-inline_">
+					                                        <input name="weightValueChargeParty" th:field="*{weightValueChargeParty}" value="PPD" type="radio" class="wtp"/>&nbsp;PPD
+					                                    </label>
+					                                    <label class="checkbox-inline_">
+					                                        <input name="weightValueChargeParty" th:field="*{weightValueChargeParty}" value="COLL" type="radio" class="wtc"/>&nbsp;COLL
+					                                    </label>
+					                                </div>
+				                                </div>
+					                            <div class="col-md-4">
+				                                    <label>Other:</label>
+					                                <div class="radio_ text-left">
+					                                    <label class="checkbox-inline_">
+					                                        <input name="otherValueChargeParty" th:field="*{otherValueChargeParty}" value="PPD" type="radio" class="otherp"/>&nbsp;PPD
+					                                    </label>
+					                                    <label class="checkbox-inline_">
+					                                        <input name="otherValueChargeParty" th:field="*{otherValueChargeParty}" value="COLL" type="radio" class="otherc"/>&nbsp;COLL
+					                                    </label>
+					                                </div>
+					                            </div>
+					                        </div>
+					                        <div class="row">
+						                        <div class="col-md-4">
+						                            <div class="form-group">
+						                                <label>Declared Value for Carriage</label>
+						                                <input name="declaredValueForCarriage" th:field="*{declaredValueForCarriage}" class="form-control unkown" />
+						                            </div>
+					                            </div>
+						                        <div class="col-md-4">
+						                            <div class="form-group">
+						                                <label>Declared Value for Customs</label>
+						                                <input name="declaredValueForCustoms" th:field="*{declaredValueForCustoms}" class="form-control unkown" />
+						                            </div>
+					                            </div>
+						                        <div class="col-md-4">
+						                            <div class="form-group">
+						                                <label>Amount of Insurance</label>
+						                                <input name="amountOfInsurance" th:field="*{amountOfInsurance}" class="form-control unkown" />
+						                            </div>
+						                        </div>
+					                        </div>
+										</div>
+					        		</div>
+					        	</div>
+					        </div>
+							<!-- ############################################## -->
+					        <!--                DETAIL                          -->
+					        <!-- ############################################## -->
+					        <div class="box box-primary">
+					        	<div class="box-header">
+			                		<h3 class="box-title">
+										<h4>Details</h4>
+									</h3>
+									<div class="box-tools pull-right">
+										<div class="form-inline">
+										  <div class="form-group">
+										    <label for="discountType">Discount</label>
+										    <select th:field="*{discountType}" class="form-control impactPrice">
+										    	<option value="" text=""></option>
+											    <option th:each="type : ${discountTypes}"
+											    		th:value="${type}" th:text="${type}">
+									    		</option>
+								    		</select>
+										    <input name="discountCode" id="discountCode" class="form-control impactPrice" type="text" th:field="*{discountCode}"/>
+										  </div>
+										</div>
+                  					</div>
+								</div>
+					        	<div class="box-body">
+				                    <div class="form-horizontal">
+			                            <table class="table table-bordered" id="packingListTbl">
+			                                <thead>
+		                                        <th class="text-center" width="1%">No. of Pieces RCP</th>
+		                                        <th class="text-center" width="8%">Gross Weight</th>
+		                                        <th class="text-center" width="1%">Dimensions</th>
+		                                        <th class="text-center" width="6%">Volumetric Weight</th>
+		                                        <th class="text-center" width="1%">Kg Lb</th>
+		                                        <th class="text-center" width="20%">Commodity Item No.</th>
+		                                        <th class="text-center" width="30%">Nature</th>
+		                                        <th class="text-center" width="6%">Chargeable Weight</th>
+		                                        <th class="text-center" width="7%">Rate Class</th>
+		                                        <th class="text-center" width="10%">Rate / Charge</th>
+		                                        <th class="text-center" width="15%">Total</th>
+		                                        <th class="text-center" width="3%"><a onclick="addPackingListRow()" class="btn btn-success btn-xs"><i class="fa fa-plus"></i></a></th>
+			                                </thead>
+			                                <tbody>
+			                                    <tr th:each="packingItem,iterState : *{packingList}" th:id="|item_${iterState.index}|" th:attr="data-index=${iterState.index}">
+			                                        <td class="text-center">
+
+			                                        	<span th:attr="id=${'priceItems'+iterState.index}">
+				                                        	<th:block th:each="priceItem,cpiState : ${packingItem.priceItems}">
+
+					                                        	<input th:field="*{packingList[__${iterState.index}__].priceItems[__${cpiState.index}__].amount}" 
+			                                        		  	     th:attr="data-index=${cpiState.index}" type="hidden" readonly="readonly" />
+					                                        	<input th:field="*{packingList[__${iterState.index}__].priceItems[__${cpiState.index}__].rateTypeId}" 
+				                                        			 th:attr="data-index=${cpiState.index}" type="hidden" readonly="readonly" />
+																<input th:field="*{packingList[__${iterState.index}__].priceItems[__${cpiState.index}__].rateTypeCode}" 
+																	 th:attr="data-index=${cpiState.index}" type="hidden" readonly="readonly" />
+																<input th:field="*{packingList[__${iterState.index}__].priceItems[__${cpiState.index}__].routeId}" 
+																	 th:attr="data-index=${cpiState.index}" type="hidden" readonly="readonly" />
+																<input th:field="*{packingList[__${iterState.index}__].priceItems[__${cpiState.index}__].nodeCode}" 
+																	 th:attr="data-index=${cpiState.index}" type="hidden" readonly="readonly" />
+																<input th:field="*{packingList[__${iterState.index}__].priceItems[__${cpiState.index}__].zoneCode}" 
+																	 th:attr="data-index=${cpiState.index}" type="hidden" readonly="readonly" />
+																<input th:field="*{packingList[__${iterState.index}__].priceItems[__${cpiState.index}__].agentId}" 
+																	 th:attr="data-index=${cpiState.index}" type="hidden" readonly="readonly" />
+																	 
+															</th:block>
+			                                        	</span>
+
+			                                        	<input 
+			                                        		th:field="*{packingList[__${iterState.index}__].pieces}" 
+			                                        		th:attr="data-index=${iterState.index}" 
+			                                        		type="text" 
+			                                        		class="form-control input-md pieceNumeric pieces" />
+			                                        </td>
+			                                        <td>
+			                                        	<input 
+			                                        		th:name="${'packingList[' + iterState.index + '].grossWeight'}" 
+			                                        		th:attr="data-index=${iterState.index}" 
+			                                        		th:value="${packingItem.grossWeight != null ? #numbers.formatDecimal(packingItem.grossWeight,1,'COMMA',1,'POINT') : ''}" 
+			                                        		type="text" class="form-control input-md notempty weightNumeric weight grossWeight"/>
+			                                        </td>
+			                                        <td class="text-center">
+			                                            <a href="javascript:;" class="dimensions btn btn-default" th:attr="data-index=${iterState.index}">DIM</a>
+			                                        	<input 
+			                                        		th:name="${'packingList[' + iterState.index + '].dimensions'}" 
+			                                        		th:attr="data-index=${iterState.index}" 
+			                                        		th:value="${packingItem.dimensions != null ? packingItem.dimensions : ''}" type="hidden"/>
+			                                        </td>
+			                                        <td>
+			                                        	<input 
+			                                        		th:name="${'packingList[' + iterState.index + '].volumetricWeight'}" 
+			                                        		th:attr="data-index=${iterState.index}" 
+			                                        		th:value="${packingItem.volumetricWeight != null ? #numbers.formatDecimal(packingItem.volumetricWeight,1,'COMMA',1,'POINT') : ''}"
+			                                        		readonly="true" 
+			                                        		tabindex="-1"
+			                                        		type="text" class="form-control input-md weightNumeric weight volumetricWeight"/>
+			                                        </td>
+			                                        <td>
+			                                            <select 
+			                                            	th:field="*{packingList[__${iterState.index}__].weightUnit}" 
+			                                            	th:attr="data-index=${iterState.index}" class="weightUnit">
+			                                                <option value="KILOGRAM">K</option>
+			                                                <option value="POUND">L</option>
+			                                            </select>
+			                                        </td>
+			                                        <td>
+	                                                    <select 
+	                                                    	th:field="*{packingList[__${iterState.index}__].commodityItemNumber}" 
+	                                                    	th:attr="data-index=${iterState.index}" class="cin impactPrice">
+	                                                		<option value=""></option>
+	                                                		<option value="7100">7100-Envelope or Docs | پاکت یا اوراق</option>
+	                                                        <option value="7109">7109-Newspapers | مطبوعات</option>
+	                                                        <option value="1001">1001-Live Animals | حیوان زنده</option>
+	                                                        <option value="9002">9002-Valuable Cargo | بار باارزش</option>
+	                                                        <option value="9091">9091-Human Remains | جنازه</option>
+	                                                    </select>
+			                                        </td>
+			                                        <td>
+		                                        		<div class="input-group">
+		                                        			<input 
+		                                        				th:id="${'nature' + iterState.index}" 
+		                                        				th:name="${'packingList[' + iterState.index + '].nature'}" 
+		                                        				th:value="${packingItem.nature != null ? packingItem.nature : ''}" 
+		                                        				th:attr="data-index=${iterState.index}" 
+		                                        				class="form-control"/>
+		                                        			 <span class="input-group-btn">
+		                                        				<a href="javascript:;" class="packages btn btn-default" th:attr="data-index=${iterState.index}"><i class="fa fa-plus"></i></a>
+		                                        			</span>
+		                                        		</div>
+
+			                                        	<input 
+			                                        		th:name="${'packingList[' + iterState.index + '].packingTypeCountPair'}" 
+			                                        		th:value="${packingItem.packingTypeCountPair != null ? packingItem.packingTypeCountPair : ''}" 
+			                                        		th:attr="data-index=${iterState.index}" 
+			                                        		type="hidden"/>
+			                                        		
+			                                        	<div th:id="|pkgTable_${iterState.index}|">
+				                                        	<table th:if="${packingItem.packingTypesList != null}" class="table table-bordered">
+			                                        			<tr>
+																	<th class="text-center">Pieces</th>
+																	<th class="text-center">Type</th>
+																</tr>
+																<tbody>
+																	<tr th:each="ptkg : ${packingItem.packingTypesList}">
+																		<td th:text="${ptkg.packageCount}"></td>
+																		<td th:text="${ptkg.packingTypeName}"></td>
+																	</tr>
+																</tbody>
+				                                        	</table>
+			                                        	</div>
+			                                        	
+			                                        	<div th:id="|dimTable_${iterState.index}|">
+				                                        	<table th:if="${packingItem.dimensions != null and packingItem.dimensions != ''}" class="table table-bordered">
+				                                        		<thead>
+				                                        			<tr>
+																		<th class="text-center">C</th>
+																		<th class="text-center">H</th>
+																		<th class="text-center">W</th>
+																		<th class="text-center">D</th>
+																	</tr>
+																</thead>
+																<tbody>
+																	<tr th:each="rows: ${#strings.arraySplit(packingItem.dimensions != null ? packingItem.dimensions : '','|')}">
+					                                        			<td th:each="cols : ${#strings.arraySplit(rows,';')}">
+																			<i th:text="${cols}"></i>
+																		</td>
+					                                        		</tr>
+																</tbody>
+				                                        	</table>
+			                                        	</div>
+			                                        </td>
+			                                        <td>
+			                                        	<!-- onchange="calcComplete(true,'NEW')" -->
+			                                        	<input 
+			                                        		readonly="true"
+			                                        		tabindex="-1" 
+			                                        		th:name="${'packingList[' + iterState.index + '].chargeableWeight'}" 
+			                                        		th:id="${'chargeableWeight' + iterState.index}" 
+			                                        		th:attr="data-index=${iterState.index}" 
+			                                        		th:value="${packingItem.chargeableWeight != null ? #numbers.formatDecimal(packingItem.chargeableWeight,1,'COMMA',1,'POINT') : ''}"
+			                                        		onchange="calcTotalCharge(this);calcAllTotal();" 
+			                                        		type="text" class="form-control weightNumeric chargeableWeight"/>
+			                                        </td>
+			                                        <td>
+		                                        		<select th:field="*{packingList[__${iterState.index}__].rateClass}"
+		                                        			th:title="*{packingList[__${iterState.index}__].rateClass}" 
+		                                        			class="form-control" th:placeholder="...">
+														    <option selected="selected" value=""></option>
+														    <option th:each="type : ${T(com.parvanpajooh.waybillmanagement.domain.model.enums.RateClass).values()}" 
+														    	th:value="${type}" 
+														    	th:text="${type}">
+													    	</option>
+														</select>
+			                                        </td>
+			                                        <td>
+			                                        	<input 
+			                                        		th:id="${'rate' + iterState.index}" 
+			                                        		th:name="${'packingList[' + iterState.index + '].rateOrCharge'}" 
+			                                        		th:value="${packingItem.rateOrCharge != null ? #numbers.formatDecimal(packingItem.rateOrCharge,1,'COMMA',0,'POINT') : ''}" 
+			                                        		type="text" 
+			                                        		class="form-control rateOrCharge ccyNumeric"
+			                                        		th:attr="data-index=${iterState.index}" />
+			                                        </td>
+			                                        <td>
+			                                        	<input 
+			                                        		th:id="${'total' + iterState.index}" 
+			                                        		th:name="${'packingList[' + iterState.index + '].totalCharge'}" 
+			                                        		th:value="${packingItem.totalCharge != null ? #numbers.formatDecimal(packingItem.totalCharge,1,'COMMA',0,'POINT') : ''}" 
+			                                        		th:attr="data-index=${iterState.index}" 
+			                                        		readonly="true"
+			                                        		tabindex="-1" 
+			                                        		class="form-control totalCharge ccyNumeric"/>
+			                                        </td>
+			                                        <td class="text-center">
+			                                        	<a 
+			                                        		th:if="${iterState.index > 0}" 
+			                                        		th:attr="data-index=${iterState.index}" 
+			                                        		class="btn btn-xs btn-danger" 
+			                                        		onclick="removePackingListRow(this)">
+			                                        			<i class="fa fa-trash-o"></i>
+	                                        			</a>
+			                                        </td>
+			                                    </tr>
+
+			                                </tbody>
+			                                <tfoot>
+			                                    <tr>
+			                                        <td class="text-center">
+			                                            <input type="text" 
+			                                            	class="form-control pieceNumeric" 
+			                                            	readonly="readonly"
+			                                            	tabindex="-1" 
+			                                            	th:field="*{totalPieces}"/>
+			                                        </td>
+			                                        <td>
+			                                            <input type="text" 
+			                                            	class="form-control weightNumeric" 
+			                                            	readonly="true"
+			                                            	tabindex="-1" 
+			                                            	th:field="*{totalGrossWeight}"/>
+			                                        </td>
+			                                        <td></td>
+			                                        <td>
+			                                            <input type="text" 
+			                                            	class="form-control weightNumeric" 
+			                                            	readonly="readonly"
+			                                            	tabindex="-1" 
+			                                            	th:field="*{totalVolumetricWeight}"/>
+			                                        </td>
+			                                        <td></td>
+			                                        <td></td>
+			                                        <td></td>
+			                                        <td>
+			                                            <input type="text" 
+			                                            	class="form-control weightNumeric impactPrice" 
+			                                            	readonly="readonly"
+			                                            	tabindex="-1" 
+			                                            	th:field="*{totalChargeableWeight}"/>
+			                                        </td>
+			                                        <td></td>
+			                                        <td></td>
+			                                        <td class="text-center" 
+			                                        	th:with="total=*{packingList} != null ? *{#aggregates.sum(packingList.![totalCharge])} : 0" >
+														<input type="text" 
+															id="totalCharge" 
+															name="totalCharge" 
+															class="form-control ccyNumeric" 
+															readonly="true"
+															tabindex="-1" 
+															th:value="${total} != null ? ${#numbers.formatDecimal(total,1,'COMMA',0,'POINT')} : ''"/>
+			                                        </td>
+			                                        <td></td>
+			                                    </tr>
+			                                </tfoot>
+			                            </table>
+				                    </div>
+					        	</div>
+					        </div>
+
+							<!-- ############################################## -->
+							<!--                PAYMENT DETAILES                -->
+							<!-- ############################################## -->
+							<div class="box box-primary">
+								<div class="box-body">
+									<div class="row">
+							            <div class="col-md-6">
+				                    		<legend>Payment Summary</legend>
+				                    		<div class="row">
+				                                <div class="col-md-4">
+			                                    	<label class="control-label"></label>
+				                                </div>
+				                                <div class="col-md-4 text-center">
+			                                        <h5 class="text-muted">Prepaid</h5>
+				                                </div>
+			                                    <div class="col-md-4 text-center">
+		                                        	<h5 class="text-muted">Collect</h5>
+			                                    </div>
+				                    		</div>
+				                    		<div class="row">
+		                                    	<label class="col-md-4 text-right">Weight Charge</label>
+				                                <div class="col-md-4">
+				                                	<div class="form-group">
+		                                            	<input name="totalWeightChargePPD" 
+	                                            			th:value="*{totalWeightChargePPD != null ? #numbers.formatDecimal(totalWeightChargePPD,1,'COMMA',0,'POINT') : ''}" 
+	                                            			type="text" 
+	                                            			class="form-control ccyNumeric"
+	                                            			tabindex="-1" 
+	                                            			readonly="true"/>
+		                                            </div>
+				                                </div>
+				                                <div class="col-md-4">
+				                                	<div class="form-group">
+		                                            	<input name="totalWeightChargeCOLL" 
+		                                            		th:value="*{totalWeightChargeCOLL != null ? #numbers.formatDecimal(totalWeightChargeCOLL,1,'COMMA',0,'POINT') : ''}" 
+		                                            		type="text" 
+		                                            		class="form-control ccyNumeric"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+				                                </div>
+				                    		</div>
+				                    		<div class="row">
+					                        	<label class="col-md-4 text-right">Valuation Charge</label>
+			                                    <div class="col-md-4">
+		                                            <div class="form-group">
+		                                            	<input name="totalValuationChargePPD" 
+		                                            		th:value="*{totalValuationChargePPD != null ? #numbers.formatDecimal(totalValuationChargePPD,1,'COMMA',0,'POINT') : ''}" 
+		                                            		type="text" 
+		                                            		class="form-control ccyNumeric"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                    <div class="col-md-4">
+		                                            <div class="form-group">
+		                                            	<input name="totalValuationChargeCOLL" 
+		                                            		th:value="*{totalValuationChargeCOLL != null ? #numbers.formatDecimal(totalValuationChargeCOLL,1,'COMMA',0,'POINT') : ''}" 
+		                                            		type="text" 
+		                                            		class="form-control ccyNumeric"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                </div>
+					                        <div class="row">
+			                                    <label class="col-md-4 text-right">Tax</label>
+			                                    <div class="col-md-4">
+		                                            <div class="form-group">
+		                                            	<input name="totalTaxPPD" 
+		                                            		th:value="*{totalTaxPPD != null ? #numbers.formatDecimal(totalTaxPPD,1,'COMMA',0,'POINT') : ''}" 
+		                                            		type="text" 
+		                                            		class="form-control ccyNumeric"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                    <div class="col-md-4">
+		                                            <div class="form-group">
+		                                            	<input name="totalTaxCOLL" 
+		                                            		th:value="*{totalTaxCOLL != null ? #numbers.formatDecimal(totalTaxCOLL,1,'COMMA',0,'POINT') : ''}" 
+		                                            		type="text" 
+		                                            		class="form-control ccyNumeric"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                </div>
+			                                <div class="row">
+			                                    <label class="col-md-4 text-right">Total other Charges Due Agent</label>
+			                                    <div class="col-md-4">
+		                                            <div class="form-group">
+		                                            	<input name="totalOtherChargesDueAgentPPD" 
+		                                            		th:value="*{totalOtherChargesDueAgentPPD != null ? #numbers.formatDecimal(totalOtherChargesDueAgentPPD,1,'COMMA',0,'POINT') : ''}" 
+		                                            		type="text" 
+		                                            		class="form-control ccyNumeric"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                    <div class="col-md-4">
+		                                            <div class="form-group">
+		                                            	<input name="totalOtherChargesDueAgentCOLL" 
+		                                            		th:value="*{totalOtherChargesDueAgentCOLL != null ? #numbers.formatDecimal(totalOtherChargesDueAgentCOLL,1,'COMMA',0,'POINT') : ''}" 
+		                                            		type="text" 
+		                                            		class="form-control ccyNumeric"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                </div>
+			                                <div class="row">
+			                                    <label class="col-md-4 text-right">Total other Charges Due Carrier</label>
+			                                    <div class="col-md-4">
+		                                            <div class="form-group">
+		                                            	<input name="totalOtherChargesDueCarrierPPD" 
+		                                            		th:value="*{totalOtherChargesDueCarrierPPD != null ? #numbers.formatDecimal(totalOtherChargesDueCarrierPPD,1,'COMMA',0,'POINT') : ''}" 
+		                                            		type="text" 
+		                                            		class="form-control ccyNumeric"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                    <div class="col-md-4">
+		                                            <div class="form-group">
+		                                            	<input name="totalOtherChargesDueCarrierCOLL" 
+		                                            		th:value="*{totalOtherChargesDueCarrierCOLL != null ? #numbers.formatDecimal(totalOtherChargesDueCarrierCOLL,1,'COMMA',0,'POINT') : ''}" 
+		                                            		type="text" 
+		                                            		class="form-control ccyNumeric"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                </div>
+			                                <hr/>
+			                                <div class="row">
+			                                   	<label class="col-md-4 text-right">Total</label>
+			                                    <div class="col-md-4">
+			                                        <div class="form-group">
+		                                            	<input name="totalAmountPPD" 
+		                                            		th:value="*{totalAmountPPD != null ? #numbers.formatDecimal(totalAmountPPD,1,'COMMA',0,'POINT') : ''}" 
+		                                            		type="text" 
+		                                            		class="form-control ccyNumeric"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                    <div class="col-md-4">
+			                                        <div class="form-group">
+		                                            	<input name="totalAmountCOLL" 
+		                                            		th:value="*{totalAmountCOLL != null ? #numbers.formatDecimal(totalAmountCOLL,1,'COMMA',0,'POINT') : ''}" 
+		                                            		type="text" 
+		                                            		class="form-control ccyNumeric"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                </div>
+			                                <hr/>
+			                                <div class="row">
+			                                    <label class="col-md-8 text-right">Currency Conversion Rates</label>
+			                                    <div class="col-md-4">
+			                                        <div class="form-group">
+		                                            	<input name="" 
+		                                            		type="text" 
+		                                            		class="form-control unkown"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                </div>
+			                                <div class="row">
+			                                    <label class="col-md-8 text-right">CC Charges in Dest. Currency</label>
+			                                    <div class="col-md-4">
+			                                        <div class="form-group">
+		                                            	<input name="" 
+		                                            		type="text" 
+		                                            		class="form-control unkown"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                </div>
+			                                <div class="row">
+			                                    <label class="col-md-8 text-right">Charges at Destination</label>
+			                                    <div class="col-md-4">
+			                                        <div class="form-group">
+		                                            	<input name="" 
+		                                            		type="text" 
+	                                            			class="form-control unkown"
+	                                            			tabindex="-1" 
+	                                            			readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                </div>
+			                                <div class="row">
+			                                    <label class="col-md-8 text-right">Total Collect Charges</label>
+			                                    <div class="col-md-4">
+			                                        <div class="form-group">
+		                                            	<input name="" 
+		                                            		type="text" 
+		                                            		class="form-control unkown"
+		                                            		tabindex="-1" 
+		                                            		readonly="true"/>
+		                                            </div>
+			                                    </div>
+			                                </div>
+			                            </div>
+			                            <!-- ############################################## -->
+										<!--                Other Charges                   -->
+										<!-- ############################################## -->
+			                            <div class="col-md-6">
+				                    		<legend>Other Charges</legend>
+			                                <div class="row form-horizontal">
+					                            <table class="table table-bordered" id="priceListTbl">
+					                                <thead>
+				                                        <th class="text-center" width="17%">Name</th>
+				                                        <th class="text-center" width="16%">Amount</th>
+					                                </thead>
+					                                <tbody>
+					                                    <tr th:each="priceItem,iterState : *{priceItems}" th:id="${#ids.seq('pi_')}" th:attr="data-index=${iterState.index}">
+					                                        <td class="text-center">
+					                                        	<input th:field="*{priceItems[__${iterState.index}__].rateTypeCode}" th:attr="data-index=${iterState.index}" type="hidden" class="form-control input-md rateTypeCode"/>
+					                                        	<input th:field="*{priceItems[__${iterState.index}__].rateTypeEditable}" th:attr="data-index=${iterState.index}" type="hidden" />
+					                                        	<input th:field="*{priceItems[__${iterState.index}__].rateTypeDisplayOrder}" th:attr="data-index=${iterState.index}" type="hidden" />
+					                                        	<input th:field="*{priceItems[__${iterState.index}__].rateTypeNameLocal}" th:attr="data-index=${iterState.index}" type="hidden" />
+					                                        	<input th:field="*{priceItems[__${iterState.index}__].rateTypeNameEn}" th:attr="data-index=${iterState.index}" type="hidden" />
+					                                        	<input th:field="*{priceItems[__${iterState.index}__].rateTypeRateDue}" th:attr="data-index=${iterState.index}" type="hidden" />
+					                                        	<span th:text="*{priceItems[__${iterState.index}__].rateTypeNameLocal}"></span>
+					                                        </td>
+					                                        <td>
+					                                        	<input 
+					                                        		th:name="|priceItems[${iterState.index}].amount|" 
+					                                        		th:attr="data-index=${iterState.index}, data-type=*{priceItems[__${iterState.index}__].rateTypeCode}"
+					                                        		th:classappend="*{priceItems[__${iterState.index}__].rateTypeRateDue} == 'AGENT' ? dueAgent : dueCarrier"
+					                                        		th:value="${priceItem.amount != null ? #numbers.formatDecimal(priceItem.amount,1,'COMMA',0,'POINT') : ''}" 
+					                                        		th:readonly="${!priceItem.rateTypeEditable}"
+					                                        		type="text" class="form-control input-md price-item ccyNumeric"/>
+					                                        </td>
+					                                    </tr>
+					                                </tbody>
+					                            </table>
+						                    </div>
+			                            </div>
+							        </div>
+								</div>
+								<div class="overlay charges-overlay">
+								  	<i class="fa fa-cog fa-spin"></i>
+								</div>
+			                </div>
+		    			</fieldset>
+					</form>
+					<form id="changeStateForm" role="form" method="post" action="" style="display: none;">
+			        	<input type="submit" value="FormSubmitBtn" id="changeStateFormSubmitBtn" style="display: none;"/>
+			        	<fieldset>
+			        		<input type="hidden" name="id" />
+			        		<input type="hidden" name="action" />
+			        		<input type="hidden" name="remark" />
+			        	</fieldset>
+			        </form>
+					</section>
+				</th:block>
+			</div>
+		</div>
+
+		<div class="modal fade" id="dimensionsModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+	        <div class="modal-dialog">
+	            <div class="modal-content">
+	                <div class="modal-header">
+	                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+	                    <h4 class="modal-title" th:text="#{dimensions}">dimensions</h4>
+	                </div>
+	                <div class="modal-body">
+	                    <div class="row">
+	                    	<div class="col-md-12">
+	                    		<input id="dimensionsIndex" name="index" value="" type="hidden"/>
+	                    		<table id="dimensionsTable" class="table table-bordered">
+	                    			<thead>
+		                    			<tr>
+			                    			<td th:text="#{count}"  width="20%"></td>
+			                    			<td th:text="#{length}" width="20%"></td>
+			                    			<td th:text="#{width}"  width="20%"></td>
+			                    			<td th:text="#{height}" width="20%"></td>
+			                    			<td width="5%"><a onclick="addDimRow()" class="btn btn-success btn-xs"><i class="fa fa-plus"></i></a></td>
+		                    			</tr>
+		                    		</thead>
+	                    			<tbody>
+	                    			</tbody>
+	                    		</table>
+	                    	</div>
+	                    </div>
+	                </div>
+	                <div class="modal-footer">
+	                	<div class="pull-left error_space"></div>
+	                    <button type="button" class="btn btn-primary" th:text="#{button.ok}" onclick="setDimensions()">OK</button>
+	                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+
+	    <div class="modal fade" id="packagesModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+	        <div class="modal-dialog">
+	            <div class="modal-content">
+	                <div class="modal-header">
+	                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+	                    <h4 class="modal-title" th:text="#{packages}">Packages</h4>
+	                </div>
+	                <div class="modal-body">
+	                    <div class="row">
+	                    	<div class="col-md-12">
+	                    		<input id="packagesIndex" name="index" value="" type="hidden"/>
+	                    		<table id="packagesTable" class="table table-bordered">
+	                    			<thead>
+		                    			<tr>
+			                    			<td th:text="#{count}" width="50%"></td>
+			                    			<td th:text="#{type}" width="50%"></td>
+			                    			<td style="width: 21px"><a onclick="addPkgRow()" class="btn btn-success btn-xs"><i class="fa fa-plus"></i></a></td>
+		                    			</tr>
+		                    		</thead>
+	                    			<tbody>
+
+	                    			</tbody>
+	                    		</table>
+	                    	</div>
+	                    </div>
+	                </div>
+	                <div class="modal-footer">
+	                	<div class="pull-left error_space"></div>
+	                    <button type="button" class="btn btn-primary" th:text="#{button.ok}" onclick="setPackages()">OK</button>
+	                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal fade" id="personModal" role="dialog" aria-hidden="true" style="display: none;">
+	        <div class="modal-dialog modal-lg">
+	            <div class="modal-content">
+	                <div class="modal-header">
+	                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+	                    <h4 class="modal-title">New Person</h4>
+	                </div>
+	                <div class="modal-body">
+	                    <th:block th:include="person-fragments :: person" />
+	                </div>
+	                <div class="modal-footer">
+	                	<div class="pull-left error_space"></div>
+	                    <button id="personSaveBtn" type="button" class="btn btn-primary" th:text="#{button.ok}">OK</button>
+	                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+		<!-- templates -->
+		<table>
+			<tbody class="pkl-row-template hidden">
+				<tr data-index="##INDEX##" id="pkl-row_##INDEX##">
+					<td>
+						<span id="priceItems_##INDEX## "> 
+							<input name="packingList[##INDEX##].priceItems[0].value" data-index="0" type="hidden" />
+							<input name="packingList[##INDEX##].priceItems[0].rateTypeId" data-index="0" type="hidden" />
+							<input name="packingList[##INDEX##].priceItems[0].rateTypeCode" data-index="0" type="hidden" />
+							<input name="packingList[##INDEX##].priceItems[0].routeId" data-index="0" type="hidden" />
+							<input name="packingList[##INDEX##].priceItems[0].nodeId" data-index="0" type="hidden" />
+							<input name="packingList[##INDEX##].priceItems[0].zoneId" data-index="0" type="hidden" />
+							<input name="packingList[##INDEX##].priceItems[0].agentId" data-index="0" type="hidden" />
+						</span>
+						<input name="packingList[##INDEX##].id" data-index="##INDEX##" type="hidden" />
+						<input name="packingList[##INDEX##].pieces" data-index="##INDEX##" type="text" 
+							class="form-control input-md pieceNumeric pieces" />
+					</td>
+					<td>
+						<input name="packingList[##INDEX##].grossWeight" data-index=" ##INDEX## " type="text"
+							class="form-control input-md weightNumeric notempty grossWeight" />
+					</td>
+					<td class="text-center">
+						<a href="javascript:;" class="dimensions btn btn-default" data-index="##INDEX##">DIM</a>
+						<input name="packingList[##INDEX##].dimensions" data-index="##INDEX##" type="hidden" />
+					</td>
+					<td>
+						<input name="packingList[##INDEX##].volumetricWeight"
+							data-index="##INDEX##" 
+							readonly="true"
+							tabindex="-1" 
+							type="text"
+							class="form-control input-md weightNumeric volumetricWeight" /></td>
+					<td>
+						<select name="packingList[##INDEX##].weightUnit" data-index="##INDEX##" id="weightUnit_##INDEX##">
+							<option value="KILOGRAM">K</option>
+							<option value="POUND">L</option>
+						</select>
+					</td>
+					<td>
+						<select name="packingList[##INDEX##].commodityItemNumber" id="selCIN_##INDEX##" data-index="##INDEX##" 
+							class="impactPrice">
+							<option value=""></option>
+							<option value="7100">7100-Envelope or Docs | پاکت یا اوراق</option>
+							<option value="7109">7109-Newspapers | مطبوعات</option>
+							<option value="1001">1001-Live Animals | حیوان زنده</option>
+							<option value="9002">9002-Valuable Cargo | بار باارزش</option>
+							<option value="9091">9091-Human Remains | جنازه</option>
+						</select>
+					</td>
+					<td>
+						<div class="input-group">
+							<input name="packingList[##INDEX##].nature" id="contents_##INDEX##" data-index="##INDEX##" type="text" 
+								class="form-control" />
+							<span class="input-group-btn">
+								<a href="javascript:;" class="packages btn btn-default" data-index="##INDEX##">
+									<i class="fa fa-plus"></i>
+								</a>
+							</span>
+						</div>
+						<input name="packingList[##INDEX##].packingTypeCountPair" type="hidden" />
+						<div id="pkgTable_##INDEX##"></div>
+						<div id="dimTable_##INDEX##"></div>
+					</td>
+					<td>
+						<!-- onchange="calcComplete(true, 'NEW')" -->
+						<input readonly="readonly" name="packingList[##INDEX##].chargeableWeight"
+							id="chargeableWeight_##INDEX##" data-index="##INDEX##"
+							onchange="calcTotalCharge(this);calcAllTotal();"
+							type="text" class="form-control weightNumeric chargeableWeight" />
+					</td>
+					<td>
+						<select name="packingList[##INDEX##].rateClass"
+								data-index="##INDEX##"
+								class="form-control" th:placeholder="...">
+						    <option value=""></option>
+						    <option th:each="type : ${T(com.parvanpajooh.waybillmanagement.domain.model.enums.RateClass).values()}" 
+						    	th:value="${type}" 
+						    	th:text="${type}">
+					    	</option>
+						</select>
+					</td>
+					<td>
+						<input name="packingList[##INDEX##].rateOrCharge" id="rate_##INDEX##" data-index="##INDEX##" type="text"
+							class="form-control rateOrCharge ccyNumeric" />
+					</td>
+					<td>
+						<input name="packingList[##INDEX##].totalCharge" id="total_##INDEX##" data-index="##INDEX##" type="text"
+							readonly="readonly" class="form-control totalCharge ccyNumeric" />
+					</td>
+					<td class="text-center">
+						<a data-index="##INDEX##" id="delBtn_##INDEX##" class="btn btn-xs btn-danger"
+							onclick="removePackingListRow(this)"><i class="fa fa-trash-o"></i>
+						</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<table>
+			<tbody class="pi-row-template hidden">
+				<tr data-index="##INDEX##" id="pi-row_##INDEX##">
+					<td class="text-center">
+						<input name="priceItems[##INDEX##].id}" data-index="##INDEX##" type="hidden" />
+						<input name="priceItems[##INDEX##].rateTypeCode}" data-index="##INDEX##" type="hidden" class="form-control input-md rateTypeCode"/>
+						<input name="priceItems[##INDEX##].rateTypeId}" data-index="##INDEX##" type="hidden" />
+						<input name="priceItems[##INDEX##].rateTypeEditable}" data-index="##INDEX##" type="hidden" />
+						<input name="priceItems[##INDEX##].rateTypeDisplayOrder}" data-index="##INDEX##" type="hidden" />
+						<input name="priceItems[##INDEX##].rateTypeNameFa}" data-index="##INDEX##" type="hidden" />
+						<input name="priceItems[##INDEX##].rateTypeNameEn}" data-index="##INDEX##" type="hidden" />
+					</td>
+					<td>
+						<input name="priceItems[##INDEX##].value'}" data-index="##INDEX##" type="text" class="form-control input-md price-item ccyNumeric"/>
+					</td>
+					<td class="text-center">
+						<a class="btn btn-xs btn-danger" data-index="##INDEX##" onclick="removePriceItemRow(this)">
+							<i class="fa fa-trash-o"></i>
+						</a>
+					</td>
+                 </tr>
+			</tbody>
+		</table>
+	</section>
+
+<th:block layout:fragment="javascripts">
+	<script th:src="@{/js/waybill.js}"></script>
+	<script th:src="@{/resources/lib/bootstrap-modal/js/bootstrap-modalmanager.js}"></script>
+	<script th:inline="javascript">
+		var fixShipperCityCode = /*[[${userAgentCityCode}]]*/;
+		var fixCollectHubId = /*[[${userAgentHubNodeId}]]*/;
+		var isShipperReadonly = /*[[${shipperInputMethod == 'SELECT_ONLY'}]]*/;
+		var isConsigneeReadonly = /*[[${consigneeInputMethod == 'SELECT_ONLY'}]]*/;
+			
+		var weightTypes = '';
+		var taxTypes = '';
+		var otherChargesTypes = '';
+		var totalTypes = '';
+
+		var vatPercent = 0.09;
+
+		var totalMap = {
+				totalWeightChargePPD : /*[[${waybill.totalWeightChargePPD}]]*/,
+				totalWeightChargeCOLL: /*[[${waybill.totalWeightChargeCOLL}]]*/,
+
+				totalValuationChargePPD : /*[[${waybill.totalValuationChargePPD}]]*/,
+				totalValuationChargeCOLL: /*[[${waybill.totalValuationChargeCOLL}]]*/,
+
+				totalTaxPPD : /*[[${waybill.totalTaxPPD}]]*/,
+				totalTaxCOLL: /*[[${waybill.totalTaxCOLL}]]*/,
+
+				totalOtherChargesDueAgentPPD: /*[[${waybill.totalOtherChargesDueAgentPPD}]]*/,
+				totalOtherChargesDueAgentCOLL:/*[[${waybill.totalOtherChargesDueAgentCOLL}]]*/,
+
+				totalOtherChargesDueCarrierPPD : /*[[${waybill.totalOtherChargesDueCarrierPPD}]]*/,
+				totalOtherChargesDueCarrierCOLL: /*[[${waybill.totalOtherChargesDueCarrierCOLL}]]*/,
+
+				totalAmountPPD : /*[[${waybill.totalAmountPPD}]]*/,
+				totalAmountCOLL: /*[[${waybill.totalAmountCOLL}]]*/
+			};
+	</script>
+</th:block>
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+package com.parvanpajooh.transportationmanagement2.service.adapter;
+
+import java.util.List;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.transportationmanagement2.model.vo.NodeVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.RouteVO;
+
+public interface RouteManagementServiceAdapter {
+	
+	public NodeVO getNodeByCode(String codeName) throws ParvanUnrecoverableException;
+	
+	public List<NodeVO> getAllNodes() throws ParvanServiceException;
+
+	public PageList<RouteVO> findRoutes(String carrierCode, String term, int page, int size) throws ParvanUnrecoverableException;
+
+	public RouteVO getRoute(Long id) throws ParvanUnrecoverableException;
+
+	public RouteVO getRouteByCarrierRouteNumber(String carrierRouteNumber) throws ParvanUnrecoverableException;
+
+	public List<String> findRouteNumbersByFromNodeCode(String fromNodeCode) throws ParvanUnrecoverableException;
+
+}

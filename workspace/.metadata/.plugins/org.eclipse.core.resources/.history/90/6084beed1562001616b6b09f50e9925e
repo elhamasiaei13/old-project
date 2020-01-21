@@ -1,0 +1,265 @@
+package com.parvanpajooh.agentmanagement.dao.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+import javax.validation.ConstraintViolationException;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hibernate.StaleObjectStateException;
+
+import com.parvanpajooh.agentmanagement.dao.AccountNumberDao;
+import com.parvanpajooh.agentmanagement.dao.EmployeeDao;
+import com.parvanpajooh.agentmanagement.dao.GeneralAgentDao;
+import com.parvanpajooh.agentmanagement.model.AccountNumber;
+import com.parvanpajooh.agentmanagement.model.Employee;
+import com.parvanpajooh.agentmanagement.model.GeneralAgent;
+import com.parvanpajooh.agentmanagement.model.GeneralAgent_;
+import com.parvanpajooh.agentmanagement.model.criteria.AccountNumberCriteria;
+import com.parvanpajooh.agentmanagement.model.criteria.EmployeeCriteria;
+import com.parvanpajooh.agentmanagement.model.criteria.GeneralAgentCriteria;
+import com.parvanpajooh.agentmanagement.model.vo.GeneralAgentVO;
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectExistsException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.DateUtil;
+import com.parvanpajooh.commons.util.Validator;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class GeneralAgentDaoJpa extends GenericDaoJpa<GeneralAgent, Long>implements GeneralAgentDao {
+
+	public GeneralAgentDaoJpa() {
+		super(GeneralAgent.class);
+	}
+
+	/**
+	 * Entity manager, injected by Spring using @PersistenceContext annotation
+	 * on setEntityManager()
+	 */
+	@PersistenceContext(unitName = PERSISTENCE_UNIT_NAME)
+	private EntityManager entityManager;
+
+	public EmployeeDao employeeDao;
+	public AccountNumberDao accountNumberDao;
+
+	@Inject
+	public void setEmployeeDao(EmployeeDao employeeDao) {
+		this.employeeDao = employeeDao;
+	}
+
+	@Inject
+	public void setAccountNumberDao(AccountNumberDao accountNumberDao) {
+		this.accountNumberDao = accountNumberDao;
+	}
+
+	@Override
+	public GeneralAgent save(GeneralAgent generalAgent) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering save( object={})", generalAgent);
+
+		GeneralAgent entity = null;
+		String accountNumber = null;
+
+		try {
+
+
+
+			Set<Employee> employeesSet = new HashSet<Employee>();
+			Set<AccountNumber> accountNumbersSet = new HashSet<AccountNumber>();
+			Set<Employee> employees = generalAgent.getEmployee();
+			List<AccountNumber> accountNumberList = new ArrayList<AccountNumber>(generalAgent.getAccountNumber());
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+
+			if (Validator.isNotNull(accountNumberList)) {
+				accountNumber = accountNumberList.get(0).getAccountNumber();
+			}
+
+			
+			// save GeneralAgent
+			generalAgent.setEmployee(null);
+			generalAgent.setAccountNumber(null);
+			entity = this.entityManager.merge(generalAgent);
+			this.entityManager.flush();
+			
+			if (Validator.isNotNull(employees)) {
+
+				// load Employee with generalAgentId
+				EmployeeCriteria employeeCriteria = new EmployeeCriteria();
+				GeneralAgentVO gAgent = new GeneralAgentVO();
+				gAgent.setId(generalAgent.getId());
+				employeeCriteria.setGeneralAgent(gAgent);
+				List<Employee> employeeList = employeeDao.findByCriteria(employeeCriteria);
+				for (Employee emp : employeeList) {
+					employeeDao.delete(emp);
+				}
+
+				for (Employee object : employees) {
+
+					// save Employee
+					object.setGeneralAgent(entity);
+					object = employeeDao.save(object);
+					employeesSet.add(object);
+				}
+			}
+
+			// save AccountNumber
+			AccountNumberCriteria accountNumberCriteria = new AccountNumberCriteria();
+			accountNumberCriteria.set
+			accountNumbersSet = accountNumberDao.findByCriteria(arg0)
+			for (AccountNumber accnt : accountNumbersSet) {
+				accnt.setActive(false);
+			}
+			AccountNumber account = new AccountNumber();
+			account.setAccountNumber(accountNumber);
+			account.setActive(true);
+			account.setGeneralAgent(entity);
+			accountNumberDao.save(account);
+			accountNumbersSet.add(account);
+			
+			
+			//refresh GeneralAgent
+			generalAgent.setEmployee(employeesSet);
+			generalAgent.setAccountNumber(accountNumbersSet);
+			entity = this.entityManager.merge(generalAgent);
+			this.entityManager.flush();
+
+
+		} catch (ConstraintViolationException e) {
+			throw e;
+
+		} catch (OptimisticLockException e) {
+			if (e.getCause() != null && e.getCause() instanceof StaleObjectStateException) {
+				throw (StaleObjectStateException) e.getCause();
+			}
+
+			throw e;
+
+		} catch (Exception e) {
+
+			Throwable cause = ExceptionUtils.getRootCause(e);
+
+			if (cause != null && cause.getMessage() != null && cause.getMessage().indexOf("_UNIQUE") > -1) {
+				throw new ObjectExistsException();
+			}
+
+			throw new ParvanDaoException("Error occurred while saving record.", e);
+		}
+
+		// LOG
+		log.debug("Leaving exists(): {}", entity);
+
+		return entity;
+	}
+
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<GeneralAgent> root,
+			Map<String, Join> joins) throws ParvanException {
+
+		// LOG
+		log.debug("Entering buildPredicateList( ... )");
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		GeneralAgentCriteria generalAgentCriteria = (GeneralAgentCriteria) cri;
+		String canonicalSearchName = generalAgentCriteria.getCanonicalSearchName();
+
+		// ----------------------------------------------------------------
+		// canonicalSearchName
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(canonicalSearchName)) {
+			List<Predicate> preList = new ArrayList<Predicate>();
+
+			String[] splited = canonicalSearchName.trim().split("\\s+");
+
+			for (String str : splited) {
+
+				Predicate predicate = builder.or(builder.like(root.<String> get(GeneralAgent_.name), "%" + str + "%"),
+						builder.like(root.<String> get(GeneralAgent_.tel), "%" + str + "%"),
+						builder.like(root.<String> get(GeneralAgent_.email), "%" + str + "%"));
+				preList.add(predicate);
+
+			}
+			predicateList.add(builder.and(preList.toArray(new Predicate[0])));
+		}
+
+		// LOG
+		log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<GeneralAgent> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDate())) {
+			Predicate predicate = builder.equal(root.<LocalDateTime> get("createDate"), cri.getCreateDate());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDate())) {
+			Predicate predicate = builder.equal(root.<LocalDateTime> get("updateDate"), cri.getCreateDate());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateFrom())) {
+			LocalDateTime localDateTime = DateUtil.getFirstTimeOfDate(cri.getCreateDateFrom());
+
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("createDate"), localDateTime);
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateTo())) {
+			LocalDateTime localDateTime = DateUtil.getLastTimeOfDate(cri.getCreateDateTo());
+
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("createDate"), localDateTime);
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateFrom())) {
+			LocalDateTime localDateTime = DateUtil.getFirstTimeOfDate(cri.getUpdateDateFrom());
+
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("updateDate"), localDateTime);
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateTo())) {
+			LocalDateTime localDateTime = DateUtil.getLastTimeOfDate(cri.getUpdateDateTo());
+
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("updateDate"), localDateTime);
+			predicateList.add(predicate);
+		}
+	}
+}

@@ -1,0 +1,68 @@
+package com.parvanpajooh.issuemanager.service.impl;
+
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.issuemanager.common.exceptions.ErrorCode;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.issuemanager.model.TaskStatusHistory;
+import com.parvanpajooh.issuemanager.model.enums.RoleEnum;
+import com.parvanpajooh.issuemanager.model.vo.TaskStatusHistoryVO;
+import com.parvanpajooh.issuemanager.service.TaskStatusHistoryLocalService;
+import com.parvanpajooh.issuemanager.service.TaskStatusHistoryService;
+import com.parvanpajooh.issuemanager.service.impl.GenericServiceImpl;
+
+@Stateless
+public class TaskStatusHistoryServiceImpl extends GenericServiceImpl<TaskStatusHistory, Long>implements TaskStatusHistoryService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(TaskStatusHistoryServiceImpl.class);
+
+	private TaskStatusHistoryLocalService taskStatusHistoryLocalService;
+
+	@Inject
+	public void setUserLocalService(TaskStatusHistoryLocalService taskStatusHistoryLocalService) {
+		this.localService = taskStatusHistoryLocalService;
+		this.taskStatusHistoryLocalService = taskStatusHistoryLocalService;
+	}
+
+	@Override
+	public List<TaskStatusHistoryVO> loadByTaskId(UserInfo userInfo, Long taskId) throws ParvanServiceException {
+		log.debug("Entering loadTaskAssignmentByTaskId(userInfo={})", userInfo);
+		return taskStatusHistoryLocalService.loadByTaskId(taskId);
+	}
+
+	@Override
+	public void edit(UserInfo userInfo, TaskStatusHistoryVO taskStatusHistoryVO) throws ParvanServiceException {
+		log.debug("Entering editTaskStatus(userInfo={})", userInfo);
+
+			// check access
+			Set<String> userRoles = userInfo.getRoleNames();
+			if (!(userRoles.contains(RoleEnum.ADMIN.value) && userRoles.contains(RoleEnum.MANAGER.value))) {
+				throw new ParvanRecoverableException(ErrorCode.HAS_NOT_ACCESS);
+			}
+
+			taskStatusHistoryVO.setUpdateUserId(userInfo.getUserId());
+			taskStatusHistoryLocalService.edit(taskStatusHistoryVO);
+
+	}
+
+	public TaskStatusHistoryVO addTaskStatus(UserInfo userInfo, TaskStatusHistoryVO taskStatusHistoryVO, Long taskId) throws ParvanServiceException {
+		log.debug("Entering deleteTask(userInfo={})", userInfo);		
+		return taskStatusHistoryLocalService.addTaskStatus(userInfo, taskStatusHistoryVO, taskId);
+
+	}
+
+}

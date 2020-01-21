@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Cloud Foundry 2012.02.03 Beta Copyright (c) [2009-2012] VMware, Inc. All Rights Reserved. This product is licensed to
+	you under the Apache License, Version 2.0 (the "License"). You may not use this product except in compliance with the License.
+	This product includes a number of subcomponents with separate copyright notices and license terms. Your use of these subcomponents
+	is subject to the terms and conditions of the subcomponent's license, as noted in the LICENSE file. -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	   xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<sec:http name="appFilterLogout" pattern="/logout" security="none" />
+	<sec:http name="appFilterLoginError" pattern="/login_error.html" security="none" />
+	<sec:http name="appFilterResources" pattern="/resources/**" security="none" />
+	<sec:http name="appFilterTrack" pattern="/rest/track/**" security="none" />
+	<sec:http name="appFilterCargoTrack" pattern="/track.*" security="none" request-matcher="regex"/>
+	<sec:http name="appFilterPush" pattern="/push" security="none" />
+	<sec:http name="appFilterFavIcon" pattern="/favicon.ico" security="none" />
+	<sec:http name="appFilterNotFound" pattern="/404.html" security="none" />
+	<sec:http name="appFilterForbidden" pattern="/403.html" security="none" />
+	
+	<!-- <http name="appFilterApps" pattern="/apps.*" request-matcher="regex" xmlns="http://www.springframework.org/schema/security"
+		entry-point-ref="loginEntryPoint" disable-url-rewriting="true" use-expressions="true" authentication-manager-ref="authenticationManager">
+		<intercept-url pattern="/apps.*" access="hasRole('cloud_controller.read')" />
+		<intercept-url pattern="/admin/.*" access="hasAnyRole('ADMIN', 'MANAGER')" />
+		<intercept-url pattern="/agent/.*" access="hasAnyRole('ADMIN', 'MANAGER', 'AGENT')" />
+		<intercept-url pattern="/switchuserto" access="hasRole('ADMIN')" />
+		<anonymous enabled="false" />
+		<custom-filter ref="oauth2ClientFilter" before="PRE_AUTH_FILTER" />
+		<custom-filter ref="accessTokenFilter" position="PRE_AUTH_FILTER" />
+		<csrf disabled="true"/>
+	</http> -->
+	
+	<http name="apiDefaultFilter" pattern="/ws/rest/**" entry-point-ref="oauthAuthenticationEntryPoint" access-decision-manager-ref="accessDecisionManager"
+		xmlns="http://www.springframework.org/schema/security" use-expressions="true">
+		<intercept-url pattern="/rest/**" access="#oauth2.hasAnyScope('cloud_controller.read','api.service')" />
+		<intercept-url pattern="/ws/rest/**" access="#oauth2.hasAnyScope('cloud_controller.read','api.service')" />
+		<custom-filter ref="oauth2ServiceFilter" position="PRE_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+		<expression-handler ref="oauth2WebSecurityExpressionHandler" />
+		<csrf disabled="true"/>
+	</http>
+	
+	<http name="restApiDefaultFilter" pattern="/rest/**" entry-point-ref="oauthAuthenticationEntryPoint" access-decision-manager-ref="accessDecisionManager"
+		xmlns="http://www.springframework.org/schema/security" use-expressions="true">
+		<intercept-url pattern="/rest/**" access="#oauth2.hasAnyScope('cloud_controller.read','api.service')" />
+		<custom-filter ref="oauth2ServiceFilter" position="PRE_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+		<expression-handler ref="oauth2WebSecurityExpressionHandler" />
+		<csrf disabled="true"/>
+	</http>
+	
+	<bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
+        <property name="realmName" value="UAA/oauth" />
+    </bean>
+    
+    <bean id="oauthAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
+    
+	<http name="appFilterDefault" auto-config="false" xmlns="http://www.springframework.org/schema/security" entry-point-ref="loginEntryPoint"
+		disable-url-rewriting="true" use-expressions="true" authentication-manager-ref="authenticationManager"
+		security-context-repository-ref="securityContextRepository">
+		<sec:access-denied-handler error-page="/403.html"/>
+		<sec:intercept-url pattern="/switchuserto" access="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')" />
+		<sec:intercept-url pattern="/admin/**" access="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')" />
+		<sec:intercept-url pattern="/agent/**" access="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_AGENT')" />
+		<sec:intercept-url pattern="/**" access="isFullyAuthenticated()" />
+		<logout logout-url="/logout" logout-success-url="/logout" delete-cookies="JSESSIONID"/>
+		<anonymous enabled="false" />
+		<custom-filter ref="switchUserProcessingFilter" position="SWITCH_USER_FILTER" />
+		<custom-filter ref="oauth2ClientFilter" before="PRE_AUTH_FILTER" />
+		<custom-filter ref="socialClientFilter" position="PRE_AUTH_FILTER" />
+		<csrf disabled="true"/>
+		<sec:session-management session-fixation-protection="migrateSession">
+			<sec:concurrency-control max-sessions="3" session-registry-ref="sessionRegistry"/>
+		</sec:session-management>
+		<headers>
+			<sec:hsts disabled="true"/>
+	    </headers>
+	</http>
+	
+	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased" xmlns="http://www.springframework.org/schema/beans">
+		<constructor-arg>
+			<list>
+				<bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter">
+					<property name="scopePrefix" value="scope=" />
+				</bean>
+				<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+				<bean class="org.springframework.security.access.vote.RoleVoter" />
+				<bean class="org.springframework.security.web.access.expression.WebExpressionVoter">
+                   	<property name="expressionHandler" ref="oauth2WebSecurityExpressionHandler" />
+				</bean>
+			</list>
+		</constructor-arg>
+	</bean>
+	
+	<bean id="oauth2WebSecurityExpressionHandler" class="org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler"/>
+	
+	<!-- <bean id="contentTypeFilter" class="org.cloudfoundry.identity.api.web.ContentTypeFilter">
+		<property name="mediaTypes">
+			<map>
+				<entry key="/apps" value="application/json" />
+				<entry key="/info" value="application/json" />
+			</map>
+		</property>
+	</bean> -->
+	
+	<sec:global-method-security pre-post-annotations="enabled">
+		<sec:expression-handler ref="oauth2MethodSecurityExpressionHandler" />
+	</sec:global-method-security>
+	
+	<oauth:resource-server id="oauth2ServiceFilter" resource-id="cloud_controller" token-services-ref="remoteTokenServices" />
+
+	<bean id="securityContextRepository" class="org.springframework.security.web.context.HttpSessionSecurityContextRepository">
+		<property name="springSecurityContextKey" value="SOCIAL_SPRING_SECURITY_CONTEXT" />
+	</bean>
+
+	<sec:authentication-manager alias="authenticationManager" />
+
+	<bean id="oauth2AuthenticationManager" class="org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager">
+		<property name="tokenServices" ref="remoteTokenServices" />
+	</bean>
+
+	<bean id="remoteTokenServices" class="com.parvanpajooh.ecourier.auth.CustomRemoteTokenServices">
+		<property name="checkTokenEndpointUrl" value="${checkTokenUrl}" />
+		<property name="clientId" value="${CLIENT_ID:app}" />
+		<property name="clientSecret" value="${CLIENT_SECRET:appclientsecret}" />
+	</bean>
+
+	<bean id="loginEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<constructor-arg value="/login_error.html" />
+	</bean>
+
+	<!--apply the oauth client context -->
+	<oauth:client id="oauth2ClientFilter" />
+	
+	
+	<bean id="customWebAuthenticationDetailsSource" class="com.parvanpajooh.ecourier.auth.CustomWebAuthenticationDetailsSource" />
+
+	<bean id="socialClientFilter" class="com.parvanpajooh.ecourier.auth.ClientAuthenticationFilter">
+		<constructor-arg value="/login" />
+		<property name="preAuthenticatedPrincipalSource">
+			<bean class="com.parvanpajooh.ecourier.auth.SocialClientUserDetailsSource">
+				<property name="restTemplate" ref="restTemplate" />
+				<property name="userInfoUrl" value="${userInfoUri}" />
+			</bean>
+		</property>
+		<property name="authenticationDetailsSource" ref="customWebAuthenticationDetailsSource"/>
+	</bean>
+
+	<bean id="accessTokenFilter" class="com.parvanpajooh.ecourier.auth.ClientAuthenticationFilter">
+		<constructor-arg value="/login" />
+		<property name="authenticationManager" ref="oauth2AuthenticationManager" />
+		<property name="preAuthenticatedPrincipalSource">
+			<bean class="org.cloudfoundry.identity.uaa.client.OAuth2AccessTokenSource">
+				<property name="restTemplate" ref="restTemplate" />
+			</bean>
+		</property>
+	</bean>
+
+	<oauth:rest-template id="restTemplate" resource="uaa" />
+	
+	<!--define an oauth 2 resource for api access -->
+	<oauth:resource id="uaa" type="authorization_code" client-id="${CLIENT_ID:app}" client-secret="${CLIENT_SECRET:appclientsecret}"
+		access-token-uri="${accessTokenUri}" user-authorization-uri="${userAuthorizationUri}" pre-established-redirect-uri="${defRedirect:/ecourier-web}"/>
+		
+	<oauth:expression-handler id="oauthExpressionHandler" />
+	
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" xmlns="http://www.springframework.org/schema/beans">
+		<property name="locations">
+			<list>
+				<value>classpath:/application.properties</value>
+				<value>file:${user.home}/application-ext.properties</value>
+			</list>
+		</property>
+		<property name="ignoreResourceNotFound" value="true"></property>
+	</bean>
+
+	<bean id="switchUserProcessingFilter" class="com.parvanpajooh.ecourier.config.SwitchUserFilter">
+		<property name="userDetailsService" ref="userDetailsService" />
+     	<property name="switchUserUrl" value="/switchuserto" />
+     	<property name="exitUserUrl" value="/switchuserlogout" />
+     	<property name="targetUrl" value="/"/>
+     	<property name="usernameParameter" value="username"/>
+	</bean>
+	
+	<bean id="userDetailsService" class="com.parvanpajooh.ecourier.auth.UserDetailsService">
+		<property name="restTemplate" ref="restTemplate" />
+	</bean>
+
+</beans>

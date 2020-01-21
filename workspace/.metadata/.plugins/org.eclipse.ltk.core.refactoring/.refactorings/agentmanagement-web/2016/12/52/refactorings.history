@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy 3 elements to &apos;taskmanagement-web/src/main/resources&apos;&#x0A;- Original project: &apos;agentmanagement-web&apos;&#x0A;- Destination element: &apos;taskmanagement-web/src/main/resources&apos;&#x0A;- Original elements:&#x0A;     Messages_fa.properties&#x0A;     Messages.properties&#x0A;     Messages_en.properties" description="Copy files" destination="=taskmanagement-web/src\/main\/resources" element1="src/main/resources/Messages_fa.properties" element2="src/main/resources/Messages.properties" element3="src/main/resources/Messages_en.properties" files="3" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1482325955080" units="0" version="1.0"/>
+</session>

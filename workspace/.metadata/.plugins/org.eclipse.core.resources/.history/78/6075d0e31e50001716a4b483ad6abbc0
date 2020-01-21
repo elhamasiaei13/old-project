@@ -1,0 +1,47 @@
+package com.parvanpajooh.personmanagement.service;
+
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
+import org.json.JSONObject;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.service.GenericService;
+import com.parvanpajooh.personmanagement.model.Person;
+import com.parvanpajooh.personmanagement.model.enums.RelationType;
+import com.parvanpajooh.personmanagement.model.vo.PersonVO;
+
+/**
+ * 
+ * @author ali
+ * @author MO
+ *
+ */
+public interface PersonService extends GenericService<Person, Long> {
+
+	public PersonVO getCompletePerson(UserInfo ecUserInfo, Long id) throws ParvanServiceException;
+
+	public void importPersons(UserInfo ecUserInfo, InputStream excelIS) throws ParvanServiceException;
+
+	public PageList<PersonVO> searchActivePeopleInOrganization(UserInfo userInfo, Long organizationId,  String term, Integer start, Integer length,
+			SortDirectionEnum directionEnum, String sortCriterion) throws ParvanServiceException;
+
+	public void index(UserInfo userInfo) throws ParvanServiceException;
+
+	public PersonVO getByUuid(UserInfo userInfo, String uuid) throws ParvanServiceException;
+	
+	public Map<String, String> getPersonsByUuids(UserInfo userInfo , List<String> uuids) throws ParvanServiceException;
+	
+	public JSONObject findPersonAndUserByUuid(UserInfo userInfo , String uuid) throws ParvanServiceException;
+	
+	public JSONObject createPerson(UserInfo userInfo, JSONObject data) throws ParvanServiceException;
+
+	public List<PersonVO> findRelatedFrom(UserInfo userInfo, String uuid, RelationType type, String allowedOrgId, String term) throws ParvanServiceException;
+
+	public List<PersonVO> findRelatedTo(UserInfo userInfo, String personUuid, RelationType type, String allowedOrgId, String term) throws ParvanServiceException;
+	
+}

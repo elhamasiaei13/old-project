@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;userVO&apos; in &apos;com.parvanpajooh.identitymanagement2.service.impl.RoleLocalServiceImpl.save(...)&apos; to &apos;roleVO&apos;&#x0A;- Original project: &apos;identitymanagement2-ejb&apos;&#x0A;- Original element: &apos;com.parvanpajooh.identitymanagement2.service.impl.RoleLocalServiceImpl.save(BaseVO, UserInfo).userVO&apos;&#x0A;- Renamed element: &apos;userVO&apos;&#x0A;- Update references to refactored element" description="Rename local variable &apos;userVO&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src\/main\/java&lt;com.parvanpajooh.identitymanagement2.service.impl{RoleLocalServiceImpl.java[RoleLocalServiceImpl~save~QBaseVO;~QUserInfo;@userVO!2706!2737!2713!2718!QRoleVO;!0!false" name="roleVO" references="true" stamp="1488872589338" version="1.0"/>
+</session>

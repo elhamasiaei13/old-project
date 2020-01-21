@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>Generate WaybillNumbers</title>
+
+<style>
+.select-device-modal label {
+	margin-bottom: 0px;
+}
+
+.select-device-modal input {
+	width: auto;
+	height: 28px;
+}
+
+.select-device-modal .form-control {
+	width: auto;
+}
+
+.select-device-modal table.dataTable td {
+	padding: 1px 10px;
+}
+
+.select-device-modal .dataTables_filter label {
+	margin-bottom: 5px;
+}
+</style>
+</head>
+
+<body th:with="rightMenu='WaybillNumberGenerateCommands'">
+	<div class="page-container">
+		<section layout:fragment="top-header" class="fixed-header">
+			<div class="ui-header-image pull-left">
+				<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/stock2-web/resources/images/stack.png" th:src="@{/resources/images/stack.png}" style="width: 48px; height: 48px;" />
+			</div>
+			<div class="ui-header-title">
+				<div class="split-left">
+					<h3>
+						<small>Generate</small>
+					</h3>
+					<h3>WaybillNumbers</h3>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<!-- CONTENT -->
+	<section class="content" layout:fragment="content">
+		<div class="box box-default">
+			<div class="box-header">
+				<h3 class="box-title" th:text="#{waybillNumberGenerateCommand.create}">ایجاد شماره‌های بارنامه</h3>
+			</div>
+			<div class="box-body" style="display: block;">
+				<dy:form entity="WaybillNumberGenerateCommand" form="create" type="create" />
+			</div>
+
+			<div class="box box-default">
+				<div class="box-header">
+					<h3 class="box-title" th:text="#{waybillNumberGenerateCommand.preview}">پیش‌نمایش</h3>
+					<div class="box-tools pull-right">
+						<button title="" data-widget="collapse" class="btn btn-default btn-xs">
+							<i class="fa fa-minus"></i>
+						</button>
+					</div>
+				</div>
+				<div class="box-body" style="display: block;">
+					<form class="form-horizontal">
+						<div class="form-group ">
+							<label class="col-sm-2 control-label" for="previewNumber" th:text="#{waybillNumberGenerateCommand.previewNumber}">تعداد</label>
+							<div class="col-sm-7">
+								<input class="form-control " id="previewNumberCreate" name="previewNumber" type="text" width="300" style="width: 300px" th:readonly="true"/>
+							</div>
+						</div>
+						<div class="form-group ">
+							<label class="col-sm-2 control-label" for="preview" th:text="#{waybillNumberGenerateCommand.previewWaybillNumbers}">شماره‌های بارنامه</label>
+							<div class="col-sm-7">
+								<textarea class="form-control " id="previewCreate" name="preview" style="width: 300px;height: 100px" th:readonly="true"></textarea>
+							</div>
+						</div>
+
+					</form>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" id="waybillNumberGeneratCommandBtn" th:text="#{button.save}">Save</button>
+				<button type="button" class="btn btn-info" id="waybillNumberPreviewBtn" th:text="#{button.preview}">پیش‌نمایش</button>
+				<a type="button" class="btn btn-default" th:href="@{'/waybillNumbers'}" th:text="#{button.cancel}">Close</a>
+			</div>
+		</div>
+	</section>
+
+	<th:block layout:fragment="javascripts">
+		<script th:inline="javascript">
+				/*<![CDATA[*/
+				
+				jQuery(document).ready(function(){
+
+					$('#incrementStepCreate').val(1);
+
+ 					$('#prefixCreate,#fromCreate,#toCreate,#incrementStepCreate,#formatCreate').on('change', function(){
+ 						$('#previewCreate').val('');
+ 						$('#previewNumberCreate').val('');
+					}); 
+
+					$('#waybillNumberPreviewBtn').click(function(event){
+						$('#createWaybillNumberGenerateCommandForm').find('.callout').text('').addClass('hide');
+						$('#createWaybillNumberGenerateCommandForm').data('bootstrapValidator').validate();
+						if($('#createWaybillNumberGenerateCommandForm').data('bootstrapValidator').isValid()){
+							$.post('/stock2-web/waybillNumber/preview', $('#createWaybillNumberGenerateCommandForm').serialize()).done(function(data) {
+								if(data.status == 'success') {
+									$('#previewCreate').val(data.result);
+									$('#previewNumberCreate').val(data.previewNumber);
+								}else {
+									console.debug(data.status);
+									$('#createWaybillNumberGenerateCommandForm').find('.callout').text((data.message ? data.message : 'save.failed')).removeClass('hide');
+								}
+							}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'waybillNumberPreviewBtn')});
+						}
+						return false;
+					});
+														
+					$('#waybillNumberGeneratCommandBtn').click(function(event){
+						$('#createWaybillNumberGenerateCommandForm').find('.callout').text('').addClass('hide');						
+						$('#createWaybillNumberGenerateCommandForm').data('bootstrapValidator').validate();
+						if($('#createWaybillNumberGenerateCommandForm').data('bootstrapValidator').isValid()){
+							$.post('/stock2-web/waybillNumber/generate/save', $('#createWaybillNumberGenerateCommandForm').serialize()).done(function(data) {
+								if(data.status == 'success') {
+									try{createTaskCreateCommandAfterSaveSuccess()}catch(error){}
+									showTopleftGrowl('success', 'Create', 'Create Successful');
+									window.open("/stock2-web/waybillNumber", "_self");
+								} else if(data.status == 'ValidationException'){
+									$('#createWaybillNumberGenerateCommandForm').find('.callout').text(data.invalidField + ' invalid-value').removeClass('hide');
+								} else if(data.status == 'ObjectExistsException'){
+									$('#createWaybillNumberGenerateCommandForm').find('.callout').text((data.invalidField ? data.invalidField : 'data') + ' already-exists').removeClass('hide');
+								} else if(data.status == 'ErrorCode'){
+									if(data.errorMessage){
+										$('#createWaybillNumberGenerateCommandForm').find('.callout').text(data.errorMessage).removeClass('hide');
+									} else {
+										$('#createWaybillNumberGenerateCommandForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+									}
+								} else {
+									console.debug(data.status);
+									$('#createWaybillNumberGenerateCommandForm').find('.callout').text((data.message ? data.message : 'save.failed')).removeClass('hide');
+								}
+							}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'waybillNumberGeneratCommandBtn')});
+						}
+						return false;
+					});
+				});
+				/*]]>*/
+			</script>
+	</th:block>
+</body>
+</html>
+

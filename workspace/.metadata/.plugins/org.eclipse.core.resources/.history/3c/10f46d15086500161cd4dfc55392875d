@@ -1,0 +1,9 @@
+title.application=E-Contact Application
+
+
+login.welcome=Contact Manager
+login.paragraph=This module is used to demonstrate the power of thymeleaf template engine which can be used as a complete replacement of JSP (view) in Spring MVC.
+button.cancel=Close
+button.delete=Delete
+button.save=Save
+create-another=Create another\n

@@ -1,0 +1,161 @@
+package com.parvanpajooh.accounting.service.impl;
+
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.accounting.dao.AccountDao;
+import com.parvanpajooh.accounting.dao.AccountTypeDao;
+import com.parvanpajooh.accounting.dao.GroupDao;
+import com.parvanpajooh.accounting.model.Account;
+import com.parvanpajooh.accounting.model.AccountType;
+import com.parvanpajooh.accounting.model.Group;
+import com.parvanpajooh.accounting.model.vo.AccountVO;
+import com.parvanpajooh.accounting.service.AccountLocalService;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.commons.util.Validator;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class AccountLocalServiceImpl extends GenericLocalServiceImpl<Account, Long>implements AccountLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(AccountLocalServiceImpl.class);
+
+	public AccountDao accountDao;
+	public GroupDao groupDao;
+	public AccountTypeDao accountTypeDao;
+
+	@Inject
+	public void setAccountDao(AccountDao accountDao) {
+		this.dao = accountDao;
+		this.accountDao = accountDao;
+	}
+
+	@Inject
+	public void setGroupDao(GroupDao groupDao) {
+		this.groupDao = groupDao;
+	}
+
+	@Inject
+	public void setAccountTypeDao(AccountTypeDao accountTypeDao) {
+		this.accountTypeDao = accountTypeDao;
+	}
+
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		AccountVO accountVO = (AccountVO) baseVO;
+		Account account = new Account();
+		Group group = null;
+		AccountType accountType = null;
+
+		try {
+
+			// validate AccountType and name and Group and AccountNumber
+			if (Validator.isNull(accountVO.getAccountType())) {
+				throw new ParvanRecoverableException("account.accountType", ErrorCode.FIELD_IS_EMPTY);
+			}
+
+			if (Validator.isNull(accountVO.getName())) {
+				throw new ParvanRecoverableException("account.name", ErrorCode.FIELD_IS_EMPTY);
+			}
+
+			if (Validator.isNull(accountVO.getGroup())) {
+				throw new ParvanRecoverableException("account.group", ErrorCode.FIELD_IS_EMPTY);
+
+			}
+
+			if (Validator.isNull(accountVO.getAccountNumber())) {
+				throw new ParvanRecoverableException("account.accountNumber", ErrorCode.FIELD_IS_EMPTY);
+			}
+
+
+			group = groupDao.get(accountVO.getGroup().getId());
+			accountType = accountTypeDao.get(accountVO.getAccountType().getId());
+			
+			if (Validator.isNotNull(accountVO.getGroup())) {
+				
+				if (Validator.isNotNull(accountVO.getClientApp())) {
+					if (!Validator.equals(group.getClientApp().getId(), accountVO.getClientApp().getId())) {
+						throw new ParvanRecoverableException("group.clientApp", ErrorCode.DATA_IS_INVALID);
+					}
+				}
+			}
+
+			account.fromVO(accountVO);
+			account.setActive(true);
+			account.setGroup(group);
+			account.setAccountType(accountType);
+
+			// save entity
+			account = super.save(account, userInfo);
+
+			accountVO = (AccountVO) account.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+
+		return accountVO;
+	}
+
+	@Override
+	public List<Account> findByClientAppCode(String clientAppCode) throws ParvanServiceException {
+
+		// LOG
+		log.trace("Entering findByClientAppCode( clientAppCode={} )", clientAppCode);
+
+		List<Account> accounts = null;
+
+		try {
+			accounts = accountDao.findByClientAppCode(clientAppCode);
+
+		} catch (Exception e) {
+			log.error("Error occurred while getting accounts by clientAppCode: " + clientAppCode, e);
+			throw new ParvanUnrecoverableException("Error occurred while getting accounts by clientAppCode: " + clientAppCode, e);
+		}
+
+		// LOG
+		log.trace("Leaving method findByClientAppCode(): ret={}", (accounts != null) ? accounts.size() : "NULL");
+		return accounts;
+
+	}
+
+	@Override
+	public Account findByAccountNumberAndAppCode(String accountNumber, String clientAppCode) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findByAccountNumberAndAppCode( clientAppCode={} )", clientAppCode);
+
+		Account account = null;
+
+		try {
+			account = accountDao.findByAccountNumberAndAppCode(accountNumber, clientAppCode);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while finding accounts by accountNumber:" + accountNumber + " and clientAppCode:" + clientAppCode, e);
+		}
+
+		return account;
+	}
+}

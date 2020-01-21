@@ -1,0 +1,177 @@
+package com.parvanpajooh.client.geomanagement.model;
+
+import java.util.List;
+
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.TransferNodeType;
+
+/**
+ * 
+ * @author mehrdad
+ *
+ */
+
+public class ZoneMsg extends BaseMsg {
+
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3514503424317219728L;
+	
+	private Long id;
+	
+	private String name;
+	
+	private String codeName;
+	
+	private String sortField;
+	
+	private Boolean active;
+	
+	private List<NodeMsg> nodes;
+
+	private ZoneMsg parent;
+
+	private List<ZoneMsg> children;
+	
+	private RateAndRouteEnums.TransferNodeType transferNodeType;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the codeName
+	 */
+	public String getCodeName() {
+		return codeName;
+	}
+
+	/**
+	 * @param codeName the codeName to set
+	 */
+	public void setCodeName(String codeName) {
+		this.codeName = codeName;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the nodes
+	 */
+	public List<NodeMsg> getNodes() {
+		return nodes;
+	}
+
+	/**
+	 * @param nodes the nodes to set
+	 */
+	public void setNodes(List<NodeMsg> nodes) {
+		this.nodes = nodes;
+	}
+
+	/**
+	 * @return the parent
+	 */
+	public ZoneMsg getParent() {
+		return parent;
+	}
+
+	/**
+	 * @param parent the parent to set
+	 */
+	public void setParent(ZoneMsg parent) {
+		this.parent = parent;
+	}
+
+	/**
+	 * @return the children
+	 */
+	public List<ZoneMsg> getChildren() {
+		return children;
+	}
+
+	/**
+	 * @param children the children to set
+	 */
+	public void setChildren(List<ZoneMsg> children) {
+		this.children = children;
+	}
+
+	/**
+	 * @return the transferNodeType
+	 */
+	public TransferNodeType getTransferNodeType() {
+		return transferNodeType;
+	}
+
+	/**
+	 * @param transferNodeType the transferNodeType to set
+	 */
+	public void setTransferNodeType(TransferNodeType transferNodeType) {
+		this.transferNodeType = transferNodeType;
+	}
+
+	/**
+	 * @return the sortField
+	 */
+	public String getSortField() {
+		return sortField;
+	}
+
+	/**
+	 * @param sortField the sortField to set
+	 */
+	public void setSortField(String sortField) {
+		this.sortField = sortField;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "ZoneMsg [id=" + getId() + ", name=" + name + ", codeName=" + codeName + ", sortField=" + sortField
+				+ ", active=" + active + ", nodes=" + nodes + ", parent=" + parent + ", children=" + children
+				+ ", transferNodeType=" + transferNodeType + "]";
+	}
+	
+}

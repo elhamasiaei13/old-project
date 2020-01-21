@@ -1,0 +1,57 @@
+package com.parvanpajooh.siteservices.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.ddd.application.AbstractApplicationServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+import com.parvanpajooh.siteservices.service.PersonManagementLocalService;
+import com.parvanpajooh.siteservices.service.PersonManagementService;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class ComplaintManagementServiceImpl extends AbstractApplicationServiceImpl implements PersonManagementService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(ComplaintManagementServiceImpl.class);
+
+	@Inject
+	private PersonManagementLocalService personManagementLocalService;
+
+//	@Override
+//	public PersonVO createPerson(UserInfo userInfo, PersonVO personVO) throws ParvanServiceException {
+//
+//		// LOG
+//		log.debug("Entering createPerson( personVO={})", personVO);
+//
+//		return personManagementLocalService.createPerson(personVO);
+//	}
+
+	@Override
+	public PersonVO getPerson(UserInfo userInfo, String uuid) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getPerson( uuid={})", uuid);
+
+		return personManagementLocalService.getPerson(uuid);
+	}
+
+//	@Override
+//	public void deletePerson(UserInfo userInfo, String uuid) throws ParvanServiceException {
+//
+//		// LOG
+//		log.debug("Entering getPerson( uuid={})", uuid);
+//
+//		personManagementLocalService.deletePerson(uuid);
+//	}
+}

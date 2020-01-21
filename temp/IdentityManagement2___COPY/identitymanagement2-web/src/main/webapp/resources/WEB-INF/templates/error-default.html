@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	layout:decorator="general-layout">
+	<head>
+		<title>Back-end Error</title>
+	</head>
+	
+	<body>
+		<section layout:fragment="content-header" th:class="content-header">
+            <div th:if="${result}" th:object="${result}">
+       			<div th:if="*{status != 'success'}" th:include="errors :: error-content" th:remove="tag"></div>
+			</div>
+		</section>
+		
+		<section layout:fragment="content">
+        	<div class="error-page">
+                <h2 class="headline text-success"><i class="fa fa-bug"></i></h2>
+                <div class="error-content">
+                    <h3><i class="fa fa-exclamation-circle text-red"></i> Oops! Something went wrong...</h3>
+                    <p>
+                        The system has encountered a technical problem. Please contact your technical support team. 
+                        Meanwhile, you may <a href="../../index.html" th:href="@{/}">return to dashboard</a>.
+                    </p>
+                </div><!-- /.error-content -->
+            </div>
+        </section><!-- /.content -->
+	</body>
+</html>

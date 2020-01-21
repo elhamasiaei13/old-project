@@ -1,0 +1,473 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.mvc;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.ecourier.model.criteria.EcRouteCriteria;
+import com.parvanpajooh.ecourier.model.enums.EcFreightNodeType;
+import com.parvanpajooh.ecourier.model.vo.EcAgentVO;
+import com.parvanpajooh.ecourier.model.vo.EcGeoEntityVO;
+import com.parvanpajooh.ecourier.model.vo.EcNodeVO;
+import com.parvanpajooh.ecourier.model.vo.EcRouteVO;
+import com.parvanpajooh.ecourier.model.vo.EcUserVO;
+import com.parvanpajooh.ecourier.mvc.EcBaseController;
+import com.parvanpajooh.shipment.model.vo.AttachmentVO;
+import com.parvanpajooh.shipment.model.vo.DeliveryVO;
+import com.parvanpajooh.shipment.model.vo.GunnyVO;
+import com.parvanpajooh.shipment.model.vo.ManifestVO;
+import com.parvanpajooh.shipment.model.vo.PackingItemVO;
+import com.parvanpajooh.shipment.model.vo.ShipmentVO;
+import com.parvanpajooh.shipment.service.EcAgentAndUserService;
+import com.parvanpajooh.shipment.service.EcRateAndRouteService;
+import com.parvanpajooh.shipment.service.ManifestService;
+import com.parvanpajooh.shipment.service.PackingItemService;
+import com.parvanpajooh.shipment.service.PaymentMethodService;
+import com.parvanpajooh.shipment.service.ShipmentService;
+
+/**
+ * @author MO
+ * 
+ */
+@Controller
+@RequestMapping("/agent/scan")
+public class ScanController extends EcBaseController {
+
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/ShipmentServiceImpl")
+	private ShipmentService shipmentService;
+	
+	@EJB(mappedName="java:global/ecourier-ear/shipment-ejb/PaymentMethodServiceImpl") 
+	private PaymentMethodService paymentMethodService;
+
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/ManifestServiceImpl")
+	private ManifestService manifestService;
+
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/EcAgentAndUserServiceImpl")
+	private EcAgentAndUserService ecAgentAndUserService;
+
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/EcRateAndRouteServiceImpl")
+	private EcRateAndRouteService ecRateAndRouteService;
+	
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/PackingItemServiceImpl")
+	private PackingItemService packingItemService;
+	
+	//TODO MO: Remove hard coded actions
+	private static final String ACTION_INSCAN = "IN_SCAN";
+
+	@RequestMapping(value = "/in", method = RequestMethod.GET)
+	public String showInscan(HttpServletRequest request, Model model) throws ObjectNotFoundException,
+			ParvanServiceException {
+
+		return "inscan";
+	}
+
+	@RequestMapping(value = "/out", method = RequestMethod.GET)
+	public String showOutscan(@RequestParam(value = "id", required = false) Long mainfestId,
+			HttpServletRequest request, Model model) throws ObjectNotFoundException, ParvanServiceException {
+		
+		UserInfo userInfo = getUserInfo(request);
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+
+		List<GunnyVO> gunnies = new ArrayList<>();
+
+		ManifestVO manifest = null;
+		if (Validator.isNotNull(mainfestId)) {// load manifest
+
+			manifest = manifestService.getFullManifest(userInfo, mainfestId);
+
+			EcAgentVO agentVO = ecAgentAndUserService.getAgent(userInfo, manifest.getOriginAgentId());
+			EcUserVO createUser = ecAgentAndUserService.getUser(userInfo, manifest.getCreateUserId());
+			String createUserName = createUser.getFirstName() + " " + createUser.getLastName();
+			manifest.setCreateUserName(createUserName);
+			
+			if(manifest.getUpdateUserId() != null){
+				EcUserVO updateUser = ecAgentAndUserService.getUser(userInfo, manifest.getUpdateUserId());
+				String updateUserName = updateUser.getFirstName() + " " + updateUser.getLastName();
+				manifest.setUpdateUserName(updateUserName);
+			}
+			
+			String destinationCityShortCode = manifest.getDestinationCityShortCode();
+			if(Validator.isNotNull(destinationCityShortCode)){
+				EcGeoEntityVO geoEntityVO = ecRateAndRouteService.findGeoEntityByShortCode(userInfo, destinationCityShortCode);
+				model.addAttribute("destinationCityId", geoEntityVO.getId());
+			}
+			
+			String originCityShortCode = manifest.getOriginCityShortCode();
+			if(Validator.isNotNull(originCityShortCode)){
+				EcGeoEntityVO geoEntityVO = ecRateAndRouteService.findGeoEntityByShortCode(userInfo, originCityShortCode);
+				model.addAttribute("originCityName", geoEntityVO.getNameFa());
+			}
+
+			model.addAttribute("currentAgent", agentVO);
+
+		} else {
+
+			EcAgentVO agentVO = ecAgentAndUserService.getAgent(userInfo, userInfoWrapper.getAgentId());
+
+			model.addAttribute("currentAgent", agentVO);
+
+			EcNodeVO fromNode = new EcNodeVO();
+			fromNode.setId(agentVO.getNodeId());
+
+			EcRouteCriteria criteria = new EcRouteCriteria();
+			criteria.setActive(true);
+			criteria.setFromNode(fromNode);
+
+			// finds
+			List<BaseVO> rows = ecRateAndRouteService.findRouteByCriteria(userInfo, criteria, 0, 1,
+					SortDirectionEnum.Ascending, null);
+
+			EcNodeVO fromNode2 = new EcNodeVO();
+			for (BaseVO row : rows) {
+				EcRouteVO route = (EcRouteVO) row;
+
+				EcNodeVO thisToNode = route.getToNode();
+
+				EcFreightNodeType[] types = new EcFreightNodeType[] { EcFreightNodeType.HUB, EcFreightNodeType.DEPO };
+
+				for (EcFreightNodeType freightNodeType : types) {
+					if (thisToNode.getFreightType().equals(freightNodeType)) {
+						fromNode2 = thisToNode;
+						break;
+					}
+				}
+			}
+
+			manifest = new ManifestVO();
+			manifest.setExpectedDeparture(LocalDateTime.now());
+			// manifest.setExpectedArrival(new Date((new Date().getTime() +
+			// 100000)));
+			// manifest.setCarrierId(1038l);
+			manifest.setOriginNodeId(fromNode2.getId());
+			// manifest.setDestinationNodeId(fromNode2.getId());
+			// AgentActorVO agentActorVO = new AgentActorVO();
+			// agentActorVO.setIdmId(12468L);
+			// manifest.setDestinationAgent(agentActorVO);
+
+			// List<ShipmentVO> list = new ArrayList<ShipmentVO>();
+
+			// GunnyVO gunnyVO = new GunnyVO();
+			// gunnyVO.setShipments(list);
+
+			// gunnies.add(gunnyVO);
+
+			manifest.setGunnies(gunnies);
+			
+			String createUserName = userInfo.getFullName();
+			manifest.setCreateUserName(createUserName);
+			
+			EcGeoEntityVO geoEntityVO = ecRateAndRouteService.findGeoEntityByNodeIdAndType(userInfo, "CITY", fromNode2.getId());
+			if(geoEntityVO != null){
+				model.addAttribute("originCityName", geoEntityVO.getNameFa());
+			}
+		}
+		
+		model.addAttribute("manifest", manifest);
+
+		return "outscan";
+	}
+	
+	@RequestMapping(value = "/out/check/{partNumber}", method = RequestMethod.GET)
+	public @ResponseBody
+	Map<String, Object> validateScan(@PathVariable String partNumber, HttpServletRequest request) {
+		Map<String, Object> result = new HashMap<>();
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			PackingItemVO packingItem = packingItemService.validateTransition(userInfo, partNumber, "OUT_SCAN");
+			result.put("status", "success");
+			result.put("result", packingItem);
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/shipment/waybill-number/{waybillNumber}", method = RequestMethod.GET)
+	public @ResponseBody
+	Map<String, Object> searchShipmentByWaybillNumber(@PathVariable String waybillNumber, HttpServletRequest request) {
+
+		log.debug("Entering searchShipment(waybillNumber={})", waybillNumber);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		try {
+
+			UserInfo userInfo = super.getUserInfo(request);
+
+			ShipmentVO shipment = shipmentService.findFullByWaybillNumber(userInfo, waybillNumber);
+
+			if (Validator.isNotNull(shipment)) {
+				result.put("status", "success");
+				result.put("result", shipment);
+			} else {
+				result.put("status", "fail");
+				result.put("errorCode", ErrorCode.OBJECT_NOT_FOUND.toValue());
+				result.put("errorMessage", waybillNumber);
+			}
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/shipment/tracking-number/{trackingNumber}", method = RequestMethod.GET)
+	public @ResponseBody
+	Map<String, Object> searchShipmentByTrackingNumber(@PathVariable String trackingNumber, HttpServletRequest request) {
+
+		log.debug("Entering searchShipment(trackingNumber={})", trackingNumber);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		try {
+
+			UserInfo userInfo = super.getUserInfo(request);
+
+			ShipmentVO shipment = shipmentService.findByTrackingNumber(userInfo, trackingNumber);
+
+			if (Validator.isNotNull(shipment)) {
+				result.put("status", "success");
+				result.put("result", shipment);
+			} else {
+				result.put("status", "fail");
+				result.put("errorCode", ErrorCode.OBJECT_NOT_FOUND.toValue());
+				result.put("errorMessage", trackingNumber);
+			}
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "in/returnDeliver/{waybillNumber}", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> inscanShipmentByWaybillNumber(@PathVariable String waybillNumber, @RequestParam(value = "remark", required = false) String remark, HttpServletRequest request) {
+
+		log.debug("Entering inscanShipmentByWaybillNumber(waybillNumber={}, remark={})", waybillNumber, remark);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		try {
+
+			UserInfo userInfo = super.getUserInfo(request);
+
+			//ShipmentVO shipment = shipmentService.scanWithoutManifest(userInfo, waybillNumber, "IN_SCAN", remark);
+
+			result.put("status", "success");
+			result.put("result", null);
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "in/manifest/{manifestId}/check/{partNumberOrGunny}", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> inscanCheckByPartNumberOrGunny(
+			@PathVariable Long manifestId,
+			@PathVariable String partNumberOrGunny, 
+			HttpServletRequest request) {
+
+		log.debug("Entering inscanCheckByPartNumberOrGunny(manifestId={}, partNumberOrGunny={})", manifestId, partNumberOrGunny);
+
+		Map<String, Object> result = new HashMap<>();
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			List<String> partNumbers = new ArrayList<>();
+			GunnyVO gunnyVO = manifestService.findGunnyByBarcode(userInfo, manifestId, partNumberOrGunny);
+			if (Validator.isNotNull(gunnyVO)) {
+				List<PackingItemVO> pivos = gunnyVO.getPackingItems();
+				if (Validator.isNotNull(pivos)) {
+					for (PackingItemVO pivo : pivos) {
+						packingItemService.validateTransition(userInfo, pivo.getPartNumber(), ACTION_INSCAN);
+						partNumbers.add(pivo.getPartNumber());
+					}
+				}
+			} else {
+				packingItemService.validateTransition(userInfo, manifestId, partNumberOrGunny, ACTION_INSCAN);
+				partNumbers.add(partNumberOrGunny);
+			}
+			result.put("status", "success");
+			result.put("result", partNumbers);
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "in/manifest/{id}", method = RequestMethod.POST)
+	public @ResponseBody
+	Map<String, Object> inscanManifest(
+			@PathVariable Long id, 
+			String[] waybillNumbers, 
+			boolean force,
+			HttpServletRequest request) {
+
+		log.debug("Entering inscanManifest(id={}, waybillNumbers={})", id, waybillNumbers);
+
+		Map<String, Object> result = new HashMap<>();
+		try {
+
+			UserInfo userInfo = super.getUserInfo(request);
+
+			List<String> list = new ArrayList<>();
+			if (Validator.isNotNull(waybillNumbers)) {
+				list = Arrays.asList(waybillNumbers);
+			}
+			
+			manifestService.scan(userInfo, id, list, force);
+
+			result.put("status", "success");
+		} catch (Exception e) {
+			if (e instanceof ParvanRecoverableException) {
+				ParvanRecoverableException recoverableException = (ParvanRecoverableException) e;
+
+				if (recoverableException.getErrorCode().equals(ErrorCode.MANIFEST_NOT_MATCH_SHIPMENT_FOR_SCAN)) {
+
+					result.put("status", "notmatch");
+					result.put("desc", getMessage("inscan.confirm.desc", recoverableException.getMessage()));
+
+					return result;
+				}
+			}
+
+			proccessException(e, result);
+		}
+		return result;
+	}
+
+//	@RequestMapping(value = "out/tracking-number/{waybillNumber}", method = RequestMethod.GET)
+//	public @ResponseBody
+//	Map<String, Object> outscanShipmentByTrackingNumber(@PathVariable String trackingNumber, HttpServletRequest request) {
+//
+//		log.debug("Entering outscanShipment(trackingNumber={})", trackingNumber);
+//
+//		Map<String, Object> result = new HashMap<String, Object>();
+//		try {
+//
+//			UserInfo userInfo = super.getUserInfo(request);
+//
+//			// TODO Mo: What to do?
+//			ShipmentVO shipment = shipmentService.scanWithoutManifest(userInfo, trackingNumber, "OUT_SCAN");
+//
+//			result.put("status", "success");
+//			result.put("result", shipment);
+//			
+//		} catch (Exception e) {
+//			proccessException(e, result);
+//		}
+//		return result;
+//	}
+
+	@RequestMapping(value = "out/deliver/{waybillNumber}", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> deliverShipmentByWaybillNumber(
+			@PathVariable String waybillNumber,
+			@RequestParam(value="partNumbers") List<String> partNumbers,
+			@RequestParam(value="paymentMethodId", required=false) String paymentMethodId, 
+			@RequestParam(value="paymentReferenceInfo", required=false) String paymentReferenceInfo,
+			@RequestParam(value="deliveryDate", required=false) LocalDateTime deliveryDate, 
+			@RequestParam(value="remark", required=false) String remark, 
+			HttpServletRequest request) {
+
+		log.debug("Entering deliverShipmentByWaybillNumber(waybillNumber={})", waybillNumber);
+
+		Map<String, Object> result = new HashMap<>();
+		try {
+
+			UserInfo userInfo = super.getUserInfo(request);
+
+			String geoLat = null;
+			String geoLng = null;
+			List<AttachmentVO> attachments = null;
+			
+			DeliveryVO deliveryVO = new DeliveryVO();
+			
+			if (Validator.isNull(deliveryDate)) {
+				deliveryDate = LocalDateTime.now();
+			}
+			Set<String> partNumbersSet = null;
+			if (Validator.isNotNull(partNumbers)) {
+				partNumbersSet = new HashSet<>(partNumbers);
+			}
+			deliveryVO.setDeliveryDate(deliveryDate);
+			deliveryVO.setAttachments(attachments);
+			deliveryVO.setGeoLat(geoLat);
+			deliveryVO.setGeoLng(geoLng);
+			deliveryVO.setPaymentMethodId((Validator.isNotNull(paymentMethodId) ? Long.valueOf(paymentMethodId) : null));
+			deliveryVO.setPaymentReferenceInfo(paymentReferenceInfo);
+			deliveryVO.setWaybillNumber(waybillNumber);
+			deliveryVO.setPartNumbers(partNumbersSet);
+			deliveryVO.setComment(remark);
+				
+			shipmentService.deliverToCustomer(userInfo, deliveryVO);
+			ShipmentVO shipment = shipmentService.findByWaybillNumber(userInfo, waybillNumber);
+
+			result.put("status", "success");
+			result.put("result", shipment);
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		return result;
+	}
+	
+	@RequestMapping(value = "out/return/{waybillNumber}", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> returnShipmentByWaybillNumber(
+			@PathVariable String waybillNumber, 
+			@RequestParam(value="partNumbers") List<String> partNumbers,
+			@RequestParam(value = "remark", required = false) String remark, 
+			HttpServletRequest request) {
+		
+		log.debug("Entering returnShipmentByWaybillNumber(waybillNumber={})", waybillNumber);
+		
+		Map<String, Object> result = new HashMap<>();
+		try {
+			UserInfo userInfo = super.getUserInfo(request);
+			Set<String> partNumbersSet = null;
+			if (Validator.isNotNull(partNumbers)) {
+				partNumbersSet = new HashSet<>(partNumbers);
+			}
+			
+			ReturnVO returnVO = new ReturnVO();
+			
+			returnVO.setPartNumbers(partNumbersSet);
+			returnVO.setWaybillNumber(waybillNumber);
+			returnVO.setRemark(remark);
+			
+			shipmentService.returnToCustomer(userInfo, returnVO);
+			ShipmentVO shipment = shipmentService.findByWaybillNumber(userInfo, waybillNumber);
+			
+			result.put("status", "success");
+			result.put("result", shipment);
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		return result;
+	}
+}

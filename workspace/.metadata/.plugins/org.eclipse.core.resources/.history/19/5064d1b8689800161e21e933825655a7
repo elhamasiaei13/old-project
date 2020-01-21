@@ -1,0 +1,104 @@
+package com.parvanpajooh.agentmanagement.service.adapter;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.ejb.Stateless;
+
+import com.parvanpajooh.accounting.AccountingProtos;
+import com.parvanpajooh.agentmanagement.common.AccountingService;
+import com.parvanpajooh.agentmanagement.model.vo.VoucherMsg;
+import com.parvanpajooh.agentmanagement.model.vo.VoucherRowMsg;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.util.DateUtil;
+
+import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
+import retrofit2.converter.protobuf.ProtoConverterFactory;
+
+@Stateless
+public class AccountingServiceAdapterRest implements AccountingServiceAdapter {
+
+	private final String REST_PATH = "http://localhost/accounting-rest/";
+
+	private AccountingService proxy;
+
+	public AccountingServiceAdapterRest() {
+		proxy = getProxy();
+	}
+	
+	private AccountingService getProxy() {
+		OkHttpClient client = new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).build();
+
+		Retrofit retrofit = new Retrofit.Builder().client(client).baseUrl(REST_PATH).addConverterFactory(ProtoConverterFactory.create())
+				.addConverterFactory(JacksonConverterFactory.create()).build();
+
+		AccountingService proxy = retrofit.create(AccountingService.class);
+
+		return proxy;
+	}
+
+	@Override
+	public List<AccountingProtos.Account> loadAccounts(String userName, String ip) throws ParvanUnrecoverableException {
+		Call<AccountingProtos.AccountList> call = proxy.loadAccountsByAppCode(userName, ip, "AgentManagement");
+		
+		DateTimeFormatter dateTimeFormatter = null;
+		dateTimeFormatter = DateTimeFormatter.ofPattern(DateUtil.PATTERN_ISO__yyyyMMdd_HHmm);//fromPattern = "yyyy-MM-dd HH:mm"
+
+		// voucherMsg object
+		List<VoucherRowMsg> voucherRowMsgs = new ArrayList<VoucherRowMsg>();
+		VoucherMsg voucherMsg = new VoucherMsg();
+		voucherMsg.setClientAppCode("AgentManagment");
+//		voucherMsg.setUuid("1");
+		voucherMsg.setReferenceId("210225555");
+		voucherMsg.setVoucherRowMsg(voucherRowMsgs);
+
+		LocalDateTime issueLdt = LocalDateTime.now();
+		String issueDateTimeStr = dateTimeFormatter.format(issueLdt);
+		voucherMsg.setIssueDate(issueDateTimeStr);
+		
+		// voucherMsg Row object
+		VoucherRowMsg voucherRowMsg;
+		voucherRowMsg = new VoucherRowMsg();
+		voucherRowMsg.setAccountCode("ABS");
+		voucherRowMsg.setDebit(BigDecimal.valueOf(5000));
+		voucherRowMsg.setCredit(BigDecimal.valueOf(0));
+		voucherRowMsg.setReferenceId("");
+		voucherRowMsgs.add(voucherRowMsg);
+		
+		voucherRowMsg = new VoucherRowMsg();
+		voucherRowMsg.setAccountCode("BAL");
+		voucherRowMsg.setDebit(BigDecimal.valueOf(0));
+		voucherRowMsg.setCredit(BigDecimal.valueOf(5000));
+		voucherRowMsg.setReferenceId("");
+		voucherRowMsgs.add(voucherRowMsg);
+		
+		
+
+		Call<AccountingProtos.AccountList> call2 = proxy.saveAccTransaction(userName,ip ,voucherMsg);
+//		Call<AccountingProtos.VoucherRowsReport> call2 = proxy.getVoucherRowsReport("ABS",userName,ip ,"SettlementApplication",issueDateTimeStr,issueDateTimeStr,2,10);
+
+		try {
+
+			Response<AccountingProtos.AccountList> response = call.execute();
+			call2.execute();
+
+			AccountingProtos.AccountList accountList = response.body();
+
+			List<AccountingProtos.Account> accounts = accountList.getAccountsList();
+
+			return accounts;
+
+		} catch (IOException e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting accounts", e);
+		}
+	}
+}

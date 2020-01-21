@@ -1,0 +1,229 @@
+package com.parvanpajooh.jobmanagement.rest;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.parvanpajooh.client.accounting.model.AccountListMsg;
+import com.parvanpajooh.client.accounting.model.AccountMsg;
+import com.parvanpajooh.common.convertor.JacksonObjectMapperProvider;
+import com.parvanpajooh.common.formatter.DateProperyEditor;
+import com.parvanpajooh.common.util.IpUtils;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.util.GetterUtil;
+import com.parvanpajooh.commons.util.StringUtil;
+import com.parvanpajooh.jobmanagement.application.OnetimeJobApplicationService;
+import com.parvanpajooh.jobmanagement.application.UserInfoApplicationService;
+import com.parvanpajooh.jobmanagement.common.JmUserInfo;
+import com.parvanpajooh.jobmanagement.domain.model.dto.SubmitOnetimeJobDto;
+import com.parvanpajooh.client.jobmanagement.model.SubmitOnetimeJobMsg;
+
+@RestController
+@RequestMapping("/v1")
+public class JobManagementRestController {
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	@EJB(mappedName = "java:global/job-management-ear/job-management-ejb/UserInfoApplicationServiceImpl")
+	private UserInfoApplicationService userInfoApplicationService;
+
+	@EJB(mappedName = "java:global/job-management-ear/job-management-ejb/OnetimeJobApplicationServiceImpl")
+	private OnetimeJobApplicationService onetimeJobApplicationService;
+
+	@Autowired
+	private MessageSource messageSource;
+
+	@Autowired
+	protected JacksonObjectMapperProvider mapperProvider;
+
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		binder.registerCustomEditor(LocalDate.class, new DateProperyEditor(false, true));
+		binder.registerCustomEditor(LocalDateTime.class, new DateProperyEditor(true, true));
+	}
+
+	@RequestMapping(value = "/hello", params = { "userName", "ip" }, method = RequestMethod.GET)
+	public void helloWord(HttpServletRequest request, @RequestParam(value = "userName") String userName, @RequestParam(value = "ip") String ip) {
+
+		// LOG
+		log.debug("Entering loadAccountsByAppCode(userName={} , ip={} , clientAppCode={} )", userName, ip);
+
+	}
+
+	
+	@RequestMapping(value = "/onetimejobs2", method = RequestMethod.POST)
+	public void submitNew2(HttpServletRequest request, String userName, String ip, @RequestBody SubmitOnetimeJobMsg SubmitOnetimeJobMsg) {
+
+		// LOG
+		log.debug("Entering submitNew(userName={} , ip={} , SubmitOnetimeJobMsg={} )", userName, ip, SubmitOnetimeJobMsg);
+
+		SubmitOnetimeJobDto submitOnetimeJobDto = null;
+
+		try {
+
+			UserInfo userInfo = loadUserInfo(request, userName, ip);
+
+			submitOnetimeJobDto = new SubmitOnetimeJobDto();
+
+			submitOnetimeJobDto.fromMsg(SubmitOnetimeJobMsg);
+
+			onetimeJobApplicationService.submitNew(userInfo, submitOnetimeJobDto);
+
+		} catch (Exception e) {
+			log.error("Error occured while submitNew onetimejobs", e);
+		}
+
+		// LOG
+		log.debug("Leaving submitNew()");
+	}
+	
+	
+	@RequestMapping(value = "/onetimejobs", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON)
+	public void submitNew(HttpServletRequest request, String userName, String ip, @RequestBody SubmitOnetimeJobMsg SubmitOnetimeJobMsg) {
+
+		// LOG
+		log.debug("Entering submitNew(userName={} , ip={} , SubmitOnetimeJobMsg={} )", userName, ip, SubmitOnetimeJobMsg);
+
+		SubmitOnetimeJobDto submitOnetimeJobDto = null;
+
+		try {
+
+			UserInfo userInfo = loadUserInfo(request, userName, ip);
+
+			submitOnetimeJobDto = new SubmitOnetimeJobDto();
+
+			submitOnetimeJobDto.fromMsg(SubmitOnetimeJobMsg);
+
+			onetimeJobApplicationService.submitNew(userInfo, submitOnetimeJobDto);
+
+		} catch (Exception e) {
+			log.error("Error occured while submitNew onetimejobs", e);
+		}
+
+		// LOG
+		log.debug("Leaving submitNew()");
+	}
+
+	private String getMessage(final String messageKey, final Object... messageParameters) {
+
+		Locale locale = LocaleContextHolder.getLocale();
+
+		String result = null;
+		try {
+			result = messageSource.getMessage(messageKey, messageParameters, locale);
+		} catch (NoSuchMessageException e) {
+			result = messageKey;
+		}
+
+		return result;
+	}
+
+	private UserInfo loadUserInfo(HttpServletRequest request, String userName, String tenantId) throws Exception {
+		Map<String, Object> user = userInfoApplicationService.loadUserByUsername(userName);
+
+		if (user == null) {
+			throw new ObjectNotFoundException("user is not valid");
+		}
+
+		if (!GetterUtil.getBoolean(user.get("active"), false)) {
+			throw new DisabledException("user is not active");
+		}
+
+		Set<String> roleNames = new HashSet<String>();
+
+		List<Map<String, Object>> roles = (List<Map<String, Object>>) user.get("roles");
+		if (roles != null) {
+			for (Map<String, Object> role : roles) {
+				roleNames.add((String) role.get("name"));
+			}
+		}
+
+		String ip = IpUtils.getIpFromRequest(request);
+
+		String context = request.getContextPath();
+		// String tenantId = TenantUtil.getTenantId(request);
+
+		// userInfo
+		UserInfo userInfo = JmUserInfo.getDefaultUserInfo(GetterUtil.getLong(user.get("id")), GetterUtil.getString(user.get("userName")),
+				GetterUtil.getString(user.get("firstName")), GetterUtil.getString(user.get("lastName")), ip, context, tenantId, roleNames,
+				GetterUtil.getString(user.get("locale")), GetterUtil.getString(user.get("zoneId")), GetterUtil.getString(user.get("calendar")));
+
+		return userInfo;
+	}
+
+	protected void proccessException(Exception e, Map<String, Object> result) {
+
+		if (e instanceof ParvanRecoverableException) {
+			ParvanRecoverableException recoverableException = (ParvanRecoverableException) e;
+
+			Exception cause = (Exception) recoverableException.getCause();
+
+			if (recoverableException.getErrorCode().equals(ErrorCode.DATA_IS_INVALID)) {
+				String invalidField = null;
+				if (cause != null && cause instanceof ConstraintViolationException) {
+					invalidField = ((ConstraintViolationException) cause).getConstraintViolations().iterator().next().getPropertyPath().toString();
+
+				} else {
+					invalidField = recoverableException.getMessage();
+				}
+				result.put("invalidField", invalidField);
+				result.put("status", "ValidationException");
+			} else if (recoverableException.getErrorCode().equals(ErrorCode.OBJECT_EXIST)) {
+				result.put("status", "ObjectExistsException");
+			} else if (recoverableException.getErrorCode().equals(ErrorCode.DATA_DUPLICATE)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error.data-duplicate", getMessage(recoverableException.getMessage(), (Object) null)));
+			} else if (recoverableException.getErrorCode().equals(ErrorCode.FIELD_IS_EMPTY)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error-required", getMessage(recoverableException.getMessage(), (Object) null)));
+			} else if (recoverableException.getErrorCode().equals(ErrorCode.SHIPMENT_INVALID_STATE_TRANSITION)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error-invalid-shipment-state",
+						getMessage("trackstate." + StringUtil.upperCase(recoverableException.getMessage()), (Object) null)));
+			} else {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorMessage", recoverableException.getMessage());
+			}
+		} else {
+			log.error("error in proccessException", e);
+			result.put("status", "fail");
+		}
+	}
+}

@@ -1,0 +1,13 @@
+package com.parvanpajooh.sample.dao;
+
+import com.parvanpajooh.ecourier.dao.GenericDao;
+import com.parvanpajooh.sample.model.Sample;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+public interface SampleDao extends GenericDao<Sample, Long> {
+
+}

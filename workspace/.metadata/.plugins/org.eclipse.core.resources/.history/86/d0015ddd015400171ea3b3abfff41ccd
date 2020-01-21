@@ -1,0 +1,119 @@
+/**
+ * 
+ */
+package com.parvanpajooh.routemanagement.service.impl;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.BaseModel;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericServiceImpl;
+import com.parvanpajooh.routemanagement.model.Route;
+import com.parvanpajooh.routemanagement.model.enums.RouteCategory;
+import com.parvanpajooh.routemanagement.model.vo.EvaluatedRouteVO;
+import com.parvanpajooh.routemanagement.model.vo.NodeVO;
+import com.parvanpajooh.routemanagement.model.vo.TransferNodeVO;
+import com.parvanpajooh.routemanagement.service.RouteLocalService;
+import com.parvanpajooh.routemanagement.service.RouteService;
+
+/**
+ * @author ali
+ * @author mehrdad
+ * @author Mohammad
+ */
+@Stateless
+public class RouteServiceImpl extends GenericServiceImpl<Route, Long> implements RouteService {
+	/**
+     * Log variable for all child classes. 
+     */
+	static final Logger log = LoggerFactory.getLogger(RouteServiceImpl.class);
+    
+    private RouteLocalService routeLocalService;
+	
+    @Inject
+    public void setRouteLocalService(RouteLocalService routeLocalService) {
+        this.localService = routeLocalService;
+        this.routeLocalService = routeLocalService;
+    }
+	
+
+	@Override
+	public void importRoutes(
+			UserInfo userInfo, 
+			InputStream excelIS) throws ParvanServiceException {
+		
+		try {
+    		// importRoutes
+			routeLocalService.importRoutes(excelIS, userInfo);
+    	
+    	} catch (Exception e) {
+    		throw new ParvanUnrecoverableException("Error occurred while importing route(s).", e);
+		}
+	}
+    
+    /*@TransactionAttribute(TransactionAttributeType.SUPPORTS)*/
+	@Override
+    public List<BaseVO> findAllFull(UserInfo userInfo) throws ParvanServiceException {
+    	//log.info("findAll");
+    	
+    	List<BaseVO> listVO = null;
+    	
+    	try {
+    		// find list
+    		List<Route> list = localService.findAll();
+    		
+    		listVO = new ArrayList<BaseVO>(list.size());
+        	for (Route baseObject : list) {
+        		listVO.add( ((BaseModel)baseObject).toVO() );
+    		}
+    	
+    	} catch (Exception e) {
+    		throw new ParvanUnrecoverableException("Error occurred while getting list of all records.", e);
+		}
+    	
+    	return listVO;
+    }
+
+	@Override
+	public List<EvaluatedRouteVO> evaluateRoutes(
+			UserInfo userInfo, 
+			List <TransferNodeVO> orderedTransferNodes,
+			RouteCategory routeCategory) throws ParvanServiceException {
+		
+		return routeLocalService.evaluateRoutes(orderedTransferNodes, routeCategory);
+	}
+
+	@Override
+	public List<NodeVO> findCollectionByGeoCity(UserInfo userInfo, String geoCityCode, Long toNodeId, String term) throws ParvanServiceException {
+		return routeLocalService.findCollectionByGeoCity(geoCityCode, toNodeId, term);
+	}
+
+	@Override
+	public List<NodeVO> findDistributionByGeoCity(UserInfo userInfo, String geoCityCode, Long fromNodeId, String term) throws ParvanServiceException {
+		return routeLocalService.findDistributionByGeoCity(geoCityCode, fromNodeId, term);
+	}
+
+	@Override
+	public List<NodeVO> findHubByGeoCity(UserInfo userInfo, String geoCityCode) throws ParvanServiceException {
+		return routeLocalService.findHubByGeoCity(geoCityCode);
+	}
+
+
+	@Override
+	public List<String> findRouteNumbersByFromNodeCode(UserInfo userInfo, String fromNodeCode) throws ParvanServiceException {
+		log.debug("Entering findRouteNumbersByFromNodeCode(userInfo={},fromNodeCode={})", userInfo, fromNodeCode);
+		return routeLocalService.findRouteNumbersByFromNodeCode(fromNodeCode);
+		
+	}
+}

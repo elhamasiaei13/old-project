@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout">
+
+<head>
+    <title>Employees List</title>
+
+    <link href="../../resources/lib/select2-3.5.0/select2.css" th:href="@{/resources/lib/select2-3.5.0/select2.css}" rel="stylesheet" />
+
+    <link href="../../resources/lib/select2-3.5.0/select2-bootstrap.css" th:href="@{/resources/lib/select2-3.5.0/select2-bootstrap.css}" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../../resources/lib/bootstrap-validator-0.5.0/css/bootstrapValidator.min.css" th:href="@{/resources/lib/bootstrap-validator-0.5.0/css/bootstrapValidator.min.css}"></link>
+
+    <style>
+        .select-device-modal label {
+            margin-bottom: 0px;
+        }
+        
+        .select-device-modal input {
+            width: auto;
+            height: 28px;
+        }
+        
+        .select-device-modal .form-control {
+            width: auto;
+        }
+        
+        .select-device-modal table.dataTable td {
+            padding: 1px 10px;
+        }
+        
+        .select-device-modal .dataTables_filter label {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body th:with="rightMenu='admin', subRightMenu='roles'">
+    <section layout:fragment="top-header" class="fixed-header">
+        <div class="ui-header-image pull-left">
+            <img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/identitymanagement2-web/resources/images/contacts.png" th:src="@{/resources/images/contacts.png}" style="width: 48px; height: 48px;" />
+        </div>
+        <div class="ui-header-title">
+            <div class="split-left">
+                <h3>
+                      <small>View</small>
+                </h3>
+                <h3>Employees</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <!-- BODY -->
+    <section class="content" layout:fragment="content">
+        <form class="form-horizontal" id="addEmployeesForm" method="post">
+
+            <div class="box box-primary">
+                <div class="box-header">
+                    <h3 class="box-title" th:text="#{search}">جستجو</h3>
+                </div>
+                <div class="box-body" style="display: block;">
+                    <div class="modal-form-content">
+                        <div class="callout callout-danger hide">
+                            <h4></h4></div>
+                        <div class="row">
+                            <label class="col-sm-2 control-label" for="canonicalSearchNameFilter" th:text="#{employee.canonicalSearchName}">نام، نام خانوادگی و شناسه کاربری</label>
+                            <div class="col-sm-4">
+                                <div class="input-group">
+                                    <input class="form-control" id="canonicalSearchNameFilter" name="canonicalSearchName" type="text" placeholder="Search for..."/>
+                                    <span class="input-group-btn">
+                                    <a  class="btn btn-default" onclick="doSearch()"><i class="fa fa-search" /></a>
+                                    <a  class="btn btn-default" onclick="resetSearch();"><i class="fa fa-refresh" /></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+  
+  
+                        <div class="row">&nbsp;</div>
+                        <!--                         <div class="row">
+                            <div class="col-sm-2 col-sm-offset-1 col-md-offset-2">
+                                <a class="btn btn-primary" onclick="doSearch()"><i class="fa fa-search"></i><span th:text="#{search}">جستجو</span></a>
+                                <a class="btn btn-warning" onclick="resetSearch();"><i class="fa fa-refresh"></i><span th:text="#{reset}">از نو</span></a>
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <div class="box-body table-responsive">
+
+                    <input type="hidden" name="id" value="" />
+                    <table id="EmployeeTable" class="table table-hover table-bordered table-condensed drop-shadow" dt:serverside="true" dt:url="@{'/employee/paging/'+${generalAgentId}}" dt:table="true" dt:proccessing="true" dt:filter="false" dt:serverparams="'getEmployeeExtraParams'">
+
+
+                        <thead>
+                            <tr>
+                                <th dt:property="id"></th>
+                                <th dt:renderFunction="'actionRenderer1'" dt:sortable="false"></th>
+                                <th dt:property="userName" th:text="#{employee.userName}">شناسه کاربری</th>
+                                <th dt:property="fullName" th:text="#{employee.fullName}">نام کامل</th>
+                            </tr>
+                        </thead>
+
+                        <tbody dt:cbk:draw="'myCustomDrawCallback'" dt:cbk:footer="'footerCallback'">
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+            <div class="box">
+
+                <div class="box-header">
+                    <h3 class="box-title" th:text="#{employee.remarks}">یادداشت</h3>
+                </div>
+                <div class="box-body" style="display: block;">
+                    <div class="col-sm-10">
+                        <textarea class="form-control" name="employee.remarks" rows="3" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="addEmployeesBtn" th:text="#{button.save}">Save</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <th:block layout:fragment="javascripts">
+
+        <script th:inline="javascript">
+            var titleModify = '<span class="label label-info"  th:remove="tag">Update !</span>';
+            var titleDelete = '<span class="label label-info"  th:remove="tag">Delete !</span>';
+
+            /*<![CDATA[*/
+
+            //get checkbox values and return as a string
+            function getSelectedChbox(frm) {
+
+                var selchbox = "&";
+
+                var inpfields = frm.getElementsByTagName('input');
+                var nr_inpfields = inpfields.length;
+
+                for (var i = 0; i < nr_inpfields; i++) {
+                    if (inpfields[i].type == 'checkbox' && inpfields[i].checked == true)
+                        if (i == nr_inpfields - 1) {
+                            selchbox = selchbox + "checkboxItems=" + inpfields[i].value;
+                        } else {
+                            selchbox = selchbox + "checkboxItems=" + inpfields[i].value + "&";
+                        }
+                }
+
+                return selchbox;
+            }
+
+            function actionRenderer1(data, type, full) {
+                var d
+                if (full.active == true) {
+                    d = '<input type="checkbox"  value="' + full.id + '" name="checkboxItems" checked="checked" disabled="disabled"/>'
+                } else {
+                    d = '<input type="checkbox"  value="' + full.id + '" name="checkboxItems"/>'
+                }
+                return d;
+            }
+
+            function doSearch() {
+
+                oTable_EmployeeTable.fnReloadAjax();
+            }
+
+            function getEmployeeExtraParams(aoData) {
+
+                return {
+                    "data": function(data) {
+                        customPush(data, 'canonicalSearchName', $('#canonicalSearchNameFilter').val());
+                    }
+                };
+            }
+
+
+            jQuery(document).ready(function() {
+                $.fn.dataTableExt.oApi.fnReloadAjax = function(oSettings, sNewSource, fnCallback, bStandingRedraw) {
+                    if ($.fn.dataTable.versionCheck) {
+                        var api = new $.fn.dataTable.Api(oSettings);
+                        if (sNewSource) {
+                            api.ajax.url(sNewSource).load(fnCallback, !bStandingRedraw);
+                        } else {
+                            api.ajax.reload(fnCallback, !bStandingRedraw);
+                        }
+                        return;
+                    }
+                    if (sNewSource !== undefined && sNewSource !== null) {
+                        oSettings.sAjaxSource = sNewSource;
+                    }
+                    if (oSettings.oFeatures.bServerSide) {
+                        oSettings.oApi._fnDraw(oSettings);
+                        return;
+                    }
+                    this.oApi._fnProcessingDisplay(oSettings, true);
+                    var that = this;
+                    var iStart = oSettings._iDisplayStart
+                    var aData = [];
+                    this.oApi._fnServerParams(oSettings, aData);
+                    oSettings.fnServerData.call(oSettings.oInstance, oSettings.sAjaxSource, aData, function(json) {
+                        that.oApi._fnClearTable(oSettings);
+                        var aData = (oSettings.sAjaxDataProp !== '') ?
+                            that.oApi._fnGetObjectDataFn(oSettings.sAjaxDataProp)(json) : json;
+                        for (var i = 0; i < aData.length; i++) {
+                            that.oApi._fnAddData(oSettings, aData[i]);
+                        }
+                        oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
+                        that.fnDraw();
+                        if (bStandingRedraw === true) {
+                            oSettings._iDisplayStart = iStart;
+                            that.oApi._fnCalculateEnd(oSettings);
+                            that.fnDraw(false);
+                        }
+                        that.oApi._fnProcessingDisplay(oSettings, false);
+                        if (typeof fnCallback == 'function' && fnCallback !== null) {
+                            fnCallback(oSettings);
+                        }
+                    }, oSettings);
+                };
+
+
+                $('#addEmployeesBtn').click(function() {
+                    var $btn = $(this);
+                    $('#addEmployeesForm').find('.callout').text('').addClass('hide');
+
+                    $.post('/agentmanagement-web/generalAgent/saveEmployees', $('#addEmployeesForm').serialize() + getSelectedChbox(this.form)).done(function(data) {
+                        if (data.status == 'success') {
+                            try {
+                                createEmployeeAfterSaveSuccess()
+                            } catch (error) {}
+                            showTopleftGrowl('success', 'Create', 'Create Successful');
+                            window.open("/agentmanagement-web/generalAgent", "_self");
+
+
+                        } else if (data.status == 'ValidationException') {
+                            $('#addEmployeesForm').find('.callout').text(data.invalidField + ' invalid-value').removeClass('hide');
+                        } else if (data.status == 'ErrorCode') {
+                            $('#addEmployeesForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+                        } else {
+                            console.debug(data.status);
+                            $('#addEmployeesForm').find('.callout').text((data.message ? data.message : '??delete.failed_fa_IR??')).removeClass('hide');
+                        }
+                        $btn.attr('disabled', false);
+                    }).fail(function(jqXHR, textStatus, errorThrown) {
+                        failAjax(jqXHR, textStatus, errorThrown, 'addEmployeesBtn')
+                    });
+                    return false;
+
+                });
+            });
+
+            function footerCallback(oSettings) {
+                $('div.pagination ul').addClass('pagination');
+                $('div.dataTables_wrapper div.row-fluid');
+                $('div.dataTables_wrapper div.span6').addClass('col-md-6 col-lg-6');
+            }
+
+            function myCustomDrawCallback(oSettings) {
+                var classMap = [];
+                for (var i = 0, iLen = oSettings.aoColumns.length; i < iLen; i++) {
+                    if (oSettings.aoColumns[i].nTh.className.indexOf('responsiveCol') > -1)
+                        classMap.push(i);
+                }
+                var iStart = oSettings._iDisplayStart + 1;
+                for (var i = 0, iLen = oSettings.aiDisplay.length; i < iLen; i++) {
+                    for (var j = 0; j < classMap.length; j++) {
+                        $('td:eq(' + classMap[j] + ')', oSettings.aoData[oSettings.aiDisplay[i]].nTr).addClass('responsiveCol');
+                    }
+                    $('td:eq(0)', oSettings.aoData[oSettings.aiDisplay[i]].nTr).html(iStart + i);
+                }
+                $('#EmployeeTable input[type=checkbox], #EmployeeTable input[type=radio]').iCheck({
+                    checkboxClass: "icheckbox_minimal",
+                    radioClass: "iradio_minimal"
+                });
+                $('#EmployeeTable input[type=checkbox], #EmployeeTable input[type=radio]').on('ifChanged', function(event) {
+                    $(this).trigger('change');
+                });
+                return false;
+            }
+
+            /*]]>*/
+        </script>
+    </th:block>
+</body>
+
+</html>

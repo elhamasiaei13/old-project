@@ -1,0 +1,236 @@
+/**
+ * 
+ */
+package com.parvanpajooh.logesticmng.model;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
+import com.parvanpajooh.commons.platform.ejb.model.BaseModel;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.logesticmng.model.vo.CourierVO;
+import com.parvanpajooh.logesticmng.model.vo.DeviceVO;
+
+/**
+ * @author MO
+ * @author ali
+ * 
+ */
+@Entity
+@Table(name = "courier_tbl")
+public class Courier extends BaseModel {
+    /**
+	 * 
+	 */
+    private static final long serialVersionUID = -3784079140110876345L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "vehicleId")
+    private Vehicle vehicle;
+
+    private Long userId;
+
+    private Long agentId;
+    
+    @OneToMany(mappedBy = "courier")
+	private Set<Device> devices = new HashSet<>();
+    
+    private Boolean active;
+	
+	@Version
+    private Integer version;
+
+    /**
+     * @return the id
+     */
+    public Long getId() {
+    	return id;
+    }
+
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+    	this.id = id;
+    }
+
+    /**
+     * @return the vehicle
+     */
+    public Vehicle getVehicle() {
+    	return vehicle;
+    }
+
+    /**
+     * @param vehicle
+     *            the vehicle to set
+     */
+    public void setVehicle(Vehicle vehicle) {
+    	this.vehicle = vehicle;
+    }
+
+    /**
+	 * @return the userId
+	 */
+	public Long getUserId() {
+		return userId;
+	}
+
+	/**
+	 * @param userId the userId to set
+	 */
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	/**
+	 * @return the agentId
+	 */
+	public Long getAgentId() {
+		return agentId;
+	}
+
+	/**
+	 * @param agentId the agentId to set
+	 */
+	public void setAgentId(Long agentId) {
+		this.agentId = agentId;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the devices
+	 */
+	public Set<Device> getDevices() {
+		return devices;
+	}
+
+	/**
+	 * @param devices the devices to set
+	 */
+	public void setDevices(Set<Device> devices) {
+		this.devices = devices;
+	}
+
+	@Override
+    public CourierVO toVO() {
+		CourierVO vo = toVOLite();
+		
+		List<DeviceVO> deviceVOs = new ArrayList<>();
+		if(devices != null){
+			for (Device device : devices) {
+				deviceVOs.add(device.toVOLite());
+			}
+		}
+		
+		vo.setDevices(deviceVOs);
+		
+		return vo;
+    }
+
+    @Override
+    public CourierVO toVOLite() {
+		CourierVO vo = new CourierVO();
+	
+		vo.setId(id);
+		vo.setVersion(version);
+		vo.setActive(this.active);
+		vo.setAgentId(agentId);
+		vo.setUserId(userId);
+	
+		if (Validator.isNotNull(vehicle)) {
+		    vo.setVehicle(vehicle.toVOLite());
+		}
+		
+		setAuditToVO(vo);
+	
+		return vo;
+    }
+
+    @Override
+    public void fromVO(BaseVO baseVO) {
+		CourierVO vo = (CourierVO) baseVO;
+		id = vo.getId();
+		version = vo.getVersion();
+		active = vo.getActive();
+		agentId = vo.getAgentId();
+		userId = vo.getUserId();
+		getAuditFromVO(vo);
+    }
+
+    @Override
+    public int hashCode() {
+    	return Objects.hashCode(id);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+		if (object instanceof Courier) {
+		    Courier that = (Courier) object;
+		    return Objects.equal(this.id, that.id);
+		}
+		return false;
+    }
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+				.add("id", id)
+				.add("vehicle", vehicle)
+				.add("userId", userId)
+				.add("agentId", agentId)
+				.add("devices", devices)
+				.add("active", active)
+				.add("version", version)
+				.toString();
+	}
+
+}

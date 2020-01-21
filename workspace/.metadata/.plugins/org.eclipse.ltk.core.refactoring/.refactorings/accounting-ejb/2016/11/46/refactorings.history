@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;voucherMsg&apos; in &apos;com.parvanpajooh.accounting.service.impl.TransactionLocalServiceImpl.save(...)&apos; to &apos;voucherVO&apos;&#x0A;- Original project: &apos;accounting-ejb&apos;&#x0A;- Original element: &apos;com.parvanpajooh.accounting.service.impl.TransactionLocalServiceImpl.save(VoucherVO).voucherMsg&apos;&#x0A;- Renamed element: &apos;voucherMsg&apos;&#x0A;- Update references to refactored element" description="Rename local variable &apos;voucherMsg&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src\/main\/java&lt;com.parvanpajooh.accounting.service.impl{TransactionLocalServiceImpl.java[TransactionLocalServiceImpl~save~QVoucherVO;@voucherMsg!1836!1855!1846!1855!QVoucherVO;!0!true" name="voucherVO" references="true" stamp="1478681160829" version="1.0"/>
+</session>

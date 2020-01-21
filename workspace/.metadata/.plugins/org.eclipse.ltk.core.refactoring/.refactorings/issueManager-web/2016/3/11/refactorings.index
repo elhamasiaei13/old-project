@@ -1,0 +1,25 @@
+1457509945565	Copy file
+1457510190507	Rename local variable 'user'
+1457512153721	Rename resource 'addUser.html'
+1457512401747	Rename resource 'showUsers.html'
+1457530204190	Rename method 'RemoveMember'
+1457531791132	Copy file
+1457594278101	Rename local variable 'user'
+1457604597783	Delete element
+1457608763844	Copy file
+1457610737850	Copy compilation unit
+1457765051517	Move 1 resources to 'Member'
+1457765054097	Move 1 resources to 'Member'
+1457765058689	Move 1 resources to 'Member'
+1457765071664	Move 1 resources to 'Group'
+1457765084236	Copy file
+1457765098530	Rename resource 'showMembers.html'
+1457765706816	Copy file
+1457765719284	Rename resource 'editMember.html'
+1457766043631	Rename local variable 'member'
+1457766183318	Rename field 'groupeService'
+1457769779406	Move 'addGroup.html' to 'templates'
+1457769784285	Move 'addMember.html' to 'templates'
+1457776065220	Copy file
+1457776156908	Rename resource 'addMembership.html'
+1457777096652	Copy compilation unit

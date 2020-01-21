@@ -1,0 +1,270 @@
+package com.parvanpajooh.taskmanagement.mvc;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.common.auth.UserInfoLoader;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.taskmanagement.application.AgentManagementApplicationService;
+import com.parvanpajooh.taskmanagement.application.Idm2ApplicationService;
+import com.parvanpajooh.taskmanagement.application.TaskApplicationService;
+import com.parvanpajooh.taskmanagement.domain.model.criteria.TaskCriteria;
+import com.parvanpajooh.taskmanagement.domain.model.dto.EmployeeDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskDisplayDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.UserDto;
+import com.parvanpajooh.taskmanagement.mvc.base.TaskCommandAbstractController;
+
+/**
+ * @author dev-03
+ *
+ */
+@Controller
+@RequestMapping("/tasks")
+public class TaskController extends TaskCommandAbstractController<TaskCommandDto> {
+
+	@EJB(mappedName = "java:global/taskmanagement-ear/taskmanagement-ejb/TaskApplicationServiceImpl")
+	private TaskApplicationService taskApplicationService;
+
+	@EJB(mappedName = "java:global/taskmanagement-ear/taskmanagement-ejb/AgentManagementApplicationServiceImpl")
+	private AgentManagementApplicationService agentManagementApplicationService;
+	
+	@EJB(mappedName = "java:global/taskmanagement-ear/taskmanagement-ejb/Idm2ApplicationServiceImpl")
+	private Idm2ApplicationService idm2ApplicationService;
+
+	@Override
+	protected String getName() {
+		return "tasks";
+	}
+
+	protected SortDirectionEnum getDefaultSortDirection() {
+		return SortDirectionEnum.Ascending;
+	}
+
+	protected String getDefaultSortCriterion() {
+		return null;
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/del/{id}", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> delete(@PathVariable String id, HttpServletRequest request) {
+		log.debug("Entering delete(id={})", id);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			taskApplicationService.deleteTask(userInfo, id);
+
+			result.put("status", "success");
+
+			request.getSession().removeAttribute(getName());
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param taskId
+	 * @param model
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/{taskKey}/details", method = RequestMethod.GET)
+	public String taskDetails(@PathVariable String taskKey, Model model, HttpServletRequest request) {
+
+		// LOG
+		log.debug("Entering taskDetails (taskKey={})", taskKey);
+		Map<String, Object> result = new HashMap<String, Object>();
+		TaskDto taskDto = null;
+		TaskDisplayDto taskDisplayDto = null;
+
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			taskDisplayDto = taskApplicationService.getTaskDisplayByTaskKey(userInfo, taskKey);
+			taskDto = taskApplicationService.get(userInfo, taskDisplayDto.getTaskId());
+			
+			taskDto.setTaskDisplay(taskDisplayDto);
+
+			result.put("status", "success");
+
+		} catch (Exception e) {
+
+			proccessException(e, result);
+		}
+		model.addAttribute("taskId", taskDisplayDto.getTaskId());
+		model.addAttribute("taskDto", taskDto);
+		return "taskdetails";
+	}
+
+	/**
+	 * 
+	 * @param criterias
+	 * @param criteria
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/display/paging", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<TaskDisplayDto> pagingTaskDisplay(@DatatablesParams DatatablesCriterias criterias, TaskCriteria criteria,
+			HttpServletRequest request) {
+
+		// LOG
+		log.debug("Entering pagingTaskDisplay(criteria={})", criteria);
+
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = getDefaultSortDirection();
+		String sortCriterion = columnDef.getName();
+
+		if ("0".equals(sortCriterion)) {
+			sortCriterion = getDefaultSortCriterion();
+		}
+
+		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+			sortDirection = SortDirectionEnum.Descending;
+		}
+
+		DataSet<TaskDisplayDto> dataSet;
+
+		try {
+
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+			List<TaskDisplayDto> rows = (List<TaskDisplayDto>) taskApplicationService.findByCriteria(userInfo, criteria, firstResult, maxResults, sortDirection,
+					sortCriterion);
+
+			long totalRecords = taskApplicationService.countByCriteria(userInfo, criteria);
+			dataSet = new DataSet<TaskDisplayDto>(rows, (long) rows.size(), totalRecords);
+
+		} catch (Exception e) {
+			log.error("error occured in record paging...", e);
+			e.printStackTrace();
+			dataSet = new DataSet<TaskDisplayDto>(new ArrayList<TaskDisplayDto>(), 0l, 0l);
+		}
+
+		// LOG
+		log.debug("Leaving method pagingTaskDisplay(): ret={}", dataSet.getRows().size());
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	/**
+	 * 
+	 * @param criterias
+	 * @param request
+	 * @param term
+	 * @return
+	 */
+	@RequestMapping(value = "/users/paging", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<UserDto> pagingUsers(@DatatablesParams DatatablesCriterias criterias, HttpServletRequest request, String term) {
+
+		// LOG
+		log.debug("Entering paging users()");
+
+		int firstResult = criterias.getStart();
+		int size = criterias.getLength();
+		int page = (firstResult / size) + 1;
+		String query = null;
+
+		DataSet<UserDto> dataSet;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			List<UserDto> rows = (List<UserDto>) idm2ApplicationService.findUsers(userInfo, query, page, size);
+
+			dataSet = new DataSet<UserDto>(rows, (long) rows.size(), (long) rows.size());
+		} catch (Exception e) {
+			log.error("error occured in record paging...", e);
+			e.printStackTrace();
+			dataSet = new DataSet<UserDto>(new ArrayList<UserDto>(), 0l, 0l);
+		}
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+
+	/**
+	 * 
+	 * @param criterias
+	 * @param request
+	 * @param term
+	 * @return
+	 */
+	@RequestMapping(value = "/employees/paging", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<EmployeeDto> paging(@DatatablesParams DatatablesCriterias criterias, HttpServletRequest request, String term) {
+
+		// LOG
+		log.debug("Entering paging employees()");
+
+		int firstResult = criterias.getStart();
+		int size = criterias.getLength();
+		int page = (firstResult / size) + 1;
+
+		DataSet<EmployeeDto> dataSet;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			List<EmployeeDto> rows = (List<EmployeeDto>) agentManagementApplicationService.findEmployeesBy(userInfo, page, size, term);
+
+			dataSet = new DataSet<EmployeeDto>(rows, (long) rows.size(), (long) rows.size());
+		} catch (Exception e) {
+			log.error("error occured in record paging...", e);
+			e.printStackTrace();
+			dataSet = new DataSet<EmployeeDto>(new ArrayList<EmployeeDto>(), 0l, 0l);
+		}
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/employees/get", method = RequestMethod.GET)
+	public @ResponseBody EmployeeDto getEmployee(Long id, HttpServletRequest request) {
+
+		// LOG
+		log.debug("Entering getEmployee(id={})", id);
+
+		EmployeeDto employeeDto = null;
+
+		try {
+
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+			employeeDto = agentManagementApplicationService.getEmployee(userInfo, id);
+
+		} catch (Exception e) {
+			log.error("Error occurred while getEmployee.", e);
+		}
+
+		return employeeDto;
+	}
+}

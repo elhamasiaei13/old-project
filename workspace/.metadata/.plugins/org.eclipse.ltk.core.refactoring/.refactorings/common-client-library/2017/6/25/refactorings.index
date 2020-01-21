@@ -1,0 +1,6 @@
+1497857555947	Change method 'findByFromNodeCodeAndDepartureDate'
+1497857571060	Change method 'findByToNodeCodeAndArrivalDate'
+1497857613233	Change method 'findByFromNodeCodeAndDepartureDate'
+1497857635276	Change method 'findByToNodeCodeAndArrivalDate'
+1497967541026	Copy compilation unit
+1497967568470	Rename type 'PersonManagementEnums'

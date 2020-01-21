@@ -1,0 +1,21 @@
+package com.parvanpajooh.personmanagement.service.adapter;
+
+import java.util.Map;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.personmanagement.model.vo.UserVO;
+
+public interface IdentityManagement2ServiceAdapter {
+
+	public UserVO findUserByPersonUuid(String uuid) throws ParvanServiceException;
+	
+	public UserVO createUser(UserVO user) throws ParvanServiceException;
+	
+	/**
+	 * 
+	 * @param username
+	 * @return
+	 */
+	/*public UserVO loadUserByUsername(String username) throws ParvanServiceException;*/
+
+}

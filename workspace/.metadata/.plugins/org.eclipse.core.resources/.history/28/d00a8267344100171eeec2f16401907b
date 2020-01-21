@@ -1,0 +1,10 @@
+package com.parvanpajooh.siteservices.service;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.siteservices.model.vo.RegisterVO;
+
+public interface ProfileManagementLocalService {
+
+	void register(RegisterVO registerVO) throws ParvanServiceException;
+
+}

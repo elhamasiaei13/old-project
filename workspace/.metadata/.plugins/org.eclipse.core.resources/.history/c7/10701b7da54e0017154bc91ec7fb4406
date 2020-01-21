@@ -1,0 +1,37 @@
+package com.parvanpajooh.client.routemanagement.service;
+
+import java.util.List;
+
+import com.parvanpajooh.client.routemanagement.model.NodeMsg;
+import com.parvanpajooh.client.routemanagement.model.RouteMsg;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+public interface RouteManagementApi {
+	
+	@GET("routes")
+	public Call<List<RouteMsg>> findRoutes(
+			@Query("carrierCode") String carrierCode, 
+			@Query("term") String term, 
+			@Query("page") int page, 
+			@Query("size") int size);
+	
+	@GET("routes/id/{id}")
+	public Call<RouteMsg> getRoute(
+			@Path("id") Long id);
+	
+	@GET("routes/carrierroutenumber")
+	public Call<RouteMsg> getRouteByCarrierRouteNumber(
+			@Query("carrierRouteNumber") String carrierRouteNumber);
+	
+	@GET("nodes/all")
+	public Call<List<NodeMsg>> getAllNodes();
+	
+	@GET("nodes/code/{code}")
+	public Call<NodeMsg> getNodeByCode(
+			@Path(value = "code") String code);
+	
+}

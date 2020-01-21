@@ -1,0 +1,83 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.geomanagement.model.criteria;
+
+import com.parvanpajooh.client.common.BaseMsg;
+
+/**
+ * @author mehrdad
+ *
+ */
+public class CurrencyCriteriaMsg extends BaseMsg {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7175810061071687494L;
+
+	private String name;
+	
+	private String code;
+	
+	private String symbol;
+	
+	private String number;
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the symbol
+	 */
+	public String getSymbol() {
+		return symbol;
+	}
+
+	/**
+	 * @param symbol the symbol to set
+	 */
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
+	}
+
+	/**
+	 * @return the number
+	 */
+	public String getNumber() {
+		return number;
+	}
+
+	/**
+	 * @param number the number to set
+	 */
+	public void setNumber(String number) {
+		this.number = number;
+	}
+	
+}

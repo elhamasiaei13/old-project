@@ -1,0 +1,647 @@
+/**
+ * 
+ */
+package com.parvanpajooh.routemanagement.service.impl;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.routemanagement.dao.RouteDao;
+import com.parvanpajooh.routemanagement.model.Node;
+import com.parvanpajooh.routemanagement.model.Route;
+import com.parvanpajooh.routemanagement.model.criteria.RouteCriteria;
+import com.parvanpajooh.routemanagement.model.enums.RouteCategory;
+import com.parvanpajooh.routemanagement.model.enums.RouteType;
+import com.parvanpajooh.routemanagement.model.vo.CarrierVO;
+import com.parvanpajooh.routemanagement.model.vo.EvaluatedRouteVO;
+import com.parvanpajooh.routemanagement.model.vo.NodeVO;
+import com.parvanpajooh.routemanagement.model.vo.RouteVO;
+import com.parvanpajooh.routemanagement.model.vo.TransferNodeVO;
+import com.parvanpajooh.routemanagement.service.NodeLocalService;
+import com.parvanpajooh.routemanagement.service.RouteLocalService;
+
+/**
+ * @author ali
+ * @author mehrdad
+ * @author Mohammad
+ *
+ */
+@Stateless
+public class RouteLocalServiceImpl extends GenericLocalServiceImpl<Route, Long> implements RouteLocalService{
+	/**
+     * Log variable for all child classes. 
+     */
+    static final Logger log = LoggerFactory.getLogger(RouteLocalServiceImpl.class);
+    
+	private RouteDao routeDao;
+    
+    @Inject
+    private NodeLocalService nodeLocalService;
+    
+//    @Inject
+//    private CarrierLocalService carrierLocalService;
+    
+    @Inject
+    public void setRouteDao(RouteDao routeDao) {
+        this.dao = routeDao;
+        this.routeDao = routeDao;
+    }
+
+	@Override
+	public RouteVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		
+		log.info("save");
+		
+		RouteVO routeVO = (RouteVO) baseVO;
+		
+		Route route = null;
+    	
+    	try {
+    		
+    		//validate
+    		/*if(routeVO.getFromNode().getId().equals(routeVO.getToNode().getId())){
+    			throw new ParvanRecoverableException(ErrorCode.SAME_START_NODE_AND_END_NODE);
+    		}*/
+    		
+    		// Validate 
+    		RouteCriteria criteria = new RouteCriteria();
+    		criteria.setCarrierCode(routeVO.getCarrierCode());
+    		criteria.setCarrierRouteNumber(routeVO.getCarrierRouteNumber());//FIXEME should we check this value for duplicate route check?
+    		criteria.setTypes(new RouteType[]{routeVO.getType()});
+    		
+    		List<Route> routes = findByCriteria(criteria);
+    		
+    		if(Validator.isNotNull(routes) && !routes.get(0).getId().equals(routeVO.getId())){
+    			throw new ParvanRecoverableException("route", ErrorCode.OBJECT_EXIST);
+    		}
+    		
+    		Node fromNode = nodeLocalService.get(routeVO.getFromNode().getId());
+    		
+    		Node toNode = nodeLocalService.get(routeVO.getToNode().getId());
+    		
+//    		Carrier carrier = carrierLocalService.get(routeVO.getCarrier().getId());
+    		
+    		if(Validator.isNull(routeVO.getId())){
+    			route = new Route();
+    		}
+    		else {
+    			route = get(routeVO.getId());
+    		}
+    		
+    		route.fromVO(routeVO);
+    		route.setFromNode(fromNode);
+    		route.setToNode(toNode);
+    		route.setCarrierCode(routeVO.getCarrierCode());
+//    		route.setCarrier(carrier);
+    		
+    		route = save(route, userInfo);
+			
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("error in save route", ErrorCode.SAVE_ERROR);
+		}
+		
+		return route.toVO();
+	}
+	
+	@Override
+	public void importRoutes(
+			InputStream excelIS, 
+			UserInfo userInfo) throws ParvanServiceException {
+		
+		//LOG 
+		log.debug("Entering importRoutes( excelIS={}, userInfo={})", 
+				excelIS, userInfo);
+		
+		try {
+			
+			// ----------------------------------------------
+			// load reference-data
+			// ----------------------------------------------
+			
+			// load carriers
+//			List<CarrierVO> allCarriers = carrierLocalService.findAll();
+			List<CarrierVO> allCarriers = new ArrayList<CarrierVO>();
+			Map<String, CarrierVO> carrierMap = new HashMap<String, CarrierVO>();
+			for (CarrierVO thisCarrier : allCarriers) {
+				carrierMap.put(thisCarrier.getCarrierCode(), thisCarrier);
+			}
+			
+			// load nodes
+			List<Node> allNodes = nodeLocalService.findAll();
+			Map<String, Node> nodesMap = new HashMap<String, Node>();
+			for (Node thisNode : allNodes) {
+				nodesMap.put(thisNode.getCodeName(), thisNode);
+			}
+			
+			// ----------------------------------------------
+    		// read input-stream of .xlsx files 
+    		// ----------------------------------------------
+    		
+    		// Get the workbook instance for XLS file 
+    		XSSFWorkbook workbook = new XSSFWorkbook ( excelIS);
+    		 
+    		// Get first sheet from the workbook
+    		XSSFSheet sheet = workbook.getSheetAt( 0);
+    		 
+    		// Get iterator to all the rows in current sheet
+    		Iterator<Row> rowIterator = sheet.iterator();
+    		
+    		int row = 0;
+    		
+    		// ----------------------------------------------
+    		// read first row: colNames 
+    		// ----------------------------------------------
+    		Map<String, Integer> colMaps = new HashMap<String, Integer>(); 
+    		
+    		// LOG
+    		log.debug( "read colNames...");
+    		log.debug( "");
+    		
+    		if ( rowIterator.hasNext()) {
+    			//LOG
+    			log.debug( "row:{}", row);
+    			
+    			Row thisRow = rowIterator.next();
+    	        
+    	        // For each row, iterate through each columns
+				Iterator<Cell> cellIterator = thisRow.cellIterator();
+				
+				// read column names
+				while (cellIterator.hasNext()) {
+					
+					Cell thisCell = cellIterator.next();
+					String thisCellValue = thisCell.getStringCellValue();
+					
+					colMaps.put( thisCellValue, thisCell.getColumnIndex());	
+					
+					// LOG
+					log.debug( "	colName:[{}]", thisCellValue);
+				}
+    			
+    			row++;
+    		}
+    		
+    		// LOG
+    		log.debug( "");
+    		log.debug( "read data...");
+    		
+    		while ( rowIterator.hasNext()) {
+    			
+    			log.info( "");
+    			log.info( "row:{}", row);
+    			
+    			Row thisRow = rowIterator.next();
+    	        
+    			Cell thisCell;
+    			
+    			// Carrier
+    			String carrierValue = null;
+    			thisCell = thisRow.getCell(colMaps.get("Carrier"));
+    			if (thisCell != null) {
+	    			carrierValue = thisCell.toString();
+					log.debug( "	carrier:[{}]", carrierValue);
+    			}
+				
+    			// RouteType
+    			String routeTypeValue = null;
+    			thisCell = thisRow.getCell(colMaps.get("RouteType"));
+    			if (thisCell != null) {
+    				routeTypeValue = thisCell.toString();
+    				log.debug( "	RouteType:[{}]", routeTypeValue);
+    			}
+				
+    			
+    			// FromNode
+    			String fromNodeValue = null;
+    			thisCell = thisRow.getCell(colMaps.get("FromNode"));
+    			if (thisCell != null) {
+    				fromNodeValue = thisCell.toString();
+    				log.debug( "	FromNode:[{}]", fromNodeValue);
+    			}
+    			
+    			
+    			// toNode
+    			String toNodeValue = null;
+    			thisCell = thisRow.getCell(colMaps.get("toNode"));
+    			if (thisCell != null) {
+    				toNodeValue = thisCell.toString();
+    				log.debug( "	toNode:[{}]", toNodeValue);
+    			}
+    			
+    			
+    			// CarrierRouteNumber
+    			String carrierRouteNumberValue = null;
+    			thisCell = thisRow.getCell(colMaps.get("CarrierRouteNumber"));
+    			if (thisCell != null) {
+    				carrierRouteNumberValue = thisCell.toString();
+    				log.debug( "	carrierRouteNumberValue:[{}]", carrierRouteNumberValue);
+    			}
+    			
+    			
+    			// Active
+    			Boolean activeValue = null;
+    			thisCell = thisRow.getCell(colMaps.get("Active"));
+    			if (thisCell != null) {
+    				activeValue = thisCell.getBooleanCellValue();
+    				log.debug( "	activeValue:[{}]", activeValue);
+    			}
+    			
+    			
+    			// Reverse
+    			Boolean reverseValue = null;
+    			thisCell = thisRow.getCell(colMaps.get("Reverse"));
+    			if (thisCell != null) {
+    				reverseValue = thisCell.getBooleanCellValue();
+    				log.debug( "	reverseValue:[{}]", reverseValue);
+    			}
+    			
+    			RouteVO thisRouteVO = null;
+    			RouteVO thisReverseRouteVO = null;
+    			
+    			if (Validator.isNotNull(routeTypeValue) &&
+    					Validator.isNotNull(fromNodeValue) &&
+    					Validator.isNotNull(toNodeValue)) {
+    				
+    				// -------------------------------------------------
+    				// load or create route
+    				// -------------------------------------------------
+    				thisRouteVO = _createRoute(
+    						carrierMap,
+    						nodesMap,
+    						carrierValue, 
+    						routeTypeValue, 
+    						fromNodeValue, 
+    						toNodeValue, 
+    						carrierRouteNumberValue,
+    						activeValue, 
+    						userInfo);
+    				
+    				log.info( "new route was created. route:[{}]", thisRouteVO);
+    				
+    				// check reverse-route creating
+    				if (reverseValue) {
+    					// -------------------------------------------------
+    					// create reverse route
+    					// -------------------------------------------------
+    					String reverseFromNodeValue = toNodeValue;
+    					String reverseToNodeValue = fromNodeValue;
+    					
+    					thisReverseRouteVO = _createRoute(
+    							carrierMap,
+    							nodesMap,
+    							carrierValue, 
+    							routeTypeValue, 
+    							reverseFromNodeValue, 
+    							reverseToNodeValue, 
+    							carrierRouteNumberValue,
+    							activeValue, 
+    							userInfo);
+        				
+        				log.info( "new reverse-route was created. route:[{}]", thisReverseRouteVO);
+    					
+    				}
+    			}
+    			
+    			// 
+				row = row + 1;
+    		}
+    		
+    		
+    	} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanServiceException("error during importing routes and rates!", e);
+		}
+		
+		
+	}
+	
+	@Override
+	public List<EvaluatedRouteVO> evaluateRoutes(List <TransferNodeVO> orderedTransferNodes, RouteCategory routeCategory) throws ParvanServiceException {
+		
+		//LOG 
+		log.debug("Entering evaluateRoutes( )");
+		
+		List<EvaluatedRouteVO> evaluatedRoutes = new ArrayList<EvaluatedRouteVO>();
+		
+		try {
+			
+			TransferNodeVO fromShipmentNodeVO = null;
+			TransferNodeVO toShipmentNodeVO;
+			
+			for (TransferNodeVO thisShipmentNodeVO : orderedTransferNodes) {
+
+				if (fromShipmentNodeVO == null) {
+					// this is first iteration
+					fromShipmentNodeVO = thisShipmentNodeVO;
+					continue;
+				}
+				
+				// 
+				toShipmentNodeVO = thisShipmentNodeVO;
+				
+				// get fromNode and toNode
+				NodeVO fromNode = null;
+				NodeVO toNode = null;
+				Long fromNodeId = fromShipmentNodeVO.getNodeId();
+				Long toNodeId = toShipmentNodeVO.getNodeId();
+				
+				if(Validator.isNotNull(fromNodeId)){
+					fromNode = new NodeVO();
+					fromNode.setId(fromNodeId);
+				}
+				
+				if(Validator.isNotNull(toNodeId)){
+					toNode = new NodeVO();
+					toNode.setId(toNodeId);
+				}
+				
+				// check fromNode and toNode
+				if (fromNode == null || toNode == null) {
+					throw new ParvanRecoverableException("fromNode or toNode is null.", ErrorCode.DATA_IS_INVALID);
+				}
+				
+				// try to find route
+				RouteCriteria criteria = new RouteCriteria();
+				criteria.setCategories(new RouteCategory[]{ routeCategory });
+				criteria.setFromNode(fromNode);
+				criteria.setToNode(toNode);
+				
+				RouteVO thisFoundedRouteVO;
+				List<Route> foundedRoutes =  this.findByCriteria(criteria);
+				
+				if (foundedRoutes.size() == 0) {
+					// could not find any route between shipment-nodes
+					EvaluatedRouteVO thisEvaluatedRoute = new EvaluatedRouteVO();
+					thisEvaluatedRoute.setFromNode(fromNode);
+					thisEvaluatedRoute.setFromNodeTransferNodeType(fromShipmentNodeVO.getType());
+					thisEvaluatedRoute.setToNode(toNode);
+					thisEvaluatedRoute.setToNodeTransferNodeType(toShipmentNodeVO.getType());
+					thisEvaluatedRoute.setValid(false);
+					
+					evaluatedRoutes.add(thisEvaluatedRoute);
+					
+				} else {
+					// found at least one route between shipment-nodes
+					Route thisFoundedRoute = foundedRoutes.get(0);
+					thisFoundedRouteVO = thisFoundedRoute.toVO(); 
+					
+					EvaluatedRouteVO thisEvaluatedRoute = new EvaluatedRouteVO(thisFoundedRouteVO);
+					thisEvaluatedRoute.setFromNodeTransferNodeType(fromShipmentNodeVO.getType());
+					thisEvaluatedRoute.setToNodeTransferNodeType(toShipmentNodeVO.getType());
+					thisEvaluatedRoute.setValid(true);
+					
+					evaluatedRoutes.add(thisEvaluatedRoute);
+					
+				} 
+				
+				fromShipmentNodeVO = toShipmentNodeVO;
+			}
+			
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("error occurred while evaluating routes");
+		}
+		
+		return evaluatedRoutes;
+	}
+
+	@Override
+	public List<NodeVO> findCollectionByGeoCity(String geoCityCode, Long toNodeId, String term) throws ParvanServiceException {
+		
+		//LOG 
+		log.debug("Entering findCollectionByGeoCity( geoCityCode={}, toNodeId={}, term={})", geoCityCode, toNodeId, term);
+		
+		try {
+			if(Validator.isNull(geoCityCode)){
+				throw new ParvanRecoverableException("geoCityCode", ErrorCode.DATA_IS_INVALID);
+			}
+			
+			List<Node> nodes = routeDao.findCollectionByGeoCity(geoCityCode, toNodeId, term);
+			List<NodeVO> nodeVOs = new ArrayList<NodeVO>();
+			for (Node node : nodes) {
+				nodeVOs.add(node.toVOLite());
+			}
+			return nodeVOs;
+		} catch (ParvanDaoException e) {
+			throw new ParvanServiceException("error in findCollectionByGeoCity", e);
+			
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanServiceException("error in findCollectionByGeoCity", e);
+		}
+	}
+
+	@Override
+	public List<NodeVO> findDistributionByGeoCity(String geoCityCode, Long fromNodeId, String term) throws ParvanServiceException {
+		
+		//LOG 
+		log.debug("Entering findDistributionByGeoCity( geoCityCode={}, fromNodeId={}, term={})", geoCityCode, fromNodeId, term);
+		
+		try {
+			if(Validator.isNull(geoCityCode)){
+				throw new ParvanRecoverableException("geoCityCode", ErrorCode.DATA_IS_INVALID);
+			}
+			
+			List<Node> nodes = routeDao.findDistributionByGeoCity(geoCityCode, fromNodeId, term);
+			List<NodeVO> nodeVOs = new ArrayList<NodeVO>();
+			for (Node node : nodes) {
+				nodeVOs.add(node.toVOLite());
+			}
+			return nodeVOs;
+		} catch (ParvanDaoException e) {
+			throw new ParvanServiceException("error in findDistributionByGeoCity", e);
+			
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanServiceException("error in findCollectionByGeoCity", e);
+		}
+	}
+
+	@Override
+	public List<NodeVO> findHubByGeoCity(String geoCityCode) throws ParvanServiceException {
+		
+		//LOG 
+		log.debug("Entering findHubByGeoCity( geoCityCode={})", geoCityCode);
+		
+		try {
+			if(Validator.isNull(geoCityCode)){
+				throw new ParvanRecoverableException("geoCityCode", ErrorCode.DATA_IS_INVALID);
+			}
+			
+			List<Node> nodes = routeDao.findHubByGeoCity(geoCityCode);
+			List<NodeVO> nodeVOs = new ArrayList<NodeVO>();
+			for (Node node : nodes) {
+				nodeVOs.add(node.toVOLite());
+			}
+			return nodeVOs;
+		} catch (ParvanDaoException e) {
+			throw new ParvanServiceException("error in findHubByGeoCity", e);
+			
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanServiceException("error in findHubByGeoCity", e);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param carrierMap
+	 * @param nodesMap
+	 * @param carrierValue
+	 * @param routeTypeValue
+	 * @param fromNodeValue
+	 * @param toNodeValue
+	 * @param carrierRouteNumberValue
+	 * @param activeValue
+	 * @param userInfo
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	private RouteVO _createRoute(
+			Map<String, CarrierVO> carrierMap,
+			Map<String, Node> nodesMap,
+			String carrierValue,
+			String routeTypeValue, 
+			String fromNodeValue, 
+			String toNodeValue,
+			String carrierRouteNumberValue, 
+			Boolean activeValue, 
+			UserInfo userInfo) throws ParvanServiceException {
+		
+		RouteVO createdRouteVO = null;
+		
+		try {
+			RouteCriteria routeCriteria = new RouteCriteria();
+			
+			// carrier
+			CarrierVO thisCarrierVO = null;
+			if (Validator.isNotNull(carrierValue)) {
+				CarrierVO aCarrier = carrierMap.get(carrierValue);
+				
+				if (aCarrier == null) {
+					log.debug( "no carrier found by code [{}].", carrierValue);
+					throw new ParvanServiceException("no carrier found by code [" + carrierValue + "]");
+				}
+				
+				thisCarrierVO = new CarrierVO();
+				thisCarrierVO.setId(aCarrier.getId());
+				
+				routeCriteria.setCarrierCode(thisCarrierVO.getCarrierCode());
+			}
+			
+			// RouteType
+			RouteType thisRouteType = null;
+			if (Validator.isNotNull(routeTypeValue)) {
+				thisRouteType = RouteType.valueOf(routeTypeValue);
+				
+				routeCriteria.setTypes(new RouteType[]{thisRouteType});
+			}
+			
+			// FromNode
+			NodeVO fromNodeVO = null;
+			if (Validator.isNotNull(fromNodeValue)) {
+				Node aNode = nodesMap.get(fromNodeValue);
+				
+				if (aNode == null) {
+					log.debug( "no from-node found by codeName [{}].", fromNodeValue);
+					throw new ParvanServiceException("no from-node found by codeName [" + fromNodeValue + "]");
+				}
+				
+				fromNodeVO = new NodeVO();
+				fromNodeVO.setId(aNode.getId());
+				
+				routeCriteria.setFromNode(fromNodeVO);
+			}
+			
+			
+			// toNode
+			NodeVO toNodeVO = null;
+			if (Validator.isNotNull(toNodeValue)) {
+				Node aNode = nodesMap.get(toNodeValue);
+				
+				if (aNode == null) {
+					log.debug( "no to-node found by codeName [{}].", toNodeValue);
+					throw new ParvanServiceException("no to-node found by codeName [" + toNodeValue + "]");
+				}
+				
+				toNodeVO = new NodeVO();
+				toNodeVO.setId(aNode.getId());
+				
+				routeCriteria.setToNode(toNodeVO);
+			}
+			
+			// find route by criteria
+			List<Route> routes = this.findByCriteria(routeCriteria);
+			
+			// check result
+			if (routes.size() == 0) {
+				log.debug( "could not find any route, so can create a new route.");
+				
+				RouteVO thisRouteVO = new RouteVO();
+				thisRouteVO.setFromNode(fromNodeVO);
+				thisRouteVO.setToNode(toNodeVO);
+				thisRouteVO.setType(thisRouteType);;
+//				thisRouteVO.setCarrier(thisCarrierVO);
+				thisRouteVO.setCarrierRouteNumber(carrierRouteNumberValue);
+				thisRouteVO.setActive(activeValue);
+				
+				createdRouteVO = (RouteVO) this.save(thisRouteVO, userInfo);
+				
+			} else { 
+				log.debug( "route exists. so skip.");
+			}
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("could not create route.", e);
+		}
+		
+		return createdRouteVO;
+	}
+
+	@Override
+	public List<String> findRouteNumbersByFromNodeCode(String fromNodeCode) throws ParvanServiceException {
+		log.debug("Entering findRouteNumbersByFromNodeCode(fromNodeCode={})", fromNodeCode);
+		try {
+			return routeDao.findRouteNumbersByFromNodeCode(fromNodeCode);
+		} catch (ParvanDaoException e) {
+			throw new ParvanServiceException(e);
+		}
+		
+	}
+}

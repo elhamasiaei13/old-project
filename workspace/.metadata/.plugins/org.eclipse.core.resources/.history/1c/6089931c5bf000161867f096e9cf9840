@@ -1,0 +1,628 @@
+package com.parvanpajooh.taskmanagement.domain.repository.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.util.StringUtil;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.taskmanagement.domain.model.Task;
+import com.parvanpajooh.taskmanagement.domain.model.TaskCommand;
+import com.parvanpajooh.taskmanagement.domain.model.TaskDisplay;
+import com.parvanpajooh.taskmanagement.domain.model.TaskDisplay_;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroupCounter;
+import com.parvanpajooh.taskmanagement.domain.model.criteria.TaskCriteria;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskPriority;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskState;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskType;
+import com.parvanpajooh.taskmanagement.domain.repository.TaskRepository;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class TaskRepositoryJpa implements TaskRepository {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+
+	static final Logger log = LoggerFactory.getLogger(TaskRepositoryJpa.class);
+
+	@PersistenceContext(unitName = "ApplicationEntityManager")
+	private EntityManager entityManager;
+
+	@Override
+	public List<TaskDisplay> findTaskDisplayByIds(List<String> waybillNumbers) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	@Override
+	public List<TaskDisplay> findTaskDisplayByCriteria(TaskCriteria cri, int firstResult, int maxResults, SortDirectionEnum sortDirection, String sortCriterion)
+			throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering findTaskDisplayByCriteria( cri={})", cri);
+
+		List<TaskDisplay> list = null;
+
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+
+			// make criteria
+			CriteriaQuery<TaskDisplay> criteria = builder.createQuery(TaskDisplay.class);
+			Metamodel metamodel = this.entityManager.getMetamodel();
+			EntityType<TaskDisplay> TaskDisplay_ = metamodel.entity(TaskDisplay.class);
+			Root<TaskDisplay> root = criteria.from(TaskDisplay_);
+			criteria.distinct(true);
+
+			@SuppressWarnings("rawtypes")
+			Map<String, Join> joins = new HashMap<String, Join>();
+
+			List<Predicate> predicateList = buildPredicateList(cri, builder, metamodel, root, joins);
+
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+
+			if (sortCriterion != null) {
+
+				String[] joinSort = StringUtil.split(sortCriterion, StringPool.PERIOD);
+
+				if (joinSort.length > 1) {
+					Join join = null;
+
+					if (joinSort.length > 2) {
+
+						for (int i = 0; i < joinSort.length - 1; i++) {
+							join = joins.get(joinSort[i]);
+
+							if (join == null) {
+								if (i == 0)
+									join = root.join(joinSort[i], JoinType.LEFT);
+								else
+									join = join.join(joinSort[i], JoinType.LEFT);
+							}
+						}
+					} else {
+						join = joins.get(joinSort[0]);
+
+						if (join == null) {
+							join = root.join(joinSort[0], JoinType.LEFT);
+						}
+					}
+
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						criteria.orderBy(builder.asc(join.get(joinSort[joinSort.length - 1])));
+					}
+
+					if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						criteria.orderBy(builder.desc(join.get(joinSort[joinSort.length - 1])));
+					}
+
+				} else {
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						criteria.orderBy(builder.asc(root.get(sortCriterion)));
+					}
+
+					if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						criteria.orderBy(builder.desc(root.get(sortCriterion)));
+					}
+				}
+
+			}
+
+			// make query
+			TypedQuery<TaskDisplay> q = this.entityManager.createQuery(criteria);
+			q.setFirstResult(firstResult);
+			q.setMaxResults(maxResults);
+
+			// execute query
+			list = q.getResultList();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting list of records by criteria.", e);
+		}
+
+		// LOG
+		log.debug("Leaving findTaskDisplayByCriteria(): {}", (list != null) ? list.size() : "NULL");
+
+		return list;
+
+	}
+
+	/**
+	 * 
+	 * @param cri
+	 * @param builder
+	 * @param metamodel
+	 * @param root
+	 * @param joins
+	 * @return
+	 */
+	protected List<Predicate> buildPredicateList(TaskCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<TaskDisplay> root,
+			@SuppressWarnings("rawtypes") Map<String, Join> joins) {
+
+		// LOG
+		log.trace("Entering buildPredicateList( ... )");
+
+		TaskCriteria taskCriteria = cri;
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		TaskState currentState = taskCriteria.getCurrentState();
+		Long currentAssigneeUserId = taskCriteria.getCurrentAssigneeUserId();
+		Long taskGroupId = taskCriteria.getTaskGroupId();
+		TaskType taskType = taskCriteria.getTaskType();
+		TaskPriority priority = taskCriteria.getPriority();
+
+		// ----------------------------------------------------------------
+		// currentState
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(currentState)) {
+
+			Predicate predicate = builder.equal(root.<TaskState> get(TaskDisplay_.currentState), currentState);
+			predicateList.add(predicate);
+
+		}
+
+		// ----------------------------------------------------------------
+		// currentAssigneeUserId
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(currentAssigneeUserId)) {
+
+			Predicate predicate = builder.equal(root.<Long> get(TaskDisplay_.currentAssigneeUserId), currentAssigneeUserId);
+			predicateList.add(predicate);
+
+		}
+
+		// ----------------------------------------------------------------
+		// taskGroupId
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(taskGroupId)) {
+
+			Predicate predicate = builder.equal(root.<Long> get(TaskDisplay_.taskGroupId), taskGroupId);
+			predicateList.add(predicate);
+
+		}
+
+		// ----------------------------------------------------------------
+		// taskType
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(taskType)) {
+
+			Predicate predicate = builder.equal(root.<TaskType> get(TaskDisplay_.taskType), taskType);
+			predicateList.add(predicate);
+
+		}
+
+		// ----------------------------------------------------------------
+		// priority
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(priority)) {
+
+			Predicate predicate = builder.equal(root.<TaskPriority> get(TaskDisplay_.priority), priority);
+			predicateList.add(predicate);
+
+		}
+
+		// LOG
+		log.trace("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+
+	}
+
+	@Override
+	public long countTaskDisplayByCriteria(TaskCriteria cri) throws ParvanDaoException {
+		// LOG
+		log.debug("Entering countTaskDisplayByCriteria( cri={})", cri);
+
+		int count = 0;
+
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+
+			// make criteria
+			CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+			Metamodel metamodel = this.entityManager.getMetamodel();
+			EntityType<TaskDisplay> TaskDisplay_ = metamodel.entity(TaskDisplay.class);
+			Root<TaskDisplay> root = criteria.from(TaskDisplay_);
+
+			criteria.select(builder.countDistinct(root));
+
+			Map<String, Join> joins = new HashMap<String, Join>();
+
+			List<Predicate> predicateList = buildPredicateList(cri, builder, metamodel, root, joins);
+
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+
+			// create query
+			Query q = this.entityManager.createQuery(criteria);
+
+			// execute query
+			Long countLong = (Long) q.getSingleResult();
+			count = countLong.intValue();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting count of records by criteria.", e);
+		}
+
+		// LOG
+		log.debug("Leaving countTaskDisplayByCriteria(): ret={}", count);
+
+		return count;
+
+	}
+
+	@Override
+	public Task getTask(String taskId) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering getTask( waybillNumber={})", taskId);
+
+		Task entity = null;
+
+		try {
+			// get record
+			entity = this.entityManager.find(Task.class, taskId);
+
+			// check
+			if (entity == null) {
+				String msg = String.format("'%s' task with id '%s' not found.", Task.class, taskId);
+				throw new ObjectNotFoundException(msg);
+			}
+
+		} catch (ParvanDaoException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting task by its id. " + taskId, e);
+		}
+
+		return entity;
+
+	}
+
+	@Override
+	public TaskDisplay getTaskDisplay(String taskId) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering getTaskDisplay( taskId={})", taskId);
+
+		TaskDisplay entity = null;
+
+		try {
+			// get record
+			entity = this.entityManager.find(TaskDisplay.class, taskId);
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting taskDisplay by taskId [" + taskId + "]", e);
+		}
+
+		return entity;
+	}
+	
+	@Override
+	public TaskDisplay getTaskDisplayByKey(String taskKey) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering getTaskDisplayByKey( taskKey={})", taskKey);
+
+		TaskDisplay entity = null;
+		List<TaskDisplay> results = null;
+
+		try {
+			// get record
+			TypedQuery<TaskDisplay> q = this.entityManager.createQuery("select obj from TaskDisplay obj where obj.taskKey = ? ", TaskDisplay.class);
+			q.setParameter(1, taskKey);
+			results = q.getResultList();
+			
+			if(results != null && results.size() > 0){
+				entity = results.get(0);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting taskDisplay by taskKey [" + taskKey + "]", e);
+		}
+
+		return entity;
+	}
+	
+	@Override
+	public TaskDisplay getTaskByTaskKey(String taskKey) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering getTaskDisplayByKey( taskKey={})", taskKey);
+
+		TaskDisplay entity = null;
+		List<TaskDisplay> results = null;
+
+		try {
+			// get record
+			TypedQuery<TaskDisplay> q = this.entityManager.createQuery("select obj from TaskDisplay obj where obj.taskKey = ? ", TaskDisplay.class);
+			q.setParameter(1, taskKey);
+			results = q.getResultList();
+			
+			if(results != null && results.size() > 0){
+				entity = results.get(0);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting taskDisplay by taskKey [" + taskKey + "]", e);
+		}
+
+		return entity;
+	}
+
+	@Override
+	public Task saveTaskAndTaskGroupCounter(Task task,TaskGroupCounter taskGroupCounter) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering saveTaskAndTaskGroupCounter( task={},taskGroupCounter={})", task,taskGroupCounter);
+
+		Task savedTask = null;
+
+		try {
+
+			// update taskGroupCounter
+			this.entityManager.merge(taskGroupCounter);
+
+			// save task
+			saveTask(task);
+
+			this.entityManager.flush();
+
+		} catch (Exception e) {
+
+			throw new ParvanDaoException("Error occurred while saveTaskAndTaskGroupCounter.", e);
+		}
+
+		return savedTask;
+	}
+	
+	@Override
+	public Task saveTask(Task task) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering saveTask( task={})", task);
+
+		Task savedTask = null;
+
+		try {
+
+			Set<TaskCommand> taskCommands = task.getTaskCommands();
+			for (TaskCommand thisTaskCommand : taskCommands) {
+				Long thisCmdId = thisTaskCommand.getId();
+				if (thisCmdId != null) {
+					// this is a saved command. We never update an previously
+					// saved object in EventSourcing
+					// do nothing
+
+				} else {
+
+					// save command
+					this.entityManager.persist(thisTaskCommand);
+				}
+			}
+
+			// save task
+			savedTask = this.entityManager.merge(task);
+
+			// update taskDisplay
+			updateTaskDisplay(savedTask);
+
+			this.entityManager.flush();
+
+		} catch (Exception e) {
+
+			throw new ParvanDaoException("Error occurred while saving Task.", e);
+		}
+
+		return savedTask;
+	}
+
+	/**
+	 * 
+	 * @param task
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	private TaskDisplay updateTaskDisplay(Task task) throws ParvanDaoException {
+		// LOG
+		log.debug("Entering updateTaskDisplay( task={})", task);
+
+		TaskDisplay savedTaskDisplay = null;
+
+		try {
+			LocalDateTime now = LocalDateTime.now();
+
+			String uuid = task.getId();
+			TaskDisplay existingTask = getTaskDisplay(uuid);
+
+			// get record
+			TaskDisplay taskDisplay = Task.getDisplayRecord(existingTask, task);
+
+			//
+			if (taskDisplay.getRecordCreateDate() == null) {
+				taskDisplay.setRecordCreateDate(now);
+				taskDisplay.setRecordUpdateDate(now);
+			} else {
+				taskDisplay.setRecordUpdateDate(now);
+			}
+
+			// save generate-command
+			savedTaskDisplay = this.entityManager.merge(taskDisplay);
+
+		} catch (Exception e) {
+
+			throw new ParvanDaoException("Error occurred while saving Task.", e);
+		}
+
+		return savedTaskDisplay;
+	}
+
+	@Override
+	public TaskCommand getTaskCommand(Long id) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering getTaskCommand( id={})", id);
+
+		TaskCommand entity = null;
+
+		try {
+			// get record
+			entity = this.entityManager.find(TaskCommand.class, id);
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getTaskCommand by id [" + id + "]", e);
+		}
+
+		return entity;
+
+	}
+
+	@Override
+	public List<TaskCommand> getTaskCommands(String taskId, TaskCommandType taskCommandType) throws ParvanDaoException {
+
+		// LOG
+		log.trace("Entering getTaskCommand taskId={} ,taskCommandType={} ", taskId, taskCommandType);
+
+		List<TaskCommand> taskCommandList = null;
+
+		try {
+
+			// Make query
+			TypedQuery<TaskCommand> q = this.entityManager.createQuery("SELECT tc FROM Task t JOIN t.taskCommands tc WHERE t.id = ? AND tc.taskCommandType = ?",
+					TaskCommand.class);
+
+			q.setParameter(1, taskId);
+			q.setParameter(2, taskCommandType);
+
+			taskCommandList = q.getResultList();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getTaskCommand with taskId:" + taskId + " and taskCommandType:" + taskCommandType, e);
+		}
+
+		return taskCommandList;
+
+	}
+
+	@Override
+	public TaskGroupCounter getTaskGroupCounter(Long groupId) throws ParvanDaoException {
+
+		// LOG
+		log.trace("Entering getLastCounter groupId={}", groupId);
+
+		TaskGroupCounter taskCounter = null;
+
+		try {
+
+			// Make query
+			taskCounter = this.entityManager.find(TaskGroupCounter.class, groupId);
+
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getTaskCounter by id [" + groupId + "]", e);
+		}
+
+		return taskCounter;
+
+	}
+
+	@Override
+	public void deleteTask(String id) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering deleteTask( id={})", id);
+
+		try {
+			// get record
+			Task task = this.getTask(id);
+			TaskDisplay taskDisplay = this.getTaskDisplay(id);
+
+			// remove taskDisplay
+			this.entityManager.remove(taskDisplay);
+
+			// remove task
+			this.entityManager.remove(task);
+			this.entityManager.flush();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while deleteTask: id [" + id + "]", e);
+		}
+	}
+	
+	@Override
+	public boolean findTaskByGroupId(Long groupId) throws ParvanDaoException {
+
+		// LOG
+		log.trace("Entering findTaskByGroupId groupId={}", groupId);
+
+		boolean hasChildren = false;
+		List<Task> list;
+
+		try {
+			// Make query
+			TypedQuery<Task> q = this.entityManager.createQuery(
+					"from Task obj where obj.taskGroupId = ?",
+					Task.class);
+
+			q.setParameter(1, groupId);
+
+			list = q.getResultList();
+
+			if (list != null && list.size() > 0) {
+				hasChildren = true;
+			}
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting task with groupId: " + groupId, e);
+		}
+
+		// LOG
+		log.trace("Leaving findTaskByGroupId : ret={}", (list != null) ? list.size() : "NULL");
+
+		return hasChildren;
+	}
+}

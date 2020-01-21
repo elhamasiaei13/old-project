@@ -1,0 +1,18 @@
+package com.parvanpajooh.transportationmanagement.model.enums;
+
+public enum TransportationScheduleStatus {
+	ACTIVE ("ACTIVE"),
+	INACTIVE ("INACTIVE"),
+	CANCELED ("CANCELED");
+	
+	private String name;
+
+	private TransportationScheduleStatus(String name) {
+		this.name = name;
+	}
+
+	@Override
+    public String toString() {
+        return name;
+    }
+}

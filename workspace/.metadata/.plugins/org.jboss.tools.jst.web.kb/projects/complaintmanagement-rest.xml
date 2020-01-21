@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kb-project>
+ <depends-on-projects>
+  <project name="common-idm-rest"/>
+  <project name="common-platform-springmvc"/>
+  <project name="common-client-library"/>
+  <project name="complaintmanagement-ejb"/>
+  <project name="common-platform-ejb"/>
+  <project name="common"/>
+  <project name="common-crosscutting-ejb"/>
+ </depends-on-projects>
+ <used-by-projects/>
+ <paths>
+  <path value="/home/dev-03/.m2/repository/org/unbescape/unbescape/1.1.0.RELEASE/unbescape-1.1.0.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/javax/javaee-api/6.0/javaee-api-6.0.jar">
+   <libraries>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/c-1_0-rt.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/c-1_0.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/c.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/fmt-1_0-rt.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/fmt-1_0.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/fmt.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/fn.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/html_basic.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/jsf_core.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/mojarra_ext.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/permittedTaglibs.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/scriptfree.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/sql-1_0-rt.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/sql-1_0.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/sql.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/x-1_0-rt.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/x-1_0.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/x.tld" project="common-client-library"/>
+    </library>
+   </libraries>
+  </path>
+  <path value="/home/dev-03/.m2/repository/ch/qos/logback/logback-classic/1.0.13/logback-classic-1.0.13.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.5.4/jackson-core-2.5.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/squareup/retrofit2/converter-gson/2.2.0/converter-gson-2.2.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-jexl/commons-jexl/1.1/commons-jexl-1.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-aop/4.1.6.RELEASE/spring-aop-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/google/guava/guava/21.0/guava-21.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/squareup/retrofit2/retrofit/2.1.1-SNAPSHOT/retrofit-2.1.1-SNAPSHOT.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.5.4/jackson-datatype-jsr310-2.5.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/squareup/okhttp3/okhttp/3.6.0/okhttp-3.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.5.4/jackson-databind-2.5.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.5.4/jackson-datatype-jdk8-2.5.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/json/json/20160212/json-20160212.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/xmlbeans/xmlbeans/2.6.0/xmlbeans-2.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/squareup/retrofit2/converter-jackson/2.1.1-SNAPSHOT/converter-jackson-2.1.1-SNAPSHOT.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-beans/4.1.6.RELEASE/spring-beans-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/junit/junit/4.12/junit-4.12.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/perf4j/perf4j/0.9.16/perf4j-0.9.16.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-web/4.1.6.RELEASE/spring-web-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/squareup/okio/okio/1.11.0/okio-1.11.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/github/virtuald/curvesapi/1.03/curvesapi-1.03.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.9.13/jackson-core-asl-1.9.13.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/squareup/okhttp3/logging-interceptor/3.6.0/logging-interceptor-3.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/security/spring-security-web/3.2.6.RELEASE/spring-security-web-3.2.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/security/oauth/spring-security-oauth2/2.0.7.RELEASE/spring-security-oauth2-2.0.7.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/taglibs/standard/1.1.2/standard-1.1.2.jar">
+   <libraries>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/c-1_0-rt.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/c-1_0.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/c.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/fmt-1_0-rt.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/fmt-1_0.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/fmt.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/fn.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/permittedTaglibs.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/scriptfree.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/sql-1_0-rt.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/sql-1_0.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/sql.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/x-1_0-rt.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/x-1_0.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/x.tld" project="common-platform-springmvc"/>
+    </library>
+   </libraries>
+  </path>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.5.4/jackson-module-parameter-names-2.5.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/poi/poi-scratchpad/3.14/poi-scratchpad-3.14.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/security/spring-security-config/4.0.0.RELEASE/spring-security-config-4.0.0.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-webmvc/4.1.6.RELEASE/spring-webmvc-4.1.6.RELEASE.jar">
+   <libraries>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-spring-webmvc-4.1.6.RELEASE.jar/META-INF/spring-form.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-spring-webmvc-4.1.6.RELEASE.jar/META-INF/spring.tld" project="common-platform-springmvc"/>
+    </library>
+   </libraries>
+  </path>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-core/4.1.6.RELEASE/spring-core-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-expression/4.1.6.RELEASE/spring-expression-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/google/code/gson/gson/2.8.0/gson-2.8.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/poi/poi/3.14/poi-3.14.jar"/>
+  <path value="/home/dev-03/.m2/repository/cglib/cglib-nodep/2.2.2/cglib-nodep-2.2.2.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/commons/commons-lang3/3.1/commons-lang3-3.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.5.0/jackson-annotations-2.5.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-codec/commons-codec/1.6/commons-codec-1.6.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/poi/poi-ooxml-schemas/3.14/poi-ooxml-schemas-3.14.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-context-support/4.1.6.RELEASE/spring-context-support-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/poi/poi-ooxml/3.14/poi-ooxml-3.14.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-beanutils/commons-beanutils/1.9.2/commons-beanutils-1.9.2.jar"/>
+  <path value="/home/dev-03/.m2/repository/ch/qos/logback/logback-core/1.0.13/logback-core-1.0.13.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/security/spring-security-core/4.0.0.RELEASE/spring-security-core-4.0.0.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/ognl/ognl/3.0.8/ognl-3.0.8.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-context/4.1.6.RELEASE/spring-context-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.9.13/jackson-mapper-asl-1.9.13.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/thymeleaf/thymeleaf/2.1.4.RELEASE/thymeleaf-2.1.4.RELEASE.jar"/>
+ </paths>
+ <validation>
+  <el/>
+ </validation>
+ <aliases/>
+ <includes/>
+ <uris/>
+</kb-project>

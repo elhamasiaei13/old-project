@@ -1,0 +1,97 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.complaintmanagement.model;
+
+import com.parvanpajooh.client.common.BaseMsg;
+
+/**
+ * @author MO
+ *
+ */
+public class CityInfoMsg extends BaseMsg {
+
+	private static final long serialVersionUID = 3927668950713026462L;
+	
+	private String shortCode;
+	private String nameEn;
+	private String nameFa;
+	private String provinceShortCode;
+	private String provinceNameEn;
+	private String provinceNameFa;
+	private String countryShortCode;
+	private String countryNameEn;
+	private String countryNameFa;
+	
+	public String getShortCode() {
+		return shortCode;
+	}
+
+	public void setShortCode(String shortCode) {
+		this.shortCode = shortCode;
+	}
+
+	public String getNameEn() {
+		return nameEn;
+	}
+
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
+	}
+
+	public String getNameFa() {
+		return nameFa;
+	}
+
+	public void setNameFa(String nameFa) {
+		this.nameFa = nameFa;
+	}
+
+	public String getProvinceShortCode() {
+		return provinceShortCode;
+	}
+	
+	public void setProvinceShortCode(String provinceShortCode) {
+		this.provinceShortCode = provinceShortCode;
+	}
+	
+	public String getProvinceNameEn() {
+		return provinceNameEn;
+	}
+	
+	public void setProvinceNameEn(String provinceNameEn) {
+		this.provinceNameEn = provinceNameEn;
+	}
+	
+	public String getProvinceNameFa() {
+		return provinceNameFa;
+	}
+	
+	public void setProvinceNameFa(String provinceNameFa) {
+		this.provinceNameFa = provinceNameFa;
+	}
+	
+	public String getCountryShortCode() {
+		return countryShortCode;
+	}
+	
+	public void setCountryShortCode(String countryShortCode) {
+		this.countryShortCode = countryShortCode;
+	}
+	
+	public String getCountryNameEn() {
+		return countryNameEn;
+	}
+	
+	public void setCountryNameEn(String countryNameEn) {
+		this.countryNameEn = countryNameEn;
+	}
+	
+	public String getCountryNameFa() {
+		return countryNameFa;
+	}
+	
+	public void setCountryNameFa(String countryNameFa) {
+		this.countryNameFa = countryNameFa;
+	}
+}

@@ -1,0 +1,1034 @@
+/**
+ * 
+ */
+package com.parvanpajooh.waybillmanagement.mvc;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.ejb.EJB;
+import javax.interceptor.Interceptors;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.perf4j.slf4j.aop.TimingAspect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.common.auth.UserInfoLoader;
+import com.parvanpajooh.common.convertor.JacksonObjectMapperProvider;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseDto;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+import com.parvanpajooh.commons.util.DateFields;
+import com.parvanpajooh.commons.util.SimplePersianCalendar;
+import com.parvanpajooh.commons.util.StringUtil;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.waybillmanagement.application.CarrierApplicationService;
+import com.parvanpajooh.waybillmanagement.application.CityApplicationService;
+import com.parvanpajooh.waybillmanagement.application.ClientApplicationService;
+import com.parvanpajooh.waybillmanagement.application.CurrencyApplicationService;
+import com.parvanpajooh.waybillmanagement.application.NodeApplicationService;
+import com.parvanpajooh.waybillmanagement.application.PackingTypeApplicationService;
+import com.parvanpajooh.waybillmanagement.application.WaybillApplicationService;
+import com.parvanpajooh.waybillmanagement.application.WaybillStateApplicationService;
+import com.parvanpajooh.waybillmanagement.domain.model.criteria.PackingTypeCriteria;
+import com.parvanpajooh.waybillmanagement.domain.model.criteria.WaybillCriteria;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.CargoWaybillDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.CarrierDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.CityInfoDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.ClientDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.CurrencyDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.NodeDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.PackingItemDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.PackingTypeDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.PackingTypeWithCountAndName;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.PriceItemDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.TransferNodeDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.WaybillDto;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.WaybillStateDto;
+import com.parvanpajooh.waybillmanagement.domain.model.enums.ChargeParty;
+import com.parvanpajooh.waybillmanagement.domain.model.enums.FreightNodeType;
+import com.parvanpajooh.waybillmanagement.domain.model.enums.RateDueType;
+import com.parvanpajooh.waybillmanagement.utils.WaybillUtils;
+
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
+
+/**
+ * @author MO
+ *
+ */
+@Controller
+@RequestMapping("/waybills")
+public class WaybillController {
+	
+	protected final Logger log = LoggerFactory.getLogger(getClass());
+	
+	@Autowired
+	private MessageSource messageSource;
+	
+	@EJB(mappedName = "java:global/waybillmanagement-ear/waybillmanagement-ejb/WaybillApplicationServiceImpl")
+	private WaybillApplicationService waybillApplicationService;
+	
+	@EJB(mappedName = "java:global/waybillmanagement-ear/waybillmanagement-ejb/CarrierApplicationServiceImpl")
+	private CarrierApplicationService carrierApplicationService;
+	
+	@EJB(mappedName = "java:global/waybillmanagement-ear/waybillmanagement-ejb/CityApplicationServiceImpl")
+	private CityApplicationService cityApplicationService;
+	
+	@EJB(mappedName = "java:global/waybillmanagement-ear/waybillmanagement-ejb/NodeApplicationServiceImpl")
+	private NodeApplicationService nodeApplicationService;
+	
+	@EJB(mappedName = "java:global/waybillmanagement-ear/waybillmanagement-ejb/ClientApplicationServiceImpl")
+	private ClientApplicationService clientApplicationService;
+	
+	@EJB(mappedName = "java:global/waybillmanagement-ear/waybillmanagement-ejb/CurrencyApplicationServiceImpl")
+	private CurrencyApplicationService currencyApplicationService;
+	
+	@EJB(mappedName = "java:global/waybillmanagement-ear/waybillmanagement-ejb/WaybillStateApplicationServiceImpl")
+	private WaybillStateApplicationService waybillStateApplicationService;
+	
+	@EJB(mappedName = "java:global/waybillmanagement-ear/waybillmanagement-ejb/PackingTypeApplicationServiceImpl")
+	private PackingTypeApplicationService packingTypeApplicationService;
+	
+	@Autowired
+	protected JacksonObjectMapperProvider mapperProvider;
+	
+	private final static String   SHIPPER_INPUT_METHOD =   "shipper.inputMethod";
+	private final static String CONSIGNEE_INPUT_METHOD = "consignee.inputMethod";
+	
+	private final static String PAGE_FORM = "waybill";
+	private final static String PAGE_VIEW = "waybill-view";
+	private final static String PAGE_LIST = "waybills";
+	
+	private void _init(UserInfo userInfo, final Model model) throws ParvanServiceException {
+		// get permitted discount codes based users agent branch state
+		String[] discountTypes = WaybillUtils.getPermittedDiscountCode();
+		model.addAttribute("discountTypes", discountTypes);
+		
+		// Add currencies as key value to model so it can be used for mapping in view
+		List<CurrencyDto> currencies = currencyApplicationService.getAll(userInfo);
+		Map<String, String> currencyCodes = new HashMap<>();
+		for (CurrencyDto dto: currencies) {
+			String ccyCode = dto.getCode();
+			currencyCodes.put(ccyCode, ccyCode);
+		}
+		model.addAttribute("currencyCodes", currencyCodes);
+		
+	/*	// Based on users roles, states that can be printed are retrieved
+		// and added to model for access in view
+		Set<String> userRoles = userInfo.getRoleNames();
+		// set editableStates states to model
+		Set<WaybillStateDto> editableStates = waybillStateApplicationService.getEditableStates(userInfo, userRoles);
+		Set<String> editableStatesCode = new HashSet<String>(editableStates.size());
+		for (WaybillStateDto editableState : editableStates) {
+			editableStatesCode.add(editableState.getCode());
+		}
+		model.addAttribute("editableStates", editableStatesCode);
+		
+		// set printable states to model
+		Set<WaybillStateDto> printableStates = waybillStateApplicationService.getPrintableStates(userInfo, userRoles);
+		Set<String> printableStatesCode = new HashSet<String>(printableStates.size());
+		for(WaybillStateDto printableState : printableStates) {
+			printableStatesCode.add(printableState.getCode());
+		}
+		model.addAttribute("printableStates", printableStatesCode);
+
+		// set deleteable states to model
+		Set<WaybillStateDto> deleteableStates = waybillStateApplicationService.getDeleteableStates(userInfo, userRoles);
+		Set<String> deleteableStatesCode = new HashSet<String>(deleteableStates.size());
+		for(WaybillStateDto deleteableState : deleteableStates) {
+			deleteableStatesCode.add(deleteableState.getCode());
+		}
+		model.addAttribute("deleteableStates", deleteableStatesCode);*/
+	}
+	
+	@RequestMapping(value = "", method = RequestMethod.GET)
+	public String showList() {
+		return PAGE_LIST;
+	}
+	
+	@RequestMapping(value = "", method = RequestMethod.POST)
+	public String saveOrUpdate(
+			CargoWaybillDto waybill,
+			Model model, 
+			RedirectAttributes redirectAttributes) {
+		
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		String waybillNumber;
+		try {
+			waybillNumber = waybillApplicationService.saveCargo(userInfo, waybill);
+			redirectAttributes.addFlashAttribute("status", "success");
+			redirectAttributes.addAttribute("waybillNumber", waybillNumber);
+			return "redirect:waybills/{waybillNumber}";
+		} catch (ParvanServiceException e) {
+			model.addAttribute("waybill", waybill);
+			model.addAttribute("canEdit", true);
+			model.addAttribute("message", _createAlert(e));
+			return PAGE_FORM;
+		}
+	}
+	
+	@RequestMapping(value = "/{waybillNumber}", method = RequestMethod.GET)
+	public String view(@PathVariable String waybillNumber, Model model) {
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		CargoWaybillDto cargoWaybill;
+		try {
+			cargoWaybill = waybillApplicationService.getCargo(userInfo, waybillNumber);
+			model.addAttribute("waybill", cargoWaybill);
+		} catch (ParvanServiceException e) {
+			model.addAttribute("message", _createAlert(e));
+		}
+		return PAGE_VIEW;
+	}
+	
+	@RequestMapping(value = "/{waybillNumber}", method = RequestMethod.DELETE)
+	public @ResponseBody Map<String, Object> delete(@PathVariable String waybillNumber, Model model) {
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		Map<String, Object> result = new HashMap<>();
+		try {
+			waybillApplicationService.deleteByNumber(userInfo, waybillNumber);
+			result.put("status", "success");
+		} catch (ParvanServiceException e) {
+			result = _createAlert(e);
+		}
+		return result;
+	}
+	
+	@RequestMapping(value = "/new", method = RequestMethod.GET)
+	public String newForm(Model model) {
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		UserInfoWrapper uiw = new UserInfoWrapper(userInfo);
+		CargoWaybillDto cargoWaybill;
+		try {
+			_init(userInfo, model);
+			cargoWaybill = waybillApplicationService.getNewCargo(userInfo);
+			model.addAttribute("waybill", cargoWaybill);
+			model.addAttribute("canEdit", true);
+			
+			Map<String, String> configs = waybillApplicationService.getConfigs();
+			model.addAttribute("shipperInputMethod", configs.get(SHIPPER_INPUT_METHOD));
+			model.addAttribute("consigneeInputMethod", configs.get(CONSIGNEE_INPUT_METHOD));
+			
+			model.addAttribute("userAgentCityCode", uiw.getAgentCityShortCode());
+			model.addAttribute("userAgentHubNodeId", uiw.getAgentHubNodeId());
+			
+		} catch (ParvanServiceException e) {
+			model.addAttribute("message", _createAlert(e));
+		}
+		return PAGE_FORM;
+	}
+	
+	@RequestMapping(value = "/edit/{waybillNumber}", method = RequestMethod.GET)
+	public String editForm(@PathVariable String waybillNumber, Model model) {
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		try {
+			_init(userInfo, model);
+			CargoWaybillDto cargoWaybill = waybillApplicationService.getCargo(userInfo, waybillNumber);
+			_loadAndSetPackingTypes(userInfo, cargoWaybill);
+			WaybillStateDto currentState = cargoWaybill.getState();
+			model.addAttribute("waybill", cargoWaybill);
+			model.addAttribute("canEdit", _isEditable(userInfo, currentState));
+			model.addAttribute("canPrint", _isPrintable(userInfo, currentState));
+		} catch (ParvanServiceException | IOException e) {
+			model.addAttribute("message", _createAlert(e));
+		}
+		return PAGE_FORM;
+	}
+	
+	
+	
+	
+	DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,###");
+	
+	@RequestMapping(value = "/print/{waybillNumber}", method = RequestMethod.GET)
+	@Interceptors(TimingAspect.class)
+	public String print(@PathVariable String waybillNumber, HttpServletRequest request, HttpServletResponse response, Model model) 
+			throws Exception {
+		
+		log.debug("print waybill with waybillNumber {}", waybillNumber);
+		
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+		CargoWaybillDto waybill = waybillApplicationService.getCargo(userInfo, waybillNumber);
+		
+		List<PackingItemDto> packingItems = waybill.getPackingList();
+		if (packingItems  != null) {
+			for (PackingItemDto packingItem : packingItems) {
+				if (Validator.isNotNull(packingItem.getPackingTypeCountPair())) {
+					ObjectMapper mapper = mapperProvider.getDefaultMapper();
+					Map<Long, Integer> map = mapper.readValue(packingItem.getPackingTypeCountPair(), new TypeReference<HashMap<Long ,Integer>>(){});
+					List<PackingTypeWithCountAndName> ptcnList = new ArrayList<>();
+					StringBuilder builder = new StringBuilder();
+					for (Map.Entry<Long, Integer> entry : map.entrySet()) {
+						Long packingTypeId = entry.getKey();
+						Integer packingTypeCount = entry.getValue();
+						PackingTypeDto pt = (PackingTypeDto) packingTypeApplicationService.get(userInfo, packingTypeId);
+						String name = pt.getNameLocal();
+						PackingTypeWithCountAndName ptcn = new PackingTypeWithCountAndName();
+						ptcn.setPackingTypeId(packingTypeId);
+						ptcn.setPackageCount(packingTypeCount);
+						ptcn.setPackingTypeName(name);
+						ptcnList.add(ptcn);
+						builder.append(name).append(" x ").append(packingTypeCount);
+					}
+					packingItem.setPackingTypesList(ptcnList);
+					packingItem.setPackingTypeNames(builder.toString());
+				}
+			}
+		}
+		
+		//Map<String, Object> data =
+		
+		/*String originNodeName = StringPool.BLANK;
+		if (waybill.getOriginNode() != null) {
+			originNodeName = waybill.getOriginNode().getNodeName();
+		}
+		
+		String destinationNodeName = StringPool.BLANK;
+		if (waybill.getDestinationNode() != null) {
+			destinationNodeName = waybill.getDestinationNode().getNodeName();
+		}*/
+		
+		TreeSet<TransferNodeDto> viaNodes = waybill.getViaNodes();
+		//TODO MO : why is this not a collection ??!!!!
+		String via = StringPool.BLANK;
+		if (viaNodes != null) {
+			for (TransferNodeDto viaNode : viaNodes) {
+				if (viaNode != null) {
+					via = viaNode.getNodeName();
+				}
+			}
+		}
+		
+		//List<PackingItemDto> packingItems = waybill.getPackingList();
+		
+		float weight = 0;
+		if (Validator.isNotNull(waybill.getTotalGrossWeight())) {
+			weight = waybill.getTotalGrossWeight().floatValue();
+		}
+		
+		float totalChargeableWeight = 0;
+		if (Validator.isNotNull(waybill.getTotalChargeableWeight())) {
+			totalChargeableWeight = waybill.getTotalChargeableWeight().floatValue();
+		}
+		
+		Calendar cal = Calendar.getInstance();
+		//cal.setTime(cargoVO.getShippingDate());
+		
+		SimplePersianCalendar persianCalendar = new SimplePersianCalendar();
+		persianCalendar.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+		DateFields dfs = persianCalendar.getDateFields();
+		
+		String issueDate = dfs.getYear() + "/" + (dfs.getMonth() + 1) + "/" + dfs.getDay();
+		String issueTime = cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE);
+		
+		String issueSigner = null;
+		/*if (Validator.isNotNull(waybill.getCreateUserId())) {
+			UserDto user = userApplicationService.get(userInfo, waybill.getCreateUserId());
+			issueSigner = user.getFirstName() + StringPool.SPACE + user.getLastName();
+		}*/
+		
+		String shipperClientId = StringPool.BLANK;
+		if(Validator.isNotNull(waybill.getShipperPersonUuid())){
+			ClientDto shipper = clientApplicationService.getByUuid(userInfo, waybill.getShipperPersonUuid());
+			if(Validator.isNotNull(shipper)){
+				shipperClientId = shipper.getId();
+			}
+		}
+		
+		String consigneeClientId = StringPool.BLANK;
+		if (Validator.isNotNull( waybill.getConsigneePersonUuid() )) {
+			ClientDto consignee = clientApplicationService.getByUuid(userInfo, waybill.getConsigneePersonUuid());
+			if(Validator.isNotNull(consignee)){
+				consigneeClientId = consignee.getId();
+			}
+		}
+		
+		String chargeParty = StringPool.BLANK;
+		
+		//String kindOfDelivery = StringPool.BLANK; //TODO MO: what to do ??!!
+		
+		String originCityName = StringPool.BLANK;
+		if (Validator.isNotNull( waybill.getShipperCityCode() )) {
+			CityInfoDto originCity = cityApplicationService.get(userInfo, waybill.getShipperCityCode());
+			originCityName = originCity.getNameLocal();
+		}
+		
+		String destinationCityName = StringPool.BLANK;
+		if (Validator.isNotNull( waybill.getConsigneeCityCode() )) {
+			CityInfoDto destinationCity = cityApplicationService.get(userInfo, waybill.getConsigneeCityCode());
+			destinationCityName = destinationCity.getNameLocal();
+		}
+		
+		String senderName = waybill.getShipperName();
+		String receiverName = waybill.getConsigneeName();
+		
+		ChargeParty weightValueChargeParty = waybill.getWeightValueChargeParty();
+		ChargeParty otherValueChargeParty = waybill.getOtherValueChargeParty();
+		
+		if(weightValueChargeParty.equals(ChargeParty.PPD) && otherValueChargeParty.equals(ChargeParty.PPD)){
+			chargeParty = "shipper";
+		} else if(weightValueChargeParty.equals(ChargeParty.COLL) && otherValueChargeParty.equals(ChargeParty.COLL)){
+			chargeParty = "consignee";
+		}
+		
+		String discountCode = waybill.getDiscountCode();
+		String discountType = StringPool.BLANK;
+		if(waybill.getDiscountType() != null){
+			discountType = waybill.getDiscountType().name();
+		}
+		
+		String forAccounting = StringPool.BLANK;
+		if(Validator.isNotNull(discountCode)){
+			forAccounting = discountCode;
+		}
+		
+		
+		String strDeclaredValueForCarriage = "N.V.D";
+		if(Validator.isNotNull(waybill.getDeclaredValueForCarriage())){
+			Double declaredValueForCarriage = waybill.getDeclaredValueForCarriage();
+			strDeclaredValueForCarriage = DECIMAL_FORMAT.format(declaredValueForCarriage);
+		}
+		
+		Map<String, Object> data = new HashMap<>();
+		data.put("shipper", senderName);
+		data.put("shipperClientId", shipperClientId);
+		data.put("shipperAddress", waybill.getShipperAddress());
+		data.put("shipperTel", waybill.getShipperLandlineNumber());
+		data.put("shipperMobile", waybill.getShipperMobileNumber());
+		data.put("consignee", receiverName);
+		data.put("consigneeClientId", consigneeClientId);
+		data.put("consigneeAddress", waybill.getConsigneeAddress());
+		data.put("consigneeTel", waybill.getConsigneeLandlineNumber());
+		data.put("consigneeMobile", waybill.getConsigneeMobileNumber());
+		data.put("origin", originCityName);
+		data.put("via", via);
+		data.put("destination", destinationCityName);
+		data.put("weight", String.valueOf(weight));
+		data.put("chargeableWeight", String.valueOf(totalChargeableWeight));
+		data.put("declaredValue", strDeclaredValueForCarriage);
+		data.put("issuerSign", issueSigner);
+		data.put("shipperSign", senderName);
+		data.put("date", issueDate);
+		data.put("time", issueTime);
+		data.put("handlingInformation", StringPool.BLANK);
+		data.put("forAccounting", forAccounting);
+		data.put("chargeParty", chargeParty);
+		data.put("discountCode", discountCode);
+		data.put("discountType", discountType);
+		
+		String airFreightAirline;
+		String airFreightIssuer = StringPool.BLANK;
+		String awcAirline = StringPool.BLANK;
+		String awcIssuer = StringPool.BLANK;
+		String sccAirline = StringPool.BLANK;
+		String sccIssuer = StringPool.BLANK;
+		String otherChargeAirline = StringPool.BLANK;
+		String otherChargeIssuer = StringPool.BLANK;
+		String ataAirline = StringPool.BLANK;
+		String ataIssuer = StringPool.BLANK;
+		String vatAirline = StringPool.BLANK;
+		String vatIssuer = StringPool.BLANK;
+		String totalAirline = StringPool.BLANK;
+		String totalIssuer = StringPool.BLANK;
+		String sumTotalAirline = StringPool.BLANK;
+		String sumTotalIssuer = StringPool.BLANK;
+		
+		airFreightAirline = DECIMAL_FORMAT.format(waybill.getTotalWeightChargePPD());
+		
+		List<PriceItemDto> orginalPriceItems = waybill.getPriceItems();
+		if (orginalPriceItems != null) {
+			for (PriceItemDto priceItem : orginalPriceItems) {
+				String code = priceItem.getRateTypeCode();
+				String due = priceItem.getRateTypeRateDue();
+				String value = DECIMAL_FORMAT.format(priceItem.getAmount());
+				
+				/*if("AIR_FREIGHT".equals(code)){
+					if(RateDueType.CARRIER.name().equals(due)){
+						airFreightAirline = value;
+					} else if(RateDueType.AGENT.name().equals(due)){
+						airFreightIssuer = value;
+					}
+				}
+				else*/ if("AWC".equals(code)){
+					if(RateDueType.CARRIER.name().equals(due)){
+						awcAirline = value;
+					} else if(RateDueType.AGENT.name().equals(due)){
+						awcIssuer = value;
+					}
+				}
+				else if("SCC".equals(code)){
+					if(RateDueType.CARRIER.name().equals(due)){
+						sccAirline = value;
+					} else if(RateDueType.AGENT.name().equals(due)){
+						sccIssuer = value;
+					}
+				}
+				else if("OTHER_CHARGES".equals(code)){
+					if(RateDueType.CARRIER.name().equals(due)){
+						if(Validator.isNotNull(otherChargeAirline)){
+							
+							double d = DECIMAL_FORMAT.parse(otherChargeAirline).doubleValue() + priceItem.getAmount().doubleValue();
+							otherChargeAirline = DECIMAL_FORMAT.format(d);
+							
+						} else {
+							otherChargeAirline = value;
+						}
+					} else if(RateDueType.AGENT.name().equals(due)){
+						
+						/*if(Validator.isNotNull(otherChargeIssuer)){
+							
+							double d = DECIMAL_FORMAT.parse(otherChargeIssuer).doubleValue() + priceItem.getAmount().doubleValue();
+							otherChargeIssuer = DECIMAL_FORMAT.format(d);
+							
+						} else {
+							otherChargeIssuer = value;
+						}*/
+	
+						otherChargeIssuer = value;
+					}
+				}
+				else if("ROUNDING".equals(code)){
+					if(RateDueType.CARRIER.name().equals(due)){
+						if(Validator.isNotNull(otherChargeAirline)){
+							
+							double d = DECIMAL_FORMAT.parse(otherChargeAirline).doubleValue() + priceItem.getAmount().doubleValue();
+							otherChargeAirline = DECIMAL_FORMAT.format(d);
+							
+						} else {
+							otherChargeAirline = value;
+						}
+					} else if(RateDueType.AGENT.name().equals(due)){
+						if(Validator.isNotNull(otherChargeIssuer)){
+							
+							double d = DECIMAL_FORMAT.parse(otherChargeIssuer).doubleValue() + priceItem.getAmount().doubleValue();
+							otherChargeIssuer = DECIMAL_FORMAT.format(d);
+							
+						} else {
+							otherChargeIssuer = value;
+						}
+					}
+				}
+				else if("ATA".equals(code)){
+					if(RateDueType.CARRIER.name().equals(due)){
+						ataAirline = value;
+					} else if(RateDueType.AGENT.name().equals(due)){
+						ataIssuer = value;
+					}
+				}
+				else if("VAT".equals(code)){
+					if(RateDueType.CARRIER.name().equals(due)){
+						vatAirline = value;
+					} else if(RateDueType.AGENT.name().equals(due)){
+						vatIssuer = value;
+					}
+				}
+				else if("TOTAL_PAYABLE".equals(code)){
+					if(RateDueType.CARRIER.name().equals(due)){
+						totalAirline = value;
+					} else if(RateDueType.AGENT.name().equals(due)){
+						totalIssuer = value;
+					}
+				}
+				else if("SUM_TOTAL".equals(code)){
+					if(RateDueType.CARRIER.name().equals(due)){
+						sumTotalAirline = value;
+					} else if(RateDueType.AGENT.name().equals(due)){
+						sumTotalIssuer = value;
+					}
+				}
+			}
+		}
+		
+		data.put("airFreightAirline", airFreightAirline);
+		data.put("airFreightIssuer", airFreightIssuer);
+		data.put("awcAirline", awcAirline);
+		data.put("awcIssuer", awcIssuer);
+		data.put("sccAirline", sccAirline);
+		data.put("sccIssuer", sccIssuer);
+		data.put("otherChargeAirline", otherChargeAirline);
+		data.put("otherChargeIssuer", otherChargeIssuer);
+		data.put("ataAirline", ataAirline);
+		data.put("ataIssuer", ataIssuer);
+		data.put("vatAirline", vatAirline);
+		data.put("vatIssuer", vatIssuer);
+		data.put("totalAirline", totalAirline);
+		data.put("totalIssuer", totalIssuer);
+		data.put("sumTotalAirline", sumTotalAirline);
+		data.put("sumTotalIssuer", sumTotalIssuer);
+		data.put("total", Validator.isNotNull(totalAirline) ? totalAirline : totalIssuer);
+		
+		List<Map<String, Object>> packingItemList = new ArrayList<>();
+		
+		BigDecimal rateOrCharge = BigDecimal.ZERO;
+		
+		if (packingItems != null) {
+			for (PackingItemDto packingItem : packingItems) {
+				
+				BigDecimal thisRateOrCharge = packingItem.getRateOrCharge();
+				if (thisRateOrCharge != null) {
+					rateOrCharge = thisRateOrCharge;
+				}
+				
+				Map<String, Object> packingItemData = new HashMap<>();
+				
+				String dims = packingItem.getDimensions();
+				String dimensions = StringPool.BLANK;
+				if (Validator.isNotNull(dims)) {
+					String[] rows = StringUtil.split(dims, "|");
+					for (String row : rows) {
+						String[] cols = StringUtil.split(row, ";");
+						
+						if (cols.length == 4) {
+							dimensions += cols[0] + "*(" + cols[1] + "*" + cols[2] + "*" + cols[3] + ") ";
+						}
+					}
+				}
+				
+				List<PackingTypeWithCountAndName> typeVO = packingItem.getPackingTypesList();
+				String type = StringPool.BLANK;
+				if (typeVO != null) {
+					for (PackingTypeWithCountAndName packingTypeWithCountAndName : typeVO) {
+						if (type.length() > 0) {
+							type += StringPool.COMMA;
+						}
+						type += packingTypeWithCountAndName.getPackingTypeName();
+					}
+				}
+				
+				packingItemData.put("packingItemRadif", String.valueOf(packingItem.getPieces()));
+				packingItemData.put("packingItemType", type);
+				packingItemData.put("packingItemContent", packingItem.getNature());
+				packingItemData.put("packingItemDimension", dimensions);
+				
+				packingItemList.add(packingItemData);
+			}
+		}
+
+		data.put("rate", rateOrCharge.doubleValue());
+		data.put("packingItemList", packingItemList);
+		
+		/////////////////////////////////////
+		
+		List<Map<String, Object>> list = new ArrayList<>();
+		list.add(data);
+		
+		JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(list);
+		
+		ServletContext context = request.getServletContext();
+		
+		String reportName = "/reports/Waybill.jrxml";
+		
+		InputStream jasperStream = context.getResourceAsStream(reportName);
+		
+		JasperDesign jasperDesign = JRXmlLoader.load(jasperStream);
+		
+	    //JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
+	    JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
+	    
+	    log.debug("start fill report");
+	    
+	    Map<String,Object> params = new HashMap<>();
+	    params.put("showBorder", "false");
+	    
+	    JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
+	    
+	    log.debug("end fill report");
+
+	    response.setContentType("application/x-pdf");
+	    response.setHeader("Content-disposition", "inline; filename=waybill-" + waybillNumber + ".pdf; creation-date=" + LocalDateTime.now());
+
+	    final OutputStream outStream = response.getOutputStream();
+	    JasperExportManager.exportReportToPdfStream(jasperPrint, outStream);
+		
+	    log.debug("end render report");
+	    
+		return null;
+	}
+	
+	
+	
+	
+
+	@RequestMapping(value = "/paging", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<WaybillDto> paging(@DatatablesParams DatatablesCriterias criterias,
+			WaybillCriteria criteria, HttpServletRequest request) {
+		
+		int page = criterias.getStart();
+		int size = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = columnDef.getName();
+		if ("0".equals(sortCriterion)) {
+			sortCriterion = "createDate";
+			sortDirection = SortDirectionEnum.Descending;
+		}
+		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+			sortDirection = SortDirectionEnum.Descending;
+		}
+		DataSet<WaybillDto> dataSet = null;
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		
+		if (Validator.isNull(userInfoWrapper.getAgentId())) {
+			dataSet = new DataSet<>(new ArrayList<WaybillDto>(), 0l, 0l);
+			log.debug("Exiting paging()");
+			return DatatablesResponse.build(dataSet, criterias);
+		}
+		
+		try {
+			PageList<WaybillDto> rows = waybillApplicationService.findByCriteria(
+					userInfo, 
+					criteria, 
+					page,
+					size,
+					sortCriterion,
+					sortDirection);
+			dataSet = new DataSet<>(
+					rows.getElements(), 
+					(long) rows.getElements().size(), 
+					(long) rows.getTotal()); 
+		} catch (ParvanServiceException e) {
+			log.debug(e.getMessage());
+		}
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	@RequestMapping(value = "/carriers", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<CarrierDto> findCarriers(
+			@DatatablesParams DatatablesCriterias criterias, String term)
+			throws ParvanServiceException, ObjectNotFoundException {
+		DataSet<CarrierDto> dataSet = null;
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = columnDef.getName();
+		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+			sortDirection = SortDirectionEnum.Descending;
+		}
+		PageList<CarrierDto> result = carrierApplicationService.findCarriers(userInfo, term,
+				firstResult, maxResults, sortDirection, sortCriterion);
+		long totalRecords = result.getTotal();
+		List<CarrierDto> elements = result.getElements();
+		dataSet = new DataSet<>(elements, (long) elements.size(), totalRecords);
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	@RequestMapping(value = "/carriers/{code}", method = RequestMethod.GET)
+	public @ResponseBody CarrierDto getCarrier(@PathVariable String code)
+			throws ParvanServiceException, ObjectNotFoundException {
+		CarrierDto carrier;
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		carrier = carrierApplicationService.get(userInfo, code);
+		return carrier;
+	}
+	
+	@RequestMapping(value = "/cities", method = RequestMethod.GET)
+	public @ResponseBody
+	DatatablesResponse<CityInfoDto> findCities(@DatatablesParams DatatablesCriterias criterias, String term) throws ParvanServiceException {
+		DataSet<CityInfoDto> dataSet = null;
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = columnDef.getName();
+		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+			sortDirection = SortDirectionEnum.Descending;
+		}
+		PageList<CityInfoDto> result = cityApplicationService.find(userInfo, term,
+				firstResult, maxResults, sortDirection, sortCriterion);
+		long totalRecords = result.getTotal();
+		List<CityInfoDto> elements = result.getElements();
+		dataSet = new DataSet<>(elements, (long) elements.size(), totalRecords);
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	@RequestMapping(value = "/cities/{code}", method = RequestMethod.GET)
+	public @ResponseBody CityInfoDto getCity(@PathVariable String code)
+			throws ParvanServiceException, ObjectNotFoundException {
+		CityInfoDto cityInfo;
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		cityInfo = cityApplicationService.get(userInfo, code);
+		return cityInfo;
+	}
+	
+	@RequestMapping(value = "/nodes", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<NodeDto> findNodes(@DatatablesParams DatatablesCriterias criterias, String term) 
+			throws ParvanServiceException {
+		DataSet<NodeDto> dataSet = null;
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = columnDef.getName();
+		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+			sortDirection = SortDirectionEnum.Descending;
+		}
+		FreightNodeType[] freightTypes = new FreightNodeType[]{ FreightNodeType.HUB };
+		PageList<NodeDto> result = nodeApplicationService.find(
+				userInfo, 
+				term,
+				freightTypes,
+				firstResult, 
+				maxResults, 
+				sortDirection, 
+				sortCriterion);
+		long totalRecords = result.getTotal();
+		List<NodeDto> elements = result.getElements();
+		dataSet = new DataSet<>(elements, (long) elements.size(), totalRecords);
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	@RequestMapping(value = "/nodes/{id}", method = RequestMethod.GET)
+	public @ResponseBody NodeDto getCity(@PathVariable Long id)
+			throws ParvanServiceException, ObjectNotFoundException {
+		NodeDto node;
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		node = nodeApplicationService.get(userInfo, id);
+		return node;
+	}
+	
+	@RequestMapping(value = "/clients", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<ClientDto> findClients(@DatatablesParams DatatablesCriterias criterias, String term)
+			throws ParvanServiceException, ObjectNotFoundException {
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		DataSet<ClientDto> dataSet = null;
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = columnDef.getName();
+		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+			sortDirection = SortDirectionEnum.Descending;
+		}
+		PageList<ClientDto> result = clientApplicationService.find(userInfo, term,
+				firstResult, maxResults, sortDirection, sortCriterion);
+		long totalRecords = result.getTotal();
+		List<ClientDto> elements = result.getElements();
+		dataSet = new DataSet<>(elements, (long) elements.size(), totalRecords);
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	@RequestMapping(value = "/clients", method = RequestMethod.POST)
+	public @ResponseBody ClientDto createClient(ClientDto client) throws ParvanServiceException {
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		UserInfoWrapper uiw = new UserInfoWrapper(userInfo);
+		Long organizationId = uiw.getAgentAllowedOrgId();
+		client.setActive(true);
+		client.setOrganizationId(organizationId);
+		return clientApplicationService.create(userInfo, client); 
+	}
+	
+	@RequestMapping(value = "/clients/{uuid}", method = RequestMethod.GET)
+	public @ResponseBody ClientDto getClient(@PathVariable String uuid) throws ParvanServiceException {
+		ClientDto client = null;
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		if (Validator.isNotNull(uuid)) {
+			client = clientApplicationService.getByUuid(userInfo, uuid);
+		}
+		return client;
+	}
+	
+	@RequestMapping(value = "/packingTypes", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<BaseDto> findPackingTypes(
+			@DatatablesParams DatatablesCriterias criterias, String term)
+			throws ParvanServiceException, ObjectNotFoundException {
+		DataSet<BaseDto> dataSet = null;
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = columnDef.getName();
+		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+			sortDirection = SortDirectionEnum.Descending;
+		}
+		PackingTypeCriteria criteria = new PackingTypeCriteria();
+		criteria.setAllNames(term);
+		criteria.setActive(true);
+		List<BaseDto> rows = packingTypeApplicationService.findByCriteria(userInfo, 
+				criteria, 
+				firstResult, 
+				maxResults, 
+				sortDirection, 
+				sortCriterion);
+		long totalRecords = packingTypeApplicationService.countByCriteria(userInfo, criteria);
+		dataSet = new DataSet<>(rows, (long) rows.size(), totalRecords);
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	@RequestMapping(value = "/packingTypes/{id}", method = RequestMethod.GET)
+	public @ResponseBody PackingTypeDto getPackingType(@PathVariable Long id, HttpServletRequest request) throws ParvanServiceException {
+		PackingTypeDto packingType;
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		packingType = (PackingTypeDto) packingTypeApplicationService.get(userInfo, id);
+		return packingType;
+	}
+	
+	private boolean _isEditable(UserInfo userInfo, WaybillStateDto currentState) throws ParvanServiceException {
+		if (userInfo != null) {
+			Set<WaybillStateDto> editableStates = waybillStateApplicationService.getEditableStates(userInfo, userInfo.getRoleNames());
+			if (currentState != null && Validator.isNotNull(currentState.getCode())) {
+				String currentStateCode = currentState.getCode();
+				for (WaybillStateDto editableState : editableStates) {
+					if (editableState.getCode().equals(currentStateCode)) {
+						return true;
+					}
+				}
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean _isPrintable(UserInfo userInfo, WaybillStateDto currentState) throws ParvanServiceException {
+		if (userInfo != null) {
+			Set<WaybillStateDto> printableStates = waybillStateApplicationService.getPrintableStates(userInfo, userInfo.getRoleNames());
+			if (currentState != null) {
+				String currentStateCode = currentState.getCode();
+				for (WaybillStateDto printableState : printableStates) {
+					if (printableState.getCode().equals(currentStateCode)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	private void _loadAndSetPackingTypes(UserInfo userInfo, CargoWaybillDto waybill) throws JsonParseException, JsonMappingException, IOException, ParvanServiceException {
+		if (Validator.isNotNull(waybill.getPackingList())) {
+			for (PackingItemDto pi : waybill.getPackingList()) {
+				if (Validator.isNotNull(pi.getPackingTypeCountPair())) {
+					ObjectMapper mapper = mapperProvider.getDefaultMapper();
+					Map<Long, Integer> map = mapper.readValue(pi.getPackingTypeCountPair(), new TypeReference<HashMap<Long ,Integer>>(){});
+					List<PackingTypeWithCountAndName> ptcnList = new ArrayList<>();
+					StringBuilder builder = new StringBuilder();
+					for (Map.Entry<Long, Integer> entry : map.entrySet()) {
+					    Long packingTypeId = entry.getKey();
+					    Integer packingTypeCount = entry.getValue();
+					    PackingTypeDto pt = (PackingTypeDto) packingTypeApplicationService.get(userInfo, packingTypeId);
+					    String name = pt.getNameLocal();
+					    PackingTypeWithCountAndName ptcn = new PackingTypeWithCountAndName();
+					    ptcn.setPackingTypeId(packingTypeId);
+					    ptcn.setPackageCount(packingTypeCount);
+					    ptcn.setPackingTypeName(name);
+					    ptcnList.add(ptcn);
+					    builder.append(name).append(" x ").append(packingTypeCount);
+					}
+					pi.setPackingTypesList(ptcnList);
+					pi.setPackingTypeNames(builder.toString());
+				}
+			}
+		}
+	}
+	
+	protected Map<String, Object> _createAlert(Exception e) {
+		Map<String, Object> alert = new HashMap<>();
+		alert.put("type", "error");
+		if (e instanceof ParvanRecoverableException) {
+			
+			ParvanRecoverableException pe = (ParvanRecoverableException) e;
+			ErrorCode errorCode = pe.getErrorCode();
+			Integer errorNumber = errorCode.toValue();
+			String invalidField = pe.getMessage();
+			String message = _getMessage("errorCode." + errorNumber,(Object) null);
+			
+			alert.put("status", errorCode);
+			alert.put("code", errorNumber);
+			alert.put("message", message);
+			alert.put("invalidField", invalidField);
+			
+		} else if (e instanceof ParvanUnrecoverableException) {
+			
+			ParvanUnrecoverableException pe = (ParvanUnrecoverableException) e;
+			String message = e.getMessage();
+			ErrorCode errorCode = pe.getErrorCode();
+			if (errorCode != null) {
+				Integer errorNumber = errorCode.toValue();
+				message = _getMessage("errorCode." + errorNumber,(Object) null);
+			}
+			String invalidField = pe.getMessage();
+			alert.put("status", errorCode);
+			alert.put("message", message);
+			alert.put("invalidField", invalidField);
+			
+		}
+		return alert;
+	}
+	
+	protected String _getMessage(final String messageKey, final Object... messageParameters) {
+		Locale locale = LocaleContextHolder.getLocale();
+		String result = null;
+		try {
+			result = messageSource.getMessage(messageKey, messageParameters, locale);
+		} catch (NoSuchMessageException e) {
+			log.debug(e.getMessage());
+			result = messageKey;
+		}
+		return result;
+	}
+	
+	
+	
+	
+}

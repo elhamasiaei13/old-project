@@ -1,0 +1,53 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.complaintmanagement;
+
+import java.util.List;
+
+import com.parvanpajooh.client.common.GenericRestClient;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.common.RestClientConstants;
+import com.parvanpajooh.client.complaintmanagement.model.ComplaintMsg;
+import com.parvanpajooh.client.complaintmanagement.service.ComplaintManagementApi;
+import com.parvanpajooh.client.geomanagement.model.CityInfoMsg;
+import com.parvanpajooh.commons.config.Config;
+
+import retrofit2.Call;
+
+/**
+ * @author MO
+ *
+ */
+public class ComplaintManagementApiRestClient extends GenericRestClient<ComplaintManagementApi> {
+	
+	private static final String ENDPOINT_PATH = "/complaintmanagement-rest/";
+
+	private ComplaintManagementApi complaintManagementApi;
+
+	public ComplaintManagementApiRestClient() {
+		super(
+				Config.getProperty("complaintmanagement.rest.endpoint.protocol", RestClientConstants.ENDPOINT_DEF_PROTOCOL__HTTP),
+				Config.getProperty("complaintmanagement.rest.endpoint.host", RestClientConstants.ENDPOINT_DEF_HOST__LOCALHOST),
+				Config.getProperty("complaintmanagement.rest.endpoint.port", RestClientConstants.ENDPOINT_DEF_PORT__80),
+				ENDPOINT_PATH,
+				Config.getLongProperty("complaintmanagement.rest.endpoint.timeout", RestClientConstants.TIMEOUT));
+		
+		complaintManagementApi = super.createRestClient();
+	}
+
+	public PageList<ComplaintMsg> findComplaintsBy(
+			String term,
+			Integer page,
+			Integer size) throws ParvanClientException {
+		
+		Call<List<ComplaintMsg>> call = complaintManagementApi.findComplaintsBy(term, page, size);
+		return executePageCall(call);
+	}
+
+	public ComplaintMsg getComplaint(Long id) {
+		Call<ComplaintMsg> call = complaintManagementApi.getComplaint(id);
+		return executeCall(call);
+	}
+}

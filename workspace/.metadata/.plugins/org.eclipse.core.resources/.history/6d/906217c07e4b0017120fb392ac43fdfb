@@ -1,0 +1,59 @@
+package com.parvanpajooh.client.routemanagement;
+
+import java.util.List;
+
+import com.parvanpajooh.client.common.GenericRestClient;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.common.RestClientConstants;
+import com.parvanpajooh.client.routemanagement.model.NodeMsg;
+import com.parvanpajooh.client.routemanagement.model.RouteMsg;
+import com.parvanpajooh.client.routemanagement.service.RouteManagementApi;
+import com.parvanpajooh.commons.config.Config;
+
+import retrofit2.Call;
+
+public class RouteManagementApiRestClient   extends GenericRestClient<RouteManagementApi>{
+	
+private static final String ENDPOINT_PATH = "/routemanagement-rest/v1/";
+	
+	private RouteManagementApi routeManagementApi;
+	
+	public RouteManagementApiRestClient() {
+
+		super(
+				Config.getProperty("jobmanagement.rest.endpoint.protocol", RestClientConstants.ENDPOINT_DEF_PROTOCOL__HTTP),
+				Config.getProperty("jobmanagement.rest.endpoint.host", RestClientConstants.ENDPOINT_DEF_HOST__LOCALHOST),
+				Config.getProperty("jobmanagement.rest.endpoint.port", RestClientConstants.ENDPOINT_DEF_PORT__80),
+				ENDPOINT_PATH,
+				Config.getLongProperty("jobmanagement.rest.endpoint.timeout", RestClientConstants.TIMEOUT));
+		
+		routeManagementApi = super.createRestClient();
+	}
+
+	public PageList<RouteMsg> findRoutes(String carrierCode, String term, int page, int size) throws ParvanClientException {
+		Call<List<RouteMsg>> call = routeManagementApi.findRoutes(carrierCode, term, page, size);
+		return executePageCall(call);
+	}
+	
+	public RouteMsg getRoute(Long id) throws ParvanClientException {
+		Call<RouteMsg> call = routeManagementApi.getRoute(id);
+		return executeCall(call);
+	}
+	
+	public RouteMsg getRouteByCarrierRouteNumber(String carrierRouteNumber) throws ParvanClientException {
+		Call<RouteMsg> call = routeManagementApi.getRouteByCarrierRouteNumber(carrierRouteNumber);
+		return executeCall(call);
+	}
+	
+	public List<NodeMsg> getAllNodes() throws ParvanClientException {
+		Call<List<NodeMsg>> call = routeManagementApi.getAllNodes();
+		return executeCall(call);
+	}
+	
+	public NodeMsg getNodeByCode(String code) throws ParvanClientException {
+		Call<NodeMsg> call = routeManagementApi.getNodeByCode(code);
+		return executeCall(call);
+	}
+
+}

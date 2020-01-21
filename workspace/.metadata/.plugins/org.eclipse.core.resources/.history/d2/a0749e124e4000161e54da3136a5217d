@@ -1,0 +1,87 @@
+package com.parvanpajooh.common.convertor;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.util.Locale;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.constants.StringPool;
+import com.parvanpajooh.common.customtype.JalaliLocalDateTime;
+import com.parvanpajooh.common.util.DateUtil;
+import com.parvanpajooh.common.util.LocaleUtil;
+import com.parvanpajooh.common.util.UserInfoThreadLocal;
+import com.parvanpajooh.common.util.ZoneIdUtil;
+
+public class JalaliDateJsonSerializer extends JsonSerializer<Object> {
+
+    //private static Logger logger = LoggerFactory.getLogger(JodaDateTimeJsonSerializer.class);
+	
+	DateTimeFormatter _formatter = null;
+	
+    @Override
+    public void serialize(Object date, JsonGenerator json, SerializerProvider provider)
+            throws IOException, JsonProcessingException {
+    	
+		if(date == null){
+			json.writeString(StringPool.BLANK);
+			return;
+		}
+		
+		UserInfo userInfo = UserInfoThreadLocal.getUserInfo();
+		
+		if(userInfo != null){
+			Locale locale = LocaleUtil.fromLanguageId("fa");
+			
+			String localValue = DateUtil.getDateTime(((JalaliLocalDateTime) date).asLocalDateTime(), locale, DateUtil.CALENDAR_JALALI, ZoneIdUtil.getZoneId(userInfo.getZoneId()));
+	    	
+			json.writeString(localValue);
+		} else {
+			
+			LocalDateTime localDateTime = ((JalaliLocalDateTime) date).asLocalDateTime();
+			
+			if (useTimestamp(provider)) {
+	            json.writeStartArray();
+	            json.writeNumber(localDateTime.getYear());
+	            json.writeNumber(localDateTime.getMonthValue());
+	            json.writeNumber(localDateTime.getDayOfMonth());
+	            json.writeNumber(localDateTime.getHour());
+	            json.writeNumber(localDateTime.getMinute());
+	            if(localDateTime.getSecond() > 0 || localDateTime.getNano() > 0)
+	            {
+	                json.writeNumber(localDateTime.getSecond());
+	                if(localDateTime.getNano() > 0)
+	                {
+	                    if(provider.isEnabled(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS))
+	                        json.writeNumber(localDateTime.getNano());
+	                    else
+	                        json.writeNumber(localDateTime.get(ChronoField.MILLI_OF_SECOND));
+	                }
+	            }
+	            json.writeEndArray();
+	        } else {
+	            String str = (_formatter == null) ? localDateTime.toString() : localDateTime.format(_formatter);
+	            json.writeString(str);
+	        }
+			
+		}
+    	
+    }
+    
+    protected boolean useTimestamp(SerializerProvider provider) {
+        /*if (_useTimestamp != null) {
+            return _useTimestamp.booleanValue();
+        }
+        // assume that explicit formatter definition implies use of textual format
+        if (_formatter != null) { 
+            return false;
+        }*/
+        return provider.isEnabled(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
+}

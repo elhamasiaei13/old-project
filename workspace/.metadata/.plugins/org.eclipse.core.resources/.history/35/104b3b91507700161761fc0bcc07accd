@@ -1,0 +1,31 @@
+	<ul xmlns:th="http://www.thymeleaf.org" 
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		xmlns:idm="http://www.parvanpajooh/thymeleaf/idm"
+		xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" 
+		layout:fragment="menu" class="nav sidebar-menu">
+		<!-- <div th:each="menu : ${session.menus}" th:remove="tag"> -->
+	
+<!-- 		<li idm:authorize="com.parvanpajooh.agentmanagement.menu.agants" data-action="VIEW" th:title="#{generalAgent}" th:class="${rightMenu == '' || rightMenu == 'generalAgents' ? 'active' : ''}">
+			<a th:href="@{'/generalAgent'}">
+				<i class="fa fa-user"></i> <span th:text="#{generalAgent}">نماینده‌ها</span>
+			</a>
+		</li> -->
+		
+		<li  data-action="VIEW" th:title="#{generalAgent}" th:class="${rightMenu == '' || rightMenu == 'generalAgents' ? 'active' : ''}">
+			<a th:href="@{'/generalAgent'}">
+				<i class="fa fa-user"></i> <span th:text="#{generalAgent}">نماینده‌ها</span>
+			</a>
+		</li>
+	
+		<li idm:authorize="com.parvanpajooh.agentmanagement.menu.employee" data-action="VIEW" th:title="#{employee}" th:class="${rightMenu == '' || rightMenu == 'employees' ? 'active' : ''}">
+			<a th:href="@{'/employee'}">
+				<i class="fa fa-users"></i> <span th:text="#{employee}">کارمند‌ها</span>
+			</a>
+		</li>
+	
+		<li idm:authorize="com.parvanpajooh.agentmanagement.menu.accounts" data-action="VIEW" th:title="#{accountNumber}" th:class="${rightMenu == '' || rightMenu == 'accountNumbers' ? 'active' : ''}">
+			<a th:href="@{'/accountNumber'}">
+				<i class="fa fa-users"></i> <span>حساب‌ها</span>
+			</a>
+		</li>
+	</ul>

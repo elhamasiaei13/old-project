@@ -1,0 +1,451 @@
+package com.parvanpajooh.transportationmanagement.dao.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.transportationmanagement.dao.TransportationScheduleDao;
+import com.parvanpajooh.transportationmanagement.model.TransportationSchedule;
+import com.parvanpajooh.transportationmanagement.model.TransportationSchedule_;
+import com.parvanpajooh.transportationmanagement.model.criteria.TransportationScheduleCriteria;
+import com.parvanpajooh.transportationmanagement.model.enums.CapacityDeterminant;
+import com.parvanpajooh.transportationmanagement.model.enums.TransportationScheduleStatus;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+@Stateless
+public class TransportationScheduleDaoJpa extends GenericDaoJpa<TransportationSchedule, Long> implements TransportationScheduleDao {
+
+	public TransportationScheduleDaoJpa() {
+		super(TransportationSchedule.class);
+	}
+	
+	@Override
+	public int countOfTransportationNumber(TransportationScheduleCriteria cri) throws ParvanDaoException{
+		//LOG
+    	log.debug("Entering countOfTransportationNumber(criteria={})", cri);
+    	
+    	int count = 0;
+    	
+//    	try {
+//    		// make criteria-builder
+//    		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+//    		
+//    		// make criteria
+//    		CriteriaQuery<Long> criteria = builder.createQuery( Long.class );
+//    		Metamodel metamodel = getEntityManager().getMetamodel();
+//    		//EntityType<TransportationSchedule> TransportationSchedule_ = metamodel.entity( TransportationSchedule.class );
+//    		Root<TransportationSchedule> root = criteria.from(TransportationSchedule.class);
+//    		
+//    		Map<String, Join> joins = new HashMap<String, Join>();
+//    		
+//    		List<Predicate> predicateList = buildPredicateList(
+//    				cri, 
+//    				builder, 
+//    				metamodel, 
+//    				root,
+//    				joins);
+//    		
+//    		Join<TransportationSchedule, Transportation> join = joins.get("transportation");
+//    		if(join == null){
+//    			join = root.join(TransportationSchedule_.transportation);
+//    		}
+//    		
+//    		Expression<String> transportationNumber = join.get(Transportation_.transportationNumber);
+//    		
+//    		criteria.select( builder.countDistinct(transportationNumber));
+//    		criteria.groupBy(transportationNumber);
+//    		
+//    		if (predicateList.size() == 1) {
+//        		criteria.where(predicateList.get(0));
+//        		
+//            } else if (predicateList.size() > 1) {
+//            	criteria.where( builder.and( predicateList.toArray(new Predicate[ predicateList.size()])));
+//            }
+//
+//    		// create query
+//    		Query q = getEntityManager().createQuery( criteria );
+//    		
+//    		// execute query
+//    		Long countLong = (Long) q.getSingleResult();
+//    		count = countLong.intValue();
+//    		
+//    	} catch (Exception e) {
+//    		throw new ParvanDaoException("Error occurred while getting count of records by criteria.", e);
+//		}
+    	
+    	log.debug("Leaving countOfTransportationNumber(criteria={})", cri);
+    	
+    	return count;
+	}
+	
+	@Override
+	protected List<Predicate> buildPredicateList(
+			BaseCriteria cri, 
+			CriteriaBuilder builder, 
+			Metamodel metamodel, 
+			Root<TransportationSchedule> root, Map<String, Join> joins) throws ParvanException {
+
+		//LOG
+    	log.debug("Entering buildPredicateList( ... )");
+    	
+    	TransportationScheduleCriteria transportationCriteria = (TransportationScheduleCriteria) cri;
+		
+    	Long[] ids = transportationCriteria.getIds();
+//    	TransportationVO transportation = transportationCriteria.getTransportation();
+//    	VehicleVO vehicle = transportationCriteria.getVehicle();
+    	TransportationScheduleStatus[] transportationScheduleStatus = transportationCriteria.getStatus();
+    	CapacityDeterminant[] capacityDeterminants = transportationCriteria.getCapacityDeterminants();
+    	Double totalWeight = transportationCriteria.getTotalWeight();
+    	Double reservableWeight = transportationCriteria.getReservableWeight();
+    	String uldInfo = transportationCriteria.getUldInfo();
+    	String remarks = transportationCriteria.getRemarks();
+    	Boolean scheduled = transportationCriteria.getScheduled();
+    	Integer departureDateInUtc = transportationCriteria.getDepartureDateInUtc();
+    	Integer departureDateInOriginLocal = transportationCriteria.getDepartureDateInOriginLocal();
+    	Integer departureDateFromInUtc = transportationCriteria.getIntDepartureDateFromInUtc();
+    	Integer departureDateToInUtc = transportationCriteria.getIntDepartureDateToInUtc();
+    	String departureTimeInUtc = transportationCriteria.getDepartureTimeInUtc();
+    	
+    	Integer arrivalDateInUtc = transportationCriteria.getArrivalDateInUtc();
+    	Integer arrivalDateFromInUtc = transportationCriteria.getIntArrivalDateFromInUtc();
+    	Integer arrivalDateToInUtc = transportationCriteria.getIntArrivalDateToInUtc();
+    	String arrivalTimeInUtc = transportationCriteria.getArrivalTimeInUtc();
+		
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+		
+//		if(Validator.isNotNull(transportation)){
+//			
+//			Join<TransportationSchedule, Transportation> join = null;
+//			
+//			if(Validator.isNotNull( transportation.getRemarks() )){
+//				
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.transportation);
+//				}
+//				
+//				Predicate predicate = builder.like(join.<String>get(Transportation_.remarks), "%" + transportation.getRemarks() + "%");
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( transportation.getCarrierCode() )){
+//				
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.transportation);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<String>get(Transportation_.carrierCode), transportation.getCarrierCode());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( transportation.getTransportationNumber() )){
+//				
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.transportation);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<String>get(Transportation_.transportationNumber), transportation.getTransportationNumber());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( transportation.getFromNodeCode() )){
+//				
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.transportation);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<String>get(Transportation_.fromNodeCode), transportation.getFromNodeCode());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( transportation.getToNodeCode() )){
+//				
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.transportation);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<String>get(Transportation_.toNodeCode), transportation.getToNodeCode());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( transportation.getDuration() )){
+//				
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.transportation);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<Long>get(Transportation_.duration), transportation.getDuration());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( transportation.getWeight() )){
+//				
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.transportation);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<Double>get(Transportation_.weight), transportation.getWeight());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( transportation.getId() )){
+//				
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.transportation);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<Long>get(Transportation_.id), transportation.getId());
+//				predicateList.add(predicate);
+//			}
+//			
+//			joins.put("transportation", join);
+//		}
+		
+//		if(Validator.isNotNull(vehicle)){
+//			Join<TransportationSchedule, Vehicle> join = null;
+//			
+//			if(Validator.isNotNull( vehicle.getId() )){
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.vehicle);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<Long>get(Vehicle_.id), vehicle.getId());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( vehicle.getManufacturer() )){
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.vehicle);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<String>get(Vehicle_.manufacturer), vehicle.getManufacturer());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( vehicle.getManufacturerModel() )){
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.vehicle);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<String>get(Vehicle_.manufacturerModel), vehicle.getManufacturerModel());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( vehicle.getCarrierCode() )){
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.vehicle);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<String>get(Vehicle_.carrierCode), vehicle.getCarrierCode());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( vehicle.getCarrierRegister() )){
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.vehicle);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<String>get(Vehicle_.carrierRegister), vehicle.getCarrierRegister());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( vehicle.getVolume())){
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.vehicle);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<Double>get(Vehicle_.volume), vehicle.getVolume());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( vehicle.getWeight() )){
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.vehicle);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<Double>get(Vehicle_.weight), vehicle.getWeight());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( vehicle.getCargoOnly() )){
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.vehicle);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<Boolean>get(Vehicle_.cargoOnly), vehicle.getCargoOnly());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( vehicle.getType() )){
+//				if(join == null){
+//					join = root.join(TransportationSchedule_.vehicle);
+//				}
+//				
+//				Predicate predicate = builder.equal(join.<VehicleType>get(Vehicle_.type), vehicle.getType());
+//				predicateList.add(predicate);
+//			}
+//			
+//			joins.put("vehicle", join);
+//		}
+		
+		if(Validator.isNotNull( remarks )){
+			Predicate predicate = builder.like(root.<String>get(TransportationSchedule_.remarks), "%" + remarks + "%");
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( scheduled )){
+			Predicate predicate = builder.equal(root.<Boolean>get(TransportationSchedule_.scheduled), scheduled);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(totalWeight)){
+			Predicate predicate = builder.equal(root.<Double>get(TransportationSchedule_.totalWeight), totalWeight);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(reservableWeight)){
+			Predicate predicate = builder.equal(root.<Double>get(TransportationSchedule_.reservableWeight), reservableWeight);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(uldInfo)){
+			Predicate predicate = builder.equal(root.<String>get(TransportationSchedule_.uldInfo), uldInfo);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(departureTimeInUtc)){
+			Predicate predicate = builder.equal(root.<String>get(TransportationSchedule_.departureTimeInUtc), departureTimeInUtc);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(departureDateInUtc)){
+			Predicate predicate = builder.equal(root.<Integer>get(TransportationSchedule_.departureDateInUtc), departureDateInUtc);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(departureDateInOriginLocal)){
+			Predicate predicate = builder.equal(root.<Integer>get(TransportationSchedule_.departureDateInOriginLocal), departureDateInOriginLocal);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(departureDateFromInUtc)){
+    		Predicate predicate = builder.greaterThanOrEqualTo(root.<Integer>get(TransportationSchedule_.departureDateInUtc), departureDateFromInUtc);
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(departureDateToInUtc)){
+    		Predicate predicate = builder.lessThanOrEqualTo(root.<Integer>get(TransportationSchedule_.departureDateInUtc), departureDateToInUtc);
+    		predicateList.add(predicate);
+    	}
+		
+		if(Validator.isNotNull(arrivalTimeInUtc)){
+			Predicate predicate = builder.equal(root.<String>get(TransportationSchedule_.arrivalTimeInUtc), arrivalTimeInUtc);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(arrivalDateInUtc)){
+			Predicate predicate = builder.equal(root.<Integer>get(TransportationSchedule_.arrivalDateInUtc), arrivalDateInUtc);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(arrivalDateFromInUtc)){
+    		Predicate predicate = builder.greaterThanOrEqualTo(root.<Integer>get(TransportationSchedule_.arrivalDateInUtc), arrivalDateFromInUtc);
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(arrivalDateToInUtc)){
+    		Predicate predicate = builder.lessThanOrEqualTo(root.<Integer>get(TransportationSchedule_.arrivalDateInUtc), arrivalDateToInUtc);
+    		predicateList.add(predicate);
+    	}
+    	
+    	if (Validator.isNotNull(ids)) {
+    		List<Predicate> orPredicates = new ArrayList<Predicate>();
+    		for (Long thisId : ids) {
+    			Predicate predicate = builder.equal(root.<Long> get(TransportationSchedule_.id), thisId);
+    			orPredicates.add(predicate);
+    		}
+    		Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+    		predicateList.add(predicate);
+    	}
+
+		if (Validator.isNotNull(capacityDeterminants)) {
+			List<Predicate> orPredicates = new ArrayList<Predicate>();
+			for (CapacityDeterminant thisCapacityDeterminant : capacityDeterminants) {
+				Predicate predicate = builder.equal(root.<CapacityDeterminant> get(TransportationSchedule_.capacityDeterminant), thisCapacityDeterminant);
+				orPredicates.add(predicate);
+			}
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		if (Validator.isNotNull(transportationScheduleStatus)) {
+			List<Predicate> orPredicates = new ArrayList<Predicate>();
+			for (TransportationScheduleStatus thisTransportationScheduleStatus : transportationScheduleStatus) {
+				Predicate predicate = builder.equal(root.<TransportationScheduleStatus> get(TransportationSchedule_.status), thisTransportationScheduleStatus);
+				orPredicates.add(predicate);
+			}
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		basePredicate((BaseCriteria)transportationCriteria, builder, root, predicateList);
+			
+		//LOG
+    	log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+    	
+    	return predicateList;
+	}
+	
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<TransportationSchedule> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+
+		if(Validator.isNotNull(cri.getCreateDateFrom())){
+    		Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime>get("createDate"), cri.getCreateDateFrom());
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(cri.getCreateDateTo())){
+    		Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime>get("createDate"), cri.getCreateDateTo());
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(cri.getUpdateDateFrom())){
+    		Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime>get("updateDate"), cri.getUpdateDateFrom());
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(cri.getUpdateDateTo())){
+    		Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime>get("updateDate"), cri.getUpdateDateTo());
+    		predicateList.add(predicate);
+    	}
+	}
+	
+}

@@ -1,0 +1,119 @@
+package com.parvanpajooh.sample.dao.jpa;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import org.hibernate.SessionFactory;
+import com.parvanpajooh.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.common.exceptions.ParvanException;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseCriteria;
+import com.parvanpajooh.ecourier.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.sample.dao.MemberDao;
+import com.parvanpajooh.sample.model.Group;
+import com.parvanpajooh.sample.model.Group_;
+import com.parvanpajooh.sample.model.criteria.SampleCriteria;
+
+/**
+ * 
+ * @author ali
+ * 
+ */
+@Stateless
+public class GroupDaoJpa extends GenericDaoJpa<Group, Long> implements
+		MemberDao {
+
+	public GroupDaoJpa() {
+		super(Group.class);
+	}
+
+	
+	public void saveUser(Group user) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+//		return super.save(object);
+		getEntityManager().persist(user);
+	}
+
+	@Override
+	public List<Group> findAll() throws ParvanDaoException {
+		// TODO Auto-generated method stub
+		// return super.findAll();
+		return getEntityManager().createQuery("from User").getResultList();
+	}
+
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri,
+			CriteriaBuilder builder, Metamodel metamodel, Root<Group> root,
+			Map<String, Join> joins) throws ParvanException {
+
+		// LOG
+		log.debug("Entering buildPredicateList( ... )");
+
+		SampleCriteria sampleCriteria = (SampleCriteria) cri;
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		String title = sampleCriteria.getTitle();
+		String link = sampleCriteria.getLink();
+		Boolean active = sampleCriteria.getActive();
+		List<String> roles = sampleCriteria.getRoles();
+		Long parentId = sampleCriteria.getParentId();
+		Long childrenId = sampleCriteria.getChildrenId();
+
+		/*if (Validator.isNotNull(title)) {
+			Predicate predicate = builder.like(root.<String> get(Group_.title),
+					"%" + title + "%");
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(link)) {
+			Predicate predicate = builder.like(root.<String> get(Group_.link),
+					"%" + link + "%");
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(active)) {
+			Predicate predicate = builder.equal(
+					root.<Boolean> get(Group_.active), active);
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(parentId)) {
+			Join<Group, Group> join = root.join(Group_.id, JoinType.LEFT);
+
+			joins.put("parent", join);
+
+			Predicate predicate = builder.equal(join.<Long> get(Group_.id),
+					parentId);
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(childrenId)) {
+			Join<Group, Group> join = root.join(Group_.children, JoinType.LEFT);
+
+			joins.put("children", join);
+
+			Predicate predicate = builder.equal(join.<Long> get(Group_.id),
+					childrenId);
+			predicateList.add(predicate);
+		}*/
+
+		basePredicate((BaseCriteria) sampleCriteria, builder, root,
+				predicateList);
+
+		// LOG
+		log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+
+}

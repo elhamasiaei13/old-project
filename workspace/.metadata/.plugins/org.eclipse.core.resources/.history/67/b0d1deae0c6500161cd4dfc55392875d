@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	layout:decorator="filter-layout" ddl:bundle-includes="bootstrapValidator,select2">
+
+	<head>
+		<title>Group List</title>
+		
+		<style>
+		.select-device-modal label{
+			margin-bottom: 0px;
+		}
+		
+		.select-device-modal input{
+			width: auto;
+			height: 28px;
+		}
+		
+		.select-device-modal .form-control{
+			width: auto;
+		}
+		
+		.select-device-modal table.dataTable td{
+			padding: 1px 10px;
+		}
+		
+		.select-device-modal .dataTables_filter label{
+			margin-bottom: 5px;
+		}
+		</style>
+	</head>
+
+	<body th:with="rightMenu='userGroups'">
+		<section layout:fragment="top-header" class="fixed-header">
+			<div class="ui-header-image pull-left">
+            	<img data-src="holder.js/140x140" class="img-circle" alt="140x140" 
+            		src="/identitymanagement2-web/resources/images/contacts.png"
+            		th:src="@{/resources/images/contacts.png}" 
+            		style="width: 48px; height: 48px;" />
+           	</div>
+            <div class="ui-header-title">
+                <div class="split-left">
+                    <h3>
+                        <small>View</small>
+                    </h3>
+                    <h3>Groups</h3>
+                </div>
+                <div class="split-right">
+                    <a data-toggle="modal" onclick="createUserGroup();" class="btn btn-success" >
+						<i class="fa fa-plus">&nbsp;&nbsp;</i><span  th:text="#{userGroup.create}">گروه جدید</span>
+					</a>
+                </div>
+            </div>
+		</section>
+		
+		<!-- Main content -->
+		<!-- BODY -->
+		<section class="content" layout:fragment="content">
+			<div class="box box-primary">
+				<div class="box-header">
+					<h3 class="box-title"  th:text="#{search}">جستجو</h3>
+	                <div class="box-tools pull-right">
+	                	<button title="" data-widget="collapse" class="btn btn-primary btn-xs" ><i class="fa fa-minus"></i></button>
+	               	</div>
+               	</div>
+               	<div class="box-body" style="display: block;">
+                   	<dy:form entity="UserGroup" form="search" type="search"/>
+               	</div><!-- /.box-body -->
+           	</div>
+           	
+			<div class="box">
+				<div class="box-body table-responsive">
+					<dy:table entity="UserGroup" table="list" customSearch="true"/>
+				</div>
+			</div>
+			
+			<div class="modal fade" id="createUserGroupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" th:text="#{userGroup.create}">جدید</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <dy:form entity="UserGroup" form="create" type="create"/>
+		                </div>
+		                <div class="modal-footer checkbox">
+		                	<label class="create-another" for="createUserGroup-create-another">
+		                		<input type="checkbox" id="createUserGroup-create-another" value="true"/>
+		                		<span  th:remove="tag" th:text="#{create-another}">Create another</span>
+		                	</label>
+		                	
+		                    <button type="button" class="btn btn-primary"  id="createUserGroupBtn" th:text="#{save}">Save</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{close}">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+			
+			<div class="modal fade" id="modifyUserGroupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" >ویرایش اطلاعات</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <dy:form entity="UserGroup" form="modify" type="modify"/>
+		                </div>
+		                <div class="modal-footer">
+		                    <button type="button" class="btn btn-primary" id="modifyUserGroupBtn">Save</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+			
+			<div class="modal fade" id="deleteUserGroupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" >حذف</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <dy:form entity="UserGroup" form="delete" type="delete"/>
+		                </div>
+		                <div class="modal-footer">
+		                    <button type="button" class="btn btn-primary" id="deleteUserGroupBtn">Delete</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+		    
+		    
+		</section>
+		
+		<th:block layout:fragment="javascripts">
+		    <script th:inline="javascript">
+
+				var titleModify = '<span class="label label-info"  th:remove="tag">Update !</span>';
+				var titleDelete = '<span class="label label-info"  th:remove="tag">Delete !</span>';
+				
+				/*<![CDATA[*/
+				
+				
+				function getUserGroupExtraParams( aoData ) {
+					return {
+			    	    "data" : function(data){
+					    	customPush(data, 'canonicalSearchGroupName', $('#canonicalSearchGroupNameFilter').val());
+			    	    }
+			    	};
+				}
+
+				/*]]>*/
+			</script>
+		</th:block>
+	</body>
+</html>

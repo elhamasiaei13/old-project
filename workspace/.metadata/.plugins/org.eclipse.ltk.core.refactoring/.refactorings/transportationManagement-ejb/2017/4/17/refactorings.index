@@ -1,0 +1,52 @@
+1492943833341	Copy compilation units
+1492943851405	Rename type 'CarrierManagementService2'
+1492944398556	Copy compilation unit
+1492944412068	Copy compilation unit
+1492944471847	Rename local variable 'carriers'
+1492944494904	Rename field 'carrierManagementServiceAdapter'
+1492944600317	Rename local variable 'carrier'
+1492944673058	Rename local variable 'carrierVOs'
+1492944812971	Rename field 'carrierLocalService'
+1492944846087	Rename local variable 'carrierVO'
+1492945099135	Copy compilation units
+1492945113354	Rename type 'CarrierManagementServiceAdapter2'
+1492945378829	Rename local variable 'carrierVO'
+1492945472047	Rename local variable 'carrierVO'
+1492945487456	Rename local variable 'carrierMsg'
+1492948430744	Copy compilation unit
+1492948447857	Copy compilation unit
+1492948632470	Copy compilation unit
+1492948673390	Copy compilation unit
+1492948740423	Rename local variable 'carrier'
+1492948874681	Copy compilation unit
+1492948891356	Copy compilation unit
+1492949021448	Rename local variable 'carrierVO'
+1492949060063	Rename local variable 'carrierMsg'
+1492949107252	Rename field 'carrierManagementApiRestClient'
+1492949190264	Rename field 'carrierManagementServiceAdapter'
+1492949460481	Rename local variable 'carrierVO'
+1492950158963	Copy compilation unit
+1492950358221	Copy compilation unit
+1492950463483	Copy compilation unit
+1492950639504	Copy compilation unit
+1492950846507	Copy compilation unit
+1492950863298	Copy compilation unit
+1492951029761	Rename local variable 'transportationVO'
+1492951103230	Rename local variable 'transportationMsg'
+1493017812760	Rename field 'transportaionId'
+1493025315820	Rename local variable 'carrierVOs'
+1493025339662	Rename local variable 'carrierVO'
+1493034995752	Rename local variable 'transportationId'
+1493035094504	Rename local variable 'transportationId'
+1493450117914	Copy compilation unit
+1493467242775	Copy compilation units
+1493467262039	Copy compilation units
+1493467318985	Copy compilation units
+1493468837097	Rename type 'RootManagementServiceAdapter'
+1493468845871	Rename type 'RootManagementServiceAdapterRest'
+1493468874913	Rename type 'RootManagementLocalService'
+1493468883892	Rename type 'RootManagementService'
+1493468903108	Rename type 'RootManagementLocalServiceImpl'
+1493468912007	Rename type 'RootManagementServiceImpl'
+1493469035904	Copy compilation units
+1493469589314	Copy compilation units

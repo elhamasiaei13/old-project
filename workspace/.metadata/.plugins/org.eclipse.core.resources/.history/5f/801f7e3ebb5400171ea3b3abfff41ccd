@@ -1,0 +1,57 @@
+package com.parvanpajooh.transportationmanagement2.service;
+
+import java.util.List;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.service.GenericService;
+import com.parvanpajooh.transportationmanagement2.model.TransportationSchedule;
+import com.parvanpajooh.transportationmanagement2.model.criteria.TransportationScheduleCriteria;
+import com.parvanpajooh.transportationmanagement2.model.vo.BulkEditTransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.GenerateTransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.TransportationScheduleVO;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+public interface TransportationScheduleService extends GenericService<TransportationSchedule, Long> {
+	
+	/**
+	 * 
+	 * @param userInfo
+	 * @param generateTransportationScheduleVO
+	 * @throws ParvanServiceException
+	 */
+	public void generateTransportationSchedules(UserInfo ecUserInfo, GenerateTransportationScheduleVO generateTransportationScheduleVO) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param transportationScheduleCriteria
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public TransportationScheduleVO preBulkEdit(UserInfo ecUserInfo, TransportationScheduleCriteria transportationScheduleCriteria) throws ParvanServiceException;
+	
+	/**
+	 * 
+	 * @param userInfo
+	 * @param transportationScheduleCriteria
+	 * @param bulkEditTransportationScheduleVO
+	 * @throws ParvanServiceException
+	 */
+	public void bulkEdit(UserInfo ecUserInfo, TransportationScheduleCriteria transportationScheduleCriteria, BulkEditTransportationScheduleVO bulkEditTransportationScheduleVO) throws ParvanServiceException;
+
+	/**
+	 * @param ecUserInfo
+	 * @param criteria
+	 * @return
+	 */
+	public TransportationScheduleVO findTransportationSchedule(UserInfo ecUserInfo, TransportationScheduleCriteria criteria) throws ParvanServiceException;
+
+	public List<TransportationScheduleVO> findByFromNodeCodeAndDepartureDate(UserInfo userInfo, String fromNodeCode, int hours) throws ParvanServiceException;
+
+	public List<TransportationScheduleVO> findByToNodeCodeAndArrivalDate(UserInfo userInfo, String toNodeCode, int hours) throws ParvanServiceException;
+}

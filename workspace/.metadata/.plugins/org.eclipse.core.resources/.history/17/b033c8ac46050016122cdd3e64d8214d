@@ -1,0 +1,153 @@
+package com.parvanpajooh.issuemanager.mvc;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.issuemanager.model.Comment;
+import com.parvanpajooh.issuemanager.model.Group;
+import com.parvanpajooh.issuemanager.model.Member;
+import com.parvanpajooh.issuemanager.model.TaskAssignment;
+import com.parvanpajooh.issuemanager.model.vo.CommentVO;
+import com.parvanpajooh.issuemanager.model.vo.TaskAssignmentVO;
+import com.parvanpajooh.issuemanager.model.vo.TypeVO;
+import com.parvanpajooh.issuemanager.service.CommentService;
+import com.parvanpajooh.issuemanager.service.MemberService;
+import com.parvanpajooh.issuemanager.service.TaskAssignmentService;
+import com.parvanpajooh.issuemanager.service.TypeService;
+
+@Controller
+@RequestMapping("/")
+public class TaskAssignmentController extends BaseController{
+
+	@EJB(mappedName = "java:global/issuemanager-ear/issuemanager-ejb/TaskAssignmentServiceImpl")
+	private TaskAssignmentService taskAssignmentService;
+
+	@EJB(mappedName = "java:global/issuemanager-ear/issuemanager-ejb/TypeServiceImpl")
+	private TypeService typeService;
+
+	@EJB(mappedName = "java:global/issuemanager-ear/issuemanager-ejb/CommentServiceImpl")
+	private CommentService commentService;
+	
+	@EJB(mappedName = "java:global/issuemanager-ear/issuemanager-ejb/MemberServiceImpl")
+	private MemberService memberService;
+
+	// private GroupService groupService;
+
+	@RequestMapping(value = "/showAssignments", method = RequestMethod.GET)
+	public String showAssignments(Model model) throws ParvanServiceException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+		List<TaskAssignmentVO> taskAssignmentsVO = taskAssignmentService.loadTaskAssignments(userInfo);
+		model.addAttribute("taskAssignments", taskAssignmentsVO);
+		return "showAssignments";
+	}
+
+	/*@RequestMapping(value = "/taskAssignment/save", method = { RequestMethod.POST, RequestMethod.GET })
+	public String saveTaskAssignment(final HttpServletRequest request,Model model) throws ParvanServiceException, ParvanDaoException {
+
+		Map<String, Object> result = new HashMap<String, Object>(); 
+		String statusId = request.getParameter("statusName");
+		String taskId = request.getParameter("id");
+		String memberId = request.getParameter("memberName");
+		model.addAttribute("task" ,taskService.loadTask(userInfo, id));
+
+		try {
+			UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+
+			taskAssignmentService.saveTaskAssignment(userInfo, memberId, taskId, statusId);
+
+		} catch (ParvanServiceException e) {
+			proccessException(e, result);
+			model.addAttribute("result", result);
+			model.addAttribute("group", new Group());
+
+			return "taskDetails";
+		}
+
+		return "redirect:/showTasks?success=true";
+	}*/
+
+	@RequestMapping(value = "/taskAssignment/edit", method = { RequestMethod.POST, RequestMethod.GET })
+	public String editTaskAssignment(final HttpServletRequest request) throws ParvanServiceException, ParvanDaoException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+		TaskAssignmentVO taskAssignmentVO = new TaskAssignmentVO();
+		Long taskAssignmentId = Long.parseLong(request.getParameter("taskAssignmentId"));
+		String statusId = request.getParameter("statusName");
+		taskAssignmentVO.setId(taskAssignmentId);
+		taskAssignmentService.editTaskAssignment(userInfo, taskAssignmentVO, statusId);
+		return "redirect:/showAssignments";
+	}
+
+	@RequestMapping(value = "/comment/{id}", method = RequestMethod.GET)
+	public String showComments(@PathVariable Long id, Model model) throws ParvanServiceException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+		/*TaskAssignmentVO taskAssignmentVO = taskAssignmentService.loadTaskAssignment(userInfo, id);*/
+		/*List<CommentVO> commentVOList = commentService.loadCommentByTaskId(userInfo, id);*/
+		/*model.addAttribute("taskAssignmentId", id);
+		model.addAttribute("taskAssignment", taskAssignmentVO);
+		model.addAttribute("status", typeService.findByTitle("taskStatus"));*/
+		/*model.addAttribute("comments", commentVOList);*/
+		model.addAttribute("taskId",id);
+		return "comments";
+	}
+	
+	@RequestMapping(value = "/assignTo/{id}", method = RequestMethod.GET)
+	public String showAssignTo(@PathVariable Long id, Model model) throws ParvanServiceException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+		model.addAttribute("members", memberService.findAll(userInfo));
+		model.addAttribute("taskId",id);
+		return "assignTo";
+	}
+
+	@RequestMapping(value = "/assignTo/save", method = { RequestMethod.POST, RequestMethod.GET })
+	public String saveAssignTo(final HttpServletRequest request) throws ParvanServiceException, ParvanDaoException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+		String changeAssignToComment = request.getParameter("changeAssignToComment");
+		Long taskId = Long.parseLong(request.getParameter("taskName"));
+		TaskAssignmentVO taskAssignmentVO = new TaskAssignmentVO();
+		Long taskAssignmentId = Long.parseLong(request.getParameter("taskAssignmentId"));
+		String statusId = request.getParameter("statusName");
+		taskAssignmentVO.setId(taskAssignmentId);
+		taskAssignmentVO.setChangeAssignToComment(changeAssignToComment);
+		taskAssignmentService.editTaskAssignment(userInfo, taskAssignmentVO, statusId);
+		return "redirect:/showTasks";
+	}
+	
+	@RequestMapping(value = "/changeStatus/{id}", method = RequestMethod.GET)
+	public String showChangeStatus(@PathVariable Long id, Model model) throws ParvanServiceException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+		model.addAttribute("status", typeService.findByTitle("taskStatus"));
+		model.addAttribute("taskId",id);
+		return "changeStatus";
+	}
+
+	@RequestMapping(value = "/changeStatus/save", method = { RequestMethod.POST, RequestMethod.GET })
+	public String saveChangeStatus(final HttpServletRequest request) throws ParvanServiceException, ParvanDaoException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+		String description = request.getParameter("description");
+//		description = "111";
+		Long taskId = Long.parseLong(request.getParameter("taskName"));
+		commentService.saveComment(userInfo, description, taskId);
+		return "redirect:/showTasks";
+	}
+}

@@ -1,0 +1,37 @@
+1462169914493	Rename field 'currentTaskAssignment'
+1462170650123	Rename local variable 'currentTaskAssignment'
+1462184747270	Copy compilation unit
+1462184798828	Copy compilation unit
+1462184962976	Copy compilation unit
+1462185568678	Copy compilation unit
+1462186379702	Rename field 'taskAssignmentDao'
+1462186667010	Rename method 'loadTaskAssignmentByTaskId'
+1462186678464	Rename method 'loadTaskId'
+1462195277997	Change method 'editTask'
+1462195377679	Change method 'editTask'
+1462361200169	Copy compilation unit
+1462362349714	Rename local variable 'Criteria'
+1462363116508	Copy compilation unit
+1462603008640	Delete element
+1462610577652	Copy compilation unit
+1462610756872	Copy compilation unit
+1462612123099	Rename type 'TaskAttachmentHistory'
+1462612219018	Rename local variable 'taskStatus'
+1462618538753	Copy compilation unit
+1462618738008	Copy compilation unit
+1462618937612	Copy compilation unit
+1462619034480	Copy compilation unit
+1462619189718	Copy compilation unit
+1462619201542	Rename type 'TaskStatusHistoryServiceImple'
+1462619299829	Rename field 'taskStatusHistoryLocalService'
+1462619366892	Copy compilation unit
+1462619607326	Rename local variable 'taskStatusHistory'
+1462629908345	Rename compilation unit 'TaskAttachmentHistory.java'
+1462629921536	Rename compilation unit 'TaskAttachmentHistoryVO.java'
+1462629940698	Rename compilation unit 'TaskAttachmentHistoryLocalService.java'
+1462629955735	Rename compilation unit 'TaskAttachmentHistoryService.java'
+1462629971628	Rename compilation unit 'TaskAttachmentHistoryLocalServiceImpl.java'
+1462629995790	Rename compilation unit 'TaskAttachmentHistoryServiceImpl.java'
+1462630199990	Rename local variable 'taskAttachment'
+1462630441713	Rename compilation unit 'TaskAttachmentHistoryDaoJpa.java'
+1462630458224	Rename compilation unit 'TaskAttachmentHistoryDao.java'

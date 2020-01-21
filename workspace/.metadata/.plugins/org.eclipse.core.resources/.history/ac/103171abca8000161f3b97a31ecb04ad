@@ -1,0 +1,287 @@
+package com.parvanpajooh.stock2.domain.repository.jpa;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+import javax.validation.ConstraintViolationException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.stock2.domain.model.WaybillNumber;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberChangeAssigneeCommand;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberChangeStateCommand;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberCommand;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberDisplay;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberGenerateCommand;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberUpdateCommand;
+import com.parvanpajooh.stock2.domain.model.criteria.WaybillNumberChangedEventCriteria;
+import com.parvanpajooh.stock2.domain.model.criteria.WaybillNumberCriteria;
+import com.parvanpajooh.stock2.domain.repository.WaybillNumberRepository;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class WaybillNumberRepositoryJpa implements WaybillNumberRepository {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(WaybillNumberRepositoryJpa.class);
+
+	@PersistenceContext(unitName = "ApplicationEntityManager")
+	private EntityManager entityManager;
+	 private Class<WaybillNumberDisplay> persistentClass;
+
+
+	@Override
+	public List<WaybillNumberDisplay> findWaybillNumberDisplayByIds(List<String> waybillNumbers) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	@Override
+	public List<WaybillNumberDisplay> findWaybillNumberDisplayByCriteria(WaybillNumberCriteria cri, int firstResult, int maxResults,
+			SortDirectionEnum sortDirection, String sortCriterion) throws ParvanDaoException {
+
+		//LOG
+    	log.debug("Entering findWaybillNumberDisplayByCriteria( cri={})", cri);
+    	
+		List<WaybillNumberDisplay> list = null;
+    	
+    	try {
+    		// make criteria-builder
+    		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+        	
+    		// make criteria
+    		CriteriaQuery<WaybillNumberDisplay> criteria = builder.createQuery( this.persistentClass );//FIXME
+    		criteria.distinct(true);
+    		Metamodel metamodel = this.entityManager.getMetamodel();
+    		EntityType<WaybillNumberDisplay> T_ = metamodel.entity( this.persistentClass);
+    		Root<WaybillNumberDisplay> root = criteria.from( T_);
+    		
+    		Map<String, Join> joins = new HashMap<String, Join>();
+    		
+    		List<Predicate> predicateList = buildPredicateList( 
+    				cri, 
+    				builder, 
+    				metamodel, 
+    				root,
+    				joins);
+    		
+    		if (predicateList.size() == 1) {
+    			criteria.where( predicateList.get( 0));
+    			
+    		} else if (predicateList.size() > 1) {
+    			criteria.where( builder.and( predicateList.toArray( new Predicate[ predicateList.size()])));
+    		}
+
+    		// make query
+    		Query q = this.entityManager.createQuery( criteria );
+    		q.setHint("org.hibernate.cacheable", true);
+            q.setHint("org.hibernate.cacheMode", "NORMAL");
+    		
+    		// execute query
+    		list = q.getResultList();
+		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting list of records by criteria.", e);
+		}
+
+    	//LOG
+    	log.debug("Leaving findWaybillNumberDisplayByCriteria(): {}", (list != null)? list.size() : "NULL");
+    	
+		return list;
+
+	}
+
+	/**
+	 * 
+	 * @param cri
+	 * @param builder
+	 * @param metamodel
+	 * @param root
+	 * @param joins
+	 * @return
+	 */
+	protected List<Predicate> buildPredicateList(WaybillNumberCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<WaybillNumberDisplay> root,
+			Map<String, Join> joins) {
+
+		// LOG
+		log.trace("Entering buildPredicateList( ... )");
+
+		WaybillNumberCriteria waybillNumberCriteria = cri;
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+
+
+		String waybillNumberFrom = waybillNumberCriteria.getWaybillNumberFrom();
+		String waybillNumberTo = waybillNumberCriteria.getWaybillNumberTo();
+		boolean domestic = waybillNumberCriteria.getDomestic();
+		String format = waybillNumberCriteria.getFormat();
+		
+
+//		// ----------------------------------------------------------------
+//		// Active
+//		// ----------------------------------------------------------------
+//		if (Validator.isNotNull(active)) {
+//			Predicate predicate = builder.equal(root.<Boolean> get(User_.active), active);
+//			predicateList.add(predicate);
+//		}
+//
+//		// ----------------------------------------------------------------
+//		// lastName
+//		// ----------------------------------------------------------------
+//		if (Validator.isNotNull(searchName)) {
+//			Predicate predicate = builder.or(builder.like(root.<String> get(User_.firstName), "%" + searchName + "%"),
+//					builder.like(root.<String> get(User_.lastName), "%" + searchName + "%"),
+//					builder.like(root.<String> get(User_.userName), "%" + searchName + "%"));
+//			predicateList.add(predicate);
+//		}
+
+//		// ----------------------------------------------------------------
+//		// canonicalSearchName
+//		// ----------------------------------------------------------------
+//		if (Validator.isNotNull(canonicalSearchName)) {
+//			List<Predicate> preList = new ArrayList<Predicate>();
+//
+//			String[] splited = canonicalSearchName.trim().split("\\s+");
+//
+//			for (String str : splited) {
+//
+//				Predicate predicate = builder.or(builder.like(root.<String> get(User_.firstName), "%" + str + "%"),
+//						builder.like(root.<String> get(User_.lastName), "%" + str + "%"), builder.like(root.<String> get(User_.userName), "%" + str + "%"));
+//				preList.add(predicate);
+//
+//			}
+//			predicateList.add(builder.and(preList.toArray(new Predicate[0])));
+//		}
+
+
+		// LOG
+		log.trace("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+
+	}
+
+	@Override
+	public List<WaybillNumberDisplay> countWaybillNumberDisplayByCriteria(WaybillNumberCriteria criteria) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	@Override
+	public List<WaybillNumberDisplay> findWaybillNumberChangedEventByCriteria(WaybillNumberChangedEventCriteria criteria, int firstResult, int maxResults,
+			SortDirectionEnum sortDirection, String sortCriterion) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	@Override
+	public List<WaybillNumberDisplay> countWaybillNumberChangedEventByCriteria(WaybillNumberChangedEventCriteria criteria) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	@Override
+	public List<WaybillNumberCommand> findWaybillNumberCommandsById(String waybillNumber) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	@Override
+	public WaybillNumber getById() throws ParvanDaoException {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	@Override
+	public void initializeWaybillNumber(WaybillNumber waybillNumber) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteWaybillNumber(WaybillNumber waybillNumber) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void saveWaybillNumberGenerateCommand(WaybillNumber waybillNumber, WaybillNumberGenerateCommand waybillNumberGenerateCommand)
+			throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering saveWaybillNumberGenerateCommand( object={})", waybillNumberGenerateCommand);
+
+		WaybillNumberGenerateCommand entity = null;
+
+		try {
+
+			// save
+			entity = this.entityManager.merge(waybillNumberGenerateCommand);
+			this.entityManager.flush();
+
+		} catch (ConstraintViolationException e) {
+
+			throw new ParvanDaoException("Error occurred while saving record.", e);
+		}
+
+		// LOG
+		log.debug("Leaving exists(): {}", entity);
+
+	}
+
+	@Override
+	public void saveWaybillNumberUpdateCommand(WaybillNumber waybillNumber, WaybillNumberUpdateCommand waybillNumberUpdateCommand) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void saveWaybillNumberChangeStateCommand(WaybillNumber waybillNumber, WaybillNumberChangeStateCommand waybillNumberChangeStateCommand)
+			throws ParvanDaoException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void saveWaybillNumberChangeAssigneeCommand(WaybillNumber waybillNumber, WaybillNumberChangeAssigneeCommand waybillNumberChangeAssigneeCommand)
+			throws ParvanDaoException {
+		// TODO Auto-generated method stub
+
+	}
+}

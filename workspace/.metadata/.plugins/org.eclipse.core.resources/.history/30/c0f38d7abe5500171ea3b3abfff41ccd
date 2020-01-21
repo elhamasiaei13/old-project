@@ -1,0 +1,77 @@
+package com.parvanpajooh.client.transportationmanagement2.model;
+
+import com.parvanpajooh.client.common.BaseMsg;
+
+/**
+ * @author sasan
+ */
+
+public class TransportationScheduleMsg extends BaseMsg{
+
+	private static final long serialVersionUID = -1304277576944253813L;
+	
+	private Long id;
+
+	private String vehicleCarrierRegister;
+
+	private String carrierCode;
+	
+	private String routeNumber;
+
+	private String fromNodeCode;
+
+	private String toNodeCode;
+
+	
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getCarrierCode() {
+		return carrierCode;
+	}
+
+	public void setCarrierCode(String carrierCode) {
+		this.carrierCode = carrierCode;
+	}
+
+	public String getRouteNumber() {
+		return routeNumber;
+	}
+
+	public String getVehicleCarrierRegister() {
+		return vehicleCarrierRegister;
+	}
+
+	public void setVehicleCarrierRegister(String vehicleCarrierRegister) {
+		this.vehicleCarrierRegister = vehicleCarrierRegister;
+	}
+
+	public void setRouteNumber(String routeNumber) {
+		this.routeNumber = routeNumber;
+	}
+
+	public String getFromNodeCode() {
+		return fromNodeCode;
+	}
+
+	public void setFromNodeCode(String fromNodeCode) {
+		this.fromNodeCode = fromNodeCode;
+	}
+
+	public String getToNodeCode() {
+		return toNodeCode;
+	}
+
+	public void setToNodeCode(String toNodeCode) {
+		this.toNodeCode = toNodeCode;
+	}
+	
+	
+	
+}

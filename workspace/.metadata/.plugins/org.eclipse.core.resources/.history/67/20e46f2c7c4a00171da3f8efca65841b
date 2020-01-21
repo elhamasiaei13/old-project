@@ -1,0 +1,182 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.dao.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.shipment.dao.PackingItemDao;
+import com.parvanpajooh.shipment.model.PackingItem;
+import com.parvanpajooh.shipment.model.PackingItemState;
+import com.parvanpajooh.shipment.model.PackingItemState_;
+import com.parvanpajooh.shipment.model.PackingItem_;
+import com.parvanpajooh.shipment.model.Shipment;
+import com.parvanpajooh.shipment.model.ShipmentState;
+import com.parvanpajooh.shipment.model.ShipmentState_;
+import com.parvanpajooh.shipment.model.Shipment_;
+import com.parvanpajooh.shipment.model.criteria.PackingItemCriteria;
+import com.parvanpajooh.shipment.model.vo.ShipmentStateVO;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberDisplay;
+
+/**
+ * @author MO
+ *
+ */
+public class PackingItemDaoJpa extends GenericDaoJpa<PackingItem, Long> implements PackingItemDao {
+	
+	@PersistenceContext(unitName = "ApplicationEntityManager")
+	private EntityManager entityManager;
+
+	public PackingItemDaoJpa() {
+		super(PackingItem.class);
+	}
+	
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<PackingItem> root,
+			Map<String, Join> joins) throws ParvanException {
+
+		PackingItemCriteria criteria = (PackingItemCriteria) cri;
+		List<Predicate> predicateList = new ArrayList<>();
+
+		// ----------------------------------------------------------------
+		// Current State
+		// ----------------------------------------------------------------
+		Long currentAssignedUserId = criteria.getCurrentAssignedUserId();
+		if (Validator.isNotNull(currentAssignedUserId)) {
+			Predicate predicate = builder.equal(root.<Long> get(PackingItem_.currentAssignedUserId), currentAssignedUserId);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Current State
+		// ----------------------------------------------------------------
+		String currentStateCode = criteria.getCurrentStateCode();
+		if (Validator.isNotNull(currentStateCode)) {
+			Join<PackingItem, PackingItemState> join = joins.get("currentState");
+			if (join == null) {
+				join = root.join(PackingItem_.currentState, JoinType.LEFT);
+			}
+			Predicate predicate = builder.equal(join.<String> get(PackingItemState_.code), currentStateCode);
+			predicateList.add(predicate);
+			joins.put("currentState", join);
+		}
+		
+		// ----------------------------------------------------------------
+		// Current States
+		// ----------------------------------------------------------------
+		String[] currentStates = criteria.getCurrentStates();
+		if (Validator.isNotNull(currentStates)) {
+			Join<PackingItem, PackingItemState> stateJoin = root.join(PackingItem_.currentState, JoinType.LEFT);
+			predicateList.add(stateJoin.<String> get(PackingItemState_.code).in(Arrays.asList(currentStates)));
+		}
+
+		// ----------------------------------------------------------------
+		// Not Current States
+		// ----------------------------------------------------------------
+		String[] notCurrentStates = criteria.getNotCurrentStates();
+		if (Validator.isNotNull(notCurrentStates)) {
+			Join<PackingItem, PackingItemState> stateJoin = root.join(PackingItem_.currentState, JoinType.LEFT);
+			Predicate predicate = builder.not(stateJoin.<String> get(PackingItemState_.code).in(Arrays.asList(notCurrentStates)));
+			predicateList.add(predicate);
+		}
+		
+		// ----------------------------------------------------------------
+		// WaybillNumber
+		// ----------------------------------------------------------------
+		String waybillNumber = criteria.getWaybillNumber();
+		if (Validator.isNotNull(waybillNumber)) {
+			Predicate predicate = builder.like(root.<String> get(PackingItem_.waybillNumber), waybillNumber);
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Last Change State Date
+		//----------------------------------------------------------------
+		LocalDateTime lastChangeStateDateTimeFrom = criteria.getLastChangeStateDateFrom();
+		LocalDateTime lastChangeStateDateTimeTo   = criteria.getLastChangeStateDateTo();
+		if (Validator.isNotNull(lastChangeStateDateTimeFrom) || Validator.isNotNull(lastChangeStateDateTimeTo)) {
+			
+			if(Validator.isNotNull(lastChangeStateDateTimeFrom)){
+				lastChangeStateDateTimeFrom = lastChangeStateDateTimeFrom.withNano(0); //TODO temporary solution due to ECD-1068
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(PackingItem_.lastChangeStateDate), lastChangeStateDateTimeFrom);
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(lastChangeStateDateTimeTo)){
+				lastChangeStateDateTimeTo = lastChangeStateDateTimeTo.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند	
+				lastChangeStateDateTimeTo = lastChangeStateDateTimeTo.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند	
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(PackingItem_.lastChangeStateDate), lastChangeStateDateTimeTo);
+				predicateList.add(predicate);
+			}
+		}
+		
+		// ----------------------------------------------------------------
+		// Consignee City Code
+		// ----------------------------------------------------------------
+		
+		String consigneeCityCode = criteria.getConsigneeCityCode();
+		if (Validator.isNotNull(consigneeCityCode)) {
+			// make criteria
+			CriteriaQuery<Shipment> shipmentCriteria = builder.createQuery(Shipment.class);
+			Metamodel shipmentMetamodel = this.entityManager.getMetamodel();
+			EntityType<Shipment> shipment_ = shipmentMetamodel.entity(Shipment.class);
+			Root<Shipment> shipmentRoot = shipmentCriteria.from(shipment_);
+
+			Join<Shipment, PackingItem> packingItemsJoin = shipmentRoot.join(Shipment_.packingList);
+
+			Predicate predicate = builder.equal(packingItemsJoin.<String> get(PackingItem_.waybillNumber), consigneeCityCode);
+			predicateList.add(predicate);
+		}
+		
+		basePredicate((BaseCriteria) criteria, builder, root, predicateList);
+
+		return predicateList;
+	}
+
+	@Override
+	public PackingItem findByPartNumber(String partNumber) throws ParvanDaoException {
+		log.debug("Entering findByPartNumber( partNumber={} )", partNumber);
+		PackingItem result = null;
+		try {
+			String query = "SELECT obj FROM PackingItem obj WHERE obj.partNumber = ?1 ";
+			TypedQuery<PackingItem> q = getEntityManager().createQuery(query, PackingItem.class);
+			q.setParameter(1, partNumber);
+			List<PackingItem> results = q.getResultList();
+			if (Validator.isNotNull(results)) {
+				if (results.size() == 1) {
+					result = results.get(0);
+				} else {
+					throw new ParvanDaoException("More than one packingItem found for partNumber " + partNumber);
+				}
+			}
+		} catch (ParvanDaoException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Unknown exception occurred during findByPartNumber.", e);
+		}
+		return result;
+	}
+
+}

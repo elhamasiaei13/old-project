@@ -1,0 +1,6 @@
+commit_dialog_history_messages=<?xml version\="1.0" encoding\="UTF-8"?>\n<messages>\n<message>fixed</message>\n<message>set FromNodeCode &amp; toNodeCode</message>\n<message>Add _getMessage()</message>\n<message>Rename two methods in transportationmanagement2\:&\#x0A;&quot;findDepartureFromNodeInNextHoures&quot; &amp; &quot;findArraivalToNodeInNextHoures&quot;</message>\n<message>Rename and mend two methods\: &\#x0A;&quot;findArraivalToNodeInNextHoures&quot; &amp; &quot;findDepartureFromNodeInNextHoures&quot;</message>\n<message>Add timeZoneId to nodeMsg</message>\n<message>Get timeZoneId from routeManagement By nodeCode&\#x0A;instead of nodeCode-to-timeOffset.properties</message>\n<message>Add timeZoneId to Node</message>\n<message>Remove get carrierCode from createModal</message>\n<message>add LocalDateTime.now() as fromDate to&\#x0A;&quot;findByRouteNumbersAndDepartureDate&quot;</message>\n</messages>
+eclipse.preferences.version=1
+org.eclipse.egit.ui.githistorypage.showallfilter=SHOWALLRESOURCE
+resourcehistory_graph_split=474,525
+resourcehistory_rev_split=480,519
+show_initial_config_dialog=false

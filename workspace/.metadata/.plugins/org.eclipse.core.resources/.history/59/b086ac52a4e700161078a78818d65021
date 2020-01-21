@@ -1,0 +1,530 @@
+package com.parvanpajooh.accounting.rest;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
+import javax.ws.rs.core.Context;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.parvanpajooh.accounting.model.criteria.AccountCriteria;
+import com.parvanpajooh.accounting.model.criteria.VoucherRowCriteria;
+import com.parvanpajooh.accounting.model.vo.AccountBalanceVO;
+import com.parvanpajooh.accounting.model.vo.AccountVO;
+import com.parvanpajooh.accounting.model.vo.ClientAppVO;
+import com.parvanpajooh.accounting.model.vo.VoucherRowVO;
+import com.parvanpajooh.accounting.model.vo.VoucherVO;
+import com.parvanpajooh.accounting.service.AccountService;
+import com.parvanpajooh.accounting.service.FiscalYearService;
+import com.parvanpajooh.accounting.service.TransactionService;
+import com.parvanpajooh.accounting.service.UserService;
+import com.parvanpajooh.accounting.service.VoucherRowService;
+import com.parvanpajooh.accounting.service.VoucherService;
+import com.parvanpajooh.client.accounting.model.AccountBalanceMsg;
+import com.parvanpajooh.client.accounting.model.AccountMsg;
+import com.parvanpajooh.client.accounting.model.VoucherMsg;
+import com.parvanpajooh.client.accounting.model.VoucherRowMsg;
+import com.parvanpajooh.common.auth.BaseRestController;
+import com.parvanpajooh.common.convertor.JacksonObjectMapperProvider;
+import com.parvanpajooh.common.formatter.DateProperyEditor;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.DateUtilV2;
+import com.parvanpajooh.commons.util.StringUtil;
+import com.parvanpajooh.commons.util.Validator;
+
+@RestController
+@RequestMapping("/v1")
+public class AccountingRestController extends BaseRestController {
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	@EJB(mappedName = "java:global/accounting-ear/accounting-ejb/AccountServiceImpl")
+	private AccountService accountService;
+
+	@EJB(mappedName = "java:global/accounting-ear/accounting-ejb/VoucherServiceImpl")
+	private VoucherService voucherService;
+
+	@EJB(mappedName = "java:global/accounting-ear/accounting-ejb/VoucherRowServiceImpl")
+	private VoucherRowService voucherRowService;
+
+	@EJB(mappedName = "java:global/accounting-ear/accounting-ejb/FiscalYearServiceImpl")
+	private FiscalYearService fiscalYearService;
+
+	@EJB(mappedName = "java:global/accounting-ear/accounting-ejb/TransactionServiceImpl")
+	private TransactionService transactionService;
+
+	@EJB(mappedName = "java:global/accounting-ear/accounting-ejb/UserServiceImpl")
+	private UserService userService;
+
+	@Autowired
+	private MessageSource messageSource;
+
+	@Autowired
+	protected JacksonObjectMapperProvider mapperProvider;
+
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		binder.registerCustomEditor(LocalDate.class, new DateProperyEditor(false, true));
+		binder.registerCustomEditor(LocalDateTime.class, new DateProperyEditor(true, true));
+	}
+
+	@RequestMapping(value = "/hello", method = RequestMethod.GET)
+	public void helloWord(
+			HttpServletRequest request, 
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip) {
+
+		// LOG
+		log.debug("Entering loadAccountsByAppCode(userName={} , ip={})", userName, ip);
+
+	}
+
+	@RequestMapping(value = "/accounts", method = RequestMethod.GET)
+	public List<AccountMsg> findAccountsByAppCode(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip, 
+			@RequestParam String clientAppCode) {
+
+		// LOG
+		log.debug("Entering findAccountsByAppCode(userName={} , ip={} , clientAppCode={} )", userName, ip, clientAppCode);
+
+		List<AccountMsg> accountMsgs = new ArrayList<AccountMsg>();
+
+		try {
+
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			List<AccountVO> accountVOs = accountService.findByClientAppCode(userInfo, clientAppCode);
+
+			for (AccountVO accountVO : accountVOs) {
+
+				AccountMsg accountMsg = new AccountMsg();
+				accountMsg.setAccountNumber(accountVO.getAccountNumber());
+				accountMsg.setClientAppCode(accountVO.getClientApp().getCode());
+				accountMsg.setDescription(accountVO.getDescription());
+				accountMsg.setName(accountVO.getName());
+
+				accountMsgs.add(accountMsg);
+			}
+
+
+		} catch (Exception e) {
+			log.error("error in findAccountsByAppCode", e);
+		}
+
+		// LOG
+		log.debug("Leaving findAccountsByAppCode(): ret={}", (accountMsgs != null) ? accountMsgs.size() : "NULL");
+		return accountMsgs;
+	}
+
+	@RequestMapping(value = "/transactions", method = RequestMethod.POST)
+	public void saveAccTransaction(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestBody VoucherMsg voucherMsg) throws Exception {
+
+		// LOG
+		log.debug("Entering saveAccTransaction(userName={} , ip={} )", userName, ip);
+
+		VoucherVO voucherVO = null;
+
+		try {
+
+			UserInfo userInfo = loadUserInfo(userName, ip);
+
+			voucherVO = new VoucherVO();
+			voucherVO.fromMsg(voucherMsg);
+
+			voucherService.save(userInfo, voucherVO);
+
+		} catch (Exception e) {
+			log.error("error in saveAccTransaction", e);
+			throw e;
+		}
+
+		// LOG
+		log.debug("Leaving saveAccTransaction()");
+
+	}
+
+	@RequestMapping(value = "/accounts/{accountNumber}/reports/detail", method = RequestMethod.GET)
+	public List<VoucherRowMsg> findVoucherRows(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip, 
+			@PathVariable(value = "accountNumber") String accountNumber,
+			@RequestParam String clientAppCode,
+			@RequestParam String fromDate, 
+			@RequestParam String toDate, 
+			@RequestParam int page, 
+			@RequestParam int size,
+			@Context HttpServletResponse response) {
+
+		// LOG
+		log.debug("Entering findVoucherRows(userName={} , ip={} ,clientAppCode={})");
+
+		List<VoucherRowMsg> voucherRowMsgs = null;
+		AccountVO accountVO = new AccountVO();
+
+		try {
+			int firstResult = page;
+			int maxResults = size;
+			SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+			String sortCriterion = "id";
+
+			VoucherRowCriteria voucherRowCriteria = new VoucherRowCriteria();
+			UserInfo userInfo = loadUserInfo(userName, ip);
+
+			if (!fromDate.isEmpty()) {
+				LocalDateTime fromDateLdt = DateUtilV2.convertStringDateTimeToLocalDateTime(fromDate);
+				voucherRowCriteria.setCreateDateFrom(fromDateLdt);
+			}
+			
+			if (!toDate.isEmpty()) {
+				LocalDateTime toDateLdt = DateUtilV2.convertStringDateTimeToLocalDateTime(toDate);
+				voucherRowCriteria.setCreateDateTo(toDateLdt);
+			}
+
+			voucherRowCriteria.setClientAppCode(clientAppCode);
+			accountVO.setAccountNumber(accountNumber);
+			voucherRowCriteria.setAccount(accountVO);
+
+			List<BaseVO> baseVOs = voucherRowService.findByCriteria(userInfo, voucherRowCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+			int total = voucherRowService.countByCriteria(userInfo, voucherRowCriteria);
+			response.addIntHeader("total", total);
+
+			if (baseVOs.size() > 0) {
+				voucherRowMsgs = new ArrayList<VoucherRowMsg>(baseVOs.size());
+				for (BaseVO baseVO : baseVOs) {
+					
+					VoucherRowVO voucherRowVO = (VoucherRowVO) baseVO;
+					voucherRowMsgs.add(voucherRowVO.toMsg());
+				}
+			}
+
+		} catch (Exception e) {
+			log.error("error in getVoucherRowsByAccountCode", e);
+		}
+
+		// LOG
+		log.debug("Leaving findVoucherRows(): ret={}");
+		
+		return voucherRowMsgs;
+
+	}
+
+	@RequestMapping(value = "/accounts/reports/balance", method = RequestMethod.GET)
+	public List<AccountBalanceMsg> getAccountBalanceReport(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip, 
+			@RequestParam (value = "accountCodes") List<String> accountCodes,
+			@RequestParam (value = "page") int page, 
+			@RequestParam (value = "size") int size,
+			@Context HttpServletResponse response) {
+
+		// LOG
+		log.debug("Entering getAccountBalanceReport(userName={} , ip={})");
+
+		List<AccountBalanceMsg> accountBalanceMsgs = null;
+
+		try {
+
+			if (page > 0) {
+				page = page - 1;// my pagination is zero based, but rest
+								// pagination best practice is 1-based
+			}
+
+			if (size == 0) {
+				size = 20;// it's default page size
+			}
+
+			int firstResult = (page * size);
+			int maxResults = size;
+
+			UserInfo userInfo = loadUserInfo(userName, ip);
+
+			List<AccountBalanceVO> balanceVOs = voucherRowService.getAccountsBalanceReport(userInfo, accountCodes, firstResult, maxResults);
+			int total = voucherRowService.countAccountBalanceReport(userInfo, accountCodes);
+			response.addIntHeader("total", total);
+			accountBalanceMsgs = new ArrayList<AccountBalanceMsg>();
+
+			for (AccountBalanceVO vo : balanceVOs) {
+
+				accountBalanceMsgs.add(vo.toMsg());
+			}
+
+		} catch (Exception e) {
+			log.error("error in getAccountBalanceReport", e);
+		}
+
+		// LOG
+		log.debug("Leaving getAccountBalanceReport(): ret={}");
+		
+		return accountBalanceMsgs;
+	}
+	
+	/**
+	 * 
+	 * @param userName
+	 * @param ip
+	 * @param clientAppCode
+	 * @param accountGroupId
+	 * @param name
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/accounts/name", method = RequestMethod.GET)
+	public List<AccountMsg> findAccountsByNameOrCode(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip, 
+			@RequestParam (value = "clientAppCode") String clientAppCode,
+			@RequestParam (value = "accountGroupId") long accountGroupId,
+			@RequestParam (value = "term") String term) throws Exception{
+
+		// LOG
+		log.debug("Entering findAccountsByNameOrCode(userName={}, ip={},clientAppCode={},accountGroupId={},term={})");
+
+		List<AccountMsg> listMsg = null;
+
+		try {
+			
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			AccountCriteria accountCriteria = new AccountCriteria();
+			accountCriteria.setCanonicalSearchName(term);
+			ClientAppVO clientAppVO = new ClientAppVO();
+			clientAppVO.setCode(clientAppCode);
+			accountCriteria.setClientApp(clientAppVO);
+			accountCriteria.setAccountGroupId(accountGroupId);
+
+			List<BaseVO> listVO = accountService.findByCriteria(userInfo, accountCriteria);
+					
+			listMsg = new ArrayList<AccountMsg>();
+
+			for (BaseVO baseVO : listVO) {
+				
+				AccountVO accountVO = (AccountVO) baseVO;
+				
+				listMsg.add(accountVO.toMsg());
+			}
+
+		} catch (Exception e) {
+			log.error("error in findAccountsByNameOrCode", e);
+			throw e;
+		}
+
+		// LOG
+		log.debug("Leaving findAccountsByNameOrCode(): ret={}",(listMsg != null) ? listMsg.size() : "NULL");
+		
+		return listMsg;
+	}
+	
+	/**
+	 * 
+	 * @param accountNumber
+	 * @param userName
+	 * @param ip
+	 * @param clientAppCode
+	 * @return
+	 */
+	@RequestMapping(value = "/accounts/accountNumber/{accountNumber}", method = RequestMethod.GET)
+	public AccountMsg findAccountByAccountNumberAndClientAppCode(
+			@PathVariable (value = "accountNumber") String accountNumber,
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip, 
+			@RequestParam (value = "clientAppCode") String clientAppCode) throws Exception{
+
+		// LOG
+		log.debug("Entering findAccountByAccountNumberAndClientAppCode(userName={} , ip={},accountNumber={},clientAppCode={})", userName, ip, accountNumber,
+				clientAppCode);
+
+		AccountMsg accountMsg = null;
+
+		try {
+
+			if (Validator.isNull(clientAppCode)) {
+				throw new ObjectNotFoundException("clientAppCode is not valid");
+			}
+
+			UserInfo userInfo = loadUserInfo(userName, ip);
+
+			AccountVO accountVO = accountService.findByAccountNumberAndAppCode(userInfo, accountNumber, clientAppCode);
+
+			accountMsg = accountVO.toMsg();
+
+		} catch (Exception e) {
+			log.error("error in findAccountByAccountNumberAndClientAppCode", e);
+			throw e;
+		}
+
+		// LOG
+		log.debug("Leaving findAccountByAccountNumberAndClientAppCode(): ret={}", accountMsg);
+
+		return accountMsg;
+	}
+	
+	private String getMessage(final String messageKey, final Object... messageParameters) {
+
+		Locale locale = LocaleContextHolder.getLocale();
+
+		String result = null;
+		try {
+			result = messageSource.getMessage(messageKey, messageParameters, locale);
+		} catch (NoSuchMessageException e) {
+			result = messageKey;
+		}
+
+		return result;
+	}
+	
+	@RequestMapping(value = "/accounts/debits/reports/balance", method = RequestMethod.GET)
+	public List<AccountBalanceMsg> getDebitAccountsBalanceReport(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip, 
+			@RequestParam (value = "accountGroupId") long accountGroupId,
+			@RequestParam (value = "page") int page, 
+			@RequestParam (value = "size") int size,
+			@Context HttpServletResponse response) {
+
+		// LOG
+		log.debug("Entering getDebitAccountsBalanceReport(userName={} , ip={} ,accountGroupId={} )", userName, ip, accountGroupId);
+
+		List<AccountBalanceMsg> accountBalanceMsgs = null;
+
+		try {
+
+			if (page > 0) {
+				page = page - 1;// my pagination is zero based, but rest
+								// pagination best practice is 1-based
+			}
+
+			if (size == 0) {
+				size = 20;// it's default page size
+			}
+
+			int firstResult = (page * size);
+			int maxResults = size;
+
+			UserInfo userInfo = loadUserInfo(userName, ip);
+
+			List<AccountBalanceVO> balanceVOs = voucherRowService.getDebitAccountsBalanceReport(userInfo, accountGroupId, firstResult, maxResults);
+//			int total = voucherRowService.countAccountBalanceReport(userInfo, accountCodes);
+			response.addIntHeader("total", 1);
+			accountBalanceMsgs = new ArrayList<AccountBalanceMsg>();
+
+			for (AccountBalanceVO vo : balanceVOs) {
+
+				accountBalanceMsgs.add(vo.toMsg());
+			}
+
+		} catch (Exception e) {
+			log.error("error in getAccountBalanceReport", e);
+		}
+
+		// LOG
+		log.debug("Leaving getDebitAccountsBalanceReport(): ret={}");
+		
+		return accountBalanceMsgs;
+	}
+	
+	/*private UserInfo loadUserInfo(String userName, String ip) throws Exception{
+		UserVO user = userService.loadUserByUsername(userName);
+    	if(user == null){
+    		throw new ObjectNotFoundException("user is not valid");
+    	}
+		Set<String> roleNames = null;
+		if (user.getRoles() != null) {
+			Set<RoleVO> roleVos = user.getRoles();
+			roleNames = new HashSet<>(roleVos.size());
+			for (RoleVO role : roleVos) {
+				roleNames.add(role.getName());
+			}
+		}
+    	
+    	String contextPath = "";
+		String tenantId = "";
+		UserInfo userInfo = AccountingUserInfo.getDefaultUserInfo(
+				user.getId(), 
+				user.getUserName(),
+				user.getFirstName(), 
+				user.getLastName(), 
+				ip, 
+				contextPath, 
+				tenantId, 
+				roleNames, 
+				user.getLocale(),
+				user.getZoneId(),
+				user.getCalendar());
+		return userInfo;
+	}*/
+
+	protected void proccessException(Exception e, Map<String, Object> result) {
+
+		if (e instanceof ParvanRecoverableException) {
+			ParvanRecoverableException recoverableException = (ParvanRecoverableException) e;
+
+			Exception cause = (Exception) recoverableException.getCause();
+
+			if (recoverableException.getErrorCode().equals(ErrorCode.DATA_IS_INVALID)) {
+				String invalidField = null;
+				if (cause != null && cause instanceof ConstraintViolationException) {
+					invalidField = ((ConstraintViolationException) cause).getConstraintViolations().iterator().next().getPropertyPath().toString();
+
+				} else {
+					invalidField = recoverableException.getMessage();
+				}
+				result.put("invalidField", invalidField);
+				result.put("status", "ValidationException");
+			} else if (recoverableException.getErrorCode().equals(ErrorCode.OBJECT_EXIST)) {
+				result.put("status", "ObjectExistsException");
+			} else if (recoverableException.getErrorCode().equals(ErrorCode.DATA_DUPLICATE)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error.data-duplicate", getMessage(recoverableException.getMessage(), (Object) null)));
+			} else if (recoverableException.getErrorCode().equals(ErrorCode.FIELD_IS_EMPTY)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error-required", getMessage(recoverableException.getMessage(), (Object) null)));
+			} else if (recoverableException.getErrorCode().equals(ErrorCode.SHIPMENT_INVALID_STATE_TRANSITION)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error-invalid-shipment-state",
+						getMessage("trackstate." + StringUtil.upperCase(recoverableException.getMessage()), (Object) null)));
+			} else {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorMessage", recoverableException.getMessage());
+			}
+		} else {
+			log.error("error in proccessException", e);
+			result.put("status", "fail");
+		}
+	}
+}

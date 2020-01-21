@@ -1,0 +1,355 @@
+package com.parvanpajooh.siteservices.model.vo;
+
+import java.time.LocalDateTime;
+
+import com.parvanpajooh.client.personmanagement.model.ContactInfoMsg;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+
+
+/**
+ * @author dev-03
+ *
+ */
+public class RecoveryCodeVO {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8622657923272411640L;
+	
+	private Long userId;
+	
+	private String userName;
+	
+	private String email;
+	
+	private String mobile;
+	
+	private String requestMethod;
+	
+	private String code;
+	
+	private LocalDateTime expireDate;
+	
+	private Integer version;
+
+	/**
+	 * @return the tel
+	 */
+	public String getTel() {
+		return tel;
+	}
+
+	/**
+	 * @param tel the tel to set
+	 */
+	public void setTel(String tel) {
+		this.tel = tel;
+	}
+
+	/**
+	 * @return the fax
+	 */
+	public String getFax() {
+		return fax;
+	}
+
+	/**
+	 * @param fax the fax to set
+	 */
+	public void setFax(String fax) {
+		this.fax = fax;
+	}
+
+	/**
+	 * @return the mobile
+	 */
+	public String getMobile() {
+		return mobile;
+	}
+
+	/**
+	 * @param mobile the mobile to set
+	 */
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	/**
+	 * @return the countryCode
+	 */
+	public String getCountryCode() {
+		return countryCode;
+	}
+
+	/**
+	 * @param countryCode the countryCode to set
+	 */
+	public void setCountryCode(String countryCode) {
+		this.countryCode = countryCode;
+	}
+
+	/**
+	 * @return the provinceCode
+	 */
+	public String getProvinceCode() {
+		return provinceCode;
+	}
+
+	/**
+	 * @param provinceCode the provinceCode to set
+	 */
+	public void setProvinceCode(String provinceCode) {
+		this.provinceCode = provinceCode;
+	}
+
+	/**
+	 * @return the cityCode
+	 */
+	public String getCityCode() {
+		return cityCode;
+	}
+
+	/**
+	 * @param cityCode the cityCode to set
+	 */
+	public void setCityCode(String cityCode) {
+		this.cityCode = cityCode;
+	}
+
+	/**
+	 * @return the countryNameEn
+	 */
+	public String getCountryNameEn() {
+		return countryNameEn;
+	}
+
+	/**
+	 * @param countryNameEn the countryNameEn to set
+	 */
+	public void setCountryNameEn(String countryNameEn) {
+		this.countryNameEn = countryNameEn;
+	}
+
+	/**
+	 * @return the countryNameFa
+	 */
+	public String getCountryNameFa() {
+		return countryNameFa;
+	}
+
+	/**
+	 * @param countryNameFa the countryNameFa to set
+	 */
+	public void setCountryNameFa(String countryNameFa) {
+		this.countryNameFa = countryNameFa;
+	}
+
+	/**
+	 * @return the provinceNameEn
+	 */
+	public String getProvinceNameEn() {
+		return provinceNameEn;
+	}
+
+	/**
+	 * @param provinceNameEn the provinceNameEn to set
+	 */
+	public void setProvinceNameEn(String provinceNameEn) {
+		this.provinceNameEn = provinceNameEn;
+	}
+
+	/**
+	 * @return the provinceNameFa
+	 */
+	public String getProvinceNameFa() {
+		return provinceNameFa;
+	}
+
+	/**
+	 * @param provinceNameFa the provinceNameFa to set
+	 */
+	public void setProvinceNameFa(String provinceNameFa) {
+		this.provinceNameFa = provinceNameFa;
+	}
+
+	/**
+	 * @return the cityNameEn
+	 */
+	public String getCityNameEn() {
+		return cityNameEn;
+	}
+
+	/**
+	 * @param cityNameEn the cityNameEn to set
+	 */
+	public void setCityNameEn(String cityNameEn) {
+		this.cityNameEn = cityNameEn;
+	}
+
+	/**
+	 * @return the cityNameFa
+	 */
+	public String getCityNameFa() {
+		return cityNameFa;
+	}
+
+	/**
+	 * @param cityNameFa the cityNameFa to set
+	 */
+	public void setCityNameFa(String cityNameFa) {
+		this.cityNameFa = cityNameFa;
+	}
+
+	/**
+	 * @return the postalCode
+	 */
+	public String getPostalCode() {
+		return postalCode;
+	}
+
+	/**
+	 * @param postalCode the postalCode to set
+	 */
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
+	}
+
+	/**
+	 * @return the address
+	 */
+	public String getAddress() {
+		return address;
+	}
+
+	/**
+	 * @param address the address to set
+	 */
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	/**
+	 * @return the contactPersonName
+	 */
+	public String getContactPersonName() {
+		return contactPersonName;
+	}
+
+	/**
+	 * @param contactPersonName the contactPersonName to set
+	 */
+	public void setContactPersonName(String contactPersonName) {
+		this.contactPersonName = contactPersonName;
+	}
+
+	/**
+	 * @return the contactPersonNationalId
+	 */
+	public String getContactPersonNationalId() {
+		return contactPersonNationalId;
+	}
+
+	/**
+	 * @param contactPersonNationalId the contactPersonNationalId to set
+	 */
+	public void setContactPersonNationalId(String contactPersonNationalId) {
+		this.contactPersonNationalId = contactPersonNationalId;
+	}
+
+	/**
+	 * @return the primary
+	 */
+	public boolean isPrimary() {
+		return primary;
+	}
+
+	/**
+	 * @param primary the primary to set
+	 */
+	public void setPrimary(boolean primary) {
+		this.primary = primary;
+	}
+	
+	/**
+	 * 
+	 * @param msg
+	 */
+	public void fromMsg(ContactInfoMsg msg) {
+		
+		this.tel = msg.getTel();
+		this.fax = msg.getFax();
+		this.mobile = msg.getMobile();
+		this.email = msg.getEmail();
+		this.countryCode = msg.getCountryCode();
+		this.countryNameEn = msg.getCountryNameEn();
+		this.countryNameFa = msg.getCountryNameLocal();
+		this.provinceCode = msg.getProvinceCode();
+		this.provinceNameEn = msg.getProvinceNameEn();
+		this.provinceNameFa = msg.getProvinceNameLocal();
+		this.cityCode = msg.getCityCode();
+		this.cityNameEn = msg.getCityNameEn();
+		this.cityNameFa = msg.getCityNameLocal();
+		this.postalCode = msg.getPostalCode();
+		this.address = msg.getAddress();
+		this.contactPersonName = msg.getContactPersonName();
+		this.contactPersonNationalId = msg.getContactPersonNationalId();
+		this.primary = msg.isPrimary();
+
+	}
+	
+	public ContactInfoMsg toMsg() {
+		ContactInfoMsg msg = new ContactInfoMsg();
+
+		msg.setTel(this.tel);
+		msg.setFax(this.fax);
+		msg.setMobile(this.mobile);
+		msg.setEmail(this.email);
+		msg.setCountryCode(this.countryCode);
+		msg.setCountryNameEn(this.countryNameEn);
+		msg.setCountryNameLocal(this.countryNameFa);
+		msg.setProvinceCode(this.provinceCode);
+		msg.setCityCode(this.cityCode);
+		msg.setCityNameEn(this.cityNameEn);
+		msg.setCityNameLocal(this.cityNameFa);
+		msg.setPostalCode(this.postalCode);
+		msg.setAddress(this.address);
+		msg.setContactPersonName(this.contactPersonName);
+		msg.setContactPersonNationalId(this.contactPersonNationalId);
+		msg.setPrimary(this.primary);
+		
+		return msg;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "ContactInfoVO [id=" + getId() + ", tel=" + tel + ", fax=" + fax
+				+ ", mobile=" + mobile + ", email=" + email + ", countryCode="
+				+ countryCode + ", countryNameEn=" + countryNameEn
+				+ ", countryNameFa=" + countryNameFa + ", provinceCode="
+				+ provinceCode + ", provinceNameEn=" + provinceNameEn
+				+ ", provinceNameFa=" + provinceNameFa + ", cityCode="
+				+ cityCode + ", cityNameEn=" + cityNameEn + ", cityNameFa="
+				+ cityNameFa + ", postalCode=" + postalCode + ", address="
+				+ address + ", contactPersonName=" + contactPersonName
+				+ ", contactPersonNationalId=" + contactPersonNationalId
+				+ ", primary=" + primary + "]";
+	}
+}

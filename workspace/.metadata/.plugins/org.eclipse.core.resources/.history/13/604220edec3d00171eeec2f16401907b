@@ -1,0 +1,71 @@
+package com.parvanpajooh.common.auth;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.util.Assert;
+import org.springframework.web.client.RestOperations;
+
+import com.parvanpajooh.client.identitymanagement2.model.RoleMsg;
+import com.parvanpajooh.client.identitymanagement2.model.UserMsg;
+
+public class SwitchUserUserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService, InitializingBean {
+
+	@Autowired
+	private UserServiceAdapter userServiceAdapter;
+	
+	@Autowired
+	private IdmUserDetailsSource userDetailsSource;
+
+	private RestOperations restTemplate;
+
+    /**
+     * A rest template to be used to contact the remote user info endpoint.
+     * Normally would be an instance of {@link OAuth2RestTemplate}, but there is
+     * no need for that dependency to be explicit, and there are advantages in
+     * making it implicit (e.g. for testing purposes).
+     * 
+     * @param restTemplate a rest template
+     */
+    public void setRestTemplate(RestOperations restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        Assert.state(restTemplate != null, "RestTemplate URL must be provided");
+    }
+	
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		UserDetails userDetails = null;
+		try {
+			UserMsg user = userServiceAdapter.initLoginLoadUserByUsername(username);
+			List<GrantedAuthority> grantedAuths = new ArrayList<GrantedAuthority>();
+			Set<RoleMsg> roles = user.getRoles();
+			if(roles != null){
+				for (RoleMsg role : roles) {
+					grantedAuths.add( new SimpleGrantedAuthority( role.getName() ) );
+				}
+			}
+			userDetails = new IdmUserDetails(username, grantedAuths);
+			//FIXME set enabled true or false
+    	} catch (AuthenticationException e) {
+    		throw e;
+		} catch (Exception e) {
+			throw new BadCredentialsException("Username not found.");
+		}
+		return userDetails;
+	}
+
+}

@@ -1,0 +1,348 @@
+package com.parvanpajooh.siteservices.mvc;
+
+
+
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.common.auth.UserInfoLoader;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.siteservices.model.enums.PasswordRecoveryMethod;
+import com.parvanpajooh.siteservices.model.vo.CityInfoVO;
+import com.parvanpajooh.siteservices.model.vo.ComplaintCategoryVO;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+import com.parvanpajooh.siteservices.model.vo.RecoveryCodeVO;
+import com.parvanpajooh.siteservices.model.vo.RegisterVO;
+import com.parvanpajooh.siteservices.model.vo.UserVO;
+import com.parvanpajooh.siteservices.mvc.base.SiteServicesBaseController;
+import com.parvanpajooh.siteservices.service.ComplaintManagementService;
+import com.parvanpajooh.siteservices.service.GeoManagementService;
+import com.parvanpajooh.siteservices.service.IdentityManagement2Service;
+import com.parvanpajooh.siteservices.service.ProfileService;
+
+/**
+ * @author dev-03
+ *
+ */
+@Controller
+@RequestMapping("/profile")
+public class ProfileController extends SiteServicesBaseController {
+
+	@EJB(mappedName = "java:global/siteservices-ear/siteservices-ejb/ProfileServiceImpl")
+	private ProfileService profileService;
+
+	@EJB(mappedName = "java:global/siteservices-ear/siteservices-ejb/IdentityManagement2ServiceImpl")
+	private IdentityManagement2Service identityManagement2Service;
+
+	@EJB(mappedName = "java:global/siteservices-ear/siteservices-ejb/GeoManagementServiceImpl")
+	private GeoManagementService geoManagementService;
+	
+	@EJB(mappedName = "java:global/siteservices-ear/siteservices-ejb/ComplaintManagementServiceImpl")
+	private ComplaintManagementService complaintManagementService;
+
+	@RequestMapping(value = "/registers", method = RequestMethod.GET)
+	public String show(HttpServletRequest request, Model model) {
+		log.debug("Entering show");
+
+		return "profiles";
+	}
+
+	@RequestMapping(value = "/open/register", method = RequestMethod.GET)
+	public String showRegisterPage(HttpServletRequest request, Model model) {
+
+		// LOG
+		log.debug("Entering showRegisterPage()");
+		try {
+			PersonVO newPerson = new PersonVO();
+			model.addAttribute("person", newPerson);
+		} catch (Exception e) {
+			Map<String, Object> result = new HashMap<String, Object>();
+			proccessException(e, result);
+			model.addAttribute("result", result);
+			return "error-default";
+		}
+
+		return "profile-register";
+	}
+
+	@RequestMapping(value = "/open/register/save", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> register(RegisterVO registerVO, HttpServletRequest request, final Model model) {
+		log.debug("Entering register(registerVO={})", registerVO);
+		Map<String, Object> result = new HashMap<String, Object>();
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+		try {
+			profileService.register(userInfo, registerVO);
+
+			result.put("status", "success");
+
+		} catch (ParvanServiceException e) {
+			proccessException(e, result);
+			model.addAttribute("result", result);
+		}
+
+		return result;
+	}
+
+	@RequestMapping(value = "/open/user/{uuid}/activate", method = RequestMethod.GET)
+	public String activate(@PathVariable String uuid, HttpServletRequest request, final Model model) {
+
+		// LOG
+		log.debug("Entering activate(uuid={})", uuid);
+		Map<String, Object> result = new HashMap<String, Object>();
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+			UserVO userVO = identityManagement2Service.getUserByUuid(userInfo, uuid);
+			model.addAttribute("userId", userVO.getId());
+
+		} catch (Exception e) {
+			proccessException(e, result);
+			model.addAttribute("result", result);
+			return "error-default";
+		}
+
+		return "profile-activate";
+	}
+
+	@RequestMapping(value = "/open/user/activate", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> activateUserAndsetPassword(Long userId, String password, String confirmPassword, HttpServletRequest request,
+			final Model model) {
+
+		// LOG
+		log.debug("Entering activateUserAndsetPassword(userId={}, password={}, confirmPassword={})", userId, password, confirmPassword);
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+			profileService.activateUserAndSetPassword(userInfo, userId, password, confirmPassword);
+
+			result.put("status", "success");
+
+		} catch (ParvanServiceException e) {
+			proccessException(e, result);
+			model.addAttribute("result", result);
+		}
+
+		return result;
+	}
+
+	@RequestMapping(value = "/open/user/recover/identify", method = RequestMethod.GET)
+	public String identify(HttpServletRequest request, final Model model) {
+
+		// LOG
+		log.debug("Entering identify()");
+		return "profile-recover-identify";
+	}
+
+	@RequestMapping(value = "/open/user/recover/identify", method = RequestMethod.POST)
+	public String identifyAndCreateCode(String emailOrMobile, HttpServletRequest request, final Model model) throws MalformedURLException {
+
+		// LOG
+		log.debug("Entering identifyAndCreateCode(emailOrMobile={})", emailOrMobile);
+		Map<String, Object> result = new HashMap<String, Object>();
+		String urlStr = "";
+		URI uri = null;
+
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+			RecoveryCodeVO recoveryCodeVO = profileService.identifyAndCreateCode(userInfo, emailOrMobile);
+
+			StringBuilder sb = new StringBuilder("http://localhost/siteservices-web/profile/open/user/recover/code");
+			sb.append("?rm=");
+			sb.append(recoveryCodeVO.getRecoveryMethod().toString());
+			if (Validator.equals(PasswordRecoveryMethod.EMAIL, recoveryCodeVO.getRecoveryMethod())) {
+				sb.append("&email=");
+				sb.append(emailOrMobile);
+			} else if (Validator.equals(PasswordRecoveryMethod.MOBILE, recoveryCodeVO.getRecoveryMethod())) {
+				sb.append("&mobile=");
+				sb.append(emailOrMobile);
+			}
+			
+			urlStr = sb.toString();
+			uri = new URI(urlStr);
+
+		} catch (ParvanServiceException | URISyntaxException  e) {
+			proccessException(e, result);
+			model.addAttribute("result", result);
+			return "profile-recover-identify";
+		}
+
+		return "redirect:" + uri.toASCIIString();
+	}
+
+	@RequestMapping(value = "/open/user/recover/code", method = RequestMethod.GET)
+	public String getRecoveryCode(String email, String mobile, String rm, HttpServletRequest request, final Model model) {
+
+		// LOG
+		log.debug("Entering getRecoverCode(email={}, mobile={}, rm={})", email, mobile, rm);
+
+		model.addAttribute("email", email);
+		model.addAttribute("mobile", mobile);
+		model.addAttribute("rm", rm);
+
+		return "profile-recover-code";
+	}
+
+	@RequestMapping(value = "/open/user/recover/confirm", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> checkRecoveryCode(String code, HttpServletRequest request, final Model model) throws URISyntaxException, MalformedURLException {
+
+		// LOG
+		log.debug("Entering checkRecoveryCode(code={})", code);
+		Map<String, Object> result = new HashMap<String, Object>();
+		RecoveryCodeVO recoveryCodeVO = null;
+		
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+			recoveryCodeVO = profileService.findRecovryCode(userInfo, code);
+
+			result.put("status", "success");
+			result.put("userId", recoveryCodeVO.getUserId());
+
+		} catch (ParvanServiceException e) {
+			proccessException(e, result);
+			model.addAttribute("result", result);
+		}
+
+		return result;
+	}
+
+	@RequestMapping(value = "/open/user/recover/resetpassword", method = RequestMethod.GET)
+	public String getNewPassword(Long userId, HttpServletRequest request, final Model model) {
+
+		// LOG
+		log.debug("Entering getNewPassword(userId={})", userId);
+
+		model.addAttribute("userId", userId);
+
+		return "profile-recover-resetpassword";
+	}
+
+	@RequestMapping(value = "/open/user/recover/resetpassword", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> resetPassword(Long userId, String password, String confirmPassword, HttpServletRequest request,
+			final Model model) {
+
+		// LOG
+		log.debug("Entering resetPassword(userId={} ,password={} , confirmPassword={})", userId, password, confirmPassword);
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+			profileService.resetPassword(userInfo, userId, password, confirmPassword);
+
+			result.put("status", "success");
+
+		} catch (ParvanServiceException e) {
+			proccessException(e, result);
+			model.addAttribute("result", result);
+		}
+
+		return result;
+	}
+
+	@RequestMapping(value = "/open/register/cities/{shortCode}", method = RequestMethod.GET)
+	public @ResponseBody CityInfoVO getGeoEntity(@PathVariable String shortCode, HttpServletRequest request) {
+		log.debug("Entering getGeoEntity(shortCode={})", shortCode);
+		CityInfoVO result = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+			if (Validator.isNotNull(shortCode)) {
+				result = geoManagementService.getCityByShortCode(userInfo, shortCode);
+			}
+		} catch (Exception e) {
+			log.error("Error occurred while getGeoEntity.", e);
+		}
+		log.debug("Exiting getGeoEntity()");
+		return result;
+	}
+
+	@RequestMapping(value = "/open/register/cities", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<CityInfoVO> findCity(@DatatablesParams DatatablesCriterias criterias, String term, HttpServletRequest request)
+			throws ParvanServiceException, ObjectNotFoundException {
+		log.debug("Entering findCity( criterias={}, term={})", criterias, term);
+		DataSet<CityInfoVO> dataSet = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+			int firstResult = criterias.getStart();
+			int maxResults = criterias.getLength();
+			ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+			SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+			String sortCriterion = columnDef.getName();
+			if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+				sortDirection = SortDirectionEnum.Descending;
+			}
+			PageList<CityInfoVO> result = geoManagementService.findCityByNameOrShortCode(userInfo, term, firstResult, maxResults, sortDirection, sortCriterion);
+			long totalRecords = result.getTotal();
+			List<CityInfoVO> elements = result.getElements();
+			dataSet = new DataSet<CityInfoVO>(elements, (long) elements.size(), totalRecords);
+		} catch (ParvanServiceException e) {
+			throw e;
+		}
+		log.debug("Exiting findCity()");
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	@RequestMapping(value = "/user/complaint", method = RequestMethod.GET)
+	public String complaint(HttpServletRequest request) {
+
+		// LOG
+		log.debug("Entering complaint()");
+		return "profile-complaint";
+	}
+	
+	@RequestMapping(value = "/user/complaintcategories", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<ComplaintCategoryVO> findComplaintCategories(@DatatablesParams DatatablesCriterias criterias, String term, HttpServletRequest request)
+			throws ParvanServiceException, ObjectNotFoundException {
+		
+		//LOG
+		log.debug("Entering findComplaintCategories( criterias={}, term={})", criterias, term);
+		DataSet<ComplaintCategoryVO> dataSet = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			int firstResult = criterias.getStart();
+			int maxResults = criterias.getLength();
+			
+			PageList<ComplaintCategoryVO> result = complaintManagementService.findComplaintCategoriesBy(userInfo, term, firstResult, maxResults);
+			long totalRecords = result.getTotal();
+			List<ComplaintCategoryVO> elements = result.getElements();
+			dataSet = new DataSet<ComplaintCategoryVO>(elements, (long) elements.size(), totalRecords);
+		} catch (ParvanServiceException e) {
+			log.error("error occured in record paging...", e);
+			e.printStackTrace();
+			dataSet = new DataSet<ComplaintCategoryVO>(new ArrayList<ComplaintCategoryVO>(), 0l, 0l);
+		}
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+}

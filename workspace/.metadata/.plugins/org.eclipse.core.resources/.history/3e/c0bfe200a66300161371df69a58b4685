@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	layout:decorator="filter-layout" ddl:bundle-includes="bootstrapValidator,select2">
+
+	<head>
+		<title>Roles List</title>
+		
+		<style>
+		.select-device-modal label{
+			margin-bottom: 0px;
+		}
+		
+		.select-device-modal input{
+			width: auto;
+			height: 28px;
+		}
+		
+		.select-device-modal .form-control{
+			width: auto;
+		}
+		
+		.select-device-modal table.dataTable td{
+			padding: 1px 10px;
+		}
+		
+		.select-device-modal .dataTables_filter label{
+			margin-bottom: 5px;
+		}
+		</style>
+	</head>
+
+	<body th:with="rightMenu='roles'">
+		<section layout:fragment="top-header" class="fixed-header">
+			<div class="ui-header-image pull-left">
+            	<img data-src="holder.js/140x140" class="img-circle" alt="140x140" 
+            		src="/identitymanagement2-web/resources/images/contacts.png"
+            		th:src="@{/resources/images/contacts.png}" 
+            		style="width: 48px; height: 48px;" />
+           	</div>
+            <div class="ui-header-title">
+                <div class="split-left">
+                    <h3>
+                        <small>View</small>
+                    </h3>
+                    <h3>Profile</h3>
+                </div>
+
+            </div>
+		</section>
+		
+		<!-- Main content -->
+		<!-- BODY -->
+		<section class="content" layout:fragment="content">
+
+           	
+			<div class="box">
+				<div class="box-body table-responsive">
+					<dy:table entity="Role" table="list" customObjectActions="true" customSearch="true"/>
+				</div>
+			</div>
+			
+		    
+		    
+		</section>
+		
+		<th:block layout:fragment="javascripts">
+		    <script th:inline="javascript">
+
+				
+				/*<![CDATA[*/
+
+
+
+				/*]]>*/
+			</script>
+		</th:block>
+	</body>
+</html>

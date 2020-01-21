@@ -1,0 +1,182 @@
+package all_sys;
+
+import com.ibm.icu.util.*;
+import com.ibm.icu.util.Calendar;
+import com.ibm.icu.util.GregorianCalendar;
+
+import java.util.*;
+
+public final class DateFunctions {
+    public static String getJalaliDay(java.util.Date gDate){
+        com.ibm.icu.text.DateFormat df =
+            new com.ghasemkiani.util.icu.PersianDateFormat(
+                //"EEEE d MMMM y",
+                "d",
+                new ULocale("fa", "IR", ""));
+        return df.format(gDate);
+    }
+
+    public static int getShamsiTodayMoth(){
+        com.ghasemkiani.util.SimplePersianCalendar c = new com.ghasemkiani.util.SimplePersianCalendar();
+	    com.ghasemkiani.util.DateFields t = c.getDateFields();
+        return  t.getMonth()+1;
+    }
+
+    public static int getShamsiTodayYear(){
+        com.ghasemkiani.util.SimplePersianCalendar c = new com.ghasemkiani.util.SimplePersianCalendar();
+	    com.ghasemkiani.util.DateFields t = c.getDateFields();
+        return  t.getYear();
+    }
+
+    public static int getShamsiTodayDay(){
+        com.ghasemkiani.util.SimplePersianCalendar c = new com.ghasemkiani.util.SimplePersianCalendar();
+	    com.ghasemkiani.util.DateFields t = c.getDateFields();
+        return  t.getDay()+1;
+    }
+
+    public static String getShamsiDate(java.util.Date gDate){
+        com.ibm.icu.text.DateFormat df =
+            new com.ghasemkiani.util.icu.PersianDateFormat(
+                "EEEE d MMMM y",
+                new ULocale("fa", "IR", ""));
+        return df.format(gDate);
+    }
+
+    public static String getShamsiMonthName(java.util.Date gDate){
+        com.ibm.icu.text.DateFormat df =
+            new com.ghasemkiani.util.icu.PersianDateFormat(
+                "MMMM",
+                new ULocale("fa", "IR", ""));
+        return df.format(gDate);
+    }
+
+    public static int getShamsiMonthNumber(java.util.Date gDate){
+        com.ibm.icu.text.DateFormat df =
+            new com.ghasemkiani.util.icu.PersianDateFormat(
+                "M",
+                new ULocale("fa", "IR", ""));
+        return Integer.parseInt( df.format(gDate));
+    }
+
+    public static int getShamsiDayNumber(java.util.Date gDate){
+        com.ibm.icu.text.DateFormat df =
+            new com.ghasemkiani.util.icu.PersianDateFormat(
+                "d",
+                new ULocale("fa", "IR", ""));
+        return Integer.parseInt( df.format(gDate));
+    }
+
+    public static int getShamsiYearNumber(java.util.Date gDate){
+        com.ibm.icu.text.DateFormat df =
+            new com.ghasemkiani.util.icu.PersianDateFormat(
+                "Y",
+                new ULocale("fa", "IR", ""));
+        return Integer.parseInt( df.format(gDate));
+    }
+
+    public static String getGerigorianDate(java.util.Date gDate){
+        return getZeroBasedGerigorianMonthName(gDate.getMonth())+ " "+gDate.getDate();
+    }
+
+    public static String getZeroBasedGerigorianMonthName(int month){
+            String result="";
+            switch (month) {
+                case 0:  result = "Jan" ; break;
+                case 1:  result = "Feb" ; break;
+                case 2:  result = "Mar" ; break;
+                case 3:  result = "Apr" ; break;
+                case 4:  result = "May" ; break;
+                case 5:  result = "Jun" ; break;
+                case 6:  result = "Jul" ; break;
+                case 7:  result = "Aug" ; break;
+                case 8:  result = "Sep" ; break;
+                case 9:  result = "Oct" ; break;
+                case 10:  result = "Nov" ; break;
+                case 11:  result = "Dec" ; break;
+            }
+            return result;
+        }
+
+    public static String getZeroBasedShamsiMonthName(int month){
+            String result="";
+            switch (month) {
+                case 0:  result = "فروردین" ; break;
+                case 1:  result = "اردیبهشت" ; break;
+                case 2:  result = "خرداد" ; break;
+                case 3:  result = "تیر" ; break;
+                case 4:  result = "مرداد" ; break;
+                case 5:  result = "شهریور" ; break;
+                case 6:  result = "مهر" ; break;
+                case 7:  result = "آبان" ; break;
+                case 8:  result = "آذر" ; break;
+                case 9:  result = "دی" ; break;
+                case 10:  result = "بهمن" ; break;
+                case 11:  result = "اسفند" ; break;
+            }
+            return result;
+        }
+
+    public static String getShamsiTodayShortDate(){
+        com.ghasemkiani.util.SimplePersianCalendar c = new com.ghasemkiani.util.SimplePersianCalendar();
+	    com.ghasemkiani.util.DateFields t = c.getDateFields();
+        String mm, dd;
+        int m,d ;
+        m = t.getMonth()+1;
+        d = t.getDay();
+        if (m<10){
+              mm="0"+String.valueOf(m);
+        }else
+        {
+            mm= String.valueOf(m) ;
+        }
+
+        if (d<10){
+              dd="0"+String.valueOf(d);
+        }else{
+            dd=String.valueOf(d);
+        }
+
+	    return t.getYear() + "/" + mm + "/" +dd;
+    }
+
+    public static String getGregorianFull(int jday , int jmonth , int jyear) {
+        return (String) getGregorian(true, jday, jmonth, jyear, false);
+    }
+
+    public static String getGregorianShort(int jday , int jmonth , int jyear){
+        return (String) getGregorian(false , jday , jmonth , jyear, false);
+    }
+
+    public static Date getGregorianAsDate(int jday , int jmonth , int jyear){
+        return (Date) getGregorian(false , jday , jmonth , jyear, true);
+    }
+
+    private static Object getGregorian(boolean isFullDate , int jday , int jmonth , int jyear, boolean asDate){
+        com.ibm.icu.util.Calendar cal = new com.ghasemkiani.util.icu.PersianCalendar();
+	    com.ibm.icu.util.Calendar gcal = new com.ibm.icu.util.GregorianCalendar();
+	    cal.set(com.ibm.icu.util.Calendar.ERA, com.ghasemkiani.util.icu.PersianCalendar.AH);
+	    cal.set(com.ibm.icu.util.Calendar.YEAR, jyear);
+	    cal.set(com.ibm.icu.util.Calendar.MONTH, jmonth);
+	    cal.set(com.ibm.icu.util.Calendar.DAY_OF_MONTH, jday);
+
+	    int julianDay = cal.get(com.ibm.icu.util.Calendar.JULIAN_DAY);
+	    gcal.set(com.ibm.icu.util.Calendar.JULIAN_DAY, julianDay);
+	    com.ibm.icu.text.DateFormat df = gcal.getDateTimeFormat(
+		( isFullDate ? com.ibm.icu.text.DateFormat.FULL : com.ibm.icu.text.DateFormat.SHORT )  , -1,
+		new com.ibm.icu.util.ULocale("en", "US", ""));
+	    if(asDate)
+            return cal.getTime();
+        else
+            return df.format(cal.getTime());
+    }
+
+    public static String getShamsiDateSlashed(java.util.Date gDate){
+        com.ibm.icu.text.DateFormat df =
+            new com.ghasemkiani.util.icu.PersianDateFormat(
+                "yyyy/MM/dd"/*,
+                new ULocale("fa", "IR", "")*/);
+        return df.format(gDate);
+    }
+
+
+}

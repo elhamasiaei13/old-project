@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout">
+
+<head>
+    <title>GeneralAgent List</title>
+
+    <link href="../../resources/lib/select2-3.5.0/select2.css" th:href="@{/resources/lib/select2-3.5.0/select2.css}" rel="stylesheet" />
+
+    <link href="../../resources/lib/select2-3.5.0/select2-bootstrap.css" th:href="@{/resources/lib/select2-3.5.0/select2-bootstrap.css}" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../../resources/lib/bootstrap-validator-0.5.0/css/bootstrapValidator.min.css" th:href="@{/resources/lib/bootstrap-validator-0.5.0/css/bootstrapValidator.min.css}"></link>
+
+    <style>
+        .select-device-modal label {
+            margin-bottom: 0px;
+        }
+        
+        .select-device-modal input {
+            width: auto;
+            height: 28px;
+        }
+        
+        .select-device-modal .form-control {
+            width: auto;
+        }
+        
+        .select-device-modal table.dataTable td {
+            padding: 1px 10px;
+        }
+        
+        .select-device-modal .dataTables_filter label {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body th:with="rightMenu='admin', subRightMenu='roles'">
+    <section layout:fragment="top-header" class="fixed-header">
+        <div class="ui-header-image pull-left">
+            <img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/agentmanagement-web/resources/images/contacts.png" th:src="@{/resources/images/contacts.png}" style="width: 48px; height: 48px;" />
+        </div>
+        <div class="ui-header-title">
+            <div class="split-left">
+                <h3>
+					<small>View</small>
+				</h3>
+                <h3>GeneralAgents</h3>
+            </div>
+            <div class="split-right">
+                <a data-toggle="modal" onclick="createGeneralAgent();" class="btn btn-success"> <i class="fa fa-plus">&nbsp;&nbsp;</i><span th:text="#{generalAgent.create}">جدید</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <!-- BODY -->
+    <section class="content" layout:fragment="content">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title">جستجو</h3>
+                <div class="box-tools pull-right">
+                    <button title="" data-widget="collapse" class="btn btn-primary btn-xs">
+						<i class="fa fa-minus"></i>
+					</button>
+                </div>
+            </div>
+            <div class="box-body" style="display: block;">
+                <dy:form entity="GeneralAgent" form="search" type="search" />
+            </div>
+            <!-- /.box-body -->
+        </div>
+
+        <div class="box">
+            <div class="box-body table-responsive">
+                <dy:table entity="GeneralAgent" table="list" customObjectActions="true" customSearch="true" />
+            </div>
+        </div>
+
+        <div class="modal fade" id="createGeneralAgentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" th:text="#{generalAgent.create}">محصول جدید</h4>
+                    </div>
+                    <div class="modal-body">
+                        <dy:form entity="GeneralAgent" form="create" type="create" />
+                    </div>
+                    <div class="modal-footer checkbox">
+                        <label class="create-another" for="createGeneralAgent-create-another"> <input
+							type="checkbox" id="createGeneralAgent-create-another"
+							value="true" /> <span th:remove="tag">Create another</span>
+						</label>
+
+                        <button type="button" class="btn btn-primary" id="createGeneralAgentBtn">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modifyGeneralAgentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" th:text="#{generalAgent.modify}">ویرایش اطلاعات</h4>
+                    </div>
+                    <div class="modal-body">
+                        <dy:form entity="GeneralAgent" form="modify" type="modify" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="modifyGeneralAgentBtn">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteGeneralAgentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">حذف</h4>
+                    </div>
+                    <div class="modal-body">
+                        <dy:form entity="GeneralAgent" form="delete" type="delete" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="deleteGeneralAgentBtn">Delete</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </section>
+
+    <th:block layout:fragment="javascripts">
+        <script src="../../resources/lib/bootstrap-validator-0.5.0/js/bootstrapValidator.min.js" th:src="@{/resources/lib/bootstrap-validator-0.5.0/js/bootstrapValidator.min.js}"></script>
+        <script src="../../resources/lib/select2-3.5.0/select2.min.js" th:src="@{/resources/lib/select2-3.5.0/select2.min.js}"></script>
+
+        <script th:inline="javascript">
+            var titleModify = '<span class="label label-info"  th:remove="tag">Update !</span>';
+            var titleDelete = '<span class="label label-info"  th:remove="tag">Delete !</span>';
+            var titleAddEmployee = '<span class="label label-info"  th:remove="tag">Add Employee !</span>';
+            var titleDeleteEmployee = '<span class="label label-info"  th:remove="tag">Delete Employee !</span>';
+
+            /*<![CDATA[*/
+            
+            function getGeneralAgentExtraParams(aoData) {
+                aoData.push({
+                    'name': 'canonicalSearchName',
+                    'value': $('#canonicalSearchNameFilter').val()
+                });
+            }
+
+            function rowActions(data, type, full) {
+
+                var d = '<div style="width: 110px;"><a class="btn btn-xs btn-primary" title="' + titleModify + '" onclick="modifyGeneralAgent(' + full.id + ')" href="javascript:;"><i class="fa fa-pencil"></i></a> ';
+                d += '<a class="btn btn-xs btn-danger" title="' + titleDelete + '" onclick="deleteGeneralAgent(' + full.id + ')" href="javascript:;"><i class="fa fa-times"></i></a> ';
+                d += '<a class="btn btn-xs btn-success" title="' + titleAddEmployee + '"  href="/agentmanagement-web/generalAgent/addEmployees/'+full.id+'"><i class="fa fa-user-plus"></i></a>';
+                d += '<a class="btn btn-xs btn-warning" title="' + titleDeleteEmployee + '" href="/agentmanagement-web/generalAgent/deleteEmployees/'+full.id+'"><i class="fa fa-user-times"></i></a>';
+                d += '</div>';
+                return d;
+            }
+
+            function doEmployeeSearch() {
+
+                oTable_employeeTable.fnReloadAjax();
+            }
+
+            var EmployeeTable;
+            
+            function addEmployees(id) {
+                  
+                $.getJSON('/agentmanagement-web/employee/findByName/' + id).done(function(data) {
+
+
+                        var $modalBodyForm = $('#addEmployeesModal .modal-body form');
+                        var $modalBodyTbody = $('#addEmployeesModal .modal-body tbody');
+
+                        $('#addEmployeesModal .modal-body tbody tr').remove();
+                        $('#addEmployeesModal .modal-body input[name=id]').val(id);
+                        
+                        $(data.aaData).each(function(i, v) {
+                            if (v.active == true) {
+                                $('<tr><td style="width: 40px"><input type="checkbox" class="validate[required]" checked  disabled="disabled" name="employees.id" value = "' + v.id + '"/></td><td>' + v.userName + '</td><td>' + v.fullName + '</td></tr>').appendTo($modalBodyTbody);
+                            } else {
+                                $('<tr><td style="width: 40px"><input type="checkbox" class="validate[required]"  name="employees.id" value = "' + v.id + '"/></td><td>' + v.userName + '</td><td>' + v.fullName + '</td></tr>').appendTo($modalBodyTbody);
+                            }
+                        });
+
+                        $('#addEmployeesModal').find('.callout').text('').addClass('hide');
+                        $('#addEmployeesModal').modal({
+                            backdrop: 'static',
+                            keyboard: true
+                        });
+                        $('#addEmployeesModal').modal('show');
+
+                        EmployeeTable = $('#addEmployeesModal #EmployeeTable').dataTable({
+                            "bLengthChange": false,
+                            "bFilter": false,
+                            "bSort": false,
+                            "bAutoWidth": false,
+                            "sPaginationType": "bootstrap",
+                            "bDestory": true,
+                            "bRetrieve": true
+                        });
+
+                        $('#addEmployeesModal div.pagination ul').addClass('pagination');
+                        $('#addEmployeesModal div.dataTables_wrapper div.row-fluid');
+                        $('#addEmployeesModal div.dataTables_wrapper div.span6').addClass('col-md-6 col-lg-6');
+
+                        //TODO maybe check validation again
+
+                    })
+                    .fail(failAjax);
+            }
+
+
+            function deleteEmployees(id) {
+                $.getJSON('/agentmanagement-web/employee/findByName/' + id).done(function(data) {
+
+
+                        var $modalBodyForm = $('#addEmployeesModal .modal-body form');
+                        var $modalBodyTbody = $('#addEmployeesModal .modal-body tbody');
+
+                        $('#addEmployeesModal .modal-body tbody tr').remove();
+                        $('#addEmployeesModal .modal-body input[name=id]').val(id);
+
+                        $(data.aaData).each(function(i, v) {
+                            if (v.active == true) {
+                                $('<tr><td style="width: 40px"><input type="checkbox" class="validate[required]" checked  name="employees.id" value = "' + v.id + '"/></td><td>' + v.userName + '</td><td>' + v.fullName + '</td></tr>').appendTo($modalBodyTbody);
+                            } else {
+                                $('<tr><td style="width: 40px"><input type="checkbox" class="validate[required]"  disabled="disabled" name="employees.id" value = "' + v.id + '"/></td><td>' + v.userName + '</td><td>' + v.fullName + '</td></tr>').appendTo($modalBodyTbody);
+                            }
+                        });
+
+                        $('#addEmployeesModal').find('.callout').text('').addClass('hide');
+                        $('#addEmployeesModal').modal({
+                            backdrop: 'static',
+                            keyboard: true
+                        });
+                        $('#addEmployeesModal').modal('show');
+
+                        employeeTable = $('#addEmployeesModal #employeeTable').dataTable({
+                            "bLengthChange": false,
+                            "bFilter": false,
+                            "bSort": false,
+                            "bAutoWidth": false,
+                            "sPaginationType": "bootstrap",
+                            "bDestory": true,
+                            "bRetrieve": true
+                        });
+
+                        $('#addEmployeesModal div.pagination ul').addClass('pagination');
+                        $('#addEmployeesModal div.dataTables_wrapper div.row-fluid');
+                        $('#addEmployeesModal div.dataTables_wrapper div.span6').addClass('col-md-6 col-lg-6');
+
+                        //TODO maybe check validation again
+
+                    })
+                    .fail(failAjax);
+            }
+
+            jQuery(document).ready(function() {
+                
+                  
+
+                $('#addEmployeesModal .modal-body form, #deleteEmployeesModal .modal-body form').bootstrapValidator({
+                    excluded: [':disabled'],
+                    feedbackIcons: {
+                        valid: 'fa fa-check',
+                        invalid: 'fa fa-times',
+                        validating: 'fa fa-refresh'
+                    }
+                });
+
+                $('#addEmployeeBtn').click(function() {
+
+                	
+                    
+                    var $btn = $(this);
+                    $('#addEmployeesModal .callout').text('').addClass('hide');
+                    $('#addEmployeesModal .modal-body form').data('bootstrapValidator').validate();
+                    if ($('#addEmployeesModal .modal-body form').data('bootstrapValidator').isValid()) {
+                        $btn.attr('disabled', true);
+                        $.post('/agentmanagement-web/generalAgent/saveEmployees', $('#addEmployeesModal form').serialize()).done(function(data) {
+                            console.debug(data);
+                            if (data.status == 'success') {
+                                showTopleftGrowl('success', null, 'Update Successful');
+                                $('#addEmployeesModal').modal('hide');
+                            } else if (data.status == 'ValidationException') {
+                                $('#addEmployeesModal .callout').text(data.invalidField + ' is required').removeClass('hide');
+                            } else if (data.status == 'ObjectExistsException') {
+                                $('#addEmployeesModal .callout').text(data.invalidField + ' is already exist').removeClass('hide');
+                            } else if (data.status == 'ErrorCode') {
+                                $('#addEmployeesModal .callout').text(messages[data.errorCode]).removeClass('hide');
+                            } else {
+                                console.debug(data.status);
+                                $('#addEmployeesModal .callout').text((data.message ? data.message : 'failed')).removeClass('hide');
+                            }
+                            $btn.attr('disabled', false);
+                        }).fail(function(jqXHR, textStatus, errorThrown) {
+                            failAjax(jqXHR, textStatus, errorThrown, 'addEmployeeBtn')
+                        });
+                    }
+                });
+                $('#changeUserRoleModal').on('hidden.bs.modal', function() {
+                	employeeTable.fnDestroy(false);
+                    $('#changeUserRoleModal .modal-body input[name=id]').val('');
+                    $('#changeUserRoleModal .modal-body input[name=version]').val('');
+                });
+
+            });
+
+            /*]]>*/
+        </script>
+    </th:block>
+</body>
+
+</html>

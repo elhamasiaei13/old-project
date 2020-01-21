@@ -1,0 +1,497 @@
+/**
+ * 
+ */
+package com.parvanpajooh.routemanagement.model;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.Cacheable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
+import com.google.common.base.Splitter;
+import com.parvanpajooh.commons.platform.ejb.model.BaseModel;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.routemanagement.model.enums.FreightNodeType;
+import com.parvanpajooh.routemanagement.model.vo.NodeVO;
+import com.parvanpajooh.routemanagement.model.vo.RouteVO;
+
+/**
+ * @author ali
+ * @author mehrdad
+ *
+ */
+@Entity
+@Cacheable
+@Table(name="node_tbl")
+public class Node extends BaseModel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -9210435531051422111L;
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long id;
+	
+	@NotEmpty
+	@NotNull
+	private String codeName;
+	
+	@NotEmpty
+	@NotNull
+	private String name;
+	
+	private String otherNames;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(nullable=false)
+	private FreightNodeType freightType;
+	
+	@NotNull
+	private Boolean active;
+	
+	@OneToMany(mappedBy = "toNode")
+    private Set<Route> toRoutes;
+	
+	@OneToMany(mappedBy = "fromNode")
+	private Set<Route> fromRoutes;
+	
+	@ManyToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name = "zoneId")
+	private Zone zone;
+	
+	private String timeZoneId;
+	
+//	@OneToOne(fetch=FetchType.EAGER)
+//	private GeoEntity geoEntity;
+	
+	private String geoEntityCode;
+	
+	private Double geoLat;
+	
+	private Double geoLng;
+	
+	@Version
+    private Integer version;
+	
+	private String tags;
+	
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the codeName
+	 */
+	public String getCodeName() {
+		return codeName;
+	}
+
+	/**
+	 * @param codeName the codeName to set
+	 */
+	public void setCodeName(String codeName) {
+		this.codeName = codeName;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @return the otherNames
+	 */
+	public String getOtherNames() {
+		return otherNames;
+	}
+
+	/**
+	 * @param otherNames the otherNames to set
+	 */
+	public void setOtherNames(String otherNames) {
+		this.otherNames = otherNames;
+	}
+
+	/**
+	 * @return the freightType
+	 */
+	public FreightNodeType getFreightType() {
+		return freightType;
+	}
+
+	/**
+	 * @param freightType the freightType to set
+	 */
+	public void setFreightType(FreightNodeType freightType) {
+		this.freightType = freightType;
+	}
+
+	/**
+	 * @return the toRoutes
+	 */
+	public Set<Route> getToRoutes() {
+		return toRoutes;
+	}
+
+	/**
+	 * @return the fromRoutes
+	 */
+	public Set<Route> getFromRoutes() {
+		return fromRoutes;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @param toRoutes the toRoutes to set
+	 */
+	public void setToRoutes(Set<Route> toRoutes) {
+		this.toRoutes = toRoutes;
+	}
+
+	/**
+	 * @param fromRoutes the fromRoutes to set
+	 */
+	public void setFromRoutes(Set<Route> fromRoutes) {
+		this.fromRoutes = fromRoutes;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the zone
+	 */
+	public Zone getZone() {
+		return zone;
+	}
+
+	/**
+	 * @param zone the zone to set
+	 */
+	public void setZone(Zone zone) {
+		this.zone = zone;
+	}
+	
+	
+
+//	/**
+//	 * @return the geoEntity
+//	 */
+//	public GeoEntity getGeoEntity() {
+//		return geoEntity;
+//	}
+//
+//	/**
+//	 * @param geoEntity the geoEntity to set
+//	 */
+//	public void setGeoEntity(GeoEntity geoEntity) {
+//		this.geoEntity = geoEntity;
+//	}
+
+	/**
+	 * @return the timeZoneId
+	 */
+	public String getTimeZoneId() {
+		return timeZoneId;
+	}
+
+	/**
+	 * @param timeZoneId the timeZoneId to set
+	 */
+	public void setTimeZoneId(String timeZoneId) {
+		this.timeZoneId = timeZoneId;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @return the geoEntityCode
+	 */
+	public String getGeoEntityCode() {
+		return geoEntityCode;
+	}
+
+	/**
+	 * @param geoEntityCode the geoEntityCode to set
+	 */
+	public void setGeoEntityCode(String geoEntityCode) {
+		this.geoEntityCode = geoEntityCode;
+	}
+
+	/**
+	 * @return the geoLat
+	 */
+	public Double getGeoLat() {
+		return geoLat;
+	}
+
+	/**
+	 * @param geoLat the geoLat to set
+	 */
+	public void setGeoLat(Double geoLat) {
+		this.geoLat = geoLat;
+	}
+
+	/**
+	 * @return the geoLng
+	 */
+	public Double getGeoLng() {
+		return geoLng;
+	}
+
+	/**
+	 * @param geoLng the geoLng to set
+	 */
+	public void setGeoLng(Double geoLng) {
+		this.geoLng = geoLng;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(String tags) {
+		this.tags = tags;
+	}
+
+	/**
+	 * @param version the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+	
+	/**
+	 * @return the tags
+	 */
+	public List<String> getTags() {
+		List<String> result = new ArrayList<String>();
+		if(Validator.isNotNull(this.tags)){
+			for (String s : Splitter.on(',').split(this.tags)) {
+				result.add(s.trim());
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(List<String> tags) {
+		if(Validator.isNotNull(tags) && tags.size() > 0){
+			this.tags = Joiner.on(',').join(tags);
+			//this.tags = "," + this.tags + ",";
+		} else {
+			this.tags = null;
+		}
+	}
+
+	@Override
+	public NodeVO toVO() {
+		NodeVO vo = toVOLite();
+		
+		// toRoute
+		List<RouteVO> toRouteVOs = new ArrayList<RouteVO>();
+		
+		if(Validator.isNotNull(this.toRoutes)){
+			for (Route route: toRoutes) {
+				toRouteVOs.add((RouteVO) route.toVOLite());
+			}
+		}
+		
+		vo.setToRoutes(toRouteVOs);
+		
+		// fromRoutes
+		List<RouteVO> fromRouteVOs = new ArrayList<RouteVO>();
+		
+		if(Validator.isNotNull(this.fromRoutes)){
+			for (Route route: fromRoutes) {
+				fromRouteVOs.add((RouteVO) route.toVOLite());
+			}
+		}
+		
+		vo.setFromRoutes(fromRouteVOs);
+		
+		// zone
+		if(Validator.isNotNull(this.zone)){
+			vo.setZone(zone.toVOLite());
+		}
+		
+		// geoEntity
+//		if(Validator.isNotNull(this.geoEntity)){
+//			vo.setGeoEntity(geoEntity.toVOLite());
+//		}
+		
+		return vo;
+	}
+
+	@Override
+	public NodeVO toVOLite() {
+		NodeVO vo = new NodeVO();
+		
+		vo.setId(this.id);
+		vo.setCodeName(this.codeName);
+		vo.setName(this.name);
+		vo.setOtherNames(this.otherNames);
+		vo.setFreightType(this.freightType);
+		vo.setGeoEntityCode(this.geoEntityCode);
+		vo.setGeoLat(this.geoLat);
+		vo.setGeoLng(this.geoLng);
+		vo.setActive(this.active);
+		vo.setVersion(version);
+		vo.setTags(getTags());
+		
+		if(Validator.isNotNull(this.zone)){
+			vo.setZone(this.zone.toVOLite());
+		}
+		
+//		if(Validator.isNotNull(this.geoEntity)){
+//			vo.setGeoEntity(this.geoEntity.toVOLite());
+//		}
+		
+		setAuditToVO(vo);
+		
+		return vo;
+	}
+
+	@Override
+	public void fromVO(BaseVO baseVO) {
+		NodeVO vo = ( NodeVO ) baseVO;
+		
+		this.id = vo.getId();
+		this.codeName = vo.getCodeName();
+		this.name = vo.getName();
+		this.otherNames = vo.getOtherNames();
+		this.freightType = vo.getFreightType();
+		this.timeZoneId = vo.getTimeZoneId();
+		this.geoEntityCode = vo.getGeoEntityCode();
+		this.geoLat = vo.getGeoLat();
+		this.geoLng = vo.getGeoLng();
+		this.active = vo.getActive();
+		this.version = vo.getVersion();
+		this.setTags(vo.getTags());
+		
+		getAuditFromVO(vo);
+		
+		/*if( Validator.isNotNull(vo.getToRoutes())  )  {
+			
+			Set<Route> toRoutes = new HashSet<Route>(vo.getToRoutes().size());
+			for( RouteVO routeVO : vo.getToRoutes()  ) {
+				
+				Route route = new Route();
+				route.fromVO(routeVO);
+				toRoutes.add(route);
+			}
+			this.toRoutes = toRoutes;
+			
+		}
+		
+		if( Validator.isNotNull(vo.getFromRoutes())  )  {
+			
+			Set<Route> fromRoutes = new HashSet<Route>(vo.getFromRoutes().size());
+			for( RouteVO routeVO : vo.getFromRoutes()  ) {
+				
+				Route route = new Route();
+				route.fromVO(routeVO);
+				fromRoutes.add(route);
+			}
+			this.fromRoutes = fromRoutes;
+			
+		}*/
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		ToStringBuilder sb = new ToStringBuilder(this,
+				ToStringStyle.MULTI_LINE_STYLE)
+				.append("id", this.id)
+				.append("codeName", this.codeName)
+				.append("name", this.name)
+				.append("otherNames", this.otherNames)
+				.append("freightType", this.freightType)
+				.append("geoEntityCode", this.geoEntityCode)
+				.append("geoLat", this.geoLat)
+				.append("geoLng", this.geoLng)
+				.append("tags", this.tags)
+				.append("active", this.active)
+				.append("version", getVersion());
+
+		return sb.toString();
+	}
+
+	@Override
+	public int hashCode(){
+		return Objects.hashCode(id);
+	}
+	
+	@Override
+	public boolean equals(Object object){
+		if (object instanceof Node) {
+			Node that = (Node) object;
+			return Objects.equal(this.id, that.id);
+		}
+		return false;
+	}
+
+}

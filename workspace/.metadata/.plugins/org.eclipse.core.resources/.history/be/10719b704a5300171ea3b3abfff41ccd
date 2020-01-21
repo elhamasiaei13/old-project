@@ -1,0 +1,1662 @@
+/**
+ * 
+ */
+package com.parvanpajooh.waybillmanagement.domain.model.dto;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.parvanpajooh.client.personmanagement.model.PersonManagementEnums;
+import com.parvanpajooh.client.waybillmanagement.model.WaybillMsg;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseDto;
+import com.parvanpajooh.commons.platform.ejb.util.converter.LocalDateTimeXmlAdapter;
+import com.parvanpajooh.commons.platform.ejb.util.converter.LocalDateXmlAdapter;
+import com.parvanpajooh.waybillmanagement.domain.model.enums.ChargeParty;
+import com.parvanpajooh.waybillmanagement.domain.model.enums.DiscountType;
+import com.parvanpajooh.waybillmanagement.domain.model.enums.PersonType;
+import com.parvanpajooh.waybillmanagement.domain.model.enums.WeightUnit;
+
+/**
+ * @author MO
+ *
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(Include.NON_NULL)
+@XmlRootElement(name = "waybill")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class CargoWaybillDto extends BaseDto {
+	
+	private static final long serialVersionUID = 306382136661819181L;
+
+	private Long id;
+	
+	private String number;
+	
+	private WaybillStateDto state;
+	
+	@XmlJavaTypeAdapter(LocalDateTimeXmlAdapter.class)
+	private LocalDateTime issuingDate;
+
+	
+	@XmlJavaTypeAdapter(LocalDateTimeXmlAdapter.class)
+	private LocalDateTime expectedDeliveryDate;
+
+	@XmlJavaTypeAdapter(LocalDateTimeXmlAdapter.class)
+	private LocalDateTime actualDeliveryDate;
+	
+	private String contentDescription;
+	
+	private Double totalGrossWeight;
+
+	private Double totalVolumetricWeight;
+
+	private Double totalChargeableWeight;
+
+	private Double totalDeclaredValue;
+	
+	private Integer totalPieces;
+	
+	private BigDecimal totalWeightChargePPD;
+	private BigDecimal totalWeightChargeCOLL;
+	
+	private BigDecimal totalValuationChargePPD;
+	private BigDecimal totalValuationChargeCOLL;
+	
+	private BigDecimal totalTaxPPD;
+	private BigDecimal totalTaxCOLL;
+	
+	private BigDecimal totalOtherChargesDueAgentPPD;
+	private BigDecimal totalOtherChargesDueAgentCOLL;
+	
+	private BigDecimal totalOtherChargesDueCarrierPPD;
+	private BigDecimal totalOtherChargesDueCarrierCOLL;
+	
+	private BigDecimal totalAmountPPD;
+	private BigDecimal totalAmountCOLL;
+	
+	// Shipper
+	private String shipperPersonUuid;
+	private PersonType shipperPersonType;
+	private ShipmentContactReal shipperContactReal;
+	private ShipmentContactLegal shipperContactLegal;
+	private String shipperCountryName;
+	private String shipperStateName;
+	private String shipperCityName;
+	private String shipperClientId;
+	private String shipperContactJson;
+	private String shipperName;
+	private String shipperNationalId;
+	private String shipperMobileNumber;
+	private String shipperLandlineNumber;
+	private String shipperCountryCode;
+	private String shipperStateCode;
+	private String shipperCityCode;
+	private String shipperPostalCode;
+	private String shipperAddress;
+	private String shipperNote;
+	
+	// Consignee
+	private String consigneePersonUuid;
+	private PersonType consigneePersonType;
+	private ShipmentContactReal consigneeContactReal;
+	private ShipmentContactLegal consigneeContactLegal;
+	private String consigneeCountryName;
+	private String consigneeStateName;
+	private String consigneeCityName;
+	private String canonicalShipperName;
+	private String consigneeClientId;
+	private String consigneeContactJson;
+	private String consigneeName;
+	private String consigneeNationalId;
+	private String consigneeMobileNumber;
+	private String consigneeLandlineNumber;
+	private String consigneeCountryCode;
+	private String consigneeStateCode;
+	private String consigneeCityCode;
+	private String consigneePostalCode;
+	private String consigneeAddress;
+	private String consigneeNote;
+	private String canonicalConsigneeName;
+	
+	private List<PackingItemDto> packingList;
+	
+	private ChargeParty weightValueChargeParty;
+	
+	private ChargeParty otherValueChargeParty;
+	
+	private PaymentMethodDto paymentMethod; // change to code
+	
+	private String paymentReferenceInfo;
+	
+	private Long productId;
+	
+	private Integer productVersion;
+	
+	private String signerName;
+
+	@XmlJavaTypeAdapter(LocalDateTimeXmlAdapter.class)
+	private LocalDateTime pickupRequestDate;
+
+	private String pickupRequestRemark;
+
+	private Double estimatedCharge;
+
+	private String trackingNumber;
+	
+	private Long issuingAgentId;
+
+	private TransferNodeDto originNode;
+	
+	private TransferNodeDto destinationNode;
+
+	private TreeSet<TransferNodeDto> viaNodes;
+	
+	private List<PriceItemDto> priceItems;
+
+	private WeightUnit weightUnit;
+	
+	private String requestedFlight;
+	
+	@XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
+	private LocalDate flightDate;
+
+	private String currencyCode;
+	
+	private Double declaredValueForCarriage;
+	
+	private Double declaredValueForCustoms;
+	
+	private Double amountOfInsurance;
+
+	private Double currencyConversionRate;
+
+	private String handlingInfo;
+
+	private String accountingInfo;
+
+	private String optionalShippingInfoReferenceNo;
+
+	private String optionalShippingInfo1;
+
+	private String optionalShippingInfo2;
+
+	private String forwarderReferenceNumber;
+	
+	private DiscountType discountType;
+	
+	private String discountCode;
+	
+	@XmlJavaTypeAdapter(LocalDateTimeXmlAdapter.class)
+	private LocalDateTime lastChangeStateDate;
+	
+	private String remarks;
+	
+	// for view only
+	@XmlTransient
+	private String createUserName;
+	
+	@XmlTransient
+	private String updateUserName;
+	
+	@XmlTransient
+	private List<TransferNodeDto> viaNodesList;
+	
+	@XmlTransient
+	private String strFlightDate;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the number
+	 */
+	public String getNumber() {
+		return number;
+	}
+
+	/**
+	 * @param number the number to set
+	 */
+	public void setNumber(String number) {
+		this.number = number;
+	}
+	
+	/**
+	 * @return the state
+	 */
+	public WaybillStateDto getState() {
+		return state;
+	}
+
+	/**
+	 * @param state the state to set
+	 */
+	public void setState(WaybillStateDto state) {
+		this.state = state;
+	}
+
+	/**
+	 * @return the issuingDate
+	 */
+	public LocalDateTime getIssuingDate() {
+		return issuingDate;
+	}
+
+	/**
+	 * @param issuingDate the issuingDate to set
+	 */
+	public void setIssuingDate(LocalDateTime issuingDate) {
+		this.issuingDate = issuingDate;
+	}
+
+	/**
+	 * @return the expectedDeliveryDate
+	 */
+	public LocalDateTime getExpectedDeliveryDate() {
+		return expectedDeliveryDate;
+	}
+
+	/**
+	 * @param expectedDeliveryDate the expectedDeliveryDate to set
+	 */
+	public void setExpectedDeliveryDate(LocalDateTime expectedDeliveryDate) {
+		this.expectedDeliveryDate = expectedDeliveryDate;
+	}
+
+	/**
+	 * @return the actualDeliveryDate
+	 */
+	public LocalDateTime getActualDeliveryDate() {
+		return actualDeliveryDate;
+	}
+
+	/**
+	 * @param actualDeliveryDate the actualDeliveryDate to set
+	 */
+	public void setActualDeliveryDate(LocalDateTime actualDeliveryDate) {
+		this.actualDeliveryDate = actualDeliveryDate;
+	}
+
+	/**
+	 * @return the contentDescription
+	 */
+	public String getContentDescription() {
+		return contentDescription;
+	}
+
+	/**
+	 * @param contentDescription the contentDescription to set
+	 */
+	public void setContentDescription(String contentDescription) {
+		this.contentDescription = contentDescription;
+	}
+
+	/**
+	 * @return the totalGrossWeight
+	 */
+	public Double getTotalGrossWeight() {
+		return totalGrossWeight;
+	}
+
+	/**
+	 * @param totalGrossWeight the totalGrossWeight to set
+	 */
+	public void setTotalGrossWeight(Double totalGrossWeight) {
+		this.totalGrossWeight = totalGrossWeight;
+	}
+
+	/**
+	 * @return the totalVolumetricWeight
+	 */
+	public Double getTotalVolumetricWeight() {
+		return totalVolumetricWeight;
+	}
+
+	/**
+	 * @param totalVolumetricWeight the totalVolumetricWeight to set
+	 */
+	public void setTotalVolumetricWeight(Double totalVolumetricWeight) {
+		this.totalVolumetricWeight = totalVolumetricWeight;
+	}
+
+	/**
+	 * @return the totalChargeableWeight
+	 */
+	public Double getTotalChargeableWeight() {
+		return totalChargeableWeight;
+	}
+
+	/**
+	 * @param totalChargeableWeight the totalChargeableWeight to set
+	 */
+	public void setTotalChargeableWeight(Double totalChargeableWeight) {
+		this.totalChargeableWeight = totalChargeableWeight;
+	}
+
+	/**
+	 * @return the totalDeclaredValue
+	 */
+	public Double getTotalDeclaredValue() {
+		return totalDeclaredValue;
+	}
+
+	/**
+	 * @param totalDeclaredValue the totalDeclaredValue to set
+	 */
+	public void setTotalDeclaredValue(Double totalDeclaredValue) {
+		this.totalDeclaredValue = totalDeclaredValue;
+	}
+
+	/**
+	 * @return the totalPieces
+	 */
+	public Integer getTotalPieces() {
+		return totalPieces;
+	}
+
+	/**
+	 * @param totalPieces the totalPieces to set
+	 */
+	public void setTotalPieces(Integer totalPieces) {
+		this.totalPieces = totalPieces;
+	}
+
+	public BigDecimal getTotalWeightChargePPD() {
+		return totalWeightChargePPD;
+	}
+
+	public void setTotalWeightChargePPD(BigDecimal totalWeightChargePPD) {
+		this.totalWeightChargePPD = totalWeightChargePPD;
+	}
+
+	public BigDecimal getTotalWeightChargeCOLL() {
+		return totalWeightChargeCOLL;
+	}
+
+	public void setTotalWeightChargeCOLL(BigDecimal totalWeightChargeCOLL) {
+		this.totalWeightChargeCOLL = totalWeightChargeCOLL;
+	}
+
+	public BigDecimal getTotalValuationChargePPD() {
+		return totalValuationChargePPD;
+	}
+
+	public void setTotalValuationChargePPD(BigDecimal totalValuationChargePPD) {
+		this.totalValuationChargePPD = totalValuationChargePPD;
+	}
+
+	public BigDecimal getTotalValuationChargeCOLL() {
+		return totalValuationChargeCOLL;
+	}
+
+	public void setTotalValuationChargeCOLL(BigDecimal totalValuationChargeCOLL) {
+		this.totalValuationChargeCOLL = totalValuationChargeCOLL;
+	}
+
+	public BigDecimal getTotalTaxPPD() {
+		return totalTaxPPD;
+	}
+
+	public void setTotalTaxPPD(BigDecimal totalTaxPPD) {
+		this.totalTaxPPD = totalTaxPPD;
+	}
+
+	public BigDecimal getTotalTaxCOLL() {
+		return totalTaxCOLL;
+	}
+
+	public void setTotalTaxCOLL(BigDecimal totalTaxCOLL) {
+		this.totalTaxCOLL = totalTaxCOLL;
+	}
+
+	public BigDecimal getTotalOtherChargesDueAgentPPD() {
+		return totalOtherChargesDueAgentPPD;
+	}
+
+	public void setTotalOtherChargesDueAgentPPD(BigDecimal totalOtherChargesDueAgentPPD) {
+		this.totalOtherChargesDueAgentPPD = totalOtherChargesDueAgentPPD;
+	}
+
+	public BigDecimal getTotalOtherChargesDueAgentCOLL() {
+		return totalOtherChargesDueAgentCOLL;
+	}
+
+	public void setTotalOtherChargesDueAgentCOLL(BigDecimal totalOtherChargesDueAgentCOLL) {
+		this.totalOtherChargesDueAgentCOLL = totalOtherChargesDueAgentCOLL;
+	}
+
+	public BigDecimal getTotalOtherChargesDueCarrierPPD() {
+		return totalOtherChargesDueCarrierPPD;
+	}
+
+	public void setTotalOtherChargesDueCarrierPPD(BigDecimal totalOtherChargesDueCarrierPPD) {
+		this.totalOtherChargesDueCarrierPPD = totalOtherChargesDueCarrierPPD;
+	}
+
+	public BigDecimal getTotalOtherChargesDueCarrierCOLL() {
+		return totalOtherChargesDueCarrierCOLL;
+	}
+
+	public void setTotalOtherChargesDueCarrierCOLL(BigDecimal totalOtherChargesDueCarrierCOLL) {
+		this.totalOtherChargesDueCarrierCOLL = totalOtherChargesDueCarrierCOLL;
+	}
+
+	public BigDecimal getTotalAmountPPD() {
+		return totalAmountPPD;
+	}
+
+	public void setTotalAmountPPD(BigDecimal totalAmountPPD) {
+		this.totalAmountPPD = totalAmountPPD;
+	}
+
+	public BigDecimal getTotalAmountCOLL() {
+		return totalAmountCOLL;
+	}
+
+	public void setTotalAmountCOLL(BigDecimal totalAmountCOLL) {
+		this.totalAmountCOLL = totalAmountCOLL;
+	}
+
+	/**
+	 * @return the shipperPersonUuid
+	 */
+	public String getShipperPersonUuid() {
+		return shipperPersonUuid;
+	}
+
+	/**
+	 * @param shipperPersonUuid the shipperPersonUuid to set
+	 */
+	public void setShipperPersonUuid(String shipperPersonUuid) {
+		this.shipperPersonUuid = shipperPersonUuid;
+	}
+
+	/**
+	 * @return the shipperClientId
+	 */
+	public String getShipperClientId() {
+		return shipperClientId;
+	}
+
+	/**
+	 * @param shipperClientId the shipperClientId to set
+	 */
+	public void setShipperClientId(String shipperClientId) {
+		this.shipperClientId = shipperClientId;
+	}
+
+	/**
+	 * @return the shipperContactJson
+	 */
+	public String getShipperContactJson() {
+		return shipperContactJson;
+	}
+
+	/**
+	 * @param shipperContactJson the shipperContactJson to set
+	 */
+	public void setShipperContactJson(String shipperContactJson) {
+		this.shipperContactJson = shipperContactJson;
+	}
+
+	/**
+	 * @return the shipperName
+	 */
+	public String getShipperName() {
+		return shipperName;
+	}
+
+	/**
+	 * @param shipperName the shipperName to set
+	 */
+	public void setShipperName(String shipperName) {
+		this.shipperName = shipperName;
+	}
+
+	/**
+	 * @return the shipperNationalId
+	 */
+	public String getShipperNationalId() {
+		return shipperNationalId;
+	}
+
+	/**
+	 * @param shipperNationalId the shipperNationalId to set
+	 */
+	public void setShipperNationalId(String shipperNationalId) {
+		this.shipperNationalId = shipperNationalId;
+	}
+
+	/**
+	 * @return the shipperMobileNumber
+	 */
+	public String getShipperMobileNumber() {
+		return shipperMobileNumber;
+	}
+
+	/**
+	 * @param shipperMobileNumber the shipperMobileNumber to set
+	 */
+	public void setShipperMobileNumber(String shipperMobileNumber) {
+		this.shipperMobileNumber = shipperMobileNumber;
+	}
+
+	/**
+	 * @return the shipperLandlineNumber
+	 */
+	public String getShipperLandlineNumber() {
+		return shipperLandlineNumber;
+	}
+
+	/**
+	 * @param shipperLandlineNumber the shipperLandlineNumber to set
+	 */
+	public void setShipperLandlineNumber(String shipperLandlineNumber) {
+		this.shipperLandlineNumber = shipperLandlineNumber;
+	}
+
+	/**
+	 * @return the shipperCountryCode
+	 */
+	public String getShipperCountryCode() {
+		return shipperCountryCode;
+	}
+
+	/**
+	 * @param shipperCountryCode the shipperCountryCode to set
+	 */
+	public void setShipperCountryCode(String shipperCountryCode) {
+		this.shipperCountryCode = shipperCountryCode;
+	}
+
+	/**
+	 * @return the shipperStateCode
+	 */
+	public String getShipperStateCode() {
+		return shipperStateCode;
+	}
+
+	/**
+	 * @param shipperStateCode the shipperStateCode to set
+	 */
+	public void setShipperStateCode(String shipperStateCode) {
+		this.shipperStateCode = shipperStateCode;
+	}
+
+	/**
+	 * @return the shipperCityCode
+	 */
+	public String getShipperCityCode() {
+		return shipperCityCode;
+	}
+
+	/**
+	 * @param shipperCityCode the shipperCityCode to set
+	 */
+	public void setShipperCityCode(String shipperCityCode) {
+		this.shipperCityCode = shipperCityCode;
+	}
+
+	/**
+	 * @return the shipperPostalCode
+	 */
+	public String getShipperPostalCode() {
+		return shipperPostalCode;
+	}
+
+	/**
+	 * @param shipperPostalCode the shipperPostalCode to set
+	 */
+	public void setShipperPostalCode(String shipperPostalCode) {
+		this.shipperPostalCode = shipperPostalCode;
+	}
+
+	/**
+	 * @return the shipperAddress
+	 */
+	public String getShipperAddress() {
+		return shipperAddress;
+	}
+
+	/**
+	 * @param shipperAddress the shipperAddress to set
+	 */
+	public void setShipperAddress(String shipperAddress) {
+		this.shipperAddress = shipperAddress;
+	}
+
+	/**
+	 * @return the shipperNote
+	 */
+	public String getShipperNote() {
+		return shipperNote;
+	}
+
+	/**
+	 * @param shipperNote the shipperNote to set
+	 */
+	public void setShipperNote(String shipperNote) {
+		this.shipperNote = shipperNote;
+	}
+
+	/**
+	 * @return the canonicalShipperName
+	 */
+	public String getCanonicalShipperName() {
+		return canonicalShipperName;
+	}
+
+	/**
+	 * @param canonicalShipperName the canonicalShipperName to set
+	 */
+	public void setCanonicalShipperName(String canonicalShipperName) {
+		this.canonicalShipperName = canonicalShipperName;
+	}
+
+	/**
+	 * @return the consigneePersonUuid
+	 */
+	public String getConsigneePersonUuid() {
+		return consigneePersonUuid;
+	}
+
+	/**
+	 * @param consigneePersonUuid the consigneePersonUuid to set
+	 */
+	public void setConsigneePersonUuid(String consigneePersonUuid) {
+		this.consigneePersonUuid = consigneePersonUuid;
+	}
+
+	/**
+	 * @return the consigneeClientId
+	 */
+	public String getConsigneeClientId() {
+		return consigneeClientId;
+	}
+
+	/**
+	 * @param consigneeClientId the consigneeClientId to set
+	 */
+	public void setConsigneeClientId(String consigneeClientId) {
+		this.consigneeClientId = consigneeClientId;
+	}
+
+	/**
+	 * @return the consigneeContactJson
+	 */
+	public String getConsigneeContactJson() {
+		return consigneeContactJson;
+	}
+
+	/**
+	 * @param consigneeContactJson the consigneeContactJson to set
+	 */
+	public void setConsigneeContactJson(String consigneeContactJson) {
+		this.consigneeContactJson = consigneeContactJson;
+	}
+
+	/**
+	 * @return the consigneeName
+	 */
+	public String getConsigneeName() {
+		return consigneeName;
+	}
+
+	/**
+	 * @param consigneeName the consigneeName to set
+	 */
+	public void setConsigneeName(String consigneeName) {
+		this.consigneeName = consigneeName;
+	}
+
+	/**
+	 * @return the consigneeNationalId
+	 */
+	public String getConsigneeNationalId() {
+		return consigneeNationalId;
+	}
+
+	/**
+	 * @param consigneeNationalId the consigneeNationalId to set
+	 */
+	public void setConsigneeNationalId(String consigneeNationalId) {
+		this.consigneeNationalId = consigneeNationalId;
+	}
+
+	/**
+	 * @return the consigneeMobileNumber
+	 */
+	public String getConsigneeMobileNumber() {
+		return consigneeMobileNumber;
+	}
+
+	/**
+	 * @param consigneeMobileNumber the consigneeMobileNumber to set
+	 */
+	public void setConsigneeMobileNumber(String consigneeMobileNumber) {
+		this.consigneeMobileNumber = consigneeMobileNumber;
+	}
+
+	/**
+	 * @return the consigneeLandlineNumber
+	 */
+	public String getConsigneeLandlineNumber() {
+		return consigneeLandlineNumber;
+	}
+
+	/**
+	 * @param consigneeLandlineNumber the consigneeLandlineNumber to set
+	 */
+	public void setConsigneeLandlineNumber(String consigneeLandlineNumber) {
+		this.consigneeLandlineNumber = consigneeLandlineNumber;
+	}
+
+	/**
+	 * @return the consigneeCountryCode
+	 */
+	public String getConsigneeCountryCode() {
+		return consigneeCountryCode;
+	}
+
+	/**
+	 * @param consigneeCountryCode the consigneeCountryCode to set
+	 */
+	public void setConsigneeCountryCode(String consigneeCountryCode) {
+		this.consigneeCountryCode = consigneeCountryCode;
+	}
+
+	/**
+	 * @return the consigneeStateCode
+	 */
+	public String getConsigneeStateCode() {
+		return consigneeStateCode;
+	}
+
+	/**
+	 * @param consigneeStateCode the consigneeStateCode to set
+	 */
+	public void setConsigneeStateCode(String consigneeStateCode) {
+		this.consigneeStateCode = consigneeStateCode;
+	}
+
+	/**
+	 * @return the consigneeCityCode
+	 */
+	public String getConsigneeCityCode() {
+		return consigneeCityCode;
+	}
+
+	/**
+	 * @param consigneeCityCode the consigneeCityCode to set
+	 */
+	public void setConsigneeCityCode(String consigneeCityCode) {
+		this.consigneeCityCode = consigneeCityCode;
+	}
+
+	/**
+	 * @return the consigneePostalCode
+	 */
+	public String getConsigneePostalCode() {
+		return consigneePostalCode;
+	}
+
+	/**
+	 * @param consigneePostalCode the consigneePostalCode to set
+	 */
+	public void setConsigneePostalCode(String consigneePostalCode) {
+		this.consigneePostalCode = consigneePostalCode;
+	}
+
+	/**
+	 * @return the consigneeAddress
+	 */
+	public String getConsigneeAddress() {
+		return consigneeAddress;
+	}
+
+	/**
+	 * @param consigneeAddress the consigneeAddress to set
+	 */
+	public void setConsigneeAddress(String consigneeAddress) {
+		this.consigneeAddress = consigneeAddress;
+	}
+
+	/**
+	 * @return the consigneeNote
+	 */
+	public String getConsigneeNote() {
+		return consigneeNote;
+	}
+
+	/**
+	 * @param consigneeNote the consigneeNote to set
+	 */
+	public void setConsigneeNote(String consigneeNote) {
+		this.consigneeNote = consigneeNote;
+	}
+
+	/**
+	 * @return the canonicalConsigneeName
+	 */
+	public String getCanonicalConsigneeName() {
+		return canonicalConsigneeName;
+	}
+
+	/**
+	 * @param canonicalConsigneeName the canonicalConsigneeName to set
+	 */
+	public void setCanonicalConsigneeName(String canonicalConsigneeName) {
+		this.canonicalConsigneeName = canonicalConsigneeName;
+	}
+
+	/**
+	 * @return the packingList
+	 */
+	public List<PackingItemDto> getPackingList() {
+		return packingList;
+	}
+
+	/**
+	 * @param packingList the packingList to set
+	 */
+	public void setPackingList(List<PackingItemDto> packingList) {
+		this.packingList = packingList;
+	}
+
+	/**
+	 * @return the weightValueChargeParty
+	 */
+	public ChargeParty getWeightValueChargeParty() {
+		return weightValueChargeParty;
+	}
+
+	/**
+	 * @param weightValueChargeParty the weightValueChargeParty to set
+	 */
+	public void setWeightValueChargeParty(ChargeParty weightValueChargeParty) {
+		this.weightValueChargeParty = weightValueChargeParty;
+	}
+
+	/**
+	 * @return the otherValueChargeParty
+	 */
+	public ChargeParty getOtherValueChargeParty() {
+		return otherValueChargeParty;
+	}
+
+	/**
+	 * @param otherValueChargeParty the otherValueChargeParty to set
+	 */
+	public void setOtherValueChargeParty(ChargeParty otherValueChargeParty) {
+		this.otherValueChargeParty = otherValueChargeParty;
+	}
+
+	/**
+	 * @return the paymentMethod
+	 */
+	public PaymentMethodDto getPaymentMethod() {
+		return paymentMethod;
+	}
+
+	/**
+	 * @param paymentMethod the paymentMethod to set
+	 */
+	public void setPaymentMethod(PaymentMethodDto paymentMethod) {
+		this.paymentMethod = paymentMethod;
+	}
+
+	/**
+	 * @return the paymentReferenceInfo
+	 */
+	public String getPaymentReferenceInfo() {
+		return paymentReferenceInfo;
+	}
+
+	/**
+	 * @param paymentReferenceInfo the paymentReferenceInfo to set
+	 */
+	public void setPaymentReferenceInfo(String paymentReferenceInfo) {
+		this.paymentReferenceInfo = paymentReferenceInfo;
+	}
+
+	/**
+	 * @return the productId
+	 */
+	public Long getProductId() {
+		return productId;
+	}
+
+	/**
+	 * @param productId the productId to set
+	 */
+	public void setProductId(Long productId) {
+		this.productId = productId;
+	}
+
+	/**
+	 * @return the productVersion
+	 */
+	public Integer getProductVersion() {
+		return productVersion;
+	}
+
+	/**
+	 * @param productVersion the productVersion to set
+	 */
+	public void setProductVersion(Integer productVersion) {
+		this.productVersion = productVersion;
+	}
+
+	/**
+	 * @return the signerName
+	 */
+	public String getSignerName() {
+		return signerName;
+	}
+
+	/**
+	 * @param signerName the signerName to set
+	 */
+	public void setSignerName(String signerName) {
+		this.signerName = signerName;
+	}
+
+	/**
+	 * @return the pickupRequestDate
+	 */
+	public LocalDateTime getPickupRequestDate() {
+		return pickupRequestDate;
+	}
+
+	/**
+	 * @param pickupRequestDate the pickupRequestDate to set
+	 */
+	public void setPickupRequestDate(LocalDateTime pickupRequestDate) {
+		this.pickupRequestDate = pickupRequestDate;
+	}
+
+	/**
+	 * @return the pickupRequestRemark
+	 */
+	public String getPickupRequestRemark() {
+		return pickupRequestRemark;
+	}
+
+	/**
+	 * @param pickupRequestRemark the pickupRequestRemark to set
+	 */
+	public void setPickupRequestRemark(String pickupRequestRemark) {
+		this.pickupRequestRemark = pickupRequestRemark;
+	}
+
+	/**
+	 * @return the estimatedCharge
+	 */
+	public Double getEstimatedCharge() {
+		return estimatedCharge;
+	}
+
+	/**
+	 * @param estimatedCharge the estimatedCharge to set
+	 */
+	public void setEstimatedCharge(Double estimatedCharge) {
+		this.estimatedCharge = estimatedCharge;
+	}
+
+	/**
+	 * @return the trackingNumber
+	 */
+	public String getTrackingNumber() {
+		return trackingNumber;
+	}
+
+	/**
+	 * @param trackingNumber the trackingNumber to set
+	 */
+	public void setTrackingNumber(String trackingNumber) {
+		this.trackingNumber = trackingNumber;
+	}
+
+	/**
+	 * @return the issuingAgentId
+	 */
+	public Long getIssuingAgentId() {
+		return issuingAgentId;
+	}
+
+	/**
+	 * @param issuingAgentId the issuingAgentId to set
+	 */
+	public void setIssuingAgentId(Long issuingAgentId) {
+		this.issuingAgentId = issuingAgentId;
+	}
+
+	/**
+	 * @return the originNode
+	 */
+	public TransferNodeDto getOriginNode() {
+		return originNode;
+	}
+
+	/**
+	 * @param originNode the originNode to set
+	 */
+	public void setOriginNode(TransferNodeDto originNode) {
+		this.originNode = originNode;
+	}
+
+	/**
+	 * @return the destinationNode
+	 */
+	public TransferNodeDto getDestinationNode() {
+		return destinationNode;
+	}
+
+	/**
+	 * @param destinationNode the destinationNode to set
+	 */
+	public void setDestinationNode(TransferNodeDto destinationNode) {
+		this.destinationNode = destinationNode;
+	}
+
+	/**
+	 * @return the viaNodes
+	 */
+	public TreeSet<TransferNodeDto> getViaNodes() {
+		return viaNodes;
+	}
+
+	/**
+	 * @param viaNodes the viaNodes to set
+	 */
+	public void setViaNodes(TreeSet<TransferNodeDto> viaNodes) {
+		this.viaNodes = viaNodes;
+	}
+
+	/**
+	 * @return the priceItems
+	 */
+	public List<PriceItemDto> getPriceItems() {
+		return priceItems;
+	}
+
+	/**
+	 * @param priceItems the priceItems to set
+	 */
+	public void setPriceItems(List<PriceItemDto> priceItems) {
+		this.priceItems = priceItems;
+	}
+
+	/**
+	 * @return the weightUnit
+	 */
+	public WeightUnit getWeightUnit() {
+		return weightUnit;
+	}
+
+	/**
+	 * @param weightUnit the weightUnit to set
+	 */
+	public void setWeightUnit(WeightUnit weightUnit) {
+		this.weightUnit = weightUnit;
+	}
+
+	/**
+	 * @return the requestedFlight
+	 */
+	public String getRequestedFlight() {
+		return requestedFlight;
+	}
+
+	/**
+	 * @return the flightDate
+	 */
+	public LocalDate getFlightDate() {
+		return flightDate;
+	}
+
+	/**
+	 * @param flightDate the flightDate to set
+	 */
+	public void setFlightDate(LocalDate flightDate) {
+		this.flightDate = flightDate;
+	}
+
+	/**
+	 * @return the currencyCode
+	 */
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	/**
+	 * @param currencyCode the currencyCode to set
+	 */
+	public void setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
+	}
+
+	/**
+	 * @return the declaredValueForCarriage
+	 */
+	public Double getDeclaredValueForCarriage() {
+		return declaredValueForCarriage;
+	}
+
+	/**
+	 * @param declaredValueForCarriage the declaredValueForCarriage to set
+	 */
+	public void setDeclaredValueForCarriage(Double declaredValueForCarriage) {
+		this.declaredValueForCarriage = declaredValueForCarriage;
+	}
+
+	/**
+	 * @return the declaredValueForCustoms
+	 */
+	public Double getDeclaredValueForCustoms() {
+		return declaredValueForCustoms;
+	}
+
+	/**
+	 * @param declaredValueForCustoms the declaredValueForCustoms to set
+	 */
+	public void setDeclaredValueForCustoms(Double declaredValueForCustoms) {
+		this.declaredValueForCustoms = declaredValueForCustoms;
+	}
+
+	/**
+	 * @return the amountOfInsurance
+	 */
+	public Double getAmountOfInsurance() {
+		return amountOfInsurance;
+	}
+
+	/**
+	 * @param amountOfInsurance the amountOfInsurance to set
+	 */
+	public void setAmountOfInsurance(Double amountOfInsurance) {
+		this.amountOfInsurance = amountOfInsurance;
+	}
+
+	/**
+	 * @return the currencyConversionRate
+	 */
+	public Double getCurrencyConversionRate() {
+		return currencyConversionRate;
+	}
+
+	/**
+	 * @param currencyConversionRate the currencyConversionRate to set
+	 */
+	public void setCurrencyConversionRate(Double currencyConversionRate) {
+		this.currencyConversionRate = currencyConversionRate;
+	}
+
+	/**
+	 * @return the handlingInfo
+	 */
+	public String getHandlingInfo() {
+		return handlingInfo;
+	}
+
+	/**
+	 * @param handlingInfo the handlingInfo to set
+	 */
+	public void setHandlingInfo(String handlingInfo) {
+		this.handlingInfo = handlingInfo;
+	}
+
+	/**
+	 * @return the accountingInfo
+	 */
+	public String getAccountingInfo() {
+		return accountingInfo;
+	}
+
+	/**
+	 * @param accountingInfo the accountingInfo to set
+	 */
+	public void setAccountingInfo(String accountingInfo) {
+		this.accountingInfo = accountingInfo;
+	}
+
+	/**
+	 * @return the optionalShippingInfoReferenceNo
+	 */
+	public String getOptionalShippingInfoReferenceNo() {
+		return optionalShippingInfoReferenceNo;
+	}
+
+	/**
+	 * @param optionalShippingInfoReferenceNo the optionalShippingInfoReferenceNo to set
+	 */
+	public void setOptionalShippingInfoReferenceNo(String optionalShippingInfoReferenceNo) {
+		this.optionalShippingInfoReferenceNo = optionalShippingInfoReferenceNo;
+	}
+
+	/**
+	 * @return the optionalShippingInfo1
+	 */
+	public String getOptionalShippingInfo1() {
+		return optionalShippingInfo1;
+	}
+
+	/**
+	 * @param optionalShippingInfo1 the optionalShippingInfo1 to set
+	 */
+	public void setOptionalShippingInfo1(String optionalShippingInfo1) {
+		this.optionalShippingInfo1 = optionalShippingInfo1;
+	}
+
+	/**
+	 * @return the optionalShippingInfo2
+	 */
+	public String getOptionalShippingInfo2() {
+		return optionalShippingInfo2;
+	}
+
+	/**
+	 * @param optionalShippingInfo2 the optionalShippingInfo2 to set
+	 */
+	public void setOptionalShippingInfo2(String optionalShippingInfo2) {
+		this.optionalShippingInfo2 = optionalShippingInfo2;
+	}
+
+	/**
+	 * @return the forwarderReferenceNumber
+	 */
+	public String getForwarderReferenceNumber() {
+		return forwarderReferenceNumber;
+	}
+
+	/**
+	 * @param forwarderReferenceNumber the forwarderReferenceNumber to set
+	 */
+	public void setForwarderReferenceNumber(String forwarderReferenceNumber) {
+		this.forwarderReferenceNumber = forwarderReferenceNumber;
+	}
+
+	/**
+	 * @return the discountType
+	 */
+	public DiscountType getDiscountType() {
+		return discountType;
+	}
+
+	/**
+	 * @param discountType the discountType to set
+	 */
+	public void setDiscountType(DiscountType discountType) {
+		this.discountType = discountType;
+	}
+
+	/**
+	 * @return the discountCode
+	 */
+	public String getDiscountCode() {
+		return discountCode;
+	}
+
+	/**
+	 * @param discountCode the discountCode to set
+	 */
+	public void setDiscountCode(String discountCode) {
+		this.discountCode = discountCode;
+	}
+
+	/**
+	 * @return the lastChangeStateDate
+	 */
+	public LocalDateTime getLastChangeStateDate() {
+		return lastChangeStateDate;
+	}
+
+	/**
+	 * @param lastChangeStateDate the lastChangeStateDate to set
+	 */
+	public void setLastChangeStateDate(LocalDateTime lastChangeStateDate) {
+		this.lastChangeStateDate = lastChangeStateDate;
+	}
+
+	/**
+	 * @return the remarks
+	 */
+	public String getRemarks() {
+		return remarks;
+	}
+
+	/**
+	 * @param remarks the remarks to set
+	 */
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+	/**
+	 * @return the shipperPersonType
+	 */
+	public PersonType getShipperPersonType() {
+		return shipperPersonType;
+	}
+
+	/**
+	 * @param shipperPersonType the shipperPersonType to set
+	 */
+	public void setShipperPersonType(PersonType shipperPersonType) {
+		this.shipperPersonType = shipperPersonType;
+	}
+
+	/**
+	 * @return the shipperContactReal
+	 */
+	public ShipmentContactReal getShipperContactReal() {
+		return shipperContactReal;
+	}
+
+	/**
+	 * @param shipperContactReal the shipperContactReal to set
+	 */
+	public void setShipperContactReal(ShipmentContactReal shipperContactReal) {
+		this.shipperContactReal = shipperContactReal;
+	}
+
+	/**
+	 * @return the shipperContactLegal
+	 */
+	public ShipmentContactLegal getShipperContactLegal() {
+		return shipperContactLegal;
+	}
+
+	/**
+	 * @param shipperContactLegal the shipperContactLegal to set
+	 */
+	public void setShipperContactLegal(ShipmentContactLegal shipperContactLegal) {
+		this.shipperContactLegal = shipperContactLegal;
+	}
+
+	/**
+	 * @return the shipperCountryName
+	 */
+	public String getShipperCountryName() {
+		return shipperCountryName;
+	}
+
+	/**
+	 * @param shipperCountryName the shipperCountryName to set
+	 */
+	public void setShipperCountryName(String shipperCountryName) {
+		this.shipperCountryName = shipperCountryName;
+	}
+
+	/**
+	 * @return the shipperStateName
+	 */
+	public String getShipperStateName() {
+		return shipperStateName;
+	}
+
+	/**
+	 * @param shipperStateName the shipperStateName to set
+	 */
+	public void setShipperStateName(String shipperStateName) {
+		this.shipperStateName = shipperStateName;
+	}
+
+	/**
+	 * @return the shipperCityName
+	 */
+	public String getShipperCityName() {
+		return shipperCityName;
+	}
+
+	/**
+	 * @param shipperCityName the shipperCityName to set
+	 */
+	public void setShipperCityName(String shipperCityName) {
+		this.shipperCityName = shipperCityName;
+	}
+
+	/**
+	 * @return the consigneePersonType
+	 */
+	public PersonType getConsigneePersonType() {
+		return consigneePersonType;
+	}
+
+	/**
+	 * @param consigneePersonType the consigneePersonType to set
+	 */
+	public void setConsigneePersonType(PersonType consigneePersonType) {
+		this.consigneePersonType = consigneePersonType;
+	}
+
+	/**
+	 * @return the consigneeContactReal
+	 */
+	public ShipmentContactReal getConsigneeContactReal() {
+		return consigneeContactReal;
+	}
+
+	/**
+	 * @param consigneeContactReal the consigneeContactReal to set
+	 */
+	public void setConsigneeContactReal(ShipmentContactReal consigneeContactReal) {
+		this.consigneeContactReal = consigneeContactReal;
+	}
+
+	/**
+	 * @return the consigneeContactLegal
+	 */
+	public ShipmentContactLegal getConsigneeContactLegal() {
+		return consigneeContactLegal;
+	}
+
+	/**
+	 * @param consigneeContactLegal the consigneeContactLegal to set
+	 */
+	public void setConsigneeContactLegal(ShipmentContactLegal consigneeContactLegal) {
+		this.consigneeContactLegal = consigneeContactLegal;
+	}
+
+	/**
+	 * @return the consigneeCountryName
+	 */
+	public String getConsigneeCountryName() {
+		return consigneeCountryName;
+	}
+
+	/**
+	 * @param consigneeCountryName the consigneeCountryName to set
+	 */
+	public void setConsigneeCountryName(String consigneeCountryName) {
+		this.consigneeCountryName = consigneeCountryName;
+	}
+
+	/**
+	 * @return the consigneeStateName
+	 */
+	public String getConsigneeStateName() {
+		return consigneeStateName;
+	}
+
+	/**
+	 * @param consigneeStateName the consigneeStateName to set
+	 */
+	public void setConsigneeStateName(String consigneeStateName) {
+		this.consigneeStateName = consigneeStateName;
+	}
+
+	/**
+	 * @return the consigneeCityName
+	 */
+	public String getConsigneeCityName() {
+		return consigneeCityName;
+	}
+
+	/**
+	 * @param consigneeCityName the consigneeCityName to set
+	 */
+	public void setConsigneeCityName(String consigneeCityName) {
+		this.consigneeCityName = consigneeCityName;
+	}
+
+	/**
+	 * @return the createUserName
+	 */
+	public String getCreateUserName() {
+		return createUserName;
+	}
+
+	/**
+	 * @param createUserName the createUserName to set
+	 */
+	public void setCreateUserName(String createUserName) {
+		this.createUserName = createUserName;
+	}
+
+	/**
+	 * @return the updateUserName
+	 */
+	public String getUpdateUserName() {
+		return updateUserName;
+	}
+
+	/**
+	 * @param updateUserName the updateUserName to set
+	 */
+	public void setUpdateUserName(String updateUserName) {
+		this.updateUserName = updateUserName;
+	}
+
+	/**
+	 * @return the viaNodesList
+	 */
+	public List<TransferNodeDto> getViaNodesList() {
+		return viaNodesList;
+	}
+
+	/**
+	 * @param viaNodesList the viaNodesList to set
+	 */
+	public void setViaNodesList(List<TransferNodeDto> viaNodesList) {
+		this.viaNodesList = viaNodesList;
+	}
+
+	/**
+	 * @return the strFlightDate
+	 */
+	public String getStrFlightDate() {
+		return strFlightDate;
+	}
+
+	/**
+	 * @param strFlightDate the strFlightDate to set
+	 */
+	public void setStrFlightDate(String strFlightDate) {
+		this.strFlightDate = strFlightDate;
+	}
+
+	/**
+	 * @param requestedFlight the requestedFlight to set
+	 */
+	public void setRequestedFlight(String requestedFlight) {
+		this.requestedFlight = requestedFlight;
+	}
+
+	/**
+	 * @return
+	 */
+	public WaybillMsg toMsg() {
+		WaybillMsg msg = new WaybillMsg();
+		
+		msg.setCanonicalConsigneeName(canonicalConsigneeName);
+		msg.setCanonicalShipperName(canonicalShipperName);
+		
+		msg.setConsigneeAddress(consigneeAddress);
+		msg.setConsigneeCityCode(consigneeCityCode);
+		msg.setConsigneeCityName(consigneeCityName);
+		msg.setConsigneeClientId(consigneeClientId);
+		msg.setConsigneeContactJson(consigneeContactJson);
+		msg.setConsigneeCountryCode(consigneeCountryCode);
+		msg.setConsigneeCountryName(consigneeCountryName);
+		msg.setConsigneeLandlineNumber(consigneeLandlineNumber);
+		msg.setConsigneeMobileNumber(consigneeMobileNumber);
+		msg.setConsigneeName(canonicalConsigneeName);
+		msg.setConsigneeNationalId(consigneeNationalId);
+		msg.setConsigneeNote(consigneeNote);
+		msg.setConsigneePersonType(PersonManagementEnums.PersonType.valueOf(consigneePersonType.toString()));
+		msg.setConsigneePersonUuid(consigneePersonUuid);
+		msg.setConsigneePostalCode(consigneePostalCode);
+		msg.setConsigneeStateCode(consigneeStateCode);
+		msg.setConsigneeStateName(consigneeStateName);
+		
+		msg.setContentDescription(contentDescription);
+		msg.setCreateUserName(createUserName);
+		msg.setDestinationNode(destinationNode.toMsg());
+		msg.setFlightDate(flightDate);
+		msg.setForwarderReferenceNumber(forwarderReferenceNumber);
+		msg.setHandlingInfo(handlingInfo);
+		msg.setId(id);
+		msg.setIssuingAgentId(issuingAgentId);
+		msg.setIssuingDate(issuingDate);		
+		msg.setNumber(number);
+		msg.setOriginNode(originNode.toMsg());
+		msg.setPackingList(packingList.stream().map(PackingItemDto::toMsg).collect(Collectors.toList()));
+		msg.setRemarks(remarks);
+		msg.setRequestedFlight(requestedFlight);
+		msg.setTotalAmountCOLL(totalAmountCOLL);
+		msg.setTotalAmountPPD(totalAmountPPD);
+		msg.setTotalChargeableWeight(totalChargeableWeight);
+		msg.setTotalDeclaredValue(totalDeclaredValue);
+		msg.setTotalGrossWeight(totalGrossWeight);
+		msg.setTotalPieces(totalPieces);
+		msg.setTotalVolumetricWeight(totalVolumetricWeight);
+		msg.setUpdateUserName(updateUserName);
+		//msg.setViaNodesList(viaNodesList.stream().map(TransferNodeDto::toMsg).collect(Collectors.toList()));		
+		
+		msg.setShipperAddress(shipperAddress);
+		msg.setShipperCityCode(shipperCityCode);
+		msg.setShipperClientId(shipperClientId);
+		msg.setShipperContactJson(shipperContactJson);
+		msg.setShipperCountryCode(shipperCountryCode);
+		msg.setShipperCountryName(shipperCountryName);
+		msg.setShipperLandlineNumber(shipperLandlineNumber);
+		msg.setShipperMobileNumber(shipperMobileNumber);
+		msg.setShipperName(canonicalShipperName);
+		msg.setShipperNationalId(shipperNationalId);
+		msg.setShipperNote(shipperNote);
+		msg.setShipperPersonType(PersonManagementEnums.PersonType.valueOf(shipperPersonType.toString()));
+		msg.setShipperPersonUuid(shipperPersonUuid);
+		msg.setShipperPostalCode(shipperPostalCode);
+		msg.setShipperStateCode(shipperStateCode);
+		msg.setShipperStateName(shipperStateName);
+		msg.setShipperStateCode(shipperStateCode);
+		msg.setStrFlightDate(strFlightDate);
+		
+		return msg;
+	}
+}	

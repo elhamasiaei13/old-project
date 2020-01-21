@@ -1,0 +1,176 @@
+package com.parvanpajooh.complaintmanagement.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.parvanpajooh.client.complaintmanagement.model.ComplaintCategoryMsg;
+import com.parvanpajooh.client.complaintmanagement.model.ComplaintMsg;
+import com.parvanpajooh.common.auth.BaseRestController;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseDto;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.complaintmanagement.application.ComplaintApplicationService;
+import com.parvanpajooh.complaintmanagement.application.ComplaintCategoryApplicationService;
+import com.parvanpajooh.complaintmanagement.domain.model.criteria.ComplaintCategoryCriteria;
+import com.parvanpajooh.complaintmanagement.domain.model.criteria.ComplaintCriteria;
+import com.parvanpajooh.complaintmanagement.domain.model.dto.ComplaintCategoryDto;
+import com.parvanpajooh.complaintmanagement.domain.model.dto.ComplaintDto;
+
+
+/**
+ * @author dev-03
+ *
+ */
+@RestController
+@RequestMapping("/v1")
+public class ComplaintManagementRestController extends BaseRestController {
+	
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+	
+	@EJB(mappedName="java:global/complaintmanagement-ear/complaintmanagement-ejb/ComplaintApplicationServiceImpl")
+	private ComplaintApplicationService complaintApplicationService;
+	
+	@EJB(mappedName="java:global/complaintmanagement-ear/complaintmanagement-ejb/ComplaintCategoryApplicationServiceImpl")
+	private ComplaintCategoryApplicationService complaintCategoryApplicationService;
+	
+	@RequestMapping(value = "/hello", method = RequestMethod.GET)
+	public String helloWord(
+			HttpServletRequest request, 
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip) {
+
+		// LOG
+		log.debug("Entering helloWord(userName={} , ip={})", userName, ip);
+		return "hello " + userName;
+	} 
+	
+	@RequestMapping(value = "/complaintcategories", method = RequestMethod.GET)
+	public List<ComplaintCategoryMsg> findComplaintCategoriesBy(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "term") String term, 
+			@RequestParam(value = "page") int page, 
+			@RequestParam(value = "size") int size,
+			@Context HttpServletResponse response) throws ParvanServiceException {
+
+		log.debug("Entering findComplaintCategoriesBy(userName={} , ip={} ,page={}, size={})", userName, ip, page, size);
+
+		List<ComplaintCategoryMsg> complaintCategoryMsgs = null;
+
+		if (page > 0) {
+			page = page - 1;// my pagination is zero based, but rest
+							// pagination best practice is 1-based
+		}
+
+		if (size == 0) {
+			size = 20;// it's default page size
+		}
+
+		int firstResult = (page * size);
+		int maxResults = size;
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = "id";
+
+		ComplaintCategoryCriteria complaintCategoryCriteria = new ComplaintCategoryCriteria();
+		
+		complaintCategoryCriteria.setCode(term);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+
+		List<BaseDto> baseDtos = complaintCategoryApplicationService.findByCriteria(userInfo, complaintCategoryCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+		int count = complaintCategoryApplicationService.countByCriteria(userInfo, complaintCategoryCriteria);
+
+		complaintCategoryMsgs = new ArrayList<ComplaintCategoryMsg>();
+
+		for (BaseDto baseDto : baseDtos) {
+
+			ComplaintCategoryDto dto = (ComplaintCategoryDto) baseDto;
+			complaintCategoryMsgs.add(dto.toMsg());
+		}
+
+		response.addIntHeader("total", count);
+		return complaintCategoryMsgs;
+	}
+	
+	@RequestMapping(value = "/complaints", method = RequestMethod.GET)
+	public List<ComplaintCategoryMsg> findComplaintsBy(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "term") String term, 
+			@RequestParam(value = "page") int page, 
+			@RequestParam(value = "size") int size,
+			@Context HttpServletResponse response) throws ParvanServiceException {
+
+		log.debug("Entering findComplaintsBy(userName={} ,ip={}, term={}, page={}, size={})", userName, ip, term, page, size);
+
+		List<ComplaintMsg> complaintMsgs = null;
+
+		if (page > 0) {
+			page = page - 1;// my pagination is zero based, but rest
+							// pagination best practice is 1-based
+		}
+
+		if (size == 0) {
+			size = 20;// it's default page size
+		}
+
+		int firstResult = (page * size);
+		int maxResults = size;
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = "id";
+
+		ComplaintCategoryCriteria complaintCategoryCriteria = new ComplaintCategoryCriteria();
+		
+		complaintCategoryCriteria.setCode(term);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+
+		List<BaseDto> baseDtos = complaintCategoryApplicationService.findByCriteria(userInfo, complaintCategoryCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+		int count = complaintCategoryApplicationService.countByCriteria(userInfo, complaintCategoryCriteria);
+
+		complaintCategoryMsgs = new ArrayList<ComplaintCategoryMsg>();
+
+		for (BaseDto baseDto : baseDtos) {
+
+			ComplaintCategoryDto dto = (ComplaintCategoryDto) baseDto;
+			complaintCategoryMsgs.add(dto.toMsg());
+		}
+
+		response.addIntHeader("total", count);
+		return complaintCategoryMsgs;
+	}
+	
+	@RequestMapping(value = "/complaints", method = RequestMethod.POST)
+	public void saveComplaint(
+			@RequestBody ComplaintMsg complaintMsg, 
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip) throws ParvanServiceException{
+
+		// LOG
+		log.debug("Entering saveComplaint(complaintMsg={} , userName={} , ip={})",complaintMsg, userName, ip);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		ComplaintDto complaintDto = new ComplaintDto();
+		complaintDto.fromMsg(complaintMsg);
+		complaintApplicationService.save(userInfo, complaintDto);
+		
+	} 
+	
+}
+	

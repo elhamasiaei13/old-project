@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	layout:decorator="layout">
+
+	<head>
+		<title>User</title>
+	</head>
+
+	<body>
+		<section class="content" layout:fragment="content">
+			<table data-role="table" id="table-1" data-mode="columntoggle" class="ui-responsive">
+				<thead>
+					<tr>
+						<th data-priority="1">A</th>
+						<th data-priority="2">B</th>
+						<th data-priority="3">C</th>
+						<th data-priority="4">D</th>
+						<th data-priority="5">E</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>a0</td>
+						<td>b0</td>
+						<td>c0</td>
+						<td>d0</td>
+						<td>e0</td>
+					</tr>
+					<tr>
+						<td>a1</td>
+						<td>b1</td>
+						<td>c1</td>
+						<td>d1</td>
+						<td>e1</td>
+					</tr>
+					<tr>
+						<td>a2</td>
+						<td>b2</td>
+						<td>c2</td>
+						<td>d2</td>
+						<td>e2</td>
+					</tr>
+				</tbody>
+			</table>
+
+		</section>
+	</body>
+</html>

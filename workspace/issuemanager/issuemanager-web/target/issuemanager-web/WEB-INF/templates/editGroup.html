@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>Edit Group</title>
+</head>
+
+<body>
+	<section class="content" layout:fragment="content">
+		<h3 th:text="#{title_edit_group}"></h3>
+		<br></br> 
+		<form action="#" class="form-inline" th:action="@{/editGroup/save}" th:object="${group}" method="post">
+		
+			<input type="hidden" name="id" class="input-small" th:field="*{id}" value="${id}" /> 
+			<input type="hidden" name="version" class="input-small" th:field="*{version}" value="${version}" /> 
+			<input type="text" name="name" class="input-small" placeholder="Name" th:field="*{name}" value="${name}" /> 
+			<br></br> 
+			<input type="text" name="description" class="input-small" placeholder="Description" th:field="*{description}" value="${description}"/> <br></br>
+			<br></br> 
+			<br></br>
+			<button type="submit" class="btn btn-primary" th:text="#{btn_edit}"></button>
+			
+		</form>
+	</section>
+</body>
+</html>

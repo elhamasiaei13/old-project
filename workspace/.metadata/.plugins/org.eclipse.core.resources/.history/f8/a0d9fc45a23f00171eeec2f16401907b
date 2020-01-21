@@ -1,0 +1,21 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.common;
+
+/**
+ * @author mehrdad
+ *
+ */
+public class RestClientConstants {
+
+	public static final String ENDPOINT_DEF_PROTOCOL__HTTP = "http";
+	
+	public static final String ENDPOINT_DEF_HOST__LOCALHOST = "localhost";
+	
+	// private final String PROTOCOL_HTTPS = "https";
+	
+	public static final String ENDPOINT_DEF_PORT__80 = "80";
+	
+	public static final long TIMEOUT = 30;
+}

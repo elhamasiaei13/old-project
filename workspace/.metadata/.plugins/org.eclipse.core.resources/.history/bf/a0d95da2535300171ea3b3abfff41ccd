@@ -1,0 +1,33 @@
+package com.parvanpajooh.complaintmanagement.mvc;
+
+import javax.ejb.EJB;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.parvanpajooh.commons.platform.ejb.ddd.application.GenericApplicationService;
+import com.parvanpajooh.complaintmanagement.application.ComplaintApplicationService;
+import com.parvanpajooh.complaintmanagement.domain.model.Complaint;
+import com.parvanpajooh.complaintmanagement.domain.model.criteria.ComplaintCriteria;
+import com.parvanpajooh.complaintmanagement.domain.model.dto.ComplaintDto;
+import com.parvanpajooh.complaintmanagement.mvc.base.ComplaintManagementAbstractController;
+
+@Controller
+@RequestMapping("/complaintCustomer")
+public class ComplaintCustomerController
+		extends ComplaintManagementAbstractController<Complaint, ComplaintDto, ComplaintCriteria> {
+
+	@EJB(mappedName = "java:global/complaintmanagement-ear/complaintmanagement-ejb/ComplaintApplicationServiceImpl")
+	private ComplaintApplicationService complaintApplicationService;
+
+	@Override
+	protected String getName() {
+		return "customer";
+	}
+
+	@Override
+	protected GenericApplicationService<Complaint, Long> getService() {
+		return complaintApplicationService;
+	}
+
+}

@@ -1,0 +1,136 @@
+package com.parvanpajooh.client.geomanagement.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.rateandroute.model.CarrierMsg;
+import com.parvanpajooh.client.rateandroute.model.CurrencyMsg;
+import com.parvanpajooh.client.rateandroute.model.EvaluatedRouteMsg;
+import com.parvanpajooh.client.rateandroute.model.GeoEntityMsg;
+import com.parvanpajooh.client.rateandroute.model.NodeMsg;
+import com.parvanpajooh.client.rateandroute.model.ProductMsg;
+import com.parvanpajooh.client.rateandroute.model.RateRuleMsg;
+import com.parvanpajooh.client.rateandroute.model.RateTypeMsg;
+import com.parvanpajooh.client.rateandroute.model.RouteMsg;
+import com.parvanpajooh.client.rateandroute.model.TransferNodeMsg;
+import com.parvanpajooh.client.rateandroute.model.ZoneMsg;
+import com.parvanpajooh.client.rateandroute.model.criteria.CarrierCriteriaMsg;
+import com.parvanpajooh.client.rateandroute.model.criteria.GeoEntityCriteriaMsg;
+import com.parvanpajooh.client.rateandroute.model.criteria.ProductCriteriaMsg;
+import com.parvanpajooh.client.rateandroute.model.criteria.RouteCriteriaMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+
+
+/**
+ * @author mehrdad
+ *
+ */
+public interface RateAndRouteServiceClientFacade {
+
+    public List<GeoEntityMsg> findGeoEntityByCriteria(UserInfo userInfo, GeoEntityCriteriaMsg criteria, int firstResult, int maxResults, SortDirectionEnum sortDirection, String sortCriterion) throws ParvanClientException;
+    
+    public List<GeoEntityMsg> findGeoEntityByCriteria(UserInfo userInfo, GeoEntityCriteriaMsg criteria) throws ParvanClientException;
+    
+    public int countGeoEntityByCriteria(UserInfo userInfo, GeoEntityCriteriaMsg criteria) throws ParvanClientException;
+    
+    public GeoEntityMsg getGeoEntity(UserInfo userInfo, Long id) throws ParvanClientException;
+    
+    public GeoEntityMsg findGeoEntityByShortCode(UserInfo userInfo, String shortCode) throws ParvanClientException;
+    
+    public List<ProductMsg> findProductByCriteria(UserInfo userInfo, ProductCriteriaMsg criteria, int firstResult, int maxResults, SortDirectionEnum sortDirection, String sortCriterion) throws ParvanClientException;
+    
+    public List<ProductMsg> findProductByCriteria(UserInfo userInfo, ProductCriteriaMsg criteria) throws ParvanClientException;
+    
+    public int countProductByCriteria(UserInfo userInfo, ProductCriteriaMsg criteria) throws ParvanClientException;
+    
+    public ProductMsg getProduct(UserInfo userInfo, Long id) throws ParvanClientException;
+    
+    public List<ProductMsg> getProductByIds(UserInfo userInfo, List<Long> ids) throws ParvanClientException;
+
+	public List<ProductMsg> findProductByCode(UserInfo userInfo, String code) throws ParvanClientException;
+	
+	public List<ProductMsg> findAllProducts(UserInfo userInfo) throws ParvanClientException;
+	
+	public List<ProductMsg> getAvailableProducts(UserInfo userInfo,
+			RateAndRouteEnums.FreightNodeType collectFreightNodeType, 
+			RateAndRouteEnums.FreightNodeType distributeFreightNodeType,
+			String destinationHubZoneCode,
+			List<String> shipperProductCodes, 
+			List<String> consigneeProductCodes,
+			String productName)
+			throws ParvanClientException;
+
+	public List<CarrierMsg> findCarrierByCriteria(UserInfo userInfo, CarrierCriteriaMsg criteria, int firstResult, int maxResults, SortDirectionEnum sortDirection, String sortCriterion) throws ParvanClientException;
+	
+	public int countCarrierByCriteria(UserInfo userInfo, CarrierCriteriaMsg criteria) throws ParvanClientException;
+	
+	public CarrierMsg getCarrier(UserInfo userInfo, Long id) throws ParvanClientException;
+
+	public List<EvaluatedRouteMsg> evaluateRoutes(
+			UserInfo userInfo, 
+			List <TransferNodeMsg> orderedShipmentNodes, 
+			RateAndRouteEnums.RouteCategory routeCategory) throws ParvanClientException;
+
+	public List<RateRuleMsg> getEvaluatedRateRules(
+			UserInfo userInfo,
+			List<EvaluatedRouteMsg> evaluatedRoutes, 
+			Map<String, Double> userProvidedPriceValues,
+			ProductMsg product, 
+			String[] evaluateOnlyRateRulesWithRateTypeCodes,
+			Map<String, Double> preCalculatedRateTypeCodesAndValues,
+			String goodsStandardCode,
+			Double totalDeclaredValue,
+			Double chargeableWeight,
+			RateAndRouteEnums.RateCalculationType rateCalculationType, 
+			String shipperClientId, 
+			String consigneeClientId,
+			RateAndRouteEnums.DiscountType discountType,
+			String discountCode,
+			String waybillNumber) throws ParvanClientException;
+
+	public List<RouteMsg> findRouteByCriteria(
+			UserInfo userInfo, 
+			RouteCriteriaMsg criteria, 
+			int firstResult, 
+			int maxResults,
+			SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanClientException;
+	
+	public int countRouteByCriteria(UserInfo userInfo, RouteCriteriaMsg criteria) throws ParvanClientException;
+	
+	public RouteMsg getRoute(UserInfo userInfo, Long id) throws ParvanClientException;
+
+	public RateTypeMsg getRateType(UserInfo userInfo, Long id) throws ParvanClientException;
+	
+	public List<RateTypeMsg> getRateTypeByIds(UserInfo userInfo, List<Long> ids) throws ParvanClientException;
+	
+	public CarrierMsg findCarrierByCode(UserInfo userInfo, String code) throws ParvanClientException;
+	
+	public ZoneMsg getZone(UserInfo userInfo, Long id) throws ParvanClientException;
+	
+	public List<NodeMsg> findCollectionByGeoCity(UserInfo userInfo, String geoCityCode, Long toNodeId, String term) throws ParvanClientException;
+	
+	public List<NodeMsg> findDistributionByGeoCity(UserInfo userInfo, String geoCityCode, Long fromNodeId, String term) throws ParvanClientException;
+	
+	public List<NodeMsg> findHubByGeoCity(UserInfo userInfo, String geoCityCode) throws ParvanClientException;
+	
+	public List<RateTypeMsg> findRateTypeByProductId(UserInfo userInfo, Long productId) throws ParvanClientException;
+
+	public RateTypeMsg findRateTypeByCode(UserInfo userInfo, Long productId, String code) throws ParvanClientException;
+	
+	public GeoEntityMsg findGeoEntityByNodeIdAndType(UserInfo userInfo, String geoTypeCode, Long nodeId) throws ParvanClientException;
+
+	public CurrencyMsg findCurrencyByCode(UserInfo userInfo, String code) throws ParvanClientException;
+
+	public List<CurrencyMsg> getAllCurrencies(UserInfo userInfo) throws ParvanClientException;
+
+	public NodeMsg findNodeByCode(UserInfo userInfo, String codeName) throws ParvanClientException;
+	
+	public NodeMsg findNodeByName(UserInfo userInfo, String name) throws ParvanClientException;
+
+	public GeoEntityMsg findGeoEntityByName(UserInfo userInfo, String name) throws ParvanClientException;
+	
+}

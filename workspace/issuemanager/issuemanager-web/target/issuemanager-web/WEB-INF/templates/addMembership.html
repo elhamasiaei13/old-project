@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>Add Membership</title>
+</head>
+
+<body>
+	<section class="content" layout:fragment="content">
+		<h2>Member List</h2>
+		<form action="#" class="form-inline" id="hideRowId"
+			th:action="@{/addMembership/save}" method="post">
+			<div id="membersTable">
+				<table>
+					<tr>
+						<th>Members</th>
+						<th>Types</th>
+					</tr>
+					<tr th:each="member : ${members}" >							
+						<td hidden="true">
+							<input type="text" name="groupId" th:value="${groupId}" />
+						</td>
+						<td style="padding: 0 15px 0 15px;" th:text="${member.firstName}+${member.lastName}" >firstName</td>
+						<td style="padding: 0 15px 0 15px;">
+							<select name="typeItems" id="selectedTypeId"  th:attr="disabled=${member.tenantId == '1' ? 'true' : 'false'}" >
+								<option th:value="${type.id}"  th:each="type : ${types}" th:text="${type.name}" >
+								</option>
+							</select>
+						</td>
+						<td style="padding: 0 15px 0 15px;">
+							<input type="checkbox" th:attr="disabled=${member.tenantId == '1' ? 'true' : 'false'}" th:value="${member.id}" id="checkListId" name="checkboxItems"/>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<br></br> <br></br>
+			<td>
+				<button type="submit" class="btn btn-primary" th:text="#{btn_save}"></button>
+			</td>
+		</form>
+	</section>
+</body>
+</html>

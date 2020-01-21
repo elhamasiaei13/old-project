@@ -1,0 +1,266 @@
+package com.parvanpajooh.accounting.rest;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.parvanpajooh.accounting.AccountingProtos;
+import com.parvanpajooh.accounting.AccountingProtos.AccountList;
+import com.parvanpajooh.accounting.AccountingProtos.Voucher;
+//import com.parvanpajooh.accounting.AccountingProtos;
+//import com.parvanpajooh.accounting.AccountingProtos.AccountList;
+import com.parvanpajooh.accounting.common.AccountingUserInfo;
+import com.parvanpajooh.accounting.model.vo.AccountVO;
+import com.parvanpajooh.accounting.model.vo.VoucherRowVO;
+import com.parvanpajooh.accounting.model.vo.VoucherVO;
+import com.parvanpajooh.accounting.service.AccountService;
+import com.parvanpajooh.accounting.service.VoucherService;
+import com.parvanpajooh.common.auth.RestUserServiceAdapter;
+import com.parvanpajooh.common.convertor.JacksonObjectMapperProvider;
+import com.parvanpajooh.common.formatter.DateProperyEditor;
+import com.parvanpajooh.common.util.IpUtils;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.util.GetterUtil;
+import com.parvanpajooh.commons.util.StringUtil;
+
+import net.badata.protobuf.converter.Converter;
+
+@RestController
+@RequestMapping("/v1")
+public class AccountingRestController {
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	@EJB(mappedName = "java:global/accounting-ear/accounting-ejb/AccountServiceImpl")
+	private AccountService accountService;
+
+	@EJB(mappedName = "java:global/accounting-ear/accounting-ejb/VoucherServiceImpl")
+	private VoucherService voucherService;
+
+	@Autowired
+	private RestUserServiceAdapter restUserServiceAdapter;
+
+	@Autowired
+	private MessageSource messageSource;
+
+	@Autowired
+	protected JacksonObjectMapperProvider mapperProvider;
+
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		binder.registerCustomEditor(LocalDate.class, new DateProperyEditor(false, true));
+		binder.registerCustomEditor(LocalDateTime.class, new DateProperyEditor(true, true));
+	}
+
+	@RequestMapping(value = "/accounts", params = { "userName", "ip", "clientAppCode" }, method = RequestMethod.GET, produces = "application/x-protobuf")
+	public AccountList loadAccountsByAppCode(HttpServletRequest request, @RequestParam(value = "userName") String userName,
+			@RequestParam(value = "ip") String ip, @RequestParam(value = "clientAppCode") String clientAppCode) {
+
+		// LOG
+		log.debug("Entering loadAccountsByAppCode(userName={} , ip={} , clientAppCode={} )", userName, ip, clientAppCode);
+
+		AccountingProtos.AccountList list = null;
+
+		try {
+
+			AccountingProtos.AccountList.Builder builder = AccountingProtos.AccountList.newBuilder();
+
+			UserInfo userInfo = loadUserInfo(request, userName, ip);
+			List<AccountVO> accountVOs = accountService.findByClientAppCode(userInfo, clientAppCode);
+
+			for (AccountVO accountVO : accountVOs) {
+
+				AccountingProtos.Account account = AccountingProtos.Account.newBuilder().setAccountNumber(accountVO.getAccountNumber())
+						.setName(accountVO.getName()).setId(accountVO.getId()).setName(accountVO.getName()).build();
+
+				builder.addAccounts(account);
+			}
+
+			list = builder.build();
+
+		} catch (Exception e) {
+			log.error("error in loadAccountsByAppCode", e);
+		}
+
+		// LOG
+		log.debug("Leaving loadAccountsByAppCode(): ret={}", (list != null) ? list.getSerializedSize() : "NULL");
+		return list;
+	}
+
+	@RequestMapping(value = "/vouchers", method = RequestMethod.POST, produces = "application/x-protobuf")
+	public void saveVoucherByAppCode(HttpServletRequest request, @RequestParam String userName, @RequestParam String ip, @RequestParam String clientAppCode,
+			@RequestParam Map<String, AccountingProtos.Voucher> voucher) {
+
+		// LOG
+		log.debug("Entering saveVoucherByAppCode(userName={} , ip={} ,clientAppCode={})");
+
+		try {
+
+			VoucherVO voucherVO = new VoucherVO();
+
+			// AccountingProtos.Voucher voucherProto = ;
+			// voucherVO = Converter.create().toDomain(VoucherVO.class,
+			// voucher.get("voucherObj"));
+
+//			voucherVO = protobufToVO(voucher.get("voucherObj"));
+			ObjectMapper mapper = new ObjectMapper();
+			
+			voucherVO = mapper.readValue(voucher.get("voucherObj").toString(),VoucherVO.class);
+
+			UserInfo userInfo = loadUserInfo(request, userName, ip);
+			voucherVO = voucherService.save(userInfo, voucherVO, clientAppCode);
+
+		} catch (Exception e) {
+			log.error("error in saveVoucherByAppCode", e);
+		}
+
+		// LOG
+		log.debug("Leaving saveVoucherByAppCode()");
+
+	}
+
+	private VoucherVO protobufToVO(Voucher voucher) {
+
+		VoucherVO voucherVO = new VoucherVO();
+		voucherVO.setDescription(voucher.getDescription());
+		voucherVO.setReferenceId(voucher.getReferenceId());
+		List<VoucherRowVO> voucherRowVOList = new ArrayList<VoucherRowVO>();
+
+		for (AccountingProtos.VoucherRow voucherRow : voucher.getVoucherRowsList()) {
+			VoucherRowVO voucherRowVO = new VoucherRowVO();
+			AccountVO accountVO = new AccountVO();
+			accountVO.setId(voucherRow.getAccountId());
+			voucherRowVO.setCredit(BigDecimal.valueOf(voucherRow.getCredit()));
+			voucherRowVO.setDebit(BigDecimal.valueOf(voucherRow.getDebit()));
+			voucherRowVO.setAccount(accountVO);
+			voucherRowVO.setDescription(voucherRow.getDescription());
+			voucherRowVO.setReferenceId(voucherRowVO.getReferenceId());
+
+			voucherRowVOList.add(voucherRowVO);
+			voucherVO.setVoucherRow(voucherRowVOList);
+		}
+
+		return voucherVO;
+	}
+
+	private String getMessage(final String messageKey, final Object... messageParameters) {
+
+		Locale locale = LocaleContextHolder.getLocale();
+
+		String result = null;
+		try {
+			result = messageSource.getMessage(messageKey, messageParameters, locale);
+		} catch (NoSuchMessageException e) {
+			result = messageKey;
+		}
+
+		return result;
+	}
+
+	private UserInfo loadUserInfo(HttpServletRequest request, String userName, String tenantId) throws Exception {
+		Map<String, Object> user = restUserServiceAdapter.loadUserByUsername(userName);
+
+		if (user == null) {
+			throw new ObjectNotFoundException("user is not valid");
+		}
+
+		if (!GetterUtil.getBoolean(user.get("active"), false)) {
+			throw new DisabledException("user is not active");
+		}
+
+		Set<String> roleNames = new HashSet<String>();
+
+		List<Map<String, Object>> roles = (List<Map<String, Object>>) user.get("roles");
+		if (roles != null) {
+			for (Map<String, Object> role : roles) {
+				roleNames.add((String) role.get("name"));
+			}
+		}
+
+		String ip = IpUtils.getIpFromRequest(request);
+
+		String context = request.getContextPath();
+		// String tenantId = TenantUtil.getTenantId(request);
+
+		// userInfo
+		UserInfo userInfo = AccountingUserInfo.getDefaultUserInfo(GetterUtil.getLong(user.get("id")), GetterUtil.getString(user.get("userName")),
+				GetterUtil.getString(user.get("firstName")), GetterUtil.getString(user.get("lastName")), ip, context, tenantId, roleNames,
+				GetterUtil.getString(user.get("locale")), GetterUtil.getString(user.get("zoneId")), GetterUtil.getString(user.get("calendar")));
+
+		return userInfo;
+	}
+
+	protected void proccessException(Exception e, Map<String, Object> result) {
+
+		if (e instanceof ParvanRecoverableException) {
+			ParvanRecoverableException recoverableException = (ParvanRecoverableException) e;
+
+			Exception cause = (Exception) recoverableException.getCause();
+
+			if (recoverableException.getErrorCode().equals(ErrorCode.DATA_IS_INVALID)) {
+				String invalidField = null;
+				if (cause != null && cause instanceof ConstraintViolationException) {
+					invalidField = ((ConstraintViolationException) cause).getConstraintViolations().iterator().next().getPropertyPath().toString();
+
+				} else {
+					invalidField = recoverableException.getMessage();
+				}
+				result.put("invalidField", invalidField);
+				result.put("status", "ValidationException");
+			} else if (recoverableException.getErrorCode().equals(ErrorCode.OBJECT_EXIST)) {
+				result.put("status", "ObjectExistsException");
+			} else if (recoverableException.getErrorCode().equals(ErrorCode.DATA_DUPLICATE)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error.data-duplicate", getMessage(recoverableException.getMessage(), (Object) null)));
+			} else if (recoverableException.getErrorCode().equals(ErrorCode.FIELD_IS_EMPTY)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error-required", getMessage(recoverableException.getMessage(), (Object) null)));
+			} else if (recoverableException.getErrorCode().equals(ErrorCode.SHIPMENT_INVALID_STATE_TRANSITION)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error-invalid-shipment-state",
+						getMessage("trackstate." + StringUtil.upperCase(recoverableException.getMessage()), (Object) null)));
+			} else {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorMessage", recoverableException.getMessage());
+			}
+		} else {
+			log.error("error in proccessException", e);
+			result.put("status", "fail");
+		}
+	}
+}

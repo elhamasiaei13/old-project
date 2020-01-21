@@ -1,0 +1,20 @@
+package com.parvanpajooh.complaintmanagement.application;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.ddd.application.GenericApplicationService;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.complaintmanagement.domain.model.Complaint;
+import com.parvanpajooh.complaintmanagement.domain.model.dto.ComplaintDto;
+
+public interface ComplaintApplicationService extends GenericApplicationService<Complaint, Long> {
+
+	public PageList<ComplaintDto> findComplaints(
+			UserInfo userInfo, 
+			int firstResult, 
+			int maxResults,
+		    SortDirectionEnum sortDirection, 
+		    String sortCriterion) throws ParvanServiceException;
+	
+}

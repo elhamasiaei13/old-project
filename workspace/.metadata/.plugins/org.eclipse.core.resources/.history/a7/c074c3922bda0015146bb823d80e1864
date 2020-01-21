@@ -1,0 +1,68 @@
+package com.parvanpajooh.sample.model.criteria;
+
+import com.parvanpajooh.common.vo.BaseCriteria;
+
+public class SampleCriteria extends BaseCriteria {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6692696276170013041L;
+
+	private String title;
+	
+	private String USER_NAME;
+	private String PASSWORD;
+	private String FIRST_NAME;
+	private String LAST_NAME;
+
+	
+
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "SampleCriteria [title=" + title + ", firstName=" + USER_NAME + ", password="
+				+ PASSWORD + ", firstName=" + FIRST_NAME + ", lastName=" + LAST_NAME + "]";
+	}
+
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * @param title the title to set
+	 */
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public String getUsername() {
+		return USER_NAME;
+	}
+	public void setUsername(String uSER_NAME) {
+		this.USER_NAME = uSER_NAME;
+	}
+	public String getFirstname() {
+		return FIRST_NAME;
+	}
+	public void setFirstname(String fIRST_NAME) {
+		this.FIRST_NAME = fIRST_NAME;
+	}
+	public String getLastname() {
+		return LAST_NAME;
+	}
+	public void setLastName(String lAST_NAME) {
+		this.LAST_NAME = lAST_NAME;
+	}
+	public String getPassword() {
+		return USER_NAME;
+	}
+	public void setPassword(String pASSWORD) {
+		this.PASSWORD = pASSWORD;
+	}
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;mapresult&apos; in &apos;com.parvanpajooh.personmanagement.dao.jpa.PersonDaoJpa.getByUuids(...)&apos; to &apos;mapResult&apos;&#x0A;- Original project: &apos;personmanagement-ejb&apos;&#x0A;- Original element: &apos;com.parvanpajooh.personmanagement.dao.jpa.PersonDaoJpa.getByUuids(List&lt;String&gt;).mapresult&apos;&#x0A;- Renamed element: &apos;mapresult&apos;&#x0A;- Update references to refactored element" description="Rename local variable &apos;mapresult&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src\/main\/java&lt;com.parvanpajooh.personmanagement.dao.jpa{PersonDaoJpa.java[PersonDaoJpa~getByUuids~QList\&lt;QString;&gt;;@mapresult!4988!5049!5008!5016!QMap\&lt;QString;QString;&gt;;!0!false" name="mapResult" references="true" stamp="1479733477144" version="1.0"/>
+</session>

@@ -1,0 +1,196 @@
+package com.parvanpajooh.agentmanagement.mvc;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.agentmanagement.model.Employee;
+import com.parvanpajooh.agentmanagement.model.criteria.EmployeeCriteria;
+import com.parvanpajooh.agentmanagement.model.vo.EmployeeVO;
+import com.parvanpajooh.agentmanagement.model.vo.GeneralAgentVO;
+import com.parvanpajooh.agentmanagement.mvc.base.AmAbstractController;
+import com.parvanpajooh.agentmanagement.service.EmployeeService;
+import com.parvanpajooh.agentmanagement.service.GeneralAgentService;
+import com.parvanpajooh.common.security.OauthHelper;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.GenericService;
+import com.parvanpajooh.commons.platform.ejb.service.ServiceGenerator;
+import com.parvanpajooh.commons.platform.ejb.util.permission.IdmService;
+import com.parvanpajooh.idm.IdmProtos;
+
+import retrofit2.Call;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Controller
+@RequestMapping("/employee")
+public class EmployeeController extends AmAbstractController<Employee, EmployeeVO, EmployeeCriteria> {
+
+	@EJB(mappedName = "java:global/agentmanagement-ear/agentmanagement-ejb/EmployeeServiceImpl")
+	private EmployeeService employeeService;
+
+	@EJB(mappedName = "java:global/agentmanagement-ear/agentmanagement-ejb/GeneralAgentServiceImpl")
+	private GeneralAgentService generalAgentService;
+
+	@Override
+	protected GenericService<Employee, Long> getService() {
+		return employeeService;
+	}
+
+	@Override
+	protected String getName() {
+		return "employees";
+	}
+
+	@Autowired
+	private MessageSource messageSource;
+
+	@RequestMapping(value = "/save", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> save(EmployeeVO employeeVO, HttpServletRequest request) {
+		log.debug("Entering save(employeeVO={})", employeeVO);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			employeeVO = employeeService.updateRemarks(getUserInfo(request), employeeVO.getId(), employeeVO.getRemarks());
+
+			result.put("status", "success");
+			result.put("result", employeeVO);
+
+			request.getSession().removeAttribute(getName());
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		return result;
+	}
+
+	@RequestMapping(value = "/pagingByAgentId", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<BaseVO> pagingByAgentId(Long id, @DatatablesParams DatatablesCriterias criterias, EmployeeCriteria criteria,
+			HttpServletRequest request) {
+		log.debug("Entering pagingByAgentId(criteria={})", criteria);
+
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		columnDef.setSortDirection(SortDirection.DESC);
+		SortDirectionEnum sortDirection = getDefaultSortDirection();
+		String sortCriterion = columnDef.getName();
+		GeneralAgentVO agentVO = new GeneralAgentVO();
+		agentVO.setId(id);
+		criteria.setGeneralAgent(agentVO);
+
+		if ("0".equals(sortCriterion)) {
+			sortCriterion = getDefaultSortCriterion();
+		}
+
+		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+			sortDirection = SortDirectionEnum.Descending;
+		}
+
+		DataSet<BaseVO> dataSet;
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			List<BaseVO> rows = (List<BaseVO>) getService().findByCriteria(userInfo, criteria, firstResult, maxResults, sortDirection, sortCriterion);
+
+			long totalRecords = getService().countByCriteria(userInfo, criteria);
+			dataSet = new DataSet<BaseVO>(rows, (long) rows.size(), totalRecords);
+		} catch (Exception e) {
+			log.error("error occured in record paging...", e);
+			e.printStackTrace();
+			dataSet = new DataSet<BaseVO>(new ArrayList<BaseVO>(), 0l, 0l);
+		}
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+
+	@RequestMapping(value = "/paging_users", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<EmployeeVO> pagingUsers(@RequestParam(value = "agentId") Long agentId, @DatatablesParams DatatablesCriterias criterias,
+			EmployeeCriteria criteria, HttpServletRequest request) {
+		log.debug("Entering paging_users(criteria={})", criteria);
+		
+		DataSet<EmployeeVO> dataSet = null;
+
+		try {
+			
+			String query = criteria.getCanonicalSearchName();
+			if(query == null){
+				query = StringPool.BLANK;
+			}
+			
+			int firstResult = criterias.getStart();
+			int size = criterias.getLength();
+			int page = (firstResult / size) + 1;
+			
+			UserInfo userInfo = getUserInfo(request);
+			
+			OauthHelper helper = OauthHelper.getInstance();
+	    	String accessToken = helper.getAccessToken().getValue();
+			
+	    	IdmService idmService = ServiceGenerator.createService(IdmService.class, "http://localhost/identitymanagement2-rest/", accessToken);
+	    	
+	    	Call<IdmProtos.UserList> call = idmService.loadUsers(userInfo.getUserName(), userInfo.getIp(), query, page, size);
+
+	    	IdmProtos.UserList userList = call.execute().body();
+	    	
+	    	List<IdmProtos.User> list = userList.getUsersList();
+	    	
+	    	Set<String> employeeUserUuids = new HashSet<>();
+	    	
+	    	List<EmployeeVO> employeeVOs = employeeService.findByAgentId(userInfo, agentId);
+	    	for (EmployeeVO employeeVO : employeeVOs) {
+	    		employeeUserUuids.add(employeeVO.getUserUuid());
+			}
+	    	
+	    	List<EmployeeVO> result = new ArrayList<>();
+	    	for (IdmProtos.User user : list) {
+	    		EmployeeVO employeeVO = new EmployeeVO();
+				employeeVO.setId(user.getId());
+				employeeVO.setUserName(user.getUserName());
+				employeeVO.setUserUuid(user.getUuid());
+				employeeVO.setFullName(user.getFirstName() + StringPool.SPACE + user.getLastName());
+				employeeVO.setActive(true);
+				
+				if(employeeUserUuids.contains(employeeVO.getUserUuid())){
+					employeeVO.setSelected(true);
+				}
+				
+				result.add(employeeVO);
+			}
+
+			long totalRecords = userList.getTotal();
+			dataSet = new DataSet<EmployeeVO>(result, (long) result.size(), totalRecords);
+
+		} catch (Exception e) {
+			log.error("Error occurred while getEntity.", e);
+		}
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+
+}

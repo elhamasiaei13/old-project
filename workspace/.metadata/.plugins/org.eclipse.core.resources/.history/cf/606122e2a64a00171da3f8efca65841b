@@ -1,0 +1,71 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.personmanagement.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.parvanpajooh.client.personmanagement.model.OrganizationMsg;
+import com.parvanpajooh.client.personmanagement.model.PersonManagementEnums.RelationType;
+import com.parvanpajooh.client.personmanagement.model.PersonMsg;
+
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+/**
+ * @author MO
+ *
+ */
+public interface PersonManagementApi {
+	
+	@GET("organizations/{id}/persons/active")
+	public Call<List<PersonMsg>> searchActivePeopleInOrganization(
+			@Path(value = "id") Long id,
+			@Query(value = "term") String term,
+			@Query(value = "start") Integer start,
+			@Query(value = "length") Integer length,
+			@Query(value = "sort_direction") String sortDirection,
+			@Query(value = "sort_criterion") String sortCriterion);
+	
+	@GET("persons/uuid/{uuid}")
+	public Call<PersonMsg> getPersonByUuid(
+			@Path(value = "uuid") String uuid);
+	
+	@GET("persons/names/uuids")
+	public Call<Map<String, String>> getPersonsByUuids(
+			@Query("uuids") String[] uuids);
+	
+	@GET("organizations")
+	public Call<List<OrganizationMsg>> findOrganizations(
+			@Query(value = "term") String term,
+			@Query(value = "start") Integer start,
+			@Query(value = "length") Integer length,
+			@Query(value = "sort_direction") String sortDirection,
+			@Query(value = "sort_criterion") String sortCriterion);
+	
+	@GET("organizations/{id}")
+	public Call<OrganizationMsg> getOrganization(
+			@Path(value = "id") Long id);
+
+	@POST("persons")
+	public Call<PersonMsg> createPerson(
+			@Body PersonMsg personMsg);
+	
+	@POST("persons/delete")
+	public Call<Void> deletePerson(
+			@Query(value = "uuid") String uuid);
+	
+	@GET("persons/{uuid}/relatedfrom")
+	public Call<List<PersonMsg>> findRelatedFrom(
+			@Path("uuid") String uuid,
+			@Query("relation_type") String type,
+			@Query("term") String term,
+			@Query("page") int page, 
+			@Query("size") int size);
+	
+}

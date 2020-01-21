@@ -1,0 +1,34 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericServiceImpl;
+import com.parvanpajooh.shipment.model.PackingItemAction;
+import com.parvanpajooh.shipment.service.PackingItemActionLocalService;
+import com.parvanpajooh.shipment.service.PackingItemActionService;
+
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class PackingItemActionServiceImpl extends GenericServiceImpl<PackingItemAction, Long> implements PackingItemActionService {
+	static final Logger log = LoggerFactory.getLogger(PackingItemActionServiceImpl.class);
+
+	private PackingItemActionLocalService packingItemActionLocalService;
+
+	@Inject
+	public void setPackingItemActionLocalService(PackingItemActionLocalService packingItemActionLocalService) {
+		this.localService = packingItemActionLocalService;
+		this.packingItemActionLocalService = packingItemActionLocalService;
+	}
+
+}

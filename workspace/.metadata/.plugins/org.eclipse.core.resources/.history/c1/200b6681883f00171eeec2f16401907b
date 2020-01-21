@@ -1,0 +1,99 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.model.vo;
+
+import java.io.Serializable;
+
+import com.parvanpajooh.client.geomanagement.model.CityInfoMsg;
+
+/**
+ * @author mohammad
+ *
+ */
+public class CityInfoVO implements Serializable {
+	
+	private static final long serialVersionUID = -3609228886938600941L;
+	
+	private String shortCode;
+	private String nameEn;
+	private String nameFa;
+	private String provinceShortCode;
+	private String provinceNameEn;
+	private String provinceNameFa;
+	private String countryShortCode;
+	private String countryNameEn;
+	private String countryNameFa;
+	
+	public String getShortCode() {
+		return shortCode;
+	}
+	public void setShortCode(String shortCode) {
+		this.shortCode = shortCode;
+	}
+	public String getNameEn() {
+		return nameEn;
+	}
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
+	}
+	public String getNameFa() {
+		return nameFa;
+	}
+	public void setNameFa(String nameFa) {
+		this.nameFa = nameFa;
+	}
+	public String getProvinceShortCode() {
+		return provinceShortCode;
+	}
+	public void setProvinceShortCode(String provinceShortCode) {
+		this.provinceShortCode = provinceShortCode;
+	}
+	public String getProvinceNameEn() {
+		return provinceNameEn;
+	}
+	public void setProvinceNameEn(String provinceNameEn) {
+		this.provinceNameEn = provinceNameEn;
+	}
+	public String getProvinceNameFa() {
+		return provinceNameFa;
+	}
+	public void setProvinceNameFa(String provinceNameFa) {
+		this.provinceNameFa = provinceNameFa;
+	}
+	public String getCountryShortCode() {
+		return countryShortCode;
+	}
+	public void setCountryShortCode(String countryShortCode) {
+		this.countryShortCode = countryShortCode;
+	}
+	public String getCountryNameEn() {
+		return countryNameEn;
+	}
+	public void setCountryNameEn(String countryNameEn) {
+		this.countryNameEn = countryNameEn;
+	}
+	public String getCountryNameFa() {
+		return countryNameFa;
+	}
+	public void setCountryNameFa(String countryNameFa) {
+		this.countryNameFa = countryNameFa;
+	}
+	
+	/**
+	 * 
+	 * @param msg
+	 */
+	private void fromMsg(CityInfoMsg msg) {
+		
+		this.setShortCode(msg.getShortCode());
+		this.setNameEn(msg.getNameEn());
+		this.setNameFa(msg.getNameFa());
+		this.setCountryShortCode(msg.getCountryShortCode());
+		this.setCountryNameEn(msg.getCountryNameEn());
+		this.setCountryNameFa(msg.getCountryNameFa());
+		this.setProvinceShortCode(msg.getProvinceShortCode());
+		this.setProvinceNameEn(msg.getProvinceNameEn());
+		this.setProvinceNameFa(msg.getProvinceNameFa());
+	}
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;IssueManager/issueManager-ear/target/sample-ear.ear&apos; to &apos;issueManager-ear.ear&apos;" description="Rename resource &apos;sample-ear.ear&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="issueManager-ear/target/sample-ear.ear" name="issueManager-ear.ear" stamp="1457355942075" updateReferences="true"/>
+</session>

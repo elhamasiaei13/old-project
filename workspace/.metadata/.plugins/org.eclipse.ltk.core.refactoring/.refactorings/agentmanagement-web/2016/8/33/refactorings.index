@@ -1,0 +1,45 @@
+1470736226910	Delete element
+1470736230492	Delete element
+1470736233776	Delete element
+1470736394658	Delete element
+1470737562118	Rename type 'UserController'
+1470738014823	Rename resource 'users.html'
+1470740572970	Copy file
+1470741215965	Copy compilation unit
+1470744571145	Copy compilation unit
+1470744680568	Copy file
+1470820466983	Rename type 'Idm2AbstractController'
+1470820528885	Rename type 'Idm2BaseController'
+1470820599462	Rename type 'Idm2UserInfo'
+1470820953035	Rename type 'agentManagementUserInfo'
+1470821209201	Rename type 'agentManagementBaseController'
+1470821219200	Rename type 'agentManagementAbstractController'
+1470821414275	Rename type 'DateFormatter'
+1470821425349	Rename type 'DateProperyEditor'
+1470821432347	Rename type 'FormattingConverters'
+1470821454050	Rename type 'CustomJacksonObjectMapper'
+1470821465656	Rename type 'DateJsonSerializer'
+1470821473749	Rename type 'LocalDateJsonDeserializer'
+1470821480307	Rename type 'LocalDateTimeJsonDeserializer'
+1470822355829	Rename type 'AgentManagementUserInfo'
+1470895573035	Rename type 'AMUserInfo'
+1470895586072	Rename type 'AMCustomJacksonObjectMapper'
+1470895595169	Rename type 'AMDateJsonSerializer'
+1470895605119	Rename type 'AMLocalDateJsonDeserializer'
+1470895615511	Rename type 'AMLocalDateTimeJsonDeserializer'
+1470895663509	Rename type 'AMDateFormatter'
+1470895673006	Rename type 'AMDateProperyEditor'
+1470895684399	Rename type 'AMFormattingConverters'
+1470895712191	Rename type 'AMAbstractController'
+1470895725023	Rename type 'AMBaseController'
+1470897799264	Rename type 'AmCustomJacksonObjectMapper'
+1470916041731	Copy file
+1470916377832	Delete element
+1470916386392	Rename resource 'general-agents2.html'
+1471073321672	Copy file
+1471075582537	Delete element
+1471076917543	Copy file
+1471079839285	Copy file
+1471080298090	Rename resource 'addEmployee.html'
+1471080530456	Delete element
+1471084612017	Copy file

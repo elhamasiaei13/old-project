@@ -1,0 +1,65 @@
+package com.parvanpajooh.sample.service.impl;
+
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.ecourier.service.impl.GenericServiceImpl;
+import com.parvanpajooh.sample.model.Member;
+import com.parvanpajooh.sample.model.vo.MemberVO;
+import com.parvanpajooh.sample.service.MemberLocalService;
+import com.parvanpajooh.sample.service.MemberService;
+
+/**
+ * 
+ * @author ali
+ * 
+ */
+@Stateless
+public class MemberServiceImpl extends GenericServiceImpl<Member, Long> implements
+		MemberService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(MemberServiceImpl.class);
+
+	private MemberLocalService sampleLocalService;
+
+	@Inject
+	public void setUserLocalService(MemberLocalService sampleLocalService) {
+		this.localService = MemberLocalService;
+		this.MemberLocalService = MemberLocalService;
+	}
+
+	@Override
+	public List<UserVO> loadSamples(UserInfo userInfo)
+			throws ParvanServiceException {
+		log.debug("Entering loadSamples(userInfo={})", userInfo);
+
+		return sampleLocalService.loadSamples();
+	}
+
+	@Override
+	public void sort(UserInfo userInfo, Long[] ids)
+			throws ParvanServiceException {
+		log.debug("Entering sort(userInfo={}, ids={})", userInfo, ids);
+
+		sampleLocalService.sort(ids);
+	}
+
+	@Override
+	public void saveUser(UserInfo userInfo,Member member) throws ParvanServiceException, ParvanDaoException {
+		log.debug("Entering loadSamples(userInfo={})", userInfo);
+
+		sampleLocalService.saveUser(user);
+
+	}
+
+}

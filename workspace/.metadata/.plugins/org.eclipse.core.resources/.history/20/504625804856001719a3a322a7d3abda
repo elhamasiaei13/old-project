@@ -1,0 +1,109 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.dao.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.shipment.dao.ShipmentActionDao;
+import com.parvanpajooh.shipment.model.Shipment;
+import com.parvanpajooh.shipment.model.ShipmentAction;
+import com.parvanpajooh.shipment.model.ShipmentAction_;
+import com.parvanpajooh.shipment.model.criteria.ShipmentActionCriteria;
+
+/**
+ * @author Mohammad
+ * 
+ */
+public class ShipmentActionDaoJpa extends GenericDaoJpa<ShipmentAction, Long> implements ShipmentActionDao {
+
+	public ShipmentActionDaoJpa() {
+		super(ShipmentAction.class);
+	}
+
+	/**
+	 * Entity manager, injected by Spring using @PersistenceContext annotation
+	 * on setEntityManager()
+	 */
+	@PersistenceContext(unitName = PERSISTENCE_UNIT_NAME)
+	private EntityManager entityManager;
+
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder,
+			Metamodel metamodel, Root<ShipmentAction> root,
+			Map<String, Join> joins) throws ParvanException {
+
+		// LOG
+		log.debug("Entering buildPredicateList( ... )");
+
+		ShipmentActionCriteria shipmentActionCriteria = (ShipmentActionCriteria) cri;
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		// ----------------------------------------------------------------
+		// code
+		// ----------------------------------------------------------------
+		String code = shipmentActionCriteria.getCode();
+		
+		if (Validator.isNotNull(code)) {
+			Predicate predicate = builder.equal(root.<String> get(ShipmentAction_.code), code);
+			predicateList.add(predicate);
+		}
+		
+
+		basePredicate((BaseCriteria) shipmentActionCriteria, builder, root, predicateList);
+
+		// LOG
+		log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+	
+	@Override
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<ShipmentAction> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateTo());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateTo());
+			predicateList.add(predicate);
+		}
+	}
+}

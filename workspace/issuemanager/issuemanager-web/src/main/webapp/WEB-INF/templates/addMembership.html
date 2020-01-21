@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="layout">
+
+<head>
+    <title>Add Membership</title>
+</head>
+
+<body>
+    <section class="content" layout:fragment="content">
+        <blockquote>
+            <p>لیست اعضا</p>
+        </blockquote>
+        <form action="#" class="form-inline" id="hideRowId" th:action="@{/addMembership/save}" method="post" th:object="${member}">
+
+
+            <table id="MembershipTable" class="table table-hover table-bordered table-condensed drop-shadow" dt:serverside="true" dt:url="@{'/pagingMembership/'+${groupId}}" dt:table="true" dt:proccessing="true" dt:filter="false" dt:select="true" dt:theme="bootstrap2" dt:paginationtype="bootstrap_full_numbers">
+
+
+                <thead>
+                    <tr>
+                        <th dt:property="id" th:text="#{table_column_id}"></th>
+                        <th dt:property="firstName">نام</th>
+                        <th dt:property="lastName">نام خانوادگی</th>
+                        <th dt:renderFunction="'actionRenderer'" dt:sortable="false">نوع عضویت</th>
+                        <th dt:renderFunction="'actionRenderer2'" dt:sortable="false">انتخاب</th>
+                    </tr>
+                </thead>
+
+                <tbody dt:cbk:draw="'myCustomDrawCallback'" dt:cbk:footer="'footerCallback'">
+                </tbody>
+
+            </table>
+
+            <input type="hidden" name="groupId" th:value="${groupId}" />
+            <!-- <table>
+					<tr>
+						<th>Members</th>
+						<th>Types</th>
+					</tr>
+					<tr th:each="member : ${members}" >							
+						<td hidden="true">
+							<input type="text" name="groupId" th:value="${groupId}" />
+						</td>
+						<td style="padding: 0 15px 0 15px;" th:text="${member.firstName}+' '+${member.lastName}" >firstName</td>
+						<td style="padding: 0 15px 0 15px;">
+							<select name="typeItems" id="selectedTypeId"  th:attr="disabled=${member.tenantId == '1' ? 'true' : 'false'}" >
+							<option th:each="type : ${T(com.parvanpajooh.issuemanager.model.enums.MemberTypeEnum).values()}" th:value="${type}" th:text="${type.value}"></option>
+							</select>
+						</td>
+						<td style="padding: 0 15px 0 15px;">
+							<input type="checkbox" th:attr="disabled=${member.tenantId == '1' ? 'true' : 'false'}" th:value="${member.id}" id="checkListId" name="checkboxItems"/>
+						</td>
+					</tr>
+				</table> -->
+
+
+            <button type="submit" class="btn btn-default" th:text="#{btn_save}"></button>
+        </form>
+
+        <script>
+
+            function actionRenderer(data, type, full) {
+                var d = '<div class="form-group">'
+                d = d + '<select class="form-control" id="selectedTypeId" name="typeItems" >';
+                d = d + '<option th:each="t : ${T(com.parvanpajooh.issuemanager.model.enums.MemberTypeEnum).values()}" th:value="${t}" th:text="${t.value}"></option>';
+                d = d + '</select>';
+                d = d + '</div>';
+                return d;
+            }
+
+            function actionRenderer2(data, type, full) {
+                var d = '<input type="checkbox"  value="' + full.id + '" id="checkListId" name="checkboxItems"/>'
+                d = d + '<input type="hidden"  value="' + full.id + '" id="checkedItems" name="checkedItems" checked="checked" style="display:none"/>';
+                return d;
+            }
+
+
+            //<![CDATA[
+
+            function doSearch() {
+
+                oTable_MembershipTable.fnReloadAjax();
+            }
+
+            jQuery(document).ready(function() {
+                $.fn.dataTableExt.oApi.fnReloadAjax = function(oSettings, sNewSource, fnCallback, bStandingRedraw) {
+                    if ($.fn.dataTable.versionCheck) {
+                        var api = new $.fn.dataTable.Api(oSettings);
+                        if (sNewSource) {
+                            api.ajax.url(sNewSource).load(fnCallback, !bStandingRedraw);
+                        } else {
+                            api.ajax.reload(fnCallback, !bStandingRedraw);
+                        }
+                        return;
+                    }
+                    if (sNewSource !== undefined && sNewSource !== null) {
+                        oSettings.sAjaxSource = sNewSource;
+                    }
+                    if (oSettings.oFeatures.bServerSide) {
+                        oSettings.oApi._fnDraw(oSettings);
+                        return;
+                    }
+                    this.oApi._fnProcessingDisplay(oSettings, true);
+                    var that = this;
+                    var iStart = oSettings._iDisplayStart
+                    var aData = [];
+                    this.oApi._fnServerParams(oSettings, aData);
+                    oSettings.fnServerData.call(oSettings.oInstance, oSettings.sAjaxSource, aData, function(json) {
+                        that.oApi._fnClearTable(oSettings);
+                        var aData = (oSettings.sAjaxDataProp !== '') ?
+                            that.oApi._fnGetObjectDataFn(oSettings.sAjaxDataProp)(json) : json;
+                        for (var i = 0; i < aData.length; i++) {
+                            that.oApi._fnAddData(oSettings, aData[i]);
+                        }
+                        oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
+                        that.fnDraw();
+                        if (bStandingRedraw === true) {
+                            oSettings._iDisplayStart = iStart;
+                            that.oApi._fnCalculateEnd(oSettings);
+                            that.fnDraw(false);
+                        }
+                        that.oApi._fnProcessingDisplay(oSettings, false);
+                        if (typeof fnCallback == 'function' && fnCallback !== null) {
+                            fnCallback(oSettings);
+                        }
+                    }, oSettings);
+                };
+
+
+                /*  $('.datepicker').datetimepicker();  */
+                $('.datepicker').datetimepicker({
+                    format: 'YYYY-MM-DD hh:mm',
+                    useCurrent: false
+
+                });
+            });
+
+            function footerCallback(oSettings) {
+                $('div.pagination ul').addClass('pagination');
+                $('div.dataTables_wrapper div.row-fluid');
+                $('div.dataTables_wrapper div.span6').addClass('col-md-6 col-lg-6');
+            }
+
+            function myCustomDrawCallback(oSettings) {
+                var classMap = [];
+                for (var i = 0, iLen = oSettings.aoColumns.length; i < iLen; i++) {
+                    if (oSettings.aoColumns[i].nTh.className.indexOf('responsiveCol') > -1)
+                        classMap.push(i);
+                }
+                var iStart = oSettings._iDisplayStart + 1;
+                for (var i = 0, iLen = oSettings.aiDisplay.length; i < iLen; i++) {
+                    for (var j = 0; j < classMap.length; j++) {
+                        $('td:eq(' + classMap[j] + ')', oSettings.aoData[oSettings.aiDisplay[i]].nTr).addClass('responsiveCol');
+                    }
+                    $('td:eq(0)', oSettings.aoData[oSettings.aiDisplay[i]].nTr).html(iStart + i);
+                }
+                $('#MembershipTable input[type=checkbox], #MembershipTable input[type=radio]').iCheck({
+                    checkboxClass: "icheckbox_minimal",
+                    radioClass: "iradio_minimal"
+                });
+                $('#MembershipTable input[type=checkbox], #MembershipTable input[type=radio]').on('ifChanged', function(event) {
+                    $(this).trigger('change');
+                });
+                return false;
+            }
+
+            //]]>
+        </script>
+    </section>
+</body>
+
+</html>

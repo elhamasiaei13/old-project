@@ -1,0 +1,33 @@
+package com.parvanpajooh.client.transportationmanagement2.service;
+
+import java.util.List;
+
+import com.parvanpajooh.client.transportationmanagement2.model.TransportationScheduleMsg;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
+
+/**
+ * @author sasan
+ */
+
+public interface TransportationManagement2Api {
+	
+	@GET("transportationSchedule/find/flightInfo")
+	public Call<TransportationScheduleMsg> findTransportationSchedule(
+			@Query("carrierCode") String carrierCode, 
+			@Query("routeNumber") String routeNumber, 
+			@Query("departureDateInUtc") String strUtcDepartureDateInUtc);
+	
+	@GET("transportationschedules/fromnodecode")
+	public Call<List<TransportationScheduleMsg>> findDepartureFromNodeInNextHoures(
+			@Query("from_nodecode") String fromNodeCode, 
+			@Query("hours") int hours);
+	
+	@GET("transportationschedules/tonodecode")
+	public Call<List<TransportationScheduleMsg>> findArraivalToNodeInNextHoures(
+			@Query("to_nodecode") String toNodeCode, 
+			@Query("hours") int hours);
+	
+}

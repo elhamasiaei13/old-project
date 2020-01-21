@@ -1,0 +1,101 @@
+package com.parvanpajooh.complaintmanagement.domain.service.impl;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseDto;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.service.impl.GenericDomainServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.complaintmanagement.domain.model.Complaint;
+import com.parvanpajooh.complaintmanagement.domain.model.ComplaintCategory;
+import com.parvanpajooh.complaintmanagement.domain.model.dto.ComplaintCategoryDto;
+import com.parvanpajooh.complaintmanagement.domain.repository.ComplaintCategoryRepository;
+import com.parvanpajooh.complaintmanagement.domain.repository.ComplaintRepository;
+import com.parvanpajooh.complaintmanagement.domain.service.ComplaintCategoryDomainService;
+
+public class ComplaintCategoryDomainServiceImpl extends GenericDomainServiceImpl<ComplaintCategory, Long>
+		implements ComplaintCategoryDomainService {
+
+	static final Logger log = LoggerFactory.getLogger(ComplaintCategoryDomainServiceImpl.class);
+
+	private ComplaintCategoryRepository compliantCategoryRepository;
+	
+	@Inject
+	public ComplaintRepository complaintRepository;
+
+	@Inject
+	public void setPackingTypeRepository(ComplaintCategoryRepository compliantCategoryRepository) {
+		this.repository = compliantCategoryRepository;
+		this.compliantCategoryRepository = compliantCategoryRepository;
+	}
+	
+	@Override
+	public void delete(ComplaintCategory complaintCategory) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering delete( complaintCategory={})", complaintCategory);
+		List<Complaint> complaints = null;
+		Long complaintCategoryId = complaintCategory.getId();
+		
+		try {
+
+			boolean hasChildren = compliantCategoryRepository.hasChildren(complaintCategoryId);
+			if (Validator.equals(hasChildren, true)) {
+				throw new ParvanDaoException(ErrorCode.COMPLAINTMANAGEMENT_CATEGORY_DELETE__CATEGORY_ALREADY_USED_IN_SOME_COMPLAINT);
+			}
+			
+			complaint = complaintRepository.findByComplaintCategoryId(complaintCategoryId);
+			if(Validator.isNotNull(complaint)){
+				throw new ParvanDaoException(ErrorCode.COMPLAINTMANAGEMENT_CATEGORY_DELETE__CATEGORY_ALREADY_USED_IN_SOME_COMPLAINT);
+			}
+
+			// delete complaintCategory
+			super.delete(complaintCategory);
+
+		} catch (ParvanDaoException e) {
+			if (Validator.isNotNull(e.getErrorCode())) {
+				throw new ParvanRecoverableException(e, e.getErrorCode());
+			} else {
+				throw new ParvanUnrecoverableException("Error occurred while delete ComplaintCategory.", e);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while delete ComplaintCategory.", e);
+		}
+	}
+
+	@Override
+	public BaseDto save(BaseDto baseDto) throws ParvanServiceException {
+
+		ComplaintCategoryDto categoryDto = (ComplaintCategoryDto) baseDto;
+
+		try {
+			ComplaintCategory complaintCategory = new ComplaintCategory();
+			complaintCategory.fromDto(categoryDto);
+
+			if (categoryDto.getParent().getId() != null) {
+				ComplaintCategory parentCategory = compliantCategoryRepository.get(categoryDto.getParent().getId());
+				complaintCategory.setParent(parentCategory);
+			}
+
+			complaintCategory = super.save(complaintCategory);
+			baseDto = complaintCategory.toDto();
+
+		} catch (ParvanDaoException e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving category.", e);
+		}
+
+		return baseDto;
+
+	}
+
+}

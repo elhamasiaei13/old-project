@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;agentmanagement-web/src/main/webapp/WEB-INF/templates/viewEmployees.html&apos; to &apos;agentDetail.html&apos;" description="Rename resource &apos;viewEmployees.html&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/main/webapp/WEB-INF/templates/viewEmployees.html" name="agentDetail.html" stamp="1472450257994" updateReferences="true"/>
+</session>

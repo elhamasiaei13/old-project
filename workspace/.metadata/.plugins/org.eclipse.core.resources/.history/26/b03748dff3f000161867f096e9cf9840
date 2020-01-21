@@ -1,0 +1,69 @@
+package com.parvanpajooh.taskmanagement.mvc;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.thymeleaf.Arguments;
+import org.thymeleaf.Configuration;
+import org.thymeleaf.dom.Element;
+import org.thymeleaf.dom.Node;
+import org.thymeleaf.dom.Text;
+import org.thymeleaf.processor.attr.AbstractChildrenModifierAttrProcessor;
+import org.thymeleaf.standard.expression.IStandardExpression;
+import org.thymeleaf.standard.expression.IStandardExpressionParser;
+import org.thymeleaf.standard.expression.StandardExpressions;
+import org.unbescape.html.HtmlEscape;
+
+public class LineSeparatorAttrProcessor extends AbstractChildrenModifierAttrProcessor {
+
+	public LineSeparatorAttrProcessor() {
+		// Only execute this processor for 'sayto' attributes.
+		super("lineseparator");
+	}
+
+	public int getPrecedence() {
+		// A value of 10000 is higher than any attribute in the
+		// SpringStandard dialect. So this attribute will execute
+		// after all other attributes from that dialect, if in the
+		// same tag.
+		return 10000;
+	}
+
+	//
+	// Our processor is a subclass of the convenience abstract implementation
+	// 'AbstractTextChildModifierAttrProcessor', which takes care of the
+	// DOM modifying stuff and allows us just to implement this 'getText(...)'
+	// method to compute the text to be set as tag body.
+	//
+	protected String getText(final Arguments arguments, final Element element, final String attributeName) {
+		// return "Hello, " + element.getAttributeValue(attributeName) + "!";
+
+		final Configuration configuration = arguments.getConfiguration();
+
+		final IStandardExpressionParser parser = StandardExpressions.getExpressionParser(configuration);
+
+		final String attributeValue = element.getAttributeValue(attributeName);
+
+		final IStandardExpression expression = parser.parseExpression(configuration, arguments, attributeValue);
+
+		 String text = (String) expression.execute(configuration, arguments);
+		
+		 text = HtmlEscape.escapeHtml4Xml( text ).replace( "\n", "<br />" );
+
+
+		return text;
+	}
+	
+	@Override
+    protected final List<Node> getModifiedChildren(
+            final Arguments arguments, final Element element, final String attributeName) {
+
+        final String text = getText(arguments, element, attributeName);
+        //Create new text node signifying that content is already escaped.
+        final Text newNode = new Text(text == null? "" : text, null, null, true);
+        // Setting this allows avoiding text inliners processing already generated text,
+        // which in turn avoids code injection.
+        newNode.setProcessable( false );
+        return Collections.singletonList((Node)newNode);
+    }
+}

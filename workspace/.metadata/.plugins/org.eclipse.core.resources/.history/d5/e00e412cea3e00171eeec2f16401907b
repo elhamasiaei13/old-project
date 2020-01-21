@@ -1,0 +1,5 @@
+package com.parvanpajooh.siteservices.service;
+
+public interface ProfileManagementLocalService {
+
+}

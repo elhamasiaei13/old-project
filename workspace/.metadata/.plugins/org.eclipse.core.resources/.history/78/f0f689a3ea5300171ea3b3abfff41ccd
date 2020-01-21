@@ -1,0 +1,39 @@
+/**
+ * 
+ */
+package com.parvanpajooh.routemanagement.service;
+
+import java.io.InputStream;
+import java.util.List;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.GenericService;
+import com.parvanpajooh.routemanagement.model.Route;
+import com.parvanpajooh.routemanagement.model.enums.RouteCategory;
+import com.parvanpajooh.routemanagement.model.vo.EvaluatedRouteVO;
+import com.parvanpajooh.routemanagement.model.vo.NodeVO;
+import com.parvanpajooh.routemanagement.model.vo.TransferNodeVO;
+
+/**
+ * @author ali
+ * @author mehrdad
+ * @author Mohammad
+ *
+ */
+public interface RouteService extends GenericService<Route, Long> {
+
+	public void importRoutes(UserInfo userInfo, InputStream excelIS) throws ParvanServiceException;
+
+	public List<BaseVO> findAllFull(UserInfo userInfo) throws ParvanServiceException;
+
+	public List<EvaluatedRouteVO> evaluateRoutes(UserInfo userInfo, List<TransferNodeVO> orderedTransferNodes, RouteCategory routeCategory)throws ParvanServiceException;
+
+	public List<NodeVO> findCollectionByGeoCity(UserInfo userInfo, String geoCityCode, Long toNodeId, String term) throws ParvanServiceException;
+
+	public List<NodeVO> findDistributionByGeoCity(UserInfo userInfo, String geoCityCode, Long fromNodeId, String term) throws ParvanServiceException;
+
+	public List<NodeVO> findHubByGeoCity(UserInfo userInfo, String geoCityCode) throws ParvanServiceException;
+
+}

@@ -1,0 +1,20 @@
+package com.parvanpajooh.siteservices.service;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.siteservices.model.vo.RecoveryCodeVO;
+import com.parvanpajooh.siteservices.model.vo.RegisterVO;
+
+public interface ProfileService {
+
+	public void register(UserInfo userInfo, RegisterVO registerVO) throws ParvanServiceException;
+
+	public void activateUserAndSetPassword(UserInfo userInfo, Long userId, String password, String confirmPassword) throws ParvanServiceException;
+
+	public RecoveryCodeVO identifyAndCreateCode(UserInfo userInfo, String emailOrMobile) throws ParvanServiceException;
+
+	public RecoveryCodeVO findRecovryCodeBy(UserInfo userInfo, RecoveryCodeVO recoveryCodeVO) throws ParvanServiceException;
+	
+	public void resetPassword(UserInfo userInfo, Long userId, String password, String confirmPassword) throws ParvanServiceException;
+
+}

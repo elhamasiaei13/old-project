@@ -1,0 +1,155 @@
+package com.parvanpajooh.siteservices.mvc;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.common.auth.UserInfoLoader;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.siteservices.model.vo.CityInfoVO;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+import com.parvanpajooh.siteservices.mvc.base.SiteServicesBaseController;
+import com.parvanpajooh.siteservices.service.PersonManagementService;
+import com.parvanpajooh.siteservices.service.RateAndRouteService;
+
+
+/**
+ * @author dev-03
+ *
+ */
+@Controller
+@RequestMapping("/profile")
+public class PersonController extends SiteServicesBaseController {
+
+	@EJB(mappedName = "java:global/siteservices-ear/siteservices-ejb/PersonManagementServiceImpl")
+	private PersonManagementService personManagementService;
+
+	@EJB(mappedName = "java:global/siteservices-ear/siteservices-ejb/RateAndRouteServiceImpl")
+	private RateAndRouteService rateAndRouteService;
+	
+	@RequestMapping(value="/registers", method = RequestMethod.GET)
+	public String show(HttpServletRequest request, Model model) {
+		log.debug("Entering show");
+
+		try {
+			init(request, model);
+
+		} catch (Exception e) {
+			log.error("Error in init method");
+			// TODO Mo: handle proper exceptions
+		}
+
+		model.addAttribute("rightMenu", getName());
+		return getName();
+	}
+	
+	@RequestMapping(value="/register", method = RequestMethod.GET)
+	public String showCreatePage(HttpServletRequest request, Model model) {
+		
+		//LOG
+		log.debug("Entering showCreatePage()");
+		try {
+			PersonVO newPerson = new PersonVO();
+			model.addAttribute("person", newPerson);
+			model.addAttribute("mode", "createPerson");
+		} catch (Exception e) {
+			Map<String, Object> result = new HashMap<String, Object>();
+			proccessException(e, result);
+			model.addAttribute("result", result);
+			return "error-default";
+		}
+		
+		model.addAttribute("rightMenu", "profile-register");
+	    return "profile-register";
+	}
+	
+	@RequestMapping(value="/register/save", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> savePerson(PersonVO personVO, HttpServletRequest request, final Model model) throws ParvanServiceException {
+		log.debug("Entering save(vo={})", personVO);
+		Map<String, Object> result = new HashMap<String, Object>();
+		if (Validator.isNull(personVO.getId())) {
+			personVO.setActive(true);
+		}
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			personManagementService.createPerson(userInfo ,personVO);
+			
+			result.put("status", "success");
+			
+		} catch (ParvanServiceException e) {
+			proccessException(e, result);
+			model.addAttribute("result", result);
+			model.addAttribute("person", personVO);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/register/cities/{shortCode}", method = RequestMethod.GET)
+	public @ResponseBody CityInfoVO getGeoEntity(@PathVariable String shortCode, HttpServletRequest request) {
+		log.debug("Entering getGeoEntity(shortCode={})", shortCode);
+		CityInfoVO result = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			if (Validator.isNotNull(shortCode)) {
+				result = rateAndRouteService.getCityByShortCode(userInfo, shortCode);
+			}
+		} catch (Exception e) {
+			log.error("Error occurred while getGeoEntity.", e);
+		}
+		log.debug("Exiting getGeoEntity()");
+		return result;
+	}
+	
+	@RequestMapping(value = "/register/cities", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<CityInfoVO> findCity(
+			@DatatablesParams DatatablesCriterias criterias, String term, HttpServletRequest request)
+			throws ParvanServiceException, ObjectNotFoundException {
+		log.debug("Entering findCity( criterias={}, term={})", criterias, term);
+		DataSet<CityInfoVO> dataSet = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			int firstResult = criterias.getStart();
+			int maxResults = criterias.getLength();
+			ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+			SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+			String sortCriterion = columnDef.getName();
+			if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+				sortDirection = SortDirectionEnum.Descending;
+			}
+			PageList<CityInfoVO> result = rateAndRouteService.findCityByNameOrShortCode(userInfo, term,
+					firstResult, maxResults, sortDirection, sortCriterion);
+			long totalRecords = result.getTotal();
+			List<CityInfoVO> elements = result.getElements();
+			dataSet = new DataSet<CityInfoVO>(elements, (long) elements.size(), totalRecords);
+		} catch (ParvanServiceException e) {
+			throw e;
+		}
+		log.debug("Exiting findCity()");
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+}

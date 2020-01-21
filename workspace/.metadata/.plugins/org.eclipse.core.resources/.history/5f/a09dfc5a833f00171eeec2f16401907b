@@ -1,0 +1,305 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.geomanagement;
+
+import java.util.List;
+
+import com.parvanpajooh.client.common.GenericRestClient;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.common.RestClientConstants;
+import com.parvanpajooh.client.rateandroute.model.CarrierMsg;
+import com.parvanpajooh.client.rateandroute.model.CityInfoMsg;
+import com.parvanpajooh.client.rateandroute.model.CountryInfoMsg;
+import com.parvanpajooh.client.rateandroute.model.CurrencyMsg;
+import com.parvanpajooh.client.rateandroute.model.NodeMsg;
+import com.parvanpajooh.client.rateandroute.model.StateInfoMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.FreightNodeType;
+import com.parvanpajooh.client.rateandroute.service.RateAndRouteApi;
+import com.parvanpajooh.commons.config.Config;
+
+import retrofit2.Call;
+
+/**
+ * @author MO
+ *
+ */
+public class RateAndRouteApiRestClient extends GenericRestClient<RateAndRouteApi> {
+	
+	private static final String ENDPOINT_PATH = "/rateAndRoute-rest/";
+
+	private RateAndRouteApi rateAndRouteApi;
+
+	public RateAndRouteApiRestClient() {
+		super(
+				Config.getProperty("rateAndRoute.rest.endpoint.protocol", RestClientConstants.ENDPOINT_DEF_PROTOCOL__HTTP),
+				Config.getProperty("rateAndRoute.rest.endpoint.host", RestClientConstants.ENDPOINT_DEF_HOST__LOCALHOST),
+				Config.getProperty("rateAndRoute.rest.endpoint.port", RestClientConstants.ENDPOINT_DEF_PORT__80),
+				ENDPOINT_PATH,
+				Config.getLongProperty("rateAndRoute.rest.endpoint.timeout", RestClientConstants.TIMEOUT));
+		
+		rateAndRouteApi = super.createRestClient();
+	}
+	
+	/**
+	 * 
+	 * @param shortCode
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public CityInfoMsg getCityByShortCode(String shortCode) throws ParvanClientException {
+		Call<CityInfoMsg> call = rateAndRouteApi.getCityByShortCode(shortCode);
+		return executeCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param term
+	 * @param start
+	 * @param length
+	 * @param sortDirection
+	 * @param sortCriterion
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public PageList<CityInfoMsg> findCitiesByNameOrShortCode(
+			String parentCode,
+			String term,
+			Integer start,
+			Integer length,
+			String sortDirection,
+			String sortCriterion) throws ParvanClientException {
+		
+		Call<List<CityInfoMsg>> call = rateAndRouteApi.findCityByNameOrShortCode(
+				parentCode,
+				term,
+				start,
+				length,
+				sortDirection,
+				sortCriterion);
+		
+		return executePageCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param term
+	 * @param start
+	 * @param length
+	 * @param sortDirection
+	 * @param sortCriterion
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public PageList<StateInfoMsg> findStatesByNameOrShortCode(
+			String parentCode,
+			String term,
+			Integer start,
+			Integer length,
+			String sortDirection,
+			String sortCriterion) throws ParvanClientException {
+		
+		Call<List<StateInfoMsg>> call = rateAndRouteApi.findStateByNameOrShortCode(
+				parentCode,
+				term,
+				start,
+				length,
+				sortDirection,
+				sortCriterion);
+		
+		return executePageCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param term
+	 * @param start
+	 * @param length
+	 * @param sortDirection
+	 * @param sortCriterion
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public PageList<CountryInfoMsg> findCountriesByNameOrShortCode(
+			String term,
+			Integer start,
+			Integer length,
+			String sortDirection,
+			String sortCriterion) throws ParvanClientException {
+		
+		Call<List<CountryInfoMsg>> call = rateAndRouteApi.findCountryByNameOrShortCode(
+				term,
+				start,
+				length,
+				sortDirection,
+				sortCriterion);
+		
+		return executePageCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param term
+	 * @param freightTypes
+	 * @param active
+	 * @param cityShortCode
+	 * @param page
+	 * @param size
+	 * @param sortDirection
+	 * @param sortCriterion
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public PageList<NodeMsg> findNodesBy(
+			String term,
+			FreightNodeType[] freightTypes,
+			Boolean active,
+			String cityShortCode,
+			int page,
+			int size,
+			String sortDirection,
+			String sortCriterion) throws ParvanClientException {
+		
+		Call<List<NodeMsg>> call = rateAndRouteApi.findNodesBy(term, freightTypes, active, cityShortCode, page, size, sortDirection, sortCriterion);
+		return executePageCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public NodeMsg getNode(Long id) throws ParvanClientException {
+		Call<NodeMsg> call = rateAndRouteApi.getNode(id);
+		return executeCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public NodeMsg getNodeByCode(String code) throws ParvanClientException {
+		Call<NodeMsg> call = rateAndRouteApi.getNodeByCode(code);
+		return executeCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param cityShortCode
+	 * @param toNodeId
+	 * @param term
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public List<NodeMsg> findCollectionNodesByCity(
+    		String cityShortCode, 
+    		Long toNodeId, 
+    		String term) throws ParvanClientException {
+		
+		Call<List<NodeMsg>> call = rateAndRouteApi.findCollectionNodesByCity( 
+				cityShortCode,
+				toNodeId,
+				term);
+		
+		return executeCall(call);
+	}
+	
+    /**
+     * 
+     * @param cityShortCode
+     * @param fromNodeId
+     * @param term
+     * @return
+     * @throws ParvanServiceException
+     */
+	public List<NodeMsg> findDistributionNodesByCity(
+			String cityShortCode, 
+			Long fromNodeId, 
+			String term) throws ParvanClientException {
+		
+		Call<List<NodeMsg>> call = rateAndRouteApi.findDistributionNodesByCity( 
+				cityShortCode,
+				fromNodeId,
+				term);
+		
+		return executeCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param cityShortCode
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public List<NodeMsg> findHubNodesByCity(String cityShortCode) throws ParvanClientException {
+		Call<List<NodeMsg>> call = rateAndRouteApi.findHubNodesByCity(cityShortCode);
+		return executeCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public CityInfoMsg getCityByNodeId(Long id) throws ParvanClientException {
+		Call<CityInfoMsg> call = rateAndRouteApi.getCityByNodeId(id);
+		return executeCall(call);
+	}
+
+	public NodeMsg getNodeForInit(Long id) throws ParvanClientException {
+		Call<NodeMsg> call = rateAndRouteApi.getNodeForInit(id);
+		return executeCall(call);
+	}
+	
+	public PageList<CarrierMsg> findCarriers(
+			String term,
+			Integer start,
+			Integer length,
+			String sortDirection,
+			String sortCriterion) throws ParvanClientException {
+
+		Call<List<CarrierMsg>> call = rateAndRouteApi.findCarriers( 
+									term,
+									start,
+									length,
+									sortDirection,
+									sortCriterion);
+		return executePageCall(call);
+	}
+	
+	public CarrierMsg getCarrierByCode(String code) throws ParvanClientException {
+		Call<CarrierMsg> call = rateAndRouteApi.getCarrierByCode(code);
+		return executeCall(call);
+	}
+	
+	public PageList<CurrencyMsg> findCurrencies(
+			String term,
+			Integer start,
+			Integer length,
+			String sortDirection,
+			String sortCriterion) throws ParvanClientException {
+
+		Call<List<CurrencyMsg>> call = rateAndRouteApi.findCurrencies( 
+									term,
+									start,
+									length,
+									sortDirection,
+									sortCriterion);
+		return executePageCall(call);
+	}
+	
+	public CurrencyMsg getCurrencyByCode(String code) throws ParvanClientException {
+		Call<CurrencyMsg> call = rateAndRouteApi.getCurrencyByCode(code);
+		return executeCall(call);
+	}
+	
+	public List<NodeMsg> getAllNodes() throws ParvanClientException {
+		Call<List<NodeMsg>> call = rateAndRouteApi.getAllNodes();
+		return executeCall(call);
+	}
+}

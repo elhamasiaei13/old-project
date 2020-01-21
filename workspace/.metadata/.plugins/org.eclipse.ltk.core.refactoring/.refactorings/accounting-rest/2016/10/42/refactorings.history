@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;accounting.proto&apos; to &apos;stock2-ejb/src/main/protobuf&apos;&#x0A;- Original project: &apos;accounting-rest&apos;&#x0A;- Destination element: &apos;stock2-ejb/src/main/protobuf&apos;&#x0A;- Original element: &apos;accounting.proto&apos;" description="Copy file" destination="=stock2-ejb/src\/main\/protobuf" element1="src/main/protobuf/accounting.proto" files="1" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1476529307611" units="0" version="1.0"/>
+</session>

@@ -1,0 +1,100 @@
+package com.parvanpajooh.complaintmanagement.mvc;
+
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.parvanpajooh.common.auth.UserInfoLoader;
+import com.parvanpajooh.common.util.UserInfoThreadLocal;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.util.logging.MdcHelper;
+import com.parvanpajooh.commons.util.CentralizedThreadLocal;
+import com.parvanpajooh.commons.util.LocaleThreadLocal;
+import com.parvanpajooh.commons.util.LocaleUtil;
+import com.parvanpajooh.commons.util.TimeZoneThreadLocal;
+import com.parvanpajooh.commons.util.TimeZoneUtil;
+import com.parvanpajooh.commons.util.ZoneIdThreadLocal;
+import com.parvanpajooh.commons.util.ZoneIdUtil;
+import com.parvanpajooh.complaintmanagement.mvc.base.ComplaintManagementBaseController;
+
+
+public class ControllerInterceptors extends ComplaintManagementBaseController implements AsyncHandlerInterceptor {
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	/* (non-Javadoc)
+	 * @see org.springframework.web.servlet.handler.HandlerInterceptorAdapter#preHandle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.Object)
+	 */
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception {
+		
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+		LocaleThreadLocal.setDefaultLocale(LocaleUtil.fromLanguageId(userInfo.getLocale()));
+		TimeZoneThreadLocal.setDefaultTimeZone(TimeZoneUtil.getTimeZone(userInfo.getZoneId()));
+		ZoneIdThreadLocal.setDefaultZoneId(ZoneIdUtil.getZoneId(userInfo.getZoneId()));
+		UserInfoThreadLocal.setUserInfo(userInfo);
+		
+    	if (userInfo != null) {
+
+        	String sessionId = request.getSession().getId();
+    		UUID uuid = UUID.randomUUID();
+    		String requestId = uuid.toString();
+        	//String requestScheme = httpRequest.getScheme();             // http
+            //String requestServerName = httpRequest.getServerName();     // hostname.com
+            //int serverPort = httpRequest.getServerPort();        // 80
+        	//String requestContextPath = httpRequest.getContextPath();   // /mywebapp
+        	String requestServletPath = request.getServletPath();   // /servlet/MyServlet
+        	String requestPathInfo = request.getPathInfo();         // /a/b;c=123
+        	
+        	userInfo.setSessionId(sessionId);
+        	userInfo.setRequestId(requestId);
+        	userInfo.setRequestServletPath(requestServletPath);
+        	userInfo.setRequestPathInfo(requestPathInfo);
+        	
+        	// fill MDC
+        	MdcHelper.fillMdc(userInfo);
+    	} 
+		
+		return true;
+	}
+
+	/**
+	 * This implementation is empty.
+	 */
+	@Override
+	public void postHandle(
+			HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
+			throws Exception {
+		
+	}
+
+	/**
+	 * This implementation is empty.
+	 */
+	@Override
+	public void afterCompletion(
+			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+			throws Exception {
+		
+		CentralizedThreadLocal.clearShortLivedThreadLocals();
+		
+	}
+
+	/**
+	 * This implementation is empty.
+	 */
+	@Override
+	public void afterConcurrentHandlingStarted(
+			HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception {
+	}
+	
+}

@@ -1,0 +1,73 @@
+package com.parvanpajooh.siteservices.model.criteria;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+
+public class RoleCriteria extends BaseCriteria {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6692696276170013041L;
+	
+
+	private Boolean active;
+	
+	private String canonicalSearchName;
+	
+	private String type;
+
+
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "SampleCriteria [ active="
+				+ active + "]";
+	}	
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the canonicalSearchName
+	 */
+	public String getCanonicalSearchName() {
+		return canonicalSearchName;
+	}
+
+	/**
+	 * @param canonicalSearchName the canonicalSearchName to set
+	 */
+	public void setCanonicalSearchName(String canonicalSearchName) {
+		this.canonicalSearchName = canonicalSearchName;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(String type) {
+		this.type = type;
+	}
+
+
+}

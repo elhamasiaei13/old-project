@@ -1,0 +1,22 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.service;
+
+import java.util.List;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.service.GenericService;
+import com.parvanpajooh.shipment.model.PackingItem;
+import com.parvanpajooh.shipment.model.vo.PackingItemStateHistoryVO;
+
+/**
+ * @author MO
+ *
+ */
+public interface PackingItemStateService extends GenericService<PackingItem, Long>{
+	
+	public List<PackingItemStateHistoryVO> findAllStateHistories(UserInfo userInfo, Long packingItemId) throws ParvanServiceException;
+	
+}

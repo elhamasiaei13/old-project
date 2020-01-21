@@ -1,0 +1,30 @@
+package com.parvanpajooh.identitymanagement2.service;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.service.GenericService;
+import com.parvanpajooh.identitymanagement2.model.User;
+import com.parvanpajooh.identitymanagement2.model.vo.UserVO;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+public interface UserService extends GenericService<User, Long> {
+
+	public void changeRoles(UserInfo userInfo, long userId, long[] roleIds) throws ParvanServiceException;
+
+	public void changePassword(UserInfo userInfo, String newPassword, String confirmNewPassword , String currentPassword) throws ParvanServiceException;
+	
+	public void resetPassword(UserInfo userInfo, Long id, String newPassword) throws ParvanServiceException;
+
+	public UserVO findUserByUsername(String username) throws ObjectNotFoundException;
+
+	public UserVO loadUserByUuid(String uuid) throws ParvanServiceException;
+	
+	public UserVO findUserByPersonUuid(String personUuid) throws ParvanServiceException;
+
+	public void activateUserAndSetPassword(UserInfo userInfo, Long id, String password);
+}

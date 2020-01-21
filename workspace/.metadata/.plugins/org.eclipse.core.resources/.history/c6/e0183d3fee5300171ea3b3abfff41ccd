@@ -1,0 +1,414 @@
+/**
+ * 
+ */
+package com.parvanpajooh.routemanagement.dao.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.routemanagement.dao.RouteDao;
+import com.parvanpajooh.routemanagement.model.Node;
+import com.parvanpajooh.routemanagement.model.Node_;
+import com.parvanpajooh.routemanagement.model.Route;
+import com.parvanpajooh.routemanagement.model.Route_;
+import com.parvanpajooh.routemanagement.model.criteria.RouteCriteria;
+import com.parvanpajooh.routemanagement.model.enums.FreightNodeType;
+import com.parvanpajooh.routemanagement.model.enums.RouteCategory;
+import com.parvanpajooh.routemanagement.model.enums.RouteType;
+import com.parvanpajooh.routemanagement.model.vo.NodeVO;
+
+/**
+ * @author ali
+ *
+ */
+public class RouteDaoJpa extends GenericDaoJpa<Route, Long> implements RouteDao {
+
+	public RouteDaoJpa() {
+		super(Route.class);
+	}
+	
+	@Override
+	protected List<Predicate> buildPredicateList(
+			BaseCriteria cri, 
+			CriteriaBuilder builder, 
+			Metamodel metamodel, 
+			Root<Route> root, Map<String, Join> joins) throws ParvanException {
+
+		//LOG
+    	log.debug("Entering buildPredicateList( ... )");
+    	
+    	RouteCriteria routeCriteria = (RouteCriteria) cri;
+    	
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+		
+		RouteType[] types = routeCriteria.getTypes();
+		String carrierRouteNumber = routeCriteria.getCarrierRouteNumber();
+		
+//		CarrierVO carrier = routeCriteria.getCarrier();
+		Boolean active = routeCriteria.getActive();
+		String title = routeCriteria.getTitle();
+		
+		if(Validator.isNotNull( carrierRouteNumber )){
+    		Predicate predicate = builder.like(root.<String>get(Route_.carrierRouteNumber),"%" +  carrierRouteNumber+ "%");
+    		predicateList.add(predicate);
+    	}
+		
+		if(Validator.isNotNull( active )){
+			Predicate predicate = builder.equal(root.<Boolean>get(Route_.active), active);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( types )){
+			List<Predicate> orPredicate = new ArrayList<Predicate>();
+			
+			for (RouteType RouteType : types) {
+				orPredicate.add(builder.equal(root.<RouteType>get(Route_.type), RouteType));
+			}
+			
+			Predicate predicate = builder.or(orPredicate.toArray(new Predicate[orPredicate.size()]));
+			predicateList.add(predicate);
+		}
+		
+		RouteCategory[] categories = routeCriteria.getCategories();
+		if (Validator.isNotNull( categories )) {
+			List<Predicate> orPredicate = new ArrayList<Predicate>();
+			for (RouteCategory RouteCategory : categories) {
+				orPredicate.add(builder.equal(root.<RouteCategory>get(Route_.category), RouteCategory));
+			}
+			Predicate predicate = builder.or(orPredicate.toArray(new Predicate[orPredicate.size()]));
+			predicateList.add(predicate);
+		}
+		
+//		if(Validator.isNotNull( carrier )){
+//			Join<Route, Carrier> join = root.join(Route_.carrier);
+//			
+//			joins.put("carrier", join);
+//			
+//			if(Validator.isNotNull( carrier.getId() )){
+//				Predicate predicate = builder.equal(join.<Long>get(Carrier_.id), carrier.getId());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( carrier.getName() )){
+//				Predicate predicate = builder.equal(join.<String>get(Carrier_.name), carrier.getName());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( carrier.getCode() )){
+//				Predicate predicate = builder.equal(join.<String>get(Carrier_.code), carrier.getCode());
+//				predicateList.add(predicate);
+//			}
+//			
+//			if(Validator.isNotNull( carrier.getActive() )){
+//				Predicate predicate = builder.equal(join.<Boolean>get(Carrier_.active), carrier.getActive());
+//				predicateList.add(predicate);
+//			}
+//			
+//		}
+		
+		// ----------------------------------------------------------------
+		// CarrierCode
+		// ----------------------------------------------------------------
+		String carrierCode = routeCriteria.getCarrierCode();
+		if (Validator.isNotNull(carrierCode)) {
+			Predicate predicate = builder.equal(root.<String> get(Route_.carrierCode), carrierCode);
+			predicateList.add(predicate);
+		}
+		
+		//---------------------------------------------------------------
+		// From Node
+		//---------------------------------------------------------------
+		NodeVO fromNode = routeCriteria.getFromNode();
+		if(Validator.isNotNull( fromNode )){
+			Join<Route, Node> join = root.join(Route_.fromNode);
+			
+			joins.put("fromNode", join);
+			
+			if(Validator.isNotNull( fromNode.getId() )){
+				Predicate predicate = builder.equal(join.<Long>get(Node_.id), fromNode.getId());
+				predicateList.add(predicate);
+			}
+			
+			if (Validator.isNotNull(fromNode.getName()) && Validator.isNotNull(fromNode.getCodeName()) && Validator.isNotNull(fromNode.getOtherNames())) {
+				Predicate predicate = builder.or(
+						builder.like(join.<String>get(Node_.name), "%" + fromNode.getName() + "%"),
+						builder.like(join.<String>get(Node_.codeName), "%" + fromNode.getCodeName() + "%"),
+						builder.like(join.<String>get(Node_.otherNames), "%" + fromNode.getOtherNames() + "%"));
+				predicateList.add(predicate);
+			} else {
+				if(Validator.isNotNull( fromNode.getName() )){
+					Predicate predicate = builder.like(join.<String>get(Node_.name), "%" + fromNode.getName() + "%");
+					predicateList.add(predicate);
+				}
+			}
+			
+			if(Validator.isNotNull( fromNode.getFreightType() )){
+				Predicate predicate = builder.equal(join.<FreightNodeType>get(Node_.freightType), fromNode.getFreightType());
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull( fromNode.getActive() )){
+				Predicate predicate = builder.equal(join.<Boolean>get(Node_.active), fromNode.getActive());
+				predicateList.add(predicate);
+			}
+			
+			/*GeoEntityVO fromNodeParentGeoEntity = routeCriteria.getFromNodeParentGeoEntity();
+			if(Validator.isNotNull(fromNode.getGeoEntity()) && Validator.isNotNull(fromNode.getGeoEntity().getParent())){
+				GeoEntityVO geoEntity = fromNode.getGeoEntity().getParent();
+				Predicate predicate = builder.in(expression)
+				Join<Node, GeoEntity> geoJoin = root.join(Node_.geoEntity, JoinType.LEFT);
+					joins.put("issuingAgent", join);
+					if (Validator.isNotNull(issuingAgent.getIdmId())) {
+						Predicate predicate = builder.equal(join.<Long> get(GeoEntity_.idmId), issuingAgent.getIdmId());
+						issueAgentPredicates.add(predicate);
+				
+				Predicate predicate = builder.equal(join.<Boolean>get(GeoEntity_.active), fromNode.getActive());
+				predicateList.add(predicate);
+			}*/
+			
+		}
+		//---------------------------------------------------------------
+		// To Node
+		//---------------------------------------------------------------
+		NodeVO toNode = routeCriteria.getToNode();
+		if(Validator.isNotNull( toNode )){
+			Join<Route, Node> join = root.join(Route_.toNode);
+			
+			joins.put("toNode", join);
+			
+			if(Validator.isNotNull( toNode.getId() )){
+				Predicate predicate = builder.equal(join.<Long>get(Node_.id), toNode.getId());
+				predicateList.add(predicate);
+			}
+			
+			if (Validator.isNotNull(toNode.getName()) && Validator.isNotNull(toNode.getCodeName()) && Validator.isNotNull(toNode.getOtherNames())) {
+				Predicate predicate = builder.or(
+						builder.like(join.<String>get(Node_.name), "%" + toNode.getName() + "%"),
+						builder.like(join.<String>get(Node_.codeName), "%" + toNode.getCodeName() + "%"),
+						builder.like(join.<String>get(Node_.otherNames), "%" + toNode.getOtherNames() + "%"));
+				predicateList.add(predicate);
+			} else {
+				if(Validator.isNotNull( toNode.getName() )){
+					Predicate predicate = builder.like(join.<String>get(Node_.name), "%" + toNode.getName() + "%");
+					predicateList.add(predicate);
+				}
+			}
+			
+			if(Validator.isNotNull( toNode.getFreightType() )){
+				Predicate predicate = builder.equal(join.<FreightNodeType>get(Node_.freightType), toNode.getFreightType());
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull( toNode.getActive() )){
+				Predicate predicate = builder.equal(join.<Boolean>get(Node_.active), toNode.getActive());
+				predicateList.add(predicate);
+			}
+			
+		}
+		
+		//---------------------------------------------------------------
+		// title
+		//---------------------------------------------------------------
+		if(Validator.isNotNull(title) && Validator.isNull( fromNode ) && Validator.isNull( toNode )){
+			Join<Route, Node> fromJoin = root.join(Route_.fromNode);
+			Join<Route, Node> toJoin = root.join(Route_.toNode);
+			
+			joins.put("fromNode", fromJoin);
+			joins.put("toNode", toJoin);
+			
+			Predicate predicate = builder.or(
+					//builder.equal(root.<Long>get(Route_.id), title),
+					builder.like(root.<String>get(Route_.carrierRouteNumber), "%" + title + "%"),
+					builder.like(fromJoin.<String>get(Node_.name), "%" + title + "%"),
+					builder.like(fromJoin.<String>get(Node_.codeName), "%" + title + "%"),
+					builder.like(fromJoin.<String>get(Node_.otherNames), "%" + title + "%"),
+					builder.like(toJoin.<String>get(Node_.name), "%" + title + "%"),
+					builder.like(toJoin.<String>get(Node_.codeName), "%" + title + "%"),
+					builder.like(toJoin.<String>get(Node_.otherNames), "%" + title + "%"));
+			predicateList.add(predicate);
+		}
+		
+		basePredicate((BaseCriteria)routeCriteria, builder, root, predicateList);
+			
+		//LOG
+    	log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+    	
+    	return predicateList;
+	}
+
+	@Override
+	public List<Node> findCollectionByGeoCity(String geoCityCode, Long toNodeId, String term) throws ParvanDaoException {
+		
+		List<Node> nodes = null;
+    	
+		try {
+			
+			//get user info from current context
+			UserInfo userInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+			
+			// make query
+			StringBuilder sb = new StringBuilder();
+			sb.append("SELECT DISTINCT fn FROM Route route ");
+			sb.append("LEFT JOIN route.fromNode fn ");
+			sb.append("LEFT JOIN route.toNode tn ");
+			sb.append("LEFT JOIN fn.geoEntity fromGeo ");
+			sb.append("WHERE fromGeo.parent.shortCode = ? AND tn.id = ? AND fn.otherNames LIKE ? ");
+			sb.append(" AND fn.freightType <> ? and route.tenantId = ? AND fn.active = true ");
+			sb.append("ORDER BY fn.tags asc, fn.name asc");
+			
+			TypedQuery<Node> q = getEntityManager().createQuery(sb.toString(), Node.class);
+
+			q.setParameter(1, geoCityCode);
+			q.setParameter(2, toNodeId);
+			q.setParameter(3, "%" + term + "%");
+			q.setParameter(4, FreightNodeType.HUB);
+			q.setParameter(5, userInfo.getTenantId());
+
+			// execute query
+			nodes = q.getResultList();
+		} catch (Exception e) {
+			throw new ParvanDaoException("error in findCollectionByGeoCity", e);
+		}
+
+		return nodes;
+	}
+
+	@Override
+	public List<Node> findDistributionByGeoCity(String geoCityCode, Long fromNodeId, String term) throws ParvanDaoException {
+		List<Node> nodes = null;
+    	
+		try {
+			
+			//get user info from current context
+			UserInfo userInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+			
+			// make query
+			StringBuilder sb = new StringBuilder();
+			sb.append("SELECT DISTINCT tn FROM Route route ");
+			sb.append("LEFT JOIN route.fromNode fn ");
+			sb.append("LEFT JOIN route.toNode tn ");
+			sb.append("LEFT JOIN tn.geoEntity toGeo ");
+			sb.append("WHERE toGeo.parent.shortCode = ? AND fn.id = ? AND tn.otherNames LIKE ? ");
+			sb.append(" AND tn.freightType <> ? and route.tenantId = ? AND tn.active = true ");
+			sb.append("ORDER BY tn.tags asc, tn.name asc");
+			
+			TypedQuery<Node> q = getEntityManager().createQuery(sb.toString(), Node.class);
+
+			q.setParameter(1, geoCityCode);
+			q.setParameter(2, fromNodeId);
+			q.setParameter(3, "%" + term + "%");
+			q.setParameter(4, FreightNodeType.HUB);
+			q.setParameter(5, userInfo.getTenantId());
+
+			// execute query
+			nodes = q.getResultList();
+		} catch (Exception e) {
+			throw new ParvanDaoException("error in findDistributionByGeoCity", e);
+		}
+
+		return nodes;
+	}
+
+	@Override
+	public List<Node> findHubByGeoCity(String geoCityCode) throws ParvanDaoException {
+		List<Node> nodes = null;
+    	
+		try {
+			
+			//get user info from current context
+			UserInfo userInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("SELECT DISTINCT tn FROM Route route ");
+			sb.append("LEFT JOIN route.fromNode fn ");
+			sb.append("LEFT JOIN route.toNode tn ");
+			sb.append("LEFT JOIN tn.geoEntity toGeo ");
+			sb.append("WHERE toGeo.parent.shortCode = ? AND tn.freightType = 'HUB' and route.tenantId = ?");
+			
+			// make query
+			TypedQuery<Node> q = getEntityManager().createQuery(sb.toString(), Node.class);
+
+			q.setParameter(1, geoCityCode);
+			q.setParameter(2, userInfo.getTenantId());
+
+			// execute query
+			nodes = q.getResultList();
+		} catch (Exception e) {
+			throw new ParvanDaoException("error in findHubByGeoCity", e);
+		}
+
+		return nodes;
+	}
+	
+	@Override
+	public List<String> findRouteNumbersByFromNodeCode(String fromNodeCode) throws ParvanDaoException {
+		
+		// LOG
+		log.debug("Entering findRouteNumbersByFromNodeCode( fromNodeCode={})", fromNodeCode);
+		
+		List<String> routeNumbers = null;
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("select route.carrierRouteNumber from Route route ");
+		sb.append("where route.fromNode.codeName = ? ");
+		
+		// make query
+		TypedQuery<String> q = getEntityManager().createQuery(sb.toString(), String.class);
+
+		q.setParameter(1, fromNodeCode);
+
+		// execute query
+		routeNumbers = q.getResultList();
+		
+	}
+	
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<Route> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateTo());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateTo());
+			predicateList.add(predicate);
+		}
+	}
+
+}

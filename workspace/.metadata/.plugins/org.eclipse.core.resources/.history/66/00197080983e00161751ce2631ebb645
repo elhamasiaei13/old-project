@@ -1,0 +1,1243 @@
+package com.parvanpajooh.accounting.dao.jpa;
+
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+import javax.validation.ConstraintViolationException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hibernate.StaleObjectStateException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.common.CurrentContext;
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.constants.StringPool;
+import com.parvanpajooh.common.enums.SortDirectionEnum;
+import com.parvanpajooh.accounting.common.exceptions.ErrorCode;
+import com.parvanpajooh.accounting.common.exceptions.ObjectExistsException;
+import com.parvanpajooh.accounting.common.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.accounting.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.accounting.common.exceptions.ParvanException;
+import com.parvanpajooh.common.util.DateUtil;
+import com.parvanpajooh.common.util.StringUtil;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseCriteria;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.accounting.dao.GenericDao;
+import com.parvanpajooh.ecourier.model.BaseModel;
+
+/**
+ * This class serves as the Base class for all other DAOs - namely to hold
+ * common CRUD methods that they might all use. You should only need to extend
+ * this class when your require custom CRUD logic.
+ *
+ * @param <T> a type variable
+ * @param <PK> the primary key for that type
+ */
+public class GenericDaoJpa<T, PK extends Serializable> implements GenericDao<T, PK> {
+	
+	/**
+     * Log variable for all child classes. 
+     */
+	public static final Logger log = LoggerFactory.getLogger( GenericDaoJpa.class);
+	
+    public static final String PERSISTENCE_UNIT_NAME = "ApplicationEntityManager";
+    
+    /**
+     * Entity manager, injected by Spring using @PersistenceContext annotation on setEntityManager()
+     */
+    @PersistenceContext(unitName=PERSISTENCE_UNIT_NAME)
+    private EntityManager entityManager;
+    
+    private Class<T> persistentClass;
+
+    /**
+     * Constructor that takes in a class to see which type of entity to persist.
+     * Use this constructor when subclassing or using dependency injection.
+     * @param persistentClass the class type you'd like to persist
+     */
+    public GenericDaoJpa(final Class<T> persistentClass) {
+        this.persistentClass = persistentClass;
+    }
+
+    /**
+     * Constructor that takes in a class to see which type of entity to persist.
+     * Use this constructor when subclassing or using dependency injection.
+     * @param persistentClass the class type you'd like to persist
+     * @param entityManager the configured EntityManager for JPA implementation.
+     */
+    public GenericDaoJpa(final Class<T> persistentClass, EntityManager entityManager) {
+        this.persistentClass = persistentClass;
+        this.entityManager = entityManager;
+    }
+
+    public EntityManager getEntityManager() {
+        return this.entityManager;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.parvanpajooh.platform.parvan.entityconfig.dao.GenericDao#getAll()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+	public List<T> findAll() throws ParvanDaoException {
+        
+    	//LOG
+    	log.debug("Entering getAll()");
+    	
+    	List<T> list = null;
+    	
+    	try {
+    		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+    		
+    		String query = "select obj from " + this.persistentClass.getName() + " obj";
+    		if(userInfo != null && Validator.isNotNull(userInfo.getTenantId())){
+    			query += " where tenantId = ? or tenantId is null";
+    		}
+    		
+    		// make query
+    		Query q = this.entityManager.createQuery(query);
+    		
+    		if(userInfo != null && Validator.isNotNull(userInfo.getTenantId())){
+    			q.setParameter(1, userInfo.getTenantId());
+    		}
+    		
+    		// execute query
+    		list = q.getResultList();
+		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting list of all records.", e);
+		}
+    	
+    	//LOG
+    	log.debug("Leaving getAll(): {}", (list != null)? list.size() : "NULL");
+    	
+    	return list;
+    }
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.parvanpajooh.accounting.dao.GenericDao#findAll(int, int, com.parvanpajooh.common.enums.SortDirectionEnum, java.lang.String)
+	 */
+	@SuppressWarnings("unchecked")
+    @Override
+	public List<T> findAll(
+			int firstResult, 
+			int maxResults,
+			SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanDaoException {
+		
+		//LOG
+    	log.debug("Entering findAll( firstResult={} , maxResults={} , sortDirection={} , sortCriterion={})",new Object[]{
+    			firstResult,
+    			maxResults,
+    			sortDirection,
+    			sortCriterion});
+    	
+		List<T> list = null;
+    	
+    	try {
+    		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+    		
+    		// make query
+    		
+    		String query = "select obj from " + this.persistentClass.getName() + " obj";
+    		if(userInfo != null){
+    			query += " where tenantId = ? or tenantId is null";
+    		}
+    		
+    		String order = StringPool.BLANK;
+    		
+    		if (SortDirectionEnum.Ascending.equals(sortDirection) && Validator.isNotNull(sortCriterion)) {
+    			order = " order by " + sortCriterion + " asc ";
+			}
+    		if (SortDirectionEnum.Descending.equals(sortDirection) && Validator.isNotNull(sortCriterion)) {
+    			order = " order by " + sortCriterion + " desc ";
+    		}
+    		
+    		query += order;
+			
+    		Query q = this.entityManager.createQuery(query);
+
+    		if(userInfo != null){
+    			q.setParameter(1, userInfo.getTenantId());
+    		}
+    		
+    		q.setFirstResult(firstResult);
+    		q.setMaxResults(maxResults);
+
+    		// execute query
+    		list = q.getResultList();
+		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting paged-list of records.", e);
+		}
+    	
+    	//LOG
+    	log.debug("Leaving findAll(): {}", (list != null)? list.size() : "NULL");
+    	
+    	return list;
+	}
+
+    /*
+     * (non-Javadoc)
+     * @see com.parvanpajooh.platform.parvan.entityconfig.dao.GenericDao#count()
+     */
+    @Override
+	public int count() throws ParvanDaoException {
+		
+		//LOG
+    	log.debug("Entering count()");
+    	
+		int count = 0;
+    	
+    	try {
+    		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+    		
+    		// make criteria-builder
+    		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+        	
+    		// make criteria
+    		CriteriaQuery<Long> criteria = builder.createQuery( Long.class );
+    		Root<T> root = criteria.from(persistentClass);
+    		criteria.select(builder.count(root));
+    		
+    		List<Predicate> predicateList = new ArrayList<Predicate>();
+    		
+    		if(userInfo != null){
+	    		Predicate predicate = builder.equal(root.<String>get("tenantId"), userInfo.getTenantId());
+	    		Predicate nullPredicate = builder.isNull(root.<String>get("tenantId"));
+	    		predicateList.add(builder.or(predicate, nullPredicate));
+			}
+    		
+    		if (predicateList.size() == 1) {
+    			criteria.where( predicateList.get( 0));
+    			
+    		} else if (predicateList.size() > 1) {
+    			criteria.where( builder.and( predicateList.toArray( new Predicate[ predicateList.size()])));
+    		}
+    		
+    		// create query
+    		Query q = getEntityManager().createQuery( criteria );
+		
+    		// execute query
+    		Long countLong = (Long) q.getSingleResult();
+    		count = countLong.intValue();
+    		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting count of all records.", e);
+		}
+    	
+    	//LOG
+    	log.debug("Leaving count(): {}", count);
+    	
+        return count;
+	}
+    
+    /*
+     * (non-Javadoc)
+     * @see com.parvanpajooh.platform.parvan.entityconfig.dao.GenericDao#getByIds(java.util.List)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<T> findByIds(List<Long> ids) throws ParvanDaoException {
+    	
+    	//LOG
+    	log.debug("Entering getByIds( ids size={})", (ids != null) ? ids.size() : "NULL list");
+    	
+    	List<T> list = null;
+    	
+    	try {
+    		if(ids.size() > 0){
+    			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+    			
+    			// make criteria-builder
+    			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+    			
+    			// make criteria
+    			CriteriaQuery<T> criteria = builder.createQuery( this.persistentClass );
+    			Metamodel metamodel = getEntityManager().getMetamodel();
+    			EntityType<T> T_ = metamodel.entity( this.persistentClass);
+    			Root<T> root = criteria.from( T_);
+    			
+    			List<Predicate> predicateList = new ArrayList<Predicate>();
+    			
+    			if(userInfo != null){
+    				Predicate predicate = builder.equal(root.<String>get("tenantId"), userInfo.getTenantId());
+    				Predicate nullPredicate = builder.isNull(root.<String>get("tenantId"));
+    				predicateList.add(builder.or(predicate, nullPredicate));
+    			}
+    			
+    			predicateList.add(root.<Long>get( "id").in( ids));
+    			
+    			if (predicateList.size() == 1) {
+    				criteria.where( predicateList.get( 0));
+    				
+    			} else if (predicateList.size() > 1) {
+    				criteria.where( builder.and( predicateList.toArray( new Predicate[ predicateList.size()])));
+    			}
+    			
+    			// make query
+    			Query q = getEntityManager().createQuery( criteria );
+    			
+    			// execute query
+    			list = q.getResultList();
+    			
+    		} else {
+    			list = new ArrayList<>();
+    		}
+		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting list of records by their IDs.", e);
+		}
+    	
+    	//LOG
+    	log.debug("Leaving getByIds(): {}", (list != null)? list.size() : "NULL");
+    	
+    	return list;
+    }
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.parvanpajooh.platform.parvan.entityconfig.dao.GenericDao#findByCriteria(com.parvanpajooh.platform.parvan.common.vo.BaseCriteria)
+	 */
+	@SuppressWarnings("unchecked")
+    @Override
+	public List<T> findByCriteria( BaseCriteria cri) throws ParvanDaoException {
+		
+		//LOG
+    	log.debug("Entering findByCriteria( cri={})", cri);
+    	
+		List<T> list = null;
+    	
+    	try {
+    		// make criteria-builder
+    		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+        	
+    		// make criteria
+    		CriteriaQuery<T> criteria = builder.createQuery( this.persistentClass );
+    		criteria.distinct(true);
+    		Metamodel metamodel = getEntityManager().getMetamodel();
+    		EntityType<T> T_ = metamodel.entity( this.persistentClass);
+    		Root<T> root = criteria.from( T_);
+    		
+    		Map<String, Join> joins = new HashMap<String, Join>();
+    		
+    		List<Predicate> predicateList = buildPredicateList( 
+    				cri, 
+    				builder, 
+    				metamodel, 
+    				root,
+    				joins);
+    		
+    		if (predicateList.size() == 1) {
+    			criteria.where( predicateList.get( 0));
+    			
+    		} else if (predicateList.size() > 1) {
+    			criteria.where( builder.and( predicateList.toArray( new Predicate[ predicateList.size()])));
+    		}
+
+    		// make query
+    		Query q = getEntityManager().createQuery( criteria );
+    		q.setHint("org.hibernate.cacheable", true);
+            q.setHint("org.hibernate.cacheMode", "NORMAL");
+    		
+    		// execute query
+    		list = q.getResultList();
+		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting list of records by criteria.", e);
+		}
+
+    	//LOG
+    	log.debug("Leaving findByCriteria(): {}", (list != null)? list.size() : "NULL");
+    	
+		return list;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.parvanpajooh.platform.parvan.entityconfig.dao.GenericDao#findByCriteria(com.parvanpajooh.platform.parvan.common.vo.BaseCriteria)
+	 */
+	@SuppressWarnings("unchecked")
+    @Override
+	public List<Long> findIdsByCriteria(BaseCriteria cri) throws ParvanDaoException {
+		
+		//LOG
+		log.debug("Entering findIdsByCriteria(cri={})", cri);
+		
+		List<Long> list = null;
+		
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+			
+			// make criteria
+			CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+			criteria.distinct(true);
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			EntityType<T> T_ = metamodel.entity( this.persistentClass);
+			Root<T> root = criteria.from(T_);
+			
+			criteria.select(root.<Long>get("id"));
+			
+			Map<String, Join> joins = new HashMap<String, Join>();
+			
+			List<Predicate> predicateList = buildPredicateList( 
+					cri, 
+					builder, 
+					metamodel, 
+					root,
+					joins);
+			
+			if (predicateList.size() == 1) {
+				criteria.where( predicateList.get( 0));
+				
+			} else if (predicateList.size() > 1) {
+				criteria.where( builder.and( predicateList.toArray( new Predicate[ predicateList.size()])));
+			}
+			
+			// make query
+			Query q = getEntityManager().createQuery( criteria );
+			q.setHint("org.hibernate.cacheable", true);
+			q.setHint("org.hibernate.cacheMode", "NORMAL");
+			
+			// execute query
+			list = q.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting list of ids by criteria.", e);
+		}
+		
+		//LOG
+		log.debug("Leaving findIdsByCriteria(): {}", (list != null)? list.size() : "NULL");
+		
+		return list;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.parvanpajooh.platform.parvan.entityconfig.dao.GenericDao#findByCriteria(com.parvanpajooh.platform.parvan.common.vo.BaseCriteria, int, int, com.parvanpajooh.platform.parvan.common.enums.SortDirectionEnum, java.lang.String)
+	 */
+	@SuppressWarnings("unchecked")
+    @Override
+	public List<T> findByCriteria(
+			BaseCriteria cri, 
+			int firstResult, 
+			int maxResults,
+			SortDirectionEnum sortDirection,
+            String sortCriterion) throws ParvanDaoException {
+
+		//LOG
+    	log.debug("Entering findByCriteria( cri={} , firstResult={} , maxResults={} , sortDirection={} , sortCriterion={})",new Object[]{
+    			cri,
+    			firstResult,
+    			maxResults,
+    			sortDirection,
+    			sortCriterion});
+    	
+		List<T> list = null;
+    	
+    	try {
+
+    		// make criteria-builder
+    		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+    		
+    		// make criteria
+    		CriteriaQuery<T> criteria = builder.createQuery( this.persistentClass );
+    		Metamodel metamodel = getEntityManager().getMetamodel();
+    		EntityType<T> T_ = metamodel.entity( this.persistentClass);
+    		Root<T> root = criteria.from( T_);
+    		criteria.distinct(true);
+    		
+    		Map<String, Join> joins = new HashMap<String, Join>();
+    		
+    		List<Predicate> predicateList = buildPredicateList(
+    				cri, 
+    				builder, 
+    				metamodel, 
+    				root,
+    				joins);
+    		
+    		if (predicateList.size() == 1) {
+        		criteria.where( predicateList.get(0));
+        		
+            } else if (predicateList.size() > 1) {
+            	criteria.where( builder.and( predicateList.toArray( new Predicate[ predicateList.size()])));
+            }
+    		
+    		if (sortCriterion != null) {
+				
+				String[] joinSort = StringUtil.split(sortCriterion, StringPool.PERIOD);
+				
+				if(joinSort.length > 1){
+					Join join = null;
+					
+					if(joinSort.length > 2){
+						
+						for (int i = 0; i < joinSort.length - 1; i++) {
+							join = joins.get(joinSort[i]);
+							
+							if(join == null){
+								if(i == 0)
+									join = root.join(joinSort[i], JoinType.LEFT);
+								else
+									join = join.join(joinSort[i], JoinType.LEFT);
+							}
+						}
+					}
+					else {
+						join = joins.get(joinSort[0]);
+						
+						if(join == null){
+							join = root.join(joinSort[0], JoinType.LEFT);
+						}
+					}
+					
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						criteria.orderBy(builder.asc(join.get(joinSort[joinSort.length - 1])));
+					}
+					
+					if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						criteria.orderBy(builder.desc(join.get(joinSort[joinSort.length - 1])));
+					}
+					
+				} else {
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						criteria.orderBy(builder.asc(root.get(sortCriterion)));
+					}
+					
+					if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						criteria.orderBy(builder.desc(root.get(sortCriterion)));
+					}
+				}
+				
+			}
+
+    		// make query
+    		Query q = getEntityManager().createQuery( criteria );
+    		q.setFirstResult( firstResult);
+            q.setMaxResults( maxResults);
+    		q.setHint("org.hibernate.cacheable", true);
+            q.setHint("org.hibernate.cacheMode", "NORMAL");
+            
+            // execute query
+            list = q.getResultList();
+		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting paged-list of records by criteria.", e);
+		}
+
+    	//LOG
+    	log.debug("Leaving findByCriteria(): {}", (list != null)? list.size() : "NULL");
+    	
+        return list;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Long> findIdsByCriteria(
+			BaseCriteria cri, 
+			int firstResult, 
+			int maxResults,
+			SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanDaoException {
+		
+		//LOG
+		log.debug("Entering findIdsByCriteria( cri={} , firstResult={} , maxResults={} , sortDirection={} , sortCriterion={})",new Object[]{
+				cri,
+				firstResult,
+				maxResults,
+				sortDirection,
+				sortCriterion});
+		
+		List<Long> list = null;
+		
+		try {
+			
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+			
+			// make criteria
+			CriteriaQuery<Long> criteria = builder.createQuery( Long.class );
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			EntityType<T> T_ = metamodel.entity( this.persistentClass);
+			Root<T> root = criteria.from( T_);
+			criteria.distinct(true);
+			criteria.select(root.<Long>get("id"));
+			
+			Map<String, Join> joins = new HashMap<String, Join>();
+			
+			List<Predicate> predicateList = buildPredicateList(
+					cri, 
+					builder, 
+					metamodel, 
+					root,
+					joins);
+			
+			if (predicateList.size() == 1) {
+				criteria.where( predicateList.get(0));
+				
+			} else if (predicateList.size() > 1) {
+				criteria.where( builder.and( predicateList.toArray( new Predicate[ predicateList.size()])));
+			}
+			
+			if (sortCriterion != null) {
+				
+				String[] joinSort = StringUtil.split(sortCriterion, StringPool.PERIOD);
+				
+				if(joinSort.length > 1){
+					Join join = null;
+					
+					if(joinSort.length > 2){
+						
+						for (int i = 0; i < joinSort.length - 1; i++) {
+							join = joins.get(joinSort[i]);
+							
+							if(join == null){
+								if(i == 0)
+									join = root.join(joinSort[i], JoinType.LEFT);
+								else
+									join = join.join(joinSort[i], JoinType.LEFT);
+							}
+						}
+					}
+					else {
+						join = joins.get(joinSort[0]);
+						
+						if(join == null){
+							join = root.join(joinSort[0], JoinType.LEFT);
+						}
+					}
+					
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						criteria.orderBy(builder.asc(join.get(joinSort[joinSort.length - 1])));
+					}
+					
+					if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						criteria.orderBy(builder.desc(join.get(joinSort[joinSort.length - 1])));
+					}
+					
+				} else {
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						criteria.orderBy(builder.asc(root.get(sortCriterion)));
+					}
+					
+					if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						criteria.orderBy(builder.desc(root.get(sortCriterion)));
+					}
+				}
+				
+			}
+			
+			// make query
+			Query q = getEntityManager().createQuery( criteria );
+			q.setFirstResult( firstResult);
+			q.setMaxResults( maxResults);
+			q.setHint("org.hibernate.cacheable", true);
+			q.setHint("org.hibernate.cacheMode", "NORMAL");
+			
+			// execute query
+			list = q.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting paged-list of ids by criteria.", e);
+		}
+		
+		//LOG
+		log.debug("Leaving findIdsByCriteria(): {}", (list != null)? list.size() : "NULL");
+		
+		return list;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.parvanpajooh.platform.parvan.entityconfig.dao.GenericDao#countByCriteria(com.parvanpajooh.platform.parvan.common.vo.BaseCriteria)
+	 */
+    @Override
+	public int countByCriteria(BaseCriteria cri) throws ParvanDaoException {
+
+		//LOG
+    	log.debug("Entering countByCriteria( cri={})", cri);
+    	
+		int count = 0;
+    	
+    	try {
+    		// make criteria-builder
+    		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+    		
+    		// make criteria
+    		CriteriaQuery<Long> criteria = builder.createQuery( Long.class );
+    		Metamodel metamodel = getEntityManager().getMetamodel();
+    		EntityType<T> T_ = metamodel.entity( this.persistentClass);
+    		Root<T> root = criteria.from( T_);
+    		
+    		criteria.select( builder.countDistinct(root));
+    		
+    		Map<String, Join> joins = new HashMap<String, Join>();
+    		
+    		List<Predicate> predicateList = buildPredicateList(
+    				cri, 
+    				builder, 
+    				metamodel, 
+    				root,
+    				joins);
+    		
+    		if (predicateList.size() == 1) {
+        		criteria.where(predicateList.get(0));
+        		
+            } else if (predicateList.size() > 1) {
+            	criteria.where( builder.and( predicateList.toArray(new Predicate[ predicateList.size()])));
+            }
+
+    		// create query
+    		Query q = getEntityManager().createQuery( criteria );
+    		
+    		// execute query
+    		Long countLong = (Long) q.getSingleResult();
+    		count = countLong.intValue();
+    		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting count of records by criteria.", e);
+		}
+
+    	//LOG
+    	log.debug("Leaving countByCriteria(): {}", count);
+    	
+        return count;
+	}
+
+    /*
+     * (non-Javadoc)
+     * @see com.parvanpajooh.platform.parvan.entityconfig.dao.GenericDao#get(java.io.Serializable)
+     */
+    @Override
+    public T get(PK id) throws ParvanDaoException {
+
+		//LOG
+    	log.debug("Entering get( id={})", id);
+    	
+    	T entity = null;
+    	
+        try {
+        	UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+        	
+        	// get record
+			entity = this.entityManager.find( this.persistentClass, id);
+			
+			// check
+			if (entity == null) {
+				String msg = String.format("'%s' object with id '%d' not found.", this.persistentClass, id);
+				//log.warning(msg);
+				throw new ObjectNotFoundException(msg);
+			}
+			
+			BaseModel model = (BaseModel) entity;
+			if(Validator.isNotNull(model.getTenantId()) && Validator.isNotNull(userInfo) && !model.getTenantId().equals(userInfo.getTenantId())){
+				throw new ParvanDaoException("Error occurred while getting records by its ID. (mismatched tenantId)");
+			}
+			
+		} catch (ParvanDaoException e) {
+			throw e;
+			
+		} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting records by its ID. " + id , e);
+		}
+
+    	//LOG
+    	log.debug("Leaving get(): {}", entity);
+    	
+        return entity;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.parvanpajooh.platform.parvan.entityconfig.dao.GenericDao#exists(java.io.Serializable)
+     */
+    @Override
+    public boolean exists(PK id) throws ParvanDaoException {
+
+		//LOG
+    	log.debug("Entering exists( id={})", id);
+    	
+    	boolean exists = false;
+    	
+    	try {
+    		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+    		
+    		// get record 
+    		T entity = this.entityManager.find( this.persistentClass, id);
+    		
+    		BaseModel model = (BaseModel) entity;
+    		if(Validator.isNotNull(model.getTenantId()) && Validator.isNotNull(userInfo) && !model.getTenantId().equals(userInfo.getTenantId())){
+    			//LOG
+    			log.warn("(mismatched tenantId)");
+    			entity = null;
+    		}
+    		
+    		// check
+    		exists = entity != null;
+    		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while checking record existence.", e);
+		}
+
+    	//LOG
+    	log.debug("Leaving exists(): {}", exists);
+    	
+        return exists;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.parvanpajooh.platform.parvan.entityconfig.dao.GenericDao#save(java.lang.Object)
+     */
+    @Override
+    public T save(T object) throws ParvanDaoException {
+
+		//LOG
+    	log.debug("Entering save( object={})", object);
+    	
+    	T entity = null;
+    	
+    	try {
+    		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+    		
+    		BaseModel model = (BaseModel) object;
+    		if(Validator.isNotNull(model.getTenantId()) && Validator.isNotNull(userInfo) && !model.getTenantId().equals(userInfo.getTenantId())){
+    			throw new ParvanDaoException("Error occurred while saving record. (mismatched tenantId)");
+    		}
+    		
+    		// save
+    		entity = this.entityManager.merge(object);
+    		this.entityManager.flush();
+    		
+    	} catch (ConstraintViolationException e) {
+    		throw e;
+    		
+    	} catch (OptimisticLockException e) {
+    		if(e.getCause() != null && e.getCause() instanceof StaleObjectStateException) {
+    			throw (StaleObjectStateException) e.getCause();
+    		} 
+    		
+    		throw e;
+    		
+    	} catch (Exception e) {
+    		
+    		Throwable cause = ExceptionUtils.getRootCause(e);
+    		
+    		if(cause != null && cause.getMessage() != null && cause.getMessage().indexOf("_UNIQUE") > -1){
+    			throw new ObjectExistsException();
+    		}
+    		
+    		throw new ParvanDaoException("Error occurred while saving record.", e);
+		} 
+
+    	//LOG
+    	log.debug("Leaving exists(): {}", entity);
+    	
+    	return entity;
+    }
+    
+    @Override
+	public Collection<T> bulkSave(List<T> objects) throws ParvanDaoException{
+		//LOG
+    	log.debug("Entering bulkSave()");
+    	
+    	Collection<T> entities = new HashSet<>();
+    	
+    	try {
+    		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+    		
+    		int count = 0;
+    		for (T object : objects) {
+    			
+        		BaseModel model = (BaseModel) object;
+        		if(Validator.isNotNull(model.getTenantId()) && Validator.isNotNull(userInfo) && !model.getTenantId().equals(userInfo.getTenantId())){
+        			throw new ParvanDaoException("Error occurred while saving record. (mismatched tenantId)");
+        		}
+        		
+        		// save
+        		T entity = this.entityManager.merge(object);
+        		
+        		entities.add(entity);
+				
+    			if ( count % 20 == 0 ) { //20, same as the JDBC batch size
+    		        //flush a batch of inserts and release memory:
+    				this.entityManager.flush();
+    				this.entityManager.clear();
+    				
+    				log.debug("flush bulkSave");
+    		    }
+    			
+    			count++;
+			}
+    		
+    		this.entityManager.flush();
+    		this.entityManager.clear();
+    		
+    	} catch (ConstraintViolationException e) {
+    		throw e;
+    		
+    	} catch (OptimisticLockException e) {
+    		if(e.getCause() != null && e.getCause() instanceof StaleObjectStateException) {
+    			throw (StaleObjectStateException) e.getCause();
+    		} 
+    		
+    		throw e;
+    		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while saving record.", e);
+		} 
+
+    	//LOG
+    	log.debug("Leaving bulkSave()");
+    	
+    	return entities;
+	}
+
+	@Override
+	public void delete(T obj) throws ParvanDaoException {
+		//LOG
+    	log.debug("Entering delete( obj={})", obj);
+    	
+    	try {
+    		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+    		
+    		BaseModel model = (BaseModel) obj;
+    		if(Validator.isNotNull(model.getTenantId()) && Validator.isNotNull(userInfo) && !model.getTenantId().equals(userInfo.getTenantId())){
+    			throw new ParvanDaoException("Error occurred while delete record. (mismatched tenantId)");
+    		}
+    		
+    		// remove
+    		this.entityManager.remove( obj);
+    		this.entityManager.flush();
+    		
+    	} catch (PersistenceException e) {
+    		throw new ParvanDaoException(e, ErrorCode.OBJECT_USED);
+    		
+    		
+    		
+    	} catch (ParvanDaoException e) {
+    		throw e;
+    		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while delete record.", e);
+		}
+    	
+    	//LOG
+    	log.debug("Leaving delete()");
+	}
+
+	@Override
+	public void deleteByIds(PK[] ids) throws ParvanDaoException {
+		
+		//LOG
+		log.debug("Entering deleteByIds( id={})", Arrays.toString(ids));
+		
+		for (PK thisId : ids) {
+			delete(thisId);
+		}
+		
+		//LOG
+		log.debug("Leaving deleteByIds()");
+	}
+
+    /*
+     * (non-Javadoc)
+     * @see com.parvanpajooh.accounting.dao.GenericDao#delete(java.io.Serializable)
+     */
+    @Override
+    public void delete(PK id) throws ParvanDaoException {
+
+		//LOG
+    	log.debug("Entering delete( id={})", id);
+    	
+    	try {
+    		// get record
+    		T entity = this.get( id);
+    		
+    		// remove
+    		delete(entity);
+    	
+    	} catch (ParvanDaoException e) {
+    		throw e;
+    		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while delete record.", e);
+		}
+    	
+    	//LOG
+    	log.debug("Leaving delete()");
+    }
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.parvanpajooh.platform.parvan.entityconfig.dao.GenericDao#refresh(java.lang.Object)
+	 */
+    @Override
+    public void refresh(T obj) throws ParvanDaoException {
+
+		//LOG
+    	log.debug("Entering refresh( obj={})", obj);
+    	
+    	try {
+    		this.entityManager.merge(obj);
+    		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while refreshing entity-manager.", e);
+		} 
+    	
+    	//LOG
+    	log.debug("Leaving refresh()");
+    }
+	
+	/**
+	 * 
+	 * @param cri
+	 * @param builder
+	 * @param metamodel
+	 * @param root
+	 * @return
+	 * @throws ParvanException
+	 */
+	protected List<Predicate> buildPredicateList(
+			BaseCriteria cri, 
+			CriteriaBuilder builder, 
+			Metamodel metamodel, 
+			Root<T> root, Map<String, Join> joins) throws ParvanException {
+
+		//LOG
+    	log.debug("Entering buildPredicateList( ... )");
+    	
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+		
+		try {
+			Field[] fields = null;
+			
+			try {
+				Method getTargetClass = cri.getClass().getMethod("getTargetClass");
+				Class<?> clazz = (Class<?>) getTargetClass.invoke(cri);
+				fields = clazz.getDeclaredFields();
+			} catch (Exception e1) {
+				fields = cri.getClass().getDeclaredFields();
+			}
+			
+			for (Field field : fields) {
+				if (field.getName().equals("serialVersionUID")) {
+					continue;
+				}
+				
+				Object value = null;
+				
+				try {
+					field.setAccessible(true);
+					//value = field.get(cri);
+					
+					String fieldName = field.getName();
+					Method m = cri.getClass().getMethod("get" + StringUtils.capitalize(fieldName));
+					value = m.invoke(cri);
+					
+					
+				} catch (IllegalArgumentException e) {
+					continue;
+				} catch (IllegalAccessException e) {
+					continue;
+				}
+				
+				if (value == null) {
+					continue;
+				}
+				
+				if(value instanceof BaseVO){
+					Join<?, T> join = root.join(field.getName());
+					
+					joins.put(field.getName(), join);
+					
+					Field[] subfields = value.getClass().getDeclaredFields();
+					
+					for (Field subfield : subfields) {
+						if (subfield.getName().equals("serialVersionUID") || Modifier.isStatic(subfield.getModifiers())) {
+							continue;
+						}
+						
+						Object subvalue = null;
+						
+						try {
+							subfield.setAccessible(true);
+							subvalue = subfield.get(value);
+						} catch (IllegalArgumentException e) {
+							continue;
+						} catch (IllegalAccessException e) {
+							continue;
+						}
+						
+						if (Validator.isNull(subvalue) || (subvalue instanceof Float && ((Float)subvalue) == 0f) || (subvalue instanceof Integer && ((Integer)subvalue) == 0) ) {
+							continue;
+						}
+						
+						Predicate predicate = builder.equal(join.get(subfield.getName()), subvalue);
+						predicateList.add(predicate);
+					}
+					
+				
+				} else {
+					if(value instanceof String && ((String)value).trim().length() == 0){
+						continue;
+					}
+					
+					if(value instanceof String && ((String)value).indexOf(StringPool.STAR) > -1){
+						String val = ((String)value);
+						String prefix = StringPool.BLANK;
+						String postfix = StringPool.BLANK;
+						if(val.indexOf(StringPool.STAR) == 0){
+							prefix = StringPool.PERCENT;
+						}
+						
+						if(val.lastIndexOf(StringPool.STAR) == val.length() - 1){
+							postfix = StringPool.PERCENT;
+						}
+						
+						val = val.replaceAll(StringPool.REGEXP_ESCAPED_STAR, StringPool.BLANK);
+						
+						Predicate predicate = builder.like(root.<String>get(field.getName()), prefix + val + postfix);
+						predicateList.add(predicate);
+					}
+					else {
+						try {
+							Predicate predicate = builder.equal(root.get(field.getName()), value);
+							predicateList.add(predicate);
+						} catch (Exception e) {
+							log.error("error in set field value", e);
+						}
+					}
+				}
+				
+			}
+			
+		} catch (Exception e) {
+			log.error("Error occurred while building query.", e);
+			throw new ParvanException("Error occurred while building query.", e);
+		}
+		
+		basePredicate(cri, builder, root, predicateList);
+
+		//LOG
+    	log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+    	
+    	return predicateList;
+	}
+	
+	private Date getDate(LocalDateTime ldt){
+		
+		Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
+		Date date = Date.from(instant);
+
+		return date;
+	}
+	
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<T> root, List<Predicate> predicateList){
+		{
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+			if(userInfo != null && Validator.isNotNull(userInfo.getTenantId())){
+	    		Predicate predicate = builder.equal(root.<String>get("tenantId"), userInfo.getTenantId());
+	    		predicateList.add(predicate);
+			}
+    	}
+		
+		if(Validator.isNotNull( cri.getCreateUserId() )){
+			Predicate predicate = builder.equal(root.<String>get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( cri.getUpdateUserId() )){
+			Predicate predicate = builder.equal(root.<String>get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(cri.getCreateDate())){
+			Predicate predicate = builder.equal(root.<Date>get("createDate"), cri.getCreateDate());
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(cri.getUpdateDate())){
+			Predicate predicate = builder.equal(root.<Date>get("updateDate"), cri.getCreateDate());
+			predicateList.add(predicate);
+		}
+		
+		
+		if(Validator.isNotNull(cri.getCreateDateFrom())){
+    		Calendar cal = Calendar.getInstance();
+    		cal.setTime(getDate(cri.getCreateDateFrom()));
+    		cal.set(Calendar.HOUR_OF_DAY, 0);
+    		cal.set(Calendar.MINUTE, 0);
+    		cal.set(Calendar.SECOND, 0);
+    		
+    		Predicate predicate = builder.greaterThanOrEqualTo(root.<Date>get("createDate"), cal.getTime());
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(cri.getCreateDateTo())){
+    		Calendar cal = Calendar.getInstance();
+    		cal.setTime(getDate(cri.getCreateDateTo()));
+    		cal.set(Calendar.HOUR_OF_DAY, 23);
+    		cal.set(Calendar.MINUTE, 59);
+    		cal.set(Calendar.SECOND, 59);
+    		
+    		Predicate predicate = builder.lessThanOrEqualTo(root.<Date>get("createDate"), cal.getTime());
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(cri.getUpdateDateFrom())){
+    		Calendar cal = Calendar.getInstance();
+    		cal.setTime(getDate(cri.getUpdateDateFrom()));
+    		cal.set(Calendar.HOUR_OF_DAY, 0);
+    		cal.set(Calendar.MINUTE, 0);
+    		cal.set(Calendar.SECOND, 0);
+    		
+    		Predicate predicate = builder.greaterThanOrEqualTo(root.<Date>get("updateDate"), cal.getTime());
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(cri.getUpdateDateTo())){
+    		Calendar cal = Calendar.getInstance();
+    		cal.setTime(getDate(cri.getUpdateDateTo()));
+    		cal.set(Calendar.HOUR_OF_DAY, 23);
+    		cal.set(Calendar.MINUTE, 59);
+    		cal.set(Calendar.SECOND, 59);
+    		
+    		Predicate predicate = builder.lessThanOrEqualTo(root.<Date>get("updateDate"), cal.getTime());
+    		predicateList.add(predicate);
+    	}
+	}
+}

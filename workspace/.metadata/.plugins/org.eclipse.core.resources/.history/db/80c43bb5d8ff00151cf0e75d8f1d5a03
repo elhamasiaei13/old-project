@@ -1,0 +1,812 @@
+package com.parvanpajooh.issuemanager.service.impl;
+
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import javax.ejb.EJBException;
+import javax.validation.ConstraintViolationException;
+
+import org.apache.commons.beanutils.NestedNullException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.hibernate.StaleObjectStateException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.common.CurrentContext;
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.enums.ListExportFormatEnum;
+import com.parvanpajooh.common.enums.SortDirectionEnum;
+import com.parvanpajooh.issuemanager.common.exceptions.ErrorCode;
+import com.parvanpajooh.issuemanager.common.exceptions.ObjectExistsException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseCriteria;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.issuemanager.dao.GenericDao;
+import com.parvanpajooh.ecourier.model.BaseModel;
+import com.parvanpajooh.issuemanager.service.GenericLocalService;
+
+/**
+ * This class serves as the Base class for all other Services - namely to hold
+ * common CRUD methods that they might all use. You should only need to extend
+ * this class when your require custom CRUD logic.
+ * 
+ * <p>
+ * To register this class in your Spring context file, use the following XML.
+ * 
+ * <pre>
+ *     &lt;bean id="userService" class="com.parvanpajooh.mediabank.services.GenericServiceImpl"&gt;
+ *         &lt;constructor-arg&gt;
+ *             &lt;bean class="com.parvanpajooh.mediabank.dao.jpa.GenericDaoHibernate"&gt;
+ *                 &lt;constructor-arg value="com.parvanpajooh.mediabank.domain.Media"/&gt;
+ *                 &lt;property name="sessionFactory" ref="sessionFactory"/&gt;
+ *             &lt;/bean&gt;
+ *         &lt;/constructor-arg&gt;
+ *     &lt;/bean&gt;
+ * </pre>
+ * 
+ * @param <T>
+ *            a type variable
+ * @param <PK>
+ *            the primary key for that type
+ */
+public class GenericLocalServiceImpl<T, PK extends Serializable> implements
+		GenericLocalService<T, PK> {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory
+			.getLogger(GenericLocalServiceImpl.class);
+
+	/**
+	 * GenericDao instance, set by constructor of child classes
+	 */
+	protected GenericDao<T, PK> dao;
+
+	/**
+	 * constructor
+	 */
+	public GenericLocalServiceImpl() {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.platform.parvan.entityconfig.service.GenericLocalService
+	 * #findAll()
+	 */
+	/* @TransactionAttribute(TransactionAttributeType.SUPPORTS) */
+	@Override
+	public List<T> findAll() throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findAll()");
+
+		List<T> list = null;
+
+		try {
+			// find list
+			list = dao.findAll();
+
+			// LOG
+			log.info("found {}", (list != null) ? list.size() : "NULL");
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while finding list of all records.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method findAll(): ret={}",
+				(list != null) ? list.size() : "NULL");
+
+		return list;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.platform.parvan.entityconfig.service.GenericLocalService
+	 * #findAll(int, int,
+	 * com.parvanpajooh.platform.parvan.common.enums.SortDirectionEnum,
+	 * java.lang.String)
+	 */
+	/* @TransactionAttribute(TransactionAttributeType.SUPPORTS) */
+	@Override
+	public List<T> findAll(int firstResult, int maxResults,
+			SortDirectionEnum sortDirection, String sortCriterion)
+			throws ParvanServiceException {
+
+		// LOG
+		log.debug(
+				"Entering findAll(firstResult={} , maxResults={} , sortDirection={} , sortCriterion={})",
+				new Object[] { firstResult, maxResults, sortDirection,
+						sortCriterion });
+
+		log.info("getList");
+
+		List<T> list = null;
+
+		try {
+			// get list
+			list = dao.findAll(firstResult, maxResults, sortDirection,
+					sortCriterion);
+
+			// LOG
+			log.info("found {}", (list != null) ? list.size() : "NULL");
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while finding paged-list of records.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method findAll(): ret={}",
+				(list != null) ? list.size() : "NULL");
+
+		return list;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.parvanpajooh.issuemanager.service.GenericLocalService#count()
+	 */
+	/* @TransactionAttribute(TransactionAttributeType.SUPPORTS) */
+	@Override
+	public int count() throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering count()");
+
+		int count = 0;
+
+		try {
+			// get count
+			count = dao.count();
+
+			// LOG
+			log.info("count = {}", count);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while getting count of all records.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method count(): ret={}", count);
+
+		return count;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.platform.parvan.entityconfig.service.GenericLocalService
+	 * #findByIds(java.util.List)
+	 */
+	/* @TransactionAttribute(TransactionAttributeType.SUPPORTS) */
+	@Override
+	public List<T> findByIds(List<Long> ids) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findByIds( id={})", ids);
+
+		List<T> list = null;
+
+		try {
+			// find list
+			list = dao.findByIds(ids);
+
+			// LOG
+			log.info("found {}", (list != null) ? list.size() : "NULL");
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while finding list of records by their IDs.",
+					e);
+		}
+
+		// LOG
+		log.debug("Leaving method findByIds(): ret={}",
+				(list != null) ? list.size() : "NULL");
+
+		return list;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.platform.parvan.entityconfig.service.GenericLocalService
+	 * #findByCriteria(com.parvanpajooh.platform.parvan.common.vo.BaseCriteria)
+	 */
+	/* @TransactionAttribute(TransactionAttributeType.SUPPORTS) */
+	@Override
+	public List<T> findByCriteria(BaseCriteria criteria)
+			throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findByCriteria( criteria={})", criteria);
+
+		List<T> list = null;
+
+		try {
+
+			// find by criteria
+			list = dao.findByCriteria(criteria);
+
+			// LOG
+			log.info("found {} ", (list != null) ? list.size() : "NULL");
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while getting list of records by criteria.",
+					e);
+		}
+
+		// LOG
+		log.debug("Leaving method findByCriteria(): ret={}",
+				(list != null) ? list.size() : "NULL");
+
+		return list;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.parvanpajooh.issuemanager.service.GenericLocalService#findIdsByCriteria(com.parvanpajooh.common.vo.BaseCriteria)
+	 */
+	@Override
+	public List<Long> findIdsByCriteria(BaseCriteria criteria)
+			throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering findIdsByCriteria( criteria={})", criteria);
+		
+		List<Long> list = null;
+		
+		try {
+			
+			// find by criteria
+			list = dao.findIdsByCriteria(criteria);
+			
+			// LOG
+			log.info("found {} ", (list != null) ? list.size() : "NULL");
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while getting list of ids by criteria.",
+					e);
+		}
+		
+		// LOG
+		log.debug("Leaving method findIdsByCriteria(): ret={}",
+				(list != null) ? list.size() : "NULL");
+		
+		return list;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.platform.parvan.entityconfig.service.GenericLocalService
+	 * #findByCriteria(com.parvanpajooh.platform.parvan.common.vo.BaseCriteria,
+	 * int, int,
+	 * com.parvanpajooh.platform.parvan.common.enums.SortDirectionEnum,
+	 * java.lang.String)
+	 */
+	/* @TransactionAttribute(TransactionAttributeType.SUPPORTS) */
+	@Override
+	public List<T> findByCriteria(BaseCriteria criteria, int firstResult,
+			int maxResults, SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanServiceException {
+
+		// LOG
+		log.debug(
+				"Entering findByCriteria( criteria={}, firstResult={}, maxResults={}, sortDirection={}, sortCriterion={})",
+				criteria, firstResult, maxResults, sortDirection, sortCriterion);
+
+		List<T> list = null;
+
+		try {
+
+			// find by criteria
+			list = dao.findByCriteria(criteria, firstResult, maxResults,
+					sortDirection, sortCriterion);
+
+			// LOG
+			log.debug("found {} from offset {}", (list != null) ? list.size()
+					: "NULL", firstResult);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while getting paged-list of records by criteria.",
+					e);
+		}
+
+		// LOG
+		log.debug("Leaving method findByCriteria(): ret={}",
+				(list != null) ? list.size() : "NULL");
+
+		return list;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.parvanpajooh.issuemanager.service.GenericLocalService#findIdsByCriteria(com.parvanpajooh.common.vo.BaseCriteria, int, int, com.parvanpajooh.common.enums.SortDirectionEnum, java.lang.String)
+	 */
+	@Override
+	public List<Long> findIdsByCriteria(BaseCriteria criteria, int firstResult,
+			int maxResults, SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanServiceException {
+		
+		// LOG
+		log.debug(
+				"Entering findIdsByCriteria( criteria={}, firstResult={}, maxResults={}, sortDirection={}, sortCriterion={})",
+				criteria, firstResult, maxResults, sortDirection, sortCriterion);
+		
+		List<Long> list = null;
+		
+		try {
+			
+			// find by criteria
+			list = dao.findIdsByCriteria(criteria, firstResult, maxResults,
+					sortDirection, sortCriterion);
+			
+			// LOG
+			log.info("found {} from offset {}", (list != null) ? list.size()
+					: "NULL", firstResult);
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while getting paged-list of ids by criteria.",
+					e);
+		}
+		
+		// LOG
+		log.debug("Leaving method findIdsByCriteria(): ret={}",
+				(list != null) ? list.size() : "NULL");
+		
+		return list;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.issuemanager.service.GenericLocalService#countByCriteria
+	 * (com.parvanpajooh.common.vo.BaseCriteria)
+	 */
+	/* @TransactionAttribute(TransactionAttributeType.SUPPORTS) */
+	@Override
+	public int countByCriteria(BaseCriteria criteria)
+			throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering countByCriteria( criteria={})", criteria);
+
+		int count = 0;
+
+		try {
+			// get count by criteria
+			count = dao.countByCriteria(criteria);
+
+			// LOG
+			log.info("count by criteria = {}; criteria={}", count, criteria);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while getting count of records by criteria.",
+					e);
+		}
+
+		// LOG
+		log.debug("Leaving method countByCriteria(): ret={}", count);
+
+		return count;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.platform.parvan.entityconfig.service.GenericLocalService
+	 * #get(java.io.Serializable)
+	 */
+	/* @TransactionAttribute(TransactionAttributeType.SUPPORTS) */
+	@Override
+	public T get(PK id) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering get( id={})", id);
+
+		T entity = null;
+
+		try {
+			// get entity
+			entity = dao.get(id);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while getting records by its ID.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method get()");
+
+		return entity;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.platform.parvan.entityconfig.service.GenericLocalService
+	 * #exists(java.io.Serializable)
+	 */
+	/* @TransactionAttribute(TransactionAttributeType.SUPPORTS) */
+	@Override
+	public boolean exists(PK id) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering exists( id={})", id);
+
+		boolean exists = false;
+
+		try {
+			// check existence
+			exists = dao.exists(id);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while checking record existence.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method exists(): ret={}", exists);
+
+		return exists;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.platform.parvan.entityconfig.service.GenericLocalService
+	 * #save(java.lang.Object)
+	 */
+	@Override
+	public T save(T object, UserInfo userInfo) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering save( object={}, userInfo={})", object, userInfo);
+
+		T entity = null;
+
+		try {
+			Date now = new Date();
+
+			((BaseModel) object).setCreateDate(now);
+			((BaseModel) object).setUpdateDate(now);
+			((BaseModel) object).setTenantId(userInfo.getTenantId());
+			((BaseModel) object).setCreateUserId(userInfo.getUserId());
+			((BaseModel) object).setUpdateUserId(userInfo.getUserId());
+
+			// save entity
+			entity = dao.save(object);
+
+		} catch (EJBException e) {
+			Exception cause = (Exception) e.getCause();
+			if (cause instanceof ConstraintViolationException) {
+				throw new ParvanRecoverableException(cause,
+						ErrorCode.DATA_IS_INVALID);
+			} else {
+				throw new ParvanUnrecoverableException(
+						"Error occurred while saving record.", e);
+			}
+
+		} catch (ConstraintViolationException e) {
+			throw new ParvanRecoverableException(e, ErrorCode.DATA_IS_INVALID);
+			
+		} catch (ObjectExistsException e) {
+			throw new ParvanRecoverableException(ErrorCode.OBJECT_EXIST);
+
+		} catch (StaleObjectStateException e) {
+			throw new ParvanRecoverableException(e, ErrorCode.VERSION_CHANGED);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while saving record.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method save()");
+
+		return entity;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo, String groupId)
+			throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering save( baseVO={}, userInfo={})", baseVO, userInfo);
+
+		try {
+			String name = baseVO.getClass().getName();
+			name = StringUtils.replace(name, ".vo.", ".");
+			name = name.substring(0, name.lastIndexOf("VO"));
+			// name = name.substring(0, name.lastIndexOf('.'));
+
+			BaseModel object = (BaseModel) Class.forName(name).newInstance();
+
+			object.fromVO(baseVO);
+
+			// save entity
+			T entity = this.save((T) object, userInfo);
+
+			baseVO = ((BaseModel) entity).toVO();
+
+		} catch (ParvanRecoverableException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while saving object.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method save(): ret={}", baseVO);
+
+		return baseVO;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.platform.parvan.entityconfig.service.GenericLocalService
+	 * #delete(java.io.Serializable)
+	 */
+	@Override
+	public void delete(PK id, UserInfo userInfo) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering delete( id={})", id);
+
+		try {
+			
+			T object = get(id);
+			
+			// delete entity
+			delete(object, userInfo);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while delete object.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method delete()");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.issuemanager.service.GenericLocalService#delete(java.lang
+	 * .Object)
+	 */
+	@Override
+	public void delete(T object, UserInfo userInfo)
+			throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering delete( object={})", object);
+
+		try {
+			// delete entity
+			dao.delete(object);
+
+		} catch (ParvanDaoException e) {
+			if (Validator.isNotNull(e.getErrorCode())) {
+				throw new ParvanRecoverableException(e, e.getErrorCode());
+			} else {
+				throw new ParvanUnrecoverableException(
+						"Error occurred while delete object.", e);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while delete object.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method delete()");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.platform.parvan.entityconfig.service.GenericLocalService
+	 * #delete(java.io.Serializable)
+	 */
+	@Override
+	public void delete(UserInfo userInfo, PK... ids)
+			throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering delete( ids={})", Arrays.toString(ids));
+
+		try {
+			for (PK id : ids) {
+				// delete entity
+				delete(id, userInfo);
+			}
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while .", e);
+		}
+
+		// LOG
+		log.debug("Leaving method delete()");
+	}
+
+	@Override
+	public void export(OutputStream out, List<String> fields, 
+			List<String> columnsNames, BaseCriteria criteria,
+			SortDirectionEnum sortDirection, String sortCriterion,
+			ListExportFormatEnum listExportFormat)
+			throws ParvanServiceException {
+		
+		//LOG
+		log.info("Entering export(fields={}, columnsNames{}, criteria={}, sortDirection={}, sortCriterion={}, listExportFormat={})", 
+				fields, columnsNames, criteria, sortDirection, sortCriterion, listExportFormat);
+		
+		try {
+			
+			//get user info from current context
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+			
+			//LOG
+			if (log.isDebugEnabled()) {
+				log.debug("start exporting...");
+			}
+			
+			if(columnsNames == null){
+				columnsNames = fields;
+				
+			}
+			
+			// column names
+			List<String> columnNames = columnsNames;
+			
+			// ----------------------------------------------
+			// get count
+			// ----------------------------------------------
+			int totalCount = countByCriteria(criteria);
+			
+			log.info("Total number of object(s) by criteria = [{}]", totalCount);
+			
+			int numberPerPage = 100;
+			int totalPageCount = totalCount / numberPerPage;
+			int firstResult = 0;
+			int rowCounter = 0;
+			
+			totalPageCount = Math.min(totalPageCount, 5);
+			
+			if(totalPageCount == 0){
+				totalPageCount = 1;
+			}
+			
+			// ----------------------------------------------
+			// create excel workbook and sheet
+			// ----------------------------------------------
+			SXSSFWorkbook wb = new SXSSFWorkbook(100);
+			Sheet sh = wb.createSheet();
+			
+			// ----------------------------------------------
+			// create header row
+			// ----------------------------------------------
+			Row headerRow = sh.createRow( rowCounter);
+			
+			int colStartIndex = 1;
+			int colIndex = colStartIndex;
+			for (String thisColumnName : columnNames) {
+				colIndex++;
+				
+				Cell thisHeaderCell = headerRow.createCell( colIndex);
+				
+				String thisColumnLabelKey = thisColumnName;
+				
+				String thisColumnLabelMessage = thisColumnLabelKey ;
+				thisHeaderCell.setCellValue(  thisColumnLabelMessage);
+				
+			}
+			
+			List<BaseModel> entities = null;
+			
+			for (int pageIndex = 0; pageIndex < totalPageCount; pageIndex++) {
+				
+				// get page
+				entities = (List<BaseModel>) findByCriteria(criteria, firstResult, numberPerPage, sortDirection, sortCriterion);
+				
+				//LOG
+				log.info("return [{}] object in page [{}]", entities.size(), pageIndex);
+				
+				// loop through this page
+				for (BaseModel thisEntity : entities) {
+					
+					rowCounter++;
+					// create row
+					Row thisRow = sh.createRow( rowCounter);
+					
+					colIndex = colStartIndex;
+					for (String thisFieldName : fields) {
+						colIndex++;
+						
+						Cell thisRowCell = thisRow.createCell( colIndex);
+						
+						String thisFieldValue = null;
+						
+						try {
+							thisFieldValue = org.apache.commons.beanutils.BeanUtils.getNestedProperty( 
+									thisEntity,
+									thisFieldName);
+						} catch (NestedNullException e) {
+							// do nothing
+						}
+						
+						
+						thisRowCell.setCellValue( thisFieldValue);	
+					}
+				}
+				
+				
+				firstResult = firstResult + numberPerPage;
+			}
+			
+	        wb.write( out );
+	        out.close();
+
+	        // dispose of temporary files backing this workbook on disk
+	        wb.dispose();
+			
+			//LOG
+			if (log.isDebugEnabled()) {
+				log.debug("end of export");
+			}
+			
+			
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while exporting list of records by criteria.",
+					e, ErrorCode.GET_ERROR);
+		}
+		
+	}
+}

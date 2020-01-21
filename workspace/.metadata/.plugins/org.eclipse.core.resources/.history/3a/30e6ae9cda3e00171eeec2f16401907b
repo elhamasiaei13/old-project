@@ -1,0 +1,11 @@
+package com.parvanpajooh.siteservices.service;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+
+public interface RegisterManagementService {
+
+	public void createUser(UserInfo userInfo ,PersonVO personVO) throws ParvanServiceException;
+
+}

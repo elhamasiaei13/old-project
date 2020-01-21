@@ -1,0 +1,97 @@
+package com.parvanpajooh.common.formatter;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.util.StringUtils;
+
+import com.parvanpajooh.common.util.DateFields;
+import com.parvanpajooh.common.util.SimplePersianCalendar;
+
+public class DateProperyEditor extends CustomDateEditor {
+	
+	private final DateFormat dateFormat;
+
+	private final boolean allowEmpty;
+
+	private final int exactDateLength;
+
+	public DateProperyEditor(DateFormat dateFormat, boolean allowEmpty) {
+		super(dateFormat, allowEmpty);
+		this.dateFormat = dateFormat;
+		this.allowEmpty = allowEmpty;
+		this.exactDateLength = -1;
+	}
+
+	public void setAsText(String text) throws IllegalArgumentException {
+		if (this.allowEmpty && !StringUtils.hasText(text)) {
+			// Treat empty String as null value.
+			setValue(null);
+		}
+		else if (text != null && this.exactDateLength >= 0 && text.length() != this.exactDateLength) {
+			throw new IllegalArgumentException(
+					"Could not parse date: it is not exactly" + this.exactDateLength + "characters long");
+		}
+		else {
+			
+			Locale locale = LocaleContextHolder.getLocale();
+	    	
+	    	if("fa".equals(locale.getLanguage())){
+	    		
+	    		String[] splited = text.split("/");
+	        	String year = splited[0];
+	        	String month = splited[1];
+	        	String day = splited[2];
+	        	
+	        	SimplePersianCalendar persianCalendar = new SimplePersianCalendar();
+	        	persianCalendar.setDateFields(Integer.parseInt(year), Integer.parseInt(month) - 1, Integer.parseInt(day));
+	        	
+	        	Calendar cal = Calendar.getInstance();
+	        	cal.setTime(persianCalendar.getTime());
+	        	
+	        	setValue(cal.getTime());
+	    	}
+	    	else {
+	    		try {
+					setValue(this.dateFormat.parse(text));
+				}
+				catch (ParseException ex) {
+					throw new IllegalArgumentException("Could not parse date: " + ex.getMessage(), ex);
+				}
+	    	}
+		}
+	}
+
+	/**
+	 * Format the Date as String, using the specified DateFormat.
+	 */
+	@Override
+	public String getAsText() {
+		Locale locale = LocaleContextHolder.getLocale();
+		
+		Date value = (Date) getValue();
+		
+		if(value == null)
+			return "";
+		
+		if("fa".equals(locale.getLanguage())){
+    		Calendar cal = Calendar.getInstance();
+    		cal.setTime(value);
+    		
+    		SimplePersianCalendar persianCalendar = new SimplePersianCalendar();
+    		persianCalendar.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
+    		DateFields dfs = persianCalendar.getDateFields();
+    		
+    		return dfs.getYear() + "/" + (dfs.getMonth() + 1) + "/" + dfs.getDay();
+    	}
+    	else {
+    		
+    		return this.dateFormat.format(value);
+    	}
+	}
+}

@@ -1,0 +1,59 @@
+package com.parvanpajooh.siteservices.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.config.Config;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+import com.parvanpajooh.siteservices.model.vo.UserVO;
+import com.parvanpajooh.siteservices.service.IdentityManagement2LocalService;
+import com.parvanpajooh.siteservices.service.adapter.IdentityManagement2ServiceAdapter;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class IdentityManagemen2tLocalServiceImpl implements IdentityManagement2LocalService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(IdentityManagemen2tLocalServiceImpl.class);
+
+	@Inject
+	private IdentityManagement2ServiceAdapter identityManagement2ServiceAdapter;
+
+	@Override
+	public UserVO createUser(PersonVO personVO) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering createUser(personVO={})", personVO);
+		UserVO userVO = null;
+		try {
+
+			userVO = identityManagement2ServiceAdapter.createUser(userVO);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while createUser", e);
+		}
+
+		return userVO;
+	}
+	
+	
+	public UserVO _createUser(PersonVO personVO){
+		
+	}
+}

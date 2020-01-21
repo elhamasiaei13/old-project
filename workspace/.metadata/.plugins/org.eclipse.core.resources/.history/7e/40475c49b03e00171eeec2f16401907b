@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>Register</title>
+
+
+	<style>
+		.col-sm-3 {
+			float: right !important;
+			padding-left: 5px !important;
+			padding-right: 5px !important;
+		}
+		
+		.col-md-6 {
+			float: right !important;
+			padding-left: 30px !important;
+		}
+		
+		.has-feedback .form-control {
+			padding-right: 0px !important;
+		}
+		
+		.form-control-feedback {
+			right: 350px !important;
+		}
+		
+		.page-header {
+			padding: 20px 0 !important;
+			border-bottom: 5px solid #CCC !important;
+			margin: 0px !important;
+		}
+		
+		.input-group .input-group-addon {
+		    border-radius: 0;
+		    border-color: #d2d6de;
+		    background-color: #fff;
+		    border-left: 1px solid #ccc !important;
+		}
+		
+		.form-horizontal .control-label {
+		    text-align: left !important;
+		}
+	</style>
+</head>
+<body>
+
+	<section layout:fragment="top-header" class="page-header">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<ul class="breadcrumb">
+						<li>
+							<a href="#">صفحه نخست</a>
+						</li>
+
+						<li class="active">ثبت‌نام</li>
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<h1>ثبت‌نام</h1>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="content" layout:fragment="content">
+		<div class="container">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<form id="createPersonForm" class="form-horizontal" role="form" method="post" th:object="${person}">
+						<input class="form-control" name="uuid" />
+						<div class="callout callout-danger hide"><h4></h4></div>
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label class="col-sm-3 control-label">نوع</label>
+									<div class="col-sm-8">
+										<label class="radio-inline" aria-checked="true">
+											<input class="iradio_minimal" type="radio" value="REAL" id="type1" name="type">
+											حقیقی
+											</input>
+										</label>
+										<label class="radio-inline">
+											<input class="iradio_minimal" type="radio" value="LEGAL" id="type2" name="type">
+											حقوقی
+											</input>
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+						<legend></legend>
+						<!-- REAL ############################################################################### -->
+						<div id="realPersonFragment">
+							<div class="row">
+								<!-- real person column 1 ################################################################################# -->
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text">
+											[[#{person.gender}]]
+											<span class="reqired"> *</span>
+										</label>
+										<div class="col-sm-8">
+											<select th:field="*{gender}" class="form-control validate[notempty]" data-bv-notempty="true" th:attr="data-bv-notempty-message=#{error-required(#{person.gender})}">
+												<option selected="selected" value=""></option>
+												<option th:each="type : ${T(com.parvanpajooh.siteservices.model.enums.Gender).values()}" th:value="${#strings.toUpperCase(type)}"
+													th:text="#{gender.__${#strings.toLowerCase(type.toString())}__}"></option>
+											</select>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text">
+											[[#{person.firstNameLocal}]]
+											<span class="reqired"> *</span>
+										</label>
+										<div class="col-sm-8">
+											<input th:field="*{firstNameLocal}" th:readonly="${mode == 'viewPerson'}" class="form-control validate[notempty]" data-bv-notempty="true"
+												th:attr="data-bv-notempty-message=#{error-required(#{person.firstNameLocal})}" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text">
+											[[#{person.lastNameLocal}]]
+											<span class="reqired"> *</span>
+										</label>
+										<div class="col-sm-8">
+											<input th:field="*{lastNameLocal}" th:readonly="${mode == 'viewPerson'}" class="form-control validate[notempty]" data-bv-notempty="true"
+												th:attr="data-bv-notempty-message=#{error-required(#{person.lastNameLocal})}" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text">
+											[[#{person.nationalCode}]]
+											<span class="reqired"> *</span>
+										</label>
+										<div class="col-sm-8">
+											<input th:field="*{nationalId}" th:readonly="${mode == 'viewPerson'}" class="form-control validate[notempty]" data-bv-notempty="true" data-bv-nationalId="true"
+												th:attr="data-bv-notempty-message=#{error-required(#{person.nationalCode})} ,data-bv-nationalId-message=#{error-nationalId(#{person.nationalCode})}" />
+										</div>
+									</div>
+
+								</div>
+								<!-- real person column 2 ################################################################################# -->
+
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:text="#{person.idNumber}"></label>
+										<div class="col-sm-8">
+											<input class="form-control" th:field="*{issueId}" th:readonly="${mode == 'viewPerson'}" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:text="#{person.issueDate}"></label>
+										<div class="col-sm-8">
+											<input class="form-control datePicker" th:field="*{issueDate}" th:readonly="${mode == 'viewPerson'}" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:text="#{person.issueLocation}"></label>
+										<div class="col-sm-8">
+											<input class="form-control" th:field="*{issueLocation}" th:readonly="${mode == 'viewPerson'}" />
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+
+						<!-- LEGAL ############################################################################### -->
+						<div id="legalPersonFragment">
+							<div class="row">
+								<!-- legal person column 1 ################################################################################# -->
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text">
+											[[#{person.prefix}]]
+											<span class="reqired"> *</span>
+										</label>
+										<div class="col-sm-8">
+											<input th:field="*{prefix}" type="hidden" id="legalPersonPrefix" th:readonly="${mode == 'viewPerson'}" class="form-control validate[notempty]" data-bv-notempty="true"
+												th:attr="data-bv-notempty-message=#{error-required(#{person.prefix})}" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text">
+											[[#{person.firstNameLocal}]]
+											<span class="reqired"> *</span>
+										</label>
+										<div class="col-sm-8">
+											<input th:field="*{firstNameLocal}" th:readonly="${mode == 'viewPerson'}" class="form-control validate[notempty]" data-bv-notempty="true"
+												th:attr="data-bv-notempty-message=#{error-required(#{person.firstNameLocal})}" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:text="#{person.nickNameLocal}"></label>
+										<div class="col-sm-8">
+											<input class="form-control" th:field="*{nickNameLocal}" th:readonly="${mode == 'viewPerson'}" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text">
+											[[#{person.nationalId}]]
+											<span class="reqired"> *</span>
+										</label>
+										<div class="col-sm-8">
+											<input th:field="*{nationalId}" th:readonly="${mode == 'viewPerson'}" class="form-control" data-bv-notempty="true" data-bv-nationalId="true"
+												th:attr="data-bv-notempty-message=#{error-required(#{person.nationalId})} ,data-bv-nationalId-message=#{error-nationalId(#{person.nationalId})}" />
+										</div>
+									</div>
+								</div>
+								<!-- legal person column 2 ################################################################################# -->
+
+								<div class="col-md-6">
+
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text">[[#{person.economicCode}]]</label>
+										<div class="col-sm-8">
+											<input th:field="*{economicCode}" th:readonly="${mode == 'viewPerson'}" class="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:text="#{person.registrationNumber}"></label>
+										<div class="col-sm-8">
+											<input class="form-control" th:field="*{issueId}" th:readonly="${mode == 'viewPerson'}" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:text="#{person.registrationDate}"></label>
+										<div class="col-sm-8">
+											<input class="form-control datePicker" th:field="*{issueDate}" th:readonly="${mode == 'viewPerson'}" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:text="#{person.registrationLocation}"></label>
+										<div class="col-sm-8">
+											<input class="form-control" th:field="*{issueLocation}" th:readonly="${mode == 'viewPerson'}" />
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<legend></legend>
+
+						<!-- CONTACT ############################################################################### -->
+						<div id="contactInfoFragment" style="margin-top: 60px">
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text">
+											[[#{contactInfo.tel}]]
+											<span class="reqired"> *</span>
+										</label>
+										<div class="col-sm-8">
+											<div class="input-group">
+												<input th:field="*{primaryContactInfo.tel}" th:readonly="${mode == 'viewPerson'}" class="form-control validate[notempty]" data-bv-notempty="true"
+													th:attr="data-bv-notempty-message=#{error-required(#{contactInfo.tel})}" />
+												<span class="input-group-addon">
+													<i class="fa fa-phone"></i>
+												</span>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text" id="mobileLabel">[[#{contactInfo.mobile}]]</label>
+										<div class="col-sm-8">
+											<div class="input-group">
+												<input th:field="*{primaryContactInfo.mobile}" id="mobile" th:readonly="${mode == 'viewPerson'}" class="form-control validate[notempty]" data-bv-notempty="true"
+													th:attr="data-bv-notempty-message=#{error-required(#{contactInfo.mobile})}" />
+												<span class="input-group-addon">
+													<i class="fa fa-mobile-phone"></i>
+												</span>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:text="#{contactInfo.fax}"></label>
+										<div class="col-sm-8">
+											<div class="input-group">
+												<input class="form-control" th:field="*{primaryContactInfo.fax}" th:readonly="${mode == 'viewPerson'}" />
+												<span class="input-group-addon">
+													<i class="fa fa-fax"></i>
+												</span>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text">
+											[[#{contactInfo.email}]]
+											<span class="reqired"> *</span>
+										</label>
+										<div class="col-sm-8">
+											<div class="input-group">
+												<input class="form-control" th:field="*{primaryContactInfo.email}" th:readonly="${mode == 'viewPerson'}" type="email"
+													th:attr="data-bv-emailaddress-message=#{error-email} ,data-bv-notempty-message=#{error-required(#{contactInfo.email})}" data-bv-notempty="true" style="direction: LTR;" />
+												<span class="input-group-addon">
+													<i class="fa fa-at"></i>
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- column 2 ############################################################################### -->
+
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text">
+											[[#{contactInfo.city}]]
+											<span class="reqired"> *</span>
+										</label>
+										<div class="col-sm-8">
+											<input type="hidden" th:field="*{primaryContactInfo.cityCode}" id="primaryContactInfoCityCode" th:readonly="${mode == 'viewPerson'}" class="form-control validate[notempty]"
+												data-bv-notempty="true" th:attr="data-bv-notempty-message=#{error-required(#{contactInfo.city})}">
+											</input>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text" id="postalCodeLabel">[[#{contactInfo.postalCode}]]</label>
+										<div class="col-sm-8">
+											<input th:field="*{primaryContactInfo.postalCode}" id="postalCode" th:readonly="${mode == 'viewPerson'}" class="form-control" data-bv-notempty="true"
+												th:attr="data-bv-notempty-message=#{error-required(#{contactInfo.postalCode})}" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label" th:inline="text">
+											[[#{contactInfo.address}]]
+											<span class="reqired"> *</span>
+										</label>
+										<div class="col-sm-8">
+											<textarea th:field="*{primaryContactInfo.address}" th:readonly="${mode == 'viewPerson'}" class="form-control validate[notempty]" data-bv-notempty="true"
+												th:attr="data-bv-notempty-message=#{error-required(#{contactInfo.address})}" />
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="split-right">
+								<button class="btn btn-success" id="createPersonBtn" tabindex="5">ذخیره</button>
+							</div>
+						</div>
+						<!-- END   ################################################################################# -->
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
+
+
+	<th:block layout:fragment="javascripts">
+
+
+		<script th:inline="javascript">
+
+			var titleModifyRelation = '<span class="label label-info"  th:remove="tag" th:text="#{relation.modify}">Modify Relation !</span>';
+			
+			var legalPrefix = [
+				{id:'company', text: /*[[#{person.prefix.company}]]*/ 
+				},
+				{id:'institution', text: /*[[#{person.prefix.institution}]]*/ 
+				},
+				{id:'office', text: /*[[#{person.prefix.office}]]*/ 
+				},
+				{id:'organization', text: /*[[#{person.prefix.organization}]]*/ 
+				},
+				{id:'ministry', text: /*[[#{person.prefix.ministry}]]*/ 
+				},
+				{id:'representative', text: /*[[#{person.prefix.representative}]]*/ 
+				},
+				{id:'laboratory', text: /*[[#{person.prefix.laboratory}]]*/ 
+				},
+				{id:'hospital', text: /*[[#{person.prefix.hospital}]]*/ 
+				},
+				{id:'clinic', text: /*[[#{person.prefix.clinic}]]*/ 
+				},
+				{id:'union', text: /*[[#{person.prefix.union}]]*/ 
+				},
+				{id:'community', text: /*[[#{person.prefix.community}]]*/ 
+				},
+				{id:'garrison', text: /*[[#{person.prefix.garrison}]]*/ 
+				},
+				{id:'cooperative', text: /*[[#{person.prefix.cooperative}]]*/ 
+				},
+				{id:'bank', text: /*[[#{person.prefix.bank}]]*/ 
+				}
+			];
+   			
+			var currentPersonId = /*[[${person.id}]]*/;
+			//var currentPersonUrl =
+
+   	    	$('input[type=radio][name=type]').on('ifChanged', function() {
+   	   	    	
+   	    		if (this.checked) {
+   	    			var $legalPersonFragment = $('#legalPersonFragment');
+   	    			var $realPersonFragment = $('#realPersonFragment');
+   	    			var $contactInfoFragment = $('#contactInfoFragment');
+   	    			if (this.value == 'REAL') {
+   	    				$("#legalPersonFragment :input").prop("disabled", true);
+   	    				$("#realPersonFragment :input").prop("disabled", false);
+   	    				$('#realPersonFragment').css('display','block');
+   	    				$('#legalPersonFragment').css('display','none');
+   	    				
+   	    				$('#legalPersonFragment').find('[data-bv-field]').each(function() {
+   	    					$legalPersonFragment.bootstrapValidator('removeField', this.name);
+   	    				});
+   	    				$('#realPersonFragment').find('[data-bv-field]').each(function() {
+   	    					$realPersonFragment.bootstrapValidator('addField', this.name);
+   	    				});
+   	    				$contactInfoFragment.bootstrapValidator('destroy');
+   	    				$contactInfoFragment.bootstrapValidator({
+	   						excluded: [':disabled'], 
+	   						feedbackIcons:{valid: 'fa fa-check',invalid: 'fa fa-times',validating: 'fa fa-refresh'}
+   						});
+ 	    				$contactInfoFragment.bootstrapValidator('addField', $('#createPersonForm').find('#mobile'));
+ 	    				$contactInfoFragment.bootstrapValidator('removeField', $('#createPersonForm').find('#postalCode'));
+   	    				resetLegalPersonFragment($legalPersonFragment);
+   	    				$('#mobileLabel span').remove();
+   	    				$('#mobileLabel').append('<span class="reqired"> *</span>');
+   	    				$('#postalCodeLabel span').remove();
+   	    				
+   	    			} else if (this.value == 'LEGAL') {
+   	    				$("#legalPersonFragment :input").prop("disabled", false);
+   	    				$("#realPersonFragment :input").prop("disabled", true);
+   	    				$('#realPersonFragment').css('display','none');
+   	    				$('#legalPersonFragment').css('display','block');
+   	    				$('#realPersonFragment').find('[data-bv-field]').each(function() {
+   	    					$realPersonFragment.bootstrapValidator('removeField', this.name);
+   	    				});
+   	    				$('#legalPersonFragment').find('[data-bv-field]').each(function() {
+   	    					$legalPersonFragment.bootstrapValidator('addField', this.name);
+   	    				});
+   	    				$contactInfoFragment.bootstrapValidator('destroy');
+   	    				$contactInfoFragment.bootstrapValidator({
+	   						excluded: [':disabled'], 
+	   						feedbackIcons:{valid: 'fa fa-check',invalid: 'fa fa-times',validating: 'fa fa-refresh'}
+   						});
+   	    				$contactInfoFragment.bootstrapValidator('removeField', $('#createPersonForm').find('#mobile'));
+   	    				$contactInfoFragment.bootstrapValidator('addField', $('#createPersonForm').find('#postalCode'));
+   	    				resetRealPersonFragment($realPersonFragment);
+   	    				$('#postalCodeLabel span').remove();
+   	    				$('#postalCodeLabel').append('<span class="reqired"> *</span>');
+   	    				$('#mobileLabel span').remove();
+   	    			}
+   	    		}
+   	    	});
+
+		    $(document).ready(function() {
+
+		    	$('input[name="type"][value="REAL"]').iCheck('check').iCheck('enable').trigger('ifChanged');
+		    	 
+				$('#legalPersonFragment ,#realPersonFragment ,#contactInfoFragment').bootstrapValidator({
+					excluded: [':disabled'], 
+					feedbackIcons:{
+						valid: 'fa fa-check',
+						invalid: 'fa fa-times',
+						validating: 'fa fa-refresh'
+					}
+				});
+		    	
+		    	$('#legalPersonPrefix').select2({
+		    		id: function(obj) { return obj.text; },
+		    		placeholder: [[#{choose}]],
+		    		allowClear: true,
+		    		data: legalPrefix,
+		    	    formatSelection: function(item){return item.text },
+		    	    formatResult: function(item){return item.text },
+		    	    initSelection: function (element, callback) {
+		    	        var data = {id: element.val(), text: element.val()};
+		    	        callback(data);
+		    	    }
+		    	}).change(function() {
+					$('#legalPersonFragment').data('bootstrapValidator').updateStatus('prefix', 'NOT_VALIDATED', null).validateField('prefix');
+				});
+
+		    	$('#gender').select2({
+	    			placeholder: [[#{choose}]]
+	    			,allowClear: true,
+	    			
+    			});
+
+		    	/*<![CDATA[*/
+		    	$('#primaryContactInfoCityCode').select2({
+	    				placeholder: [[#{choose}]]
+	    				,formatResult: geoEntityFormat
+	    				,id: function(obj) { return obj.shortCode; }
+	    				,formatSelection: geoEntityFormat
+	    				,initSelection: geoEntityInitSelection
+	    				,allowClear: true
+	    				,ajax: {
+	    				     url: '/siteservices-web/profile/register/cities',
+	    					 transport: transportFunction,
+	    					 dataType: 'json',
+	    					 params: {contentType: 'application/json;charset=utf-8', statusCode: {404: function(){showError('404');},403: function(){showError('403');},503: function(){showError('503');}}},
+	    					 quietMillis: 200,
+	    					 data: function (term, page) {
+	    					 	return {
+					    				'columns[1][data]': 'id'
+					    				,start: (page - 1) * 20
+					    				,length: 20
+					    				,'order[1][column]': 1
+					    				,'order[1][dir]': 'asc'
+					    				,term: term
+	    					 	};
+	    					 },
+	    					 results: function (data, page) {
+	    					 	var more = (page * 20) < data.recordsFiltered;
+	    					 	return {results: data.data, more: more}
+	    					 }
+	    				}
+  				}).change(function() {
+					$('#contactInfoFragment').data('bootstrapValidator').updateStatus('primaryContactInfo.cityCode', 'NOT_VALIDATED', null).validateField('primaryContactInfo.cityCode');
+				});
+
+		    	$('#createPersonBtn').click(function(){
+		    		var $btn = $(this);
+		    		var isValidForm = false;
+		    		var isContactInfosValid = false;
+		    		var $legalPersonFragment = $('#legalPersonFragment');
+	                var $realPersonFragment = $('#realPersonFragment');
+	                var $contactInfoFragment = $('#contactInfoFragment');
+		    		$('#createPersonForm').find('.callout').text('').addClass('hide');
+    				$('#contactInfoFragment').data('bootstrapValidator').validate();
+    				isContactInfosValid = $('#contactInfoFragment').data('bootstrapValidator').isValid();
+    				
+		    		if($('input[name="type"][value="REAL"]').is(":checked")){
+		    			$('#realPersonFragment').data('bootstrapValidator').validate();
+		    			isValidForm = isContactInfosValid ? $('#realPersonFragment').data('bootstrapValidator').isValid() : false;
+					}else if($('input[name="type"][value="LEGAL"]').is(":checked")){
+						$('#legalPersonFragment').data('bootstrapValidator').validate();
+						isValidForm = isContactInfosValid ? $('#legalPersonFragment').data('bootstrapValidator').isValid() : false;
+					}
+					if(isValidForm){ 
+		    			$btn.attr('disabled', true);
+			    		$.post('/siteservices-web/profile/register/save', $('#createPersonForm').serialize()).done(function(data) {
+			    			if(data.status == 'success') {
+			    				showTopleftGrowl('success', 'Create', 'Create Successful');
+			                    resetContactInfoFragment($contactInfoFragment);
+			                    resetRealPersonFragment($realPersonFragment);
+			                    resetLegalPersonFragment($legalPersonFragment);
+			                    $contactInfoFragment.bootstrapValidator('destroy');
+			                    $realPersonFragment.bootstrapValidator('destroy');
+			                    $legalPersonFragment.bootstrapValidator('destroy');
+			                    $('#legalPersonFragment ,#realPersonFragment ,#contactInfoFragment').bootstrapValidator({
+			                        excluded: [':disabled'],
+			                        feedbackIcons: {
+			                            valid: 'fa fa-check',
+			                            invalid: 'fa fa-times',
+			                            validating: 'fa fa-refresh'
+			                        }
+			                    });   
+			                    $('input[name="type"][value="REAL"]').iCheck('check').iCheck('enable').trigger('ifChanged');
+			    			} else if(data.status == 'ValidationException'){
+			    				showTopleftGrowl('error', 'Error', data.invalidField);
+			    				$('#createPersonForm').find('.callout').text(data.invalidField + 'invalid-value').removeClass('hide');
+			    			} else if(data.status == 'ErrorCode'){
+			    				if(data.errorMessage){
+			    					showTopleftGrowl('error', 'Error', data.errorMessage);
+			    					$('#createPersonForm').find('.callout').text(data.errorMessage).removeClass('hide');
+			    				} else {
+			    					showTopleftGrowl('error', 'Error', data.errorCode);
+			    					$('#createPersonForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+			    				}
+			    			} else {
+			    				console.debug(data.status);
+			    				showTopleftGrowl('error', 'Error', data.message);
+			    				$('#createPersonForm').find('.callout').text((data.message ? data.message : 'delete.failed' )).removeClass('hide');
+			    			}
+			    			$btn.attr('disabled', false);
+			    		}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'createPersonBtn')});
+					} 
+			    		return false;
+		    	});
+		    });
+
+   	    	function resetContactInfoFragment($contactInfoFragment) {
+   	    		$contactInfoFragment.find('input,select, textarea').val('');
+   	    		try{$('#primaryContactInfoCityCode').select2('val', '');}catch(Erro){}
+   			}
+   			
+   	    	function resetRealPersonFragment($realPersonFragment) {
+   			    $realPersonFragment.find('input:text,select, textarea').val('');
+   			    $realPersonFragment.find('input:radio, input:checkbox').iCheck('uncheck');
+   			 	try{$('#gender').select2('val', '');}catch(Erro){}
+   			}
+
+   	    	function resetLegalPersonFragment($legalPersonFragment) {
+   			    $legalPersonFragment.find('input:text,select, textarea').val('');
+   			    $legalPersonFragment.find('input:radio, input:checkbox').iCheck('uncheck');
+   			 	try{$('#legalPersonPrefix').select2('val', '');}catch(Erro){}
+   			}
+		    
+		    function personInitSelection(element, callback) {
+	    		var id = $(element).val();
+	    		$.ajax({
+	    			url : '/siteservices-web/person/get', 
+	    			data : {id : id}, 
+	    			dataType: 'json'
+	    		}).done(function(data) {callback(data);});
+	    	}
+
+	    	function personFormat(aaData) {
+	    		return aaData.fullNameLocal; 
+	    	}
+
+	    	function ajaxResult(data, page) {
+				var more = (page * 20) < data.recordsFiltered;
+				$.each(data.data, function(i,obj) {
+					if (/* currentPersonId == obj.id ||  */!obj.active) {
+						obj.disabled = true;
+						return;
+					}
+				});
+				return {results: data.data, more: more};
+			}
+
+	    	function geoEntityFormat(aaData) {
+	    		var res = '<strong>' + aaData.nameFa + '</strong>';
+	    		var resAdditional = '';
+	    		if(aaData.parent){
+	    			resAdditional = aaData.parent.nameFa + ' , ';
+	    			
+	    			if(aaData.parent.parent){
+	    				resAdditional = aaData.parent.parent.nameFa + ' , ' + resAdditional;
+	    			}
+	    			
+	    			res = '<span style="color: #999;">' + resAdditional + '</span>' + res;
+	    		}
+	    		return res; 
+	    	}
+
+		    function geoEntityInitSelection(element, callback) {
+	    		var id = $(element).val();
+	    		$.ajax({
+	    			url : '/siteservices-web/profile/register/cities/' + id, 
+	    			dataType: 'json'
+	    		}).done(function(data) {callback(data);});
+	    	}
+			
+	    	/*]]>*/
+    		</script>
+
+	</th:block>
+
+</body>
+</html>

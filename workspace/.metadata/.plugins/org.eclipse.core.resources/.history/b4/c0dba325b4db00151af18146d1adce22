@@ -1,0 +1,22 @@
+package com.parvanpajooh.sample.service;
+
+import java.util.List;
+
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.ecourier.service.GenericService;
+import com.parvanpajooh.sample.model.Sample;
+import com.parvanpajooh.sample.model.vo.SampleVO;
+
+
+/**
+ * 
+ * @author ali
+ *
+ */
+public interface SampleService extends GenericService<Sample, Long> {
+	
+	public List<SampleVO> loadSamples(UserInfo userInfo) throws ParvanServiceException;
+	
+	public void sort(UserInfo userInfo, Long[] ids) throws ParvanServiceException;
+}

@@ -1,0 +1,262 @@
+package com.parvanpajooh.sample.service.impl;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.common.CurrentContext;
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.enums.SortDirectionEnum;
+import com.parvanpajooh.common.exceptions.ErrorCode;
+import com.parvanpajooh.common.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.common.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.ecourier.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.sample.dao.SampleDao;
+import com.parvanpajooh.sample.model.Sample;
+import com.parvanpajooh.sample.model.criteria.SampleCriteria;
+import com.parvanpajooh.sample.model.vo.SampleVO;
+import com.parvanpajooh.sample.service.SampleLocalService;
+
+/**
+ * 
+ * @author ali
+ * @author mehrdad
+ *
+ */
+@Stateless
+public class SampleLocalServiceImpl extends GenericLocalServiceImpl<Sample, Long> implements SampleLocalService {
+    /**
+     * Log variable for all child classes. 
+     */
+    static final Logger log = LoggerFactory.getLogger( SampleLocalServiceImpl.class);
+	
+    public SampleDao sampleDao;
+    
+    @Inject
+    public void setSampleDao(SampleDao sampleDao) {
+        this.dao = sampleDao;
+        this.sampleDao = sampleDao;
+    }
+	
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+    	log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+    	
+    	SampleVO sampleVO = (SampleVO) baseVO;
+    	
+    	try {
+    		
+    		Sample sample = null;
+    		
+    		if(Validator.isNull(sampleVO.getId())){
+    			sample = new Sample();
+    			sample.fromVO(sampleVO);
+    		}
+    		else {
+    			sample = sampleDao.get(sampleVO.getId());
+    			sample.fromVO(sampleVO);
+    		}
+
+//			if (Validator.isNotNull(sampleVO.getID()) && Validator.isNotNull(sampleVO.getUSER_NAME())) {
+
+//				Sample parent = get(sampleVO.getParent().getId());
+
+//				if (!_isParentValid(sample, parent)) {
+//					throw new ParvanRecoverableException(ErrorCode.INVALID_PARENT);
+//				}
+
+//				sample.setParent(parent);
+//			} 
+//				else {
+//				sample.setParent(null);
+//			}
+    		
+    		// save entity
+    		sample = save(sample, userInfo);
+    		
+    		sampleVO = (SampleVO) sample.toVO();
+    	
+    	} catch (ParvanServiceException e) {
+    		throw e;
+    		
+    	} catch (Exception e) {
+    		throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+    	
+    	return sampleVO; 
+    }
+
+	@Override
+	public void sort(Long[] ids) throws ParvanServiceException {
+    	log.info("Entering sort(ids)");
+
+    	try {
+	    	// get current userInfo
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+			
+	    	for (int i = 0; i < ids.length; i++) {
+	    		// load sample
+				Sample sample = get(ids[i]);
+				
+				// set index
+//				sample.setIndexInParent(i);
+				
+				// save sample
+				save(sample, userInfo);
+			}
+    	} catch (ParvanServiceException e) {
+    		throw e;
+    		
+    	} catch (Exception e) {
+    		throw new ParvanUnrecoverableException("Error occurred while save sorted list.", e);
+		}
+	}
+
+	@Override
+	public List<SampleVO> loadSamples() throws ParvanServiceException {
+    	log.info("Entering loadSamples()");
+    	
+    	List<SampleVO> result = null;
+    	
+    	try {
+			SampleCriteria sampleCriteria = new SampleCriteria();
+			sampleCriteria.setActive(true);
+			
+			List<Sample> samples = findByCriteria(sampleCriteria, 0, Integer.MAX_VALUE, SortDirectionEnum.Ascending, "indexInParent");
+			
+			result = convertToTree(samples);
+			
+    	} catch (ParvanServiceException e) {
+			log.error("error occurred while loading samples", e);
+			throw e;
+		} catch (Exception e) {
+			log.error("error occurred while loading samples", e);
+			throw new ParvanUnrecoverableException("error occurred while loading samples", e);
+		}
+		
+		return result;
+	}
+	
+	private boolean hasAccess(SampleVO sampleVO){
+		
+    	// get current userInfo
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		
+		Set<String> userRoles = userInfo.getRoleNames();
+		
+		boolean hasAccess = false;
+		
+		List<String> thisSampleRoles = sampleVO.getRoles();
+		if(Validator.isNotNull(thisSampleRoles)){
+			for (String role : thisSampleRoles) {
+				if(userRoles.contains(role)){
+					hasAccess = true;
+					break;
+				}
+			}
+		} else {
+			hasAccess = true;
+		}
+		
+		return hasAccess;
+	}
+	
+	/**
+	 * 
+	 * @param samples
+	 * @return
+	 */
+	private List<SampleVO> convertToTree(List<Sample> samples){
+		
+		List<SampleVO> result = new ArrayList<SampleVO>();
+		Map<Long, SampleVO> map = new HashMap<Long, SampleVO>();
+		
+		Iterator<Sample> iterator = samples.iterator();
+		while (iterator.hasNext()) {
+			Sample thisSample = iterator.next();
+			if(thisSample.getParent() == null){
+				SampleVO sampleVO = thisSample.toVOLite();
+
+				// check permission
+				if(hasAccess(sampleVO)){
+					sampleVO.setChildren(new ArrayList<SampleVO>());
+					result.add(sampleVO);
+				}
+				
+				map.put(thisSample.getId(), sampleVO);
+				iterator.remove();
+			}
+			else {
+				SampleVO parentSampleVO = map.get(thisSample.getParent().getId());
+				
+				if(parentSampleVO != null){
+					List<SampleVO> children = parentSampleVO.getChildren();
+					if(children == null){
+						children = new ArrayList<SampleVO>();
+					}
+					
+					SampleVO sampleVO = thisSample.toVOLite();
+					sampleVO.setChildren(new ArrayList<SampleVO>());
+					
+					// check permission
+					if(hasAccess(sampleVO)){
+						children.add(sampleVO);
+						
+						Collections.sort(children, new Comparator<SampleVO>() {
+							
+							@Override
+							public int compare(SampleVO o1, SampleVO o2) {
+								return Integer.compare(o1.getIndexInParent(), o2.getIndexInParent());
+							}
+							
+						});
+					}
+
+					parentSampleVO.setChildren(children);
+					
+					map.put(thisSample.getId(), sampleVO);
+					iterator.remove();
+				}
+			}
+		}
+		
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param sample
+	 * @param parent
+	 * @return
+	 */
+	private boolean _isParentValid(Sample sample, Sample parent) {
+		if (sample.equals(parent)) {
+			return false;
+		}
+
+		Sample parentOfParent = parent.getParent();
+
+		if (Validator.isNotNull(parentOfParent)) {
+			if (!_isParentValid(sample, parentOfParent)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+}

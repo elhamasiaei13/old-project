@@ -1,0 +1,124 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.geomanagement.service;
+
+import java.util.List;
+
+import com.parvanpajooh.client.rateandroute.model.CarrierMsg;
+import com.parvanpajooh.client.rateandroute.model.CityInfoMsg;
+import com.parvanpajooh.client.rateandroute.model.CountryInfoMsg;
+import com.parvanpajooh.client.rateandroute.model.CurrencyMsg;
+import com.parvanpajooh.client.rateandroute.model.NodeMsg;
+import com.parvanpajooh.client.rateandroute.model.StateInfoMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.FreightNodeType;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+/**
+ * @author MO
+ *
+ */
+public interface GeoManagementApi {
+	
+	@GET("v1/cities/{shortCode}")
+	public Call<CityInfoMsg> getCityByShortCode(@Path(value = "shortCode") String shortCode);
+	
+	@GET("v1/cities/node/{nodeId}")
+	public Call<CityInfoMsg> getCityByNodeId(@Path(value = "nodeId") Long id);
+	
+	@GET("v1/cities")
+	public Call<List<CityInfoMsg>> findCityByNameOrShortCode(
+			@Query(value = "parent_code") String parentCode,
+			@Query(value = "term") String term,
+			@Query(value = "start") Integer start,
+			@Query(value = "length") Integer length,
+			@Query(value = "sort_direction") String sortDirection,
+			@Query(value = "sort_criterion") String sortCriterion);
+	
+	@GET("v1/states")
+	public Call<List<StateInfoMsg>> findStateByNameOrShortCode(
+			@Query(value = "parent_code") String parentCode,
+			@Query(value = "term") String term,
+			@Query(value = "start") Integer start,
+			@Query(value = "length") Integer length,
+			@Query(value = "sort_direction") String sortDirection,
+			@Query(value = "sort_criterion") String sortCriterion);
+	
+	@GET("v1/countries")
+	public Call<List<CountryInfoMsg>> findCountryByNameOrShortCode(
+			@Query(value = "term") String term,
+			@Query(value = "start") Integer start,
+			@Query(value = "length") Integer length,
+			@Query(value = "sort_direction") String sortDirection,
+			@Query(value = "sort_criterion") String sortCriterion);
+
+	@GET("v1/nodes")
+	public Call<List<NodeMsg>> findNodesBy(
+			@Query(value = "term") String term,
+			@Query(value = "freight_types") FreightNodeType[] freightTypes,
+			@Query(value = "active") Boolean active,
+			@Query(value = "city_short_code") String cityShortCode,
+			@Query(value = "page") int page,
+			@Query(value = "size") int size,
+			@Query(value = "sort_direction") String sortDirection,
+			@Query(value = "sort_criterion") String sortCriterion);
+	
+	@GET("v1/nodes/{id}")
+	public Call<NodeMsg> getNode(
+			@Path(value = "id") Long id);
+	
+	@GET("v1/initLogin/nodes/{id}")
+	public Call<NodeMsg> getNodeForInit(
+			@Path(value = "id") Long id);
+
+	@GET("v1/nodes/code/{code}")
+	public Call<NodeMsg> getNodeByCode(
+			@Path(value = "code") String code);
+
+	@GET("v1/nodes/collection/{cityShortCode}/to/{nodeId}")
+	public Call<List<NodeMsg>> findCollectionNodesByCity(
+			@Path(value = "cityShortCode") String cityShortCode, 
+			@Path(value = "nodeId") Long toNodeId, 
+			@Query(value = "term") String term);
+
+	@GET("v1/nodes/distribution/{cityShortCode}/from/{nodeId}")
+	public Call<List<NodeMsg>> findDistributionNodesByCity(
+			@Path(value = "cityShortCode") String cityShortCode, 
+			@Path(value = "nodeId") Long fromNodeId, 
+			@Query(value = "term") String term);
+
+	@GET("v1/nodes/hub/{cityShortCode}")
+	public Call<List<NodeMsg>> findHubNodesByCity(
+			@Path(value = "cityShortCode") String cityShortCode);
+
+	@GET("v1/carriers")
+	public Call<List<CarrierMsg>> findCarriers(
+			@Query(value = "term") String term,
+			@Query(value = "start") Integer start,
+			@Query(value = "length") Integer length,
+			@Query(value = "sort_direction") String sortDirection,
+			@Query(value = "sort_criterion") String sortCriterion);
+	
+	@GET("v1/carriers/{code}")
+	public Call<CarrierMsg> getCarrierByCode(
+			@Path(value = "code") String code);
+	
+	@GET("v1/currencies")
+	public Call<List<CurrencyMsg>> findCurrencies(
+			@Query(value = "term") String term,
+			@Query(value = "start") Integer start,
+			@Query(value = "length") Integer length,
+			@Query(value = "sort_direction") String sortDirection,
+			@Query(value = "sort_criterion") String sortCriterion);
+
+	@GET("v1/currencies/{code}")
+	public Call<CurrencyMsg> getCurrencyByCode(
+			@Path(value = "code") String code);
+	
+	@GET("v1/nodes/all")
+	public Call<List<NodeMsg>> getAllNodes();
+}

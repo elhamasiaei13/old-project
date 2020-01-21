@@ -1,0 +1,246 @@
+package com.parvanpajooh.sample.model;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.ecourier.model.BaseModel;
+import com.parvanpajooh.sample.model.vo.SampleVO;
+
+/**
+ * @author ali
+ *
+ */
+@Entity
+@XmlRootElement
+@Table(name="sample_tbl")
+public class Sample extends BaseModel{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4036378126742804100L;
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long ID;
+	
+	@NotNull
+	@NotEmpty
+	private String TITLE;
+	
+	@NotNull
+	@NotEmpty
+	private String TITLE_EN;
+	
+	@NotNull
+	@NotEmpty
+	private String USER_NAME;
+	
+	@NotNull
+	@NotEmpty
+	private String PASSWORD;
+	
+	@NotNull
+	@NotEmpty
+	private String FIRST_NAME;
+	
+	@NotNull
+	@NotEmpty
+	private String LAST_NAME;
+	
+	@NotNull
+	@NotEmpty
+	private boolean active;
+
+	
+	
+//	@ManyToOne
+//	@JoinColumn(name = "parentId", referencedColumnName = "id")
+//	private Sample parent;
+//
+//	@OneToMany(fetch = FetchType.LAZY, mappedBy = "parent")
+//	private Set<Sample> children;
+//	
+//	@Version
+//    private Integer version;
+	
+	@Override
+	public SampleVO toVOLite() {
+		SampleVO vo = new SampleVO();
+		
+		vo.setId(this.ID);
+		vo.setTitle(this.TITLE);
+		vo.setTITLE_EN(this.TITLE_EN);
+		vo.setUSER_NAME(this.USER_NAME);
+		vo.setPASSWORD(this.PASSWORD);
+		vo.setFIRST_NAME(this.FIRST_NAME);
+		vo.setLAST_NAME(this.LAST_NAME);
+		vo.setActive(this.active);
+		
+
+		
+//		if( Validator.isNotNull( this.parent ) ) {
+//			
+//			SampleVO sampleVO = this.parent.toVOLite();
+//			vo.setParent(sampleVO);
+//		}
+
+		setAuditToVO(vo);
+		
+		return vo;
+	}
+	
+	@Override
+	public SampleVO toVO () {
+		
+		SampleVO sampleVO = (SampleVO) toVOLite();
+		
+//		if( Validator.isNotNull( this.children ) ) {
+//			
+//			List<SampleVO> list = new ArrayList<SampleVO>();
+//			
+//			for (Sample sample : this.children) {
+//				list.add(sample.toVOLite());
+//			}
+//			sampleVO.setChildren(list);
+//		}
+
+		return sampleVO;
+	}
+
+	@Override
+	public void fromVO(BaseVO baseVO) {
+		
+		SampleVO vo = (SampleVO) baseVO;
+		
+		this.ID = vo.getId();
+		this.TITLE = vo.getTitle();
+		this.TITLE_EN = vo.getTITLE_EN();
+		this.USER_NAME = vo.getUSER_NAME();
+		this.PASSWORD = vo.getPASSWORD();
+		this.FIRST_NAME = vo.getFIRST_NAME();
+		this.LAST_NAME = vo.getLAST_NAME();
+		this.active = vo.isActive();
+		getAuditFromVO(vo);
+	}
+	
+	
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+	
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+	
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return ID;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.ID = id;
+	}
+
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return TITLE;
+	}
+
+	/**
+	 * @param title the title to set
+	 */
+	public void setTitle(String title) {
+		this.TITLE = title;
+	}
+	
+	/**
+	 * @return the titleEn
+	 */
+	public String getTitleEn() {
+		return getTitleEn();
+	}
+
+	/**
+	 * @param titleEn the titleEn to set
+	 */
+	public void setTitleEn(String titleEn) {
+		this.TITLE_EN = titleEn;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Sample [id=" + ID + ", title=" + TITLE + ", username=" + USER_NAME
+				+ ", password=" + PASSWORD + ", firstName=" + FIRST_NAME + ", lastName="
+				+ LAST_NAME +", active="
+						+ active + "+"]";
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Sample)) {
+            return false;
+        }
+
+        final Sample obj = (Sample) o;
+
+        return new EqualsBuilder()
+    			.append(this.ID, obj.getId())
+    			.isEquals();
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(-970989579, 1884842917)
+			.append(this.ID)
+			.toHashCode();
+	}
+
+}

@@ -1,0 +1,228 @@
+package com.parvanpajooh.issuemanager.mvc;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring4.ajax.DatatablesParams;
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.enums.SortDirectionEnum;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.issuemanager.model.Group;
+import com.parvanpajooh.issuemanager.model.Task;
+import com.parvanpajooh.issuemanager.model.TaskAssignment;
+import com.parvanpajooh.issuemanager.model.criteria.TaskCriteria;
+import com.parvanpajooh.issuemanager.model.vo.CommentVO;
+import com.parvanpajooh.issuemanager.model.vo.GroupVO;
+import com.parvanpajooh.issuemanager.model.vo.TaskVO;
+import com.parvanpajooh.issuemanager.model.vo.TypeVO;
+import com.parvanpajooh.issuemanager.service.CommentService;
+import com.parvanpajooh.issuemanager.service.GroupService;
+import com.parvanpajooh.issuemanager.service.MemberService;
+import com.parvanpajooh.issuemanager.service.TaskAssignmentService;
+import com.parvanpajooh.issuemanager.service.TaskService;
+import com.parvanpajooh.issuemanager.service.TypeService;
+
+@Controller
+@RequestMapping("/")
+public class TaskController extends BaseController {
+
+	@EJB(mappedName = "java:global/issuemanager-ear/issuemanager-ejb/TaskServiceImpl")
+	private TaskService taskService;
+
+	@EJB(mappedName = "java:global/issuemanager-ear/issuemanager-ejb/TaskAssignmentServiceImpl")
+	private TaskAssignmentService taskAssignmentService;
+
+	@EJB(mappedName = "java:global/issuemanager-ear/issuemanager-ejb/TypeServiceImpl")
+	private TypeService typeService;
+
+	@EJB(mappedName = "java:global/issuemanager-ear/issuemanager-ejb/MemberServiceImpl")
+	private MemberService memberService;
+
+	@EJB(mappedName = "java:global/issuemanager-ear/issuemanager-ejb/CommentServiceImpl")
+	private CommentService commentService;
+
+	@EJB(mappedName = "java:global/issuemanager-ear/issuemanager-ejb/GroupServiceImpl")
+	private GroupService groupService;
+
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(format, true));
+		binder.registerCustomEditor(Timestamp.class, new CustomDateEditor(format, true));
+	}
+
+	@RequestMapping(value = "/login", method = RequestMethod.GET)
+	public String home(HttpServletRequest request, Model model) {
+
+		return "login";
+	}
+
+	@RequestMapping(value = "/showTasks", method = RequestMethod.GET)
+	public String showTasks(Model model) throws ParvanServiceException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+
+
+		return "showTasks";
+	}
+
+	@RequestMapping(value = "/taskDetails/{id}", method = RequestMethod.GET)
+	public String taskDetails(@PathVariable Long id, Model model) throws ParvanServiceException {
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+
+		model.addAttribute("task", taskService.loadTask(userInfo, id));
+		model.addAttribute("taskAssignment", new TaskAssignment());
+//		model.addAttribute("status", typeService.findByTitle("taskStatus"));
+//		model.addAttribute("status", typeService.findByTitle("taskStatus"));
+		model.addAttribute("members", memberService.findAll(userInfo));
+		
+		List<CommentVO> commentVOList = commentService.loadCommentByTaskId(userInfo, id);
+		model.addAttribute("comments", commentVOList);
+
+		return "taskDetails";
+	}
+	
+
+	@RequestMapping(value = "/comment/{id}", method = RequestMethod.GET)
+	public String showComments(@PathVariable Long id, Model model) throws ParvanServiceException {
+
+		model.addAttribute("tasksId",id);
+		model.addAttribute("commentVO", new CommentVO());
+		return "comments";
+	}
+
+	@RequestMapping(value = "/comment/save", method = { RequestMethod.POST, RequestMethod.GET })
+	public String saveComment(final HttpServletRequest request, Model model,CommentVO commentVO) throws ParvanServiceException, ParvanDaoException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+		Long taskId = Long.parseLong(request.getParameter("tasksId"));
+		TaskVO taskVO =new TaskVO();
+		taskVO.setId(taskId);
+		commentVO.setTaskId(taskVO);
+		commentService.save(userInfo, commentVO);
+		return "redirect:/taskDetails/"+taskId;
+	}
+	
+
+
+	@RequestMapping(value = "/addTask", method = RequestMethod.GET)
+	public String showAddTaskPage(Model model) throws ParvanServiceException {
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+
+		List<GroupVO> groupVOs = groupService.loadGroups(userInfo);
+		model.addAttribute("task", new Task());
+		model.addAttribute("groups", groupVOs);
+		return "addTask";
+	}
+
+	@RequestMapping(value = "/addTask/save", method = { RequestMethod.POST, RequestMethod.GET })
+	public String addTask(TaskVO taskVO, Model model, final HttpServletRequest request) throws ParvanServiceException, ParvanDaoException {
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);			
+			taskService.save(userInfo, taskVO);
+
+		} catch (ParvanServiceException e) {
+			UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+			List<GroupVO> groupVOs = groupService.loadGroups(userInfo);
+			proccessException(e, result);
+			model.addAttribute("result", result);
+			model.addAttribute("task", new Task());
+			model.addAttribute("groups", groupVOs);
+
+			return "addTask";
+		}
+
+		return "redirect:/showTasks?success=true";
+	}
+
+	@RequestMapping(value = "/editTask/{id}", method = RequestMethod.GET)
+	public String showEditPage(@PathVariable Long id, final HttpServletRequest req, Model model) throws ParvanServiceException, ParvanDaoException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+		List<GroupVO> groupVOs = groupService.loadGroups(userInfo);
+		model.addAttribute("groups", groupVOs);
+		TaskVO task = taskService.loadTask(userInfo, id);
+		model.addAttribute("task", task);
+		return "editTask";
+	}
+
+	@RequestMapping(value = "/editTask/save", method = { RequestMethod.POST, RequestMethod.GET })
+	public String editTask(TaskVO taskVO, Model model) throws ParvanServiceException, ParvanDaoException {
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);		
+		taskService.editTask(userInfo, taskVO);
+		return "redirect:/showTasks";
+	}
+
+	@RequestMapping(value = "/removeTask", method = RequestMethod.GET)
+	public String removeTask(final HttpServletRequest req) throws ParvanServiceException, ParvanDaoException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+		Long rowId = Long.valueOf(req.getParameter("taskId"));
+		taskService.delete(userInfo, rowId);
+		return "redirect:/showTasks";
+	}
+
+	@RequestMapping(value = "/paging", method = RequestMethod.GET)
+	public @ResponseBody
+	DatatablesResponse<BaseVO> findAll(@DatatablesParams DatatablesCriterias criterias, TaskCriteria taskCriteria, HttpServletRequest request) {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName", "lastName", "ip", "context", 1L, null, null, null, null, true, false);
+		int firstResult = criterias.getDisplayStart();
+		int maxResults = criterias.getDisplaySize();
+		ColumnDef columnDef = criterias.getSortingColumnDefs().get(0);
+		
+		taskCriteria.setSubject(criterias.getSearch());
+		
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = columnDef.getName();
+
+		if ("0".equals(sortCriterion)) {
+			sortCriterion = "indexInParent";
+		}
+
+		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+			sortDirection = SortDirectionEnum.Ascending;
+		}
+
+		DataSet<BaseVO> dataSet;
+		try {
+			
+			taskCriteria.setTenantId(null);
+
+			List<BaseVO> rows = taskService.findByCriteria(userInfo, taskCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+			long totalRecords = taskService.countByCriteria(userInfo, taskCriteria);
+			dataSet = new DataSet<BaseVO>(rows, (long) rows.size(), totalRecords);
+		} catch (Exception e) {
+			log.error("error occured in menu paging...", e);
+			dataSet = new DataSet<BaseVO>(new ArrayList<BaseVO>(), 0l, 0l);
+		}
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+}

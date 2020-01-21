@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout" ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+    <title>Agent Detail</title>
+
+    <style>
+        .select-device-modal label {
+            margin-bottom: 0px;
+        }
+        
+        .select-device-modal input {
+            width: auto;
+            height: 28px;
+        }
+        
+        .select-device-modal .form-control {
+            width: auto;
+        }
+        
+        .select-device-modal table.dataTable td {
+            padding: 1px 10px;
+        }
+        
+        .select-device-modal .dataTables_filter label {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body th:with="rightMenu='admin', subRightMenu='roles'">
+    <section layout:fragment="top-header" class="fixed-header">
+        <div class="ui-header-image pull-left">
+            <img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/identitymanagement2-web/resources/images/contacts.png" th:src="@{/resources/images/contacts.png}" style="width: 48px; height: 48px;" />
+        </div>
+        <div class="ui-header-title">
+            <div class="split-left">
+                <h3>
+                    <small>Agent</small>
+                </h3>
+                <h3>Detail</h3>
+            </div>        
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <!-- BODY -->
+    <section class="content" layout:fragment="content">
+        <form class="form-horizontal" id="deleteEmployeesForm" method="post">
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="box box-primary">
+                        <div class="box-body box-profile">
+                            <div class="callout callout-danger hide">
+                            </div>
+                            <a href="#" class="pop">
+                                <img style="width: 180px; height: 60px;" th:src="@{/resources/images/female.png}" class="profile-user-img img-responsive img-rectangle" />
+                            </a>
+                            <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-body">
+                                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                            <img src="" class="imagepreview" style="width: 100%;" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <h4 class="profile-username text-center">
+						<span>Test Middle Test</span>
+						</h4>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="box box-primary">
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <strong><i class="fa fa-map-marker margin-r-5"></i>Location</strong>
+                                    <p class="text-muted">
+                                        <span  th:if="${generalAgentVO != null}" th:text="${generalAgentVO.address}"></span>
+                                    </p>
+<hr/>
+
+                                </div>
+                                
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong><i class="fa fa-phone margin-r-5"></i>Phone</strong>
+                                    <p class="text-muted">
+                                        <span  th:if="${generalAgentVO != null}" th:text="${generalAgentVO.tel}"></span>
+                                    </p>
+                                    <strong><i class="fa fa-at margin-r-5"></i>Email</strong>
+                                    <p class="text-muted">
+                                        <span th:if="${generalAgentVO != email}" th:text="${generalAgentVO.email}">email@test.com</span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong><i class="fa fa-tag margin-r-5" th:text="#{generalAgent.nodeCode}"></i></strong>
+                                    <p class="text-muted">
+                                        <span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.nodeCode}"></span>
+                                    </p>
+                                    <strong><i class="fa fa-tag margin-r-5"></i>IATA Code</strong>
+                                    <p class="text-muted">
+                                        <span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.iataCode}"></span>
+                                    </p>
+
+                                    <strong><i class="fa fa-file-text-o margin-r-5" th:text="#{generalAgent.remarks}"></i></strong>
+                                    <p  class="text-muted" ></p>
+                                    <span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.remarks}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            
+
+            <div class="box">
+                <div class="box-body table-responsive">
+			 		  	<div class="box-header">				            
+					            <h2 class="page-header">
+									<i class="fa fa-arrow-circle-o-right" th:text="#{generalAgent.employees.list}">Employee List</i>
+									 <a data-toggle="modal" th:href="@{'/generalAgent/addEmployees/'+${generalAgentId}}" class="btn btn-xs btn-success pull-right">
+					                    <i class="fa fa-plus">&nbsp;&nbsp;</i><span th:text="#{generalAgent.employees.create}">افزودن کارمندان جدید</span>
+					                </a>
+								</h2>
+
+
+			            </div>
+                        <form class="form-horizontal" role="form" id="frmEmployeeSearch" onsubmit="doSearch(); return false;" action="/agentmanagement-web/">
+                            <div class="callout callout-danger hide">
+                                <h4></h4></div>
+                            <div class="row">
+                                <label class="col-sm-2 control-label" for="canonicalSearchNameFilter" th:text="#{employee.canonicalSearchName}">نام کامل یا شناسه کاربری</label>
+                                <div class="col-sm-3">
+                                    <div class="input-group">
+                                        <input class="form-control" id="canonicalSearchNameFilter" name="canonicalSearchName" type="text" placeholder="Search for..." />
+                                        <span class="input-group-btn">
+                                    <a  class="btn btn-default" onclick="doSearch()"><i class="fa fa-search" /></a>
+                                    <a  class="btn btn-default" onclick="resetSearch();"><i class="fa fa-refresh" /></a>
+                                    </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr/>
+                        </form>
+
+                    <input type="hidden" name="id" th:value="${generalAgentId}" id="id" />
+                    <div class="box-body table-responsive">
+                        <dy:table entity="Employee" table="list" customSearch="true" customObjectActions="true" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="deleteEmployeeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            <h4 class="modal-title" th:text="#{employee.delete}">حذف</h4>
+                        </div>
+                        <div class="modal-body">
+                            <dy:form entity="Employee" form="delete" type="delete" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" id="deleteEmployeeBtn" th:text="#{button.delete}">Delete</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </section>
+
+    <th:block layout:fragment="javascripts">
+
+        <script th:inline="javascript">
+            var titleDelete = '<span class="label label-info"  th:remove="tag">Delete !</span>';
+
+            /*<![CDATA[*/
+
+            $(function() {
+                $('.pop').on('click', function() {
+                    $('.imagepreview').attr('src', $(this).find('img').attr('src'));
+                    $('#imagemodal').modal('show');
+                });
+            });
+
+            function resetSearch() {
+                $('#frmEmployeeSearch').trigger('reset');
+                $('#canonicalSearchNameFilter').val('');
+                doSearch();
+            }
+
+            function rowActions(data, type, full) {
+
+                var d = '<div style="width: 30px;">';
+                d += '<a class="btn btn-xs btn-danger" title="' + titleDelete + '" onclick="deleteEmployee(' + full.id + ')" href="javascript:;"><i class="fa fa-times"></i></a> ';
+                d += '</div>';
+                return d;
+            }
+
+            function getEmployeeExtraParams(aoData) {
+
+                return {
+                    "data": function(data) {
+                        customPush(data, 'id', $('#id').val());
+                        customPush(data, 'canonicalSearchName', $('#canonicalSearchNameFilter').val());
+                    }
+                };
+            }
+            jQuery(document).ready(function() {
+
+                $('#viewEmployeeBtn').click(function() {
+                    var $btn = $(this);
+                    $('#viewEmployeeForm').find('.callout').text('').addClass('hide');
+                    var id = $('#addEmployeesForm').find('input[name=id]').val()
+
+                    $.post('/agentmanagement-web/generalAgent/saveEmployees/' + id, $('#viewEmployeeForm').serialize() + getSelectedChbox(this.form)).done(function(data) {
+                        if (data.status == 'success') {
+                            try {
+                                createEmployeeAfterSaveSuccess()
+                            } catch (error) {}
+                            showTopleftGrowl('success', 'Create', 'Create Successful');
+                            window.open("/agentmanagement-web/generalAgent", "_self");
+
+
+                        } else if (data.status == 'ValidationException') {
+                            $('#deleteEmployeesForm').find('.callout').text(data.invalidField + ' invalid-value').removeClass('hide');
+                        } else if (data.status == 'ErrorCode') {
+                            $('#deleteEmployeesForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+                        } else {
+                            console.debug(data.status);
+                            $('#viewEmployeeForm').find('.callout').text((data.message ? data.message : '??save.failed_fa_IR??')).removeClass('hide');
+                        }
+                        $btn.attr('disabled', false);
+                    }).fail(function(jqXHR, textStatus, errorThrown) {
+                        failAjax(jqXHR, textStatus, errorThrown, 'viewEmployeeBtn')
+                    });
+                    return false;
+
+                });
+            });
+
+
+            /*]]>*/
+        </script>
+    </th:block>
+</body>
+
+</html>

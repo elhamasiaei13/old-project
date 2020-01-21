@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+<head>
+<title>Agent Detail</title>
+<style>
+.select-device-modal label {
+	margin-bottom: 0px;
+}
+
+.select-device-modal input {
+	width: auto;
+	height: 28px;
+}
+
+.select-device-modal .form-control {
+	width: auto;
+}
+
+.select-device-modal table.dataTable td {
+	padding: 1px 10px;
+}
+
+.select-device-modal .dataTables_filter label {
+	margin-bottom: 5px;
+}
+.breadcrumb {
+	padding: 5px 5px;
+	margin-bottom: 0px;
+}
+</style>
+</head>
+<body th:with="rightMenu='admin', subRightMenu='roles'">
+	<section layout:fragment="top-header" class="fixed-header">
+		<div class="ui-header-image pull-left">
+			<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/agentmanagement-web/resources/images/contacts.png" th:src="@{/resources/images/contacts.png}"
+				style="width: 48px; height: 48px;" />
+		</div>
+		<div class="ui-header-title">
+			<div class="split-left">
+				<small>
+					<ol class="breadcrumb">
+						<li>
+							<a href="/agentmanagement-web" th:text="#{breadcrumb.home}">Home</a>
+						</li>
+						<li>
+							<a href="/agentmanagement-web/generalAgent">View Agents</a>
+						</li>
+						<li class="active">Agent Detail</li>
+					</ol>
+				</small>
+				<h3 th:if="${generalAgentVO != null}" th:text="${generalAgentVO.name}"></h3>
+			</div>
+			<div class="split-right">
+				<a type="button" class="btn btn-primary btn-circle" th:onclick="'modifyGeneralAgent(' + ${generalAgentId} + ')'" href="javascript:;">
+					<i class="fa fa-pencil" />
+				</a>
+				<a type="button" class="btn btn-danger btn-circle" th:onclick="'deleteGeneralAgent(' + ${generalAgentId} + ')'" href="javascript:;">
+					<i class="fa fa-times" />
+				</a>
+				<a type="button" class="btn btn-success btn-circle" th:href="@{'/generalAgent/'+${generalAgentId}+'/employees/add'}">
+					<i class="fa fa-user-plus" />
+				</a>
+			</div>
+		</div>
+	</section>
+	<!-- Main content -->
+	<!-- BODY -->
+	<section class="content" layout:fragment="content">
+		<div class="box box-default">
+			<div class="box-body">
+				<div class="row">
+					<div class="col-md-2">
+						<div class="thumbnail">
+							<a href="#" class="pop">
+								<img th:src="@{'/generalAgent/' +${generalAgentId} +'/logo/show'}" class="profile-user-img img-responsive img-rectangle" style="width: 225px; height: 75px;" />
+							</a>
+							<div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+								<div class="modal-dialog">
+									<div class="modal-content">
+										<div class="modal-body">
+											<button type="button" class="close" data-dismiss="modal">
+												<span aria-hidden="true">&times;</span>
+												<span class="sr-only">Close</span>
+											</button>
+											<img src="" class="imagepreview" />
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="caption">
+								<h4 class="profile-username text-center">
+									<span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.name}"></span>
+								</h4>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-10">
+						<div class="row">
+							<div class="col-md-12">
+								<p class="text-muted">
+									<strong>
+										<i class="fa fa-map-marker margin-r-5"></i>
+										<i th:text="#{generalAgent.address}"></i>
+										<i>:</i>
+									</strong>
+									<span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.address}"></span>
+								</p>
+								<hr />
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6">
+								<p class="text-muted">
+									<strong>
+										<i class="fa fa-phone margin-r-5"></i>
+										&nbsp;
+										<i th:text="#{generalAgent.tel}"></i>
+										<i>:</i>
+									</strong>
+
+									<span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.tel}"></span>
+								</p>
+								<p class="text-muted">
+									<strong>
+										<i class="fa fa-envelope margin-r-5"></i>
+										&nbsp;
+										<i th:text="#{generalAgent.email}"></i>
+										<i>:</i>
+									</strong>
+									<span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.email}"></span>
+								</p>
+								<p class="text-muted">
+									<strong>
+										<i class="fa fa-file-text-o"></i>
+										&nbsp;
+										<i th:text="#{generalAgent.accountNumber}"></i>
+										<i>:</i>
+									</strong>
+
+									<span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.currentAccountNumber}"></span>
+								</p>
+								<p class="text-muted">
+									<strong>
+										<i class="fa fa-external-link"></i>
+										&nbsp;
+										<i th:text="#{generalAgent.branch}"></i>
+										<i>:</i>
+									</strong>
+
+									<span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.branch}"></span>
+								</p>
+								<p class="text-muted">
+									<strong>
+										<i class="fa fa-question-circle"></i>
+										&nbsp;
+										<i th:text="#{active}"></i>
+										<i>:</i>
+									</strong>
+
+									<span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.active}"></span>
+								</p>
+							</div>
+							<div class="col-md-6">
+								<p class="text-muted">
+									<strong>
+										<i class="fa fa-user"></i>
+										&nbsp;
+										<i th:text="#{generalAgent.parent}"></i>
+										<i>:</i>
+									</strong>
+
+									<span th:if=" ${generalAgentVO !=null} and ${generalAgentVO.parent != null}" th:text="${generalAgentVO.parent.name}">&nbsp;</span>
+								</p>
+								<p class="text-muted">
+									<strong>
+										<i class="fa fa-tag margin-r-5"></i>
+										&nbsp;
+										<i th:text="#{generalAgent.nodeCode}"></i>
+										<i>:</i>
+									</strong>
+									<span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.nodeCode}"></span>
+								</p>
+								<p class="text-muted">
+									<strong>
+										<i class="fa fa-tag margin-r-5"></i>
+										&nbsp;
+										<i th:text="#{generalAgent.iataCode}"></i>
+										<i>:</i>
+									</strong>
+									<span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.iataCode}"></span>
+								</p>
+								<p class="text-muted">
+									<strong>
+										<i class="fa fa-file-text-o margin-r-5"></i>
+										&nbsp;
+										<i th:text="#{generalAgent.remarks}"></i>
+										<i>:</i>
+									</strong>
+									<span th:if="${generalAgentVO != null}" th:text="${generalAgentVO.remarks}"></span>
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12 table-responsive">
+				<!--  tabs -->
+				<div id="content" class="nav-tabs-custom">
+					<ul class="nav nav-tabs" id="generalAgentTabs" role="tablist">
+						<li class="active" role="presentation">
+							<a aria-expanded="true" aria-controls="employees" data-toggle="tab" role="tab" id="employees-tab" href="#employees" th:text="#{generalAgent.employees}">لیست کارمندان</a>
+						</li>
+						<li role="presentation">
+							<a aria-expanded="true" aria-controls="accounts" data-toggle="tab" role="tab" id="accounts-tab" href="#accounts" th:text="#{generalAgent.accounts}">لیست حساب‌ها</a>
+						</li>
+					</ul>
+					<div id="my-tab-content" class="tab-content">
+						<input type="hidden" name="agentId" th:value="${generalAgentId}" id="agentIdFilter" />
+						<div class="tab-pane active" id="employees" aria-labelledby="employees-tab" role="tabpanel">
+							<div class="row">
+								<div class="col-sm-3 col-sm-offset-9">
+									<div class="input-group">
+										<input class="form-control" id="canonicalSearchNameFilter" name="canonicalSearchName" type="text" th:placeholder="#{employee.canonicalSearchName}" />
+										<span class="input-group-btn">
+											<a class="btn btn-default" onclick="doSearch()">
+												<i class="fa fa-search" />
+											</a>
+											<a class="btn btn-default" onclick="resetSearch();">
+												<i class="fa fa-refresh" />
+											</a>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="box-body table-responsive">
+								<dy:table entity="Employee" table="list" customSearch="true" />
+							</div>
+						</div>
+						<div class="tab-pane" id="accounts" aria-labelledby="accounts-tab" role="tabpanel">
+							<div class="row">
+								<div class="col-sm-3 col-sm-offset-9">
+									<div class="input-group">
+										<input class="form-control" id="accountNumberFilter" name="accountNumber" type="text" th:placeholder="#{accountNumber.accountNumber}" />
+										<span class="input-group-btn">
+											<a class="btn btn-default" onclick="doSearch()">
+												<i class="fa fa-search" />
+											</a>
+											<a class="btn btn-default" onclick="resetSearch();">
+												<i class="fa fa-refresh" />
+											</a>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="box-body table-responsive">
+								<dy:table entity="AccountNumber" table="list" customSearch="false" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade" id="deleteEmployeeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h4 class="modal-title" th:text="#{employee.delete}">حذف اطلاعات کارمند</h4>
+					</div>
+					<div class="modal-body">
+						<dy:form entity="Employee" form="delete" type="delete" />
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" id="deleteEmployeeBtn" th:text="#{button.delete}">Delete</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade" id="modifyEmployeeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h4 class="modal-title" th:text="#{employee.modify}">ویرایش اطلاعات کارمند</h4>
+					</div>
+					<div class="modal-body">
+						<dy:form entity="Employee" form="modify" type="modify" />
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" id="modifyEmployeeBtn" th:text="#{button.save}">Save</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="modifyGeneralAgentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h4 class="modal-title" th:text="#{generalAgent.modify}">ویرایش اطلاعات نمایندگی</h4>
+					</div>
+					<div class="modal-body">
+						<dy:form entity="GeneralAgent" form="modify" type="modify" />
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" id="modifyGeneralAgentBtn" th:text="#{button.save}">Save</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="deleteGeneralAgentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h4 class="modal-title" th:text="#{generalAgent.delete}">حذف اطلاعات نمایندگی</h4>
+					</div>
+					<div class="modal-body">
+						<dy:form entity="GeneralAgent" form="delete" type="delete" />
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" id="deleteGeneralAgentBtn" th:text="#{button.delete}">Delete</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</section>
+	<th:block layout:fragment="javascripts">
+		<script th:inline="javascript">
+            var titleModify = '<span class="label label-info" th:text="#{employee.modify}" th:remove="tag"></span>';
+            var titleDelete = '<span class="label label-info" th:text="#{employee.delete}" th:remove="tag"></span>';
+
+            /*<![CDATA[*/
+
+            $(function() {
+                $('.pop').on('click', function() {
+                    $('.imagepreview').attr('src', $(this).find('img').attr('src'));
+                    $('#imagemodal').modal('show');
+                });
+            });
+
+            function resetSearch() {
+                $('#frmEmployeeSearch').trigger('reset');
+                $('#canonicalSearchNameFilter').val('');
+                doSearch();
+            }
+
+
+            function employeeRowActions(data, type, full) {
+
+                var d = '<div style="width: 50px;">';
+                d += '<a class="btn btn-xs btn-primary" title="' + titleModify + '" href="javascript:;" onclick="modifyEmployee(' + full.id + ')"><i class="fa fa-pencil"></i></a> ';
+                d += '<a class="btn btn-xs btn-danger" title="' + titleDelete + '" href="javascript:;" onclick="deleteEmployee(' + full.id + ')" ><i class="fa fa-times"></i></a> ';
+                d += '</div>';
+                return d;
+            }
+
+            function getEmployeeExtraParams(aoData) {
+
+                return {
+                    "data": function(data) {                        
+                        customPush(data, 'canonicalSearchName', $('#canonicalSearchNameFilter').val());
+                        customPush(data, 'agentId', $('#agentIdFilter').val());
+                    }
+                };
+            }
+
+            function getAccountNumberExtraParams(aoData) {
+
+                return {
+                    "data": function(data) {
+                        customPush(data, 'accountNumber', $('#accountNumberFilter').val());
+                        customPush(data, 'agentId', $('#agentIdFilter').val());
+                    }
+                };
+            }
+
+	    	function geoEntityFormat(aaData) {
+	    		var res = '<strong>'+ aaData.nameFa +'</strong>';
+	    		var resAdditional = '';
+	    		if(aaData.provinceNameFa){
+	    			resAdditional = aaData.provinceNameFa + ' , ';
+	    			
+	    			if(aaData.countryNameFa){
+	    				resAdditional = aaData.countryNameFa + ' , ' + resAdditional;
+	    			}
+	    			
+	    			res = '<span style="color: #999;">' + resAdditional + '</span>' + res;
+	    		}
+	    		return res; 
+	    	}
+
+            /*]]>*/
+        </script>
+	</th:block>
+</body>
+</html>

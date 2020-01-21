@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="layout">
+
+<head>
+    <title>ShowVouchers</title>
+</head>
+
+<body>
+    <section class="content" layout:fragment="content">
+
+        <div class="row" dir="rtl">
+            <div class="col-lg-12">
+                <h3 class="page-header">فهرست سندها</h3>
+            </div>
+        </div>
+        <div class="row" dir="rtl">
+            <div class="row">
+                <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">جستجو</div>
+                    <div class="panel-body">
+                        <form id="searchForm">
+                            <div class="form-group">
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label style="float: right; margin-right: 5px;" class="control-label">تاریخ صدور </label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control datepicker" id="issueDateFrom" />
+                                    </div>
+                                    <div class="col-md-0">
+                                        <label style="float: right; margin-right: 5px;"> تا </label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control datepicker" id="issueDateTo" />
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label style="float: right; margin-right: 5px;" class="control-label">تاریخ ایجاد </label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control datepicker" id="creatDateFrom" />
+                                    </div>
+                                    <div class="col-md-0">
+                                        <label style="float: right; margin-right: 5px;"> تا </label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control datepicker" id="creatDateTo" />
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label style="float: right; margin-right: 5px;" class="control-label">تاریخ به‌روزرسانی </label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control datepicker" id="updateDateFrom" />
+                                    </div>
+                                    <div class="col-md-0">
+                                        <label style="float: right; margin-right: 5px;"> تا </label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control datepicker" id="updateDateTo" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="btn-group btn-group-justified" role="group">
+                        <div class="btn-group" role="group">
+                            <button id="submit" class="btn btn-default" type="submit" onclick="doSearch()">جستجو</button>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button id="submit" class="btn btn-default" type="submit" onclick="clearForm()">از نو</button>
+                        </div>
+                    </div>
+                </div>
+
+<div class="row">
+                <div class="col-lg-12" style="margin: 50px">
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                <table id="AccountTable" class="table table-hover table-bordered table-condensed drop-shadow" dt:serverside="true" dt:url="@{/voucher/paging}" dt:table="true" dt:proccessing="true" dt:filter="false" dt:theme="bootstrap2" dt:paginationtype="bootstrap_full_numbers" dt:serverparams="'getExtraParams'">
+
+
+                    <thead>
+
+                        <tr>
+                            <th dt:property="id" th:text="#{table_column_id}" dt:sortable="false" dt:colspan="0"></th>
+                            <th dt:renderFunction="'actionRenderer1'" dt:sortable="false" dt:colspan="0"></th>
+                            <th dt:property="id" th:text="#{table_column_id2}"></th>
+                            <th dt:property="referenceId">شناسه مرجع</th>
+                            <th dt:property="fiscalYear.code">سال مالی</th>
+                            <th dt:property="issueDate">تاریخ صدور</th>
+                            <th dt:property="createDate" th:text="#{table_column_createdate}"></th>
+                            <th dt:property="updateDate" th:text="#{table_column_updatedate}"></th>
+                        </tr>
+                    </thead>
+
+                    <tbody dt:cbk:draw="'myCustomDrawCallback'" dt:cbk:footer="'footerCallback'">
+                    </tbody>
+
+                </table>
+                </div>
+                </div>
+
+
+            </div>
+        </div>
+        </div>
+        
+
+        <form th:action="@{/voucher/delete}" method="post" id="deleteTaskForm">
+            <input name="voucherId" type="hidden" id="deleteTaskId" />
+        </form>
+
+
+        <script>
+            //<![CDATA[
+
+            function clearForm() {
+                document.getElementById("searchForm").reset();
+            }
+
+
+            function actionRenderer1(data, type, full) {
+                var d = '<div class="btn-group">'
+                d = d + '<a class="btn btn-default" href="/accounting-web/voucher/edit/' + full.id + '"><i class="fa fa-pencil-square-o" title="Edit" aria-hidden="true"></i><span class="sr-only">Edit</span></a>';
+                d = d + '<a onclick="deleteTask(' + full.id + ')" class="btn btn-default"><i class="fa fa-trash-o" title="Delete" aria-hidden="true"></i><span class="sr-only">Delete</span></a>';
+                d = d + '</div>';
+                return d;
+            }
+
+
+
+            function deleteTask(id) {
+                if (confirm('Are you sure you want to delete this item?')) {
+
+                    $('#deleteTaskId').val(id);
+                    $('#deleteTaskForm').submit();
+                }
+            }
+
+            function doSearch() {
+
+                oTable_AccountTable.fnReloadAjax();
+            }
+
+            function getExtraParams(aoData) {
+
+                aoData.push({
+                    'name': 'name',
+                    'value': $('#name').val()
+                }, {
+                    'name': 'description',
+                    'value': $('#description').val()
+                }, {
+                    'name': 'issueDateFrom',
+                    'value': $('#issueDateFrom').val()
+                }, {
+                    'name': 'issueDateTo',
+                    'value': $('#issueDateTo').val()
+                }, {
+                    'name': 'createDateFrom',
+                    'value': $('#createDateFrom').val()
+                }, {
+                    'name': 'createDateTo',
+                    'value': $('#createDateTo').val()
+                }, {
+                    'name': 'updateDateFrom',
+                    'value': $('#updateDateFrom').val()
+                }, {
+                    'name': 'updateDateTo',
+                    'value': $('#updateDateTo').val()
+                });
+            }
+
+            jQuery(document).ready(function() {
+                $.fn.dataTableExt.oApi.fnReloadAjax = function(oSettings, sNewSource, fnCallback, bStandingRedraw) {
+                    if ($.fn.dataTable.versionCheck) {
+                        var api = new $.fn.dataTable.Api(oSettings);
+                        if (sNewSource) {
+                            api.ajax.url(sNewSource).load(fnCallback, !bStandingRedraw);
+                        } else {
+                            api.ajax.reload(fnCallback, !bStandingRedraw);
+                        }
+                        return;
+                    }
+                    if (sNewSource !== undefined && sNewSource !== null) {
+                        oSettings.sAjaxSource = sNewSource;
+                    }
+                    if (oSettings.oFeatures.bServerSide) {
+                        oSettings.oApi._fnDraw(oSettings);
+                        return;
+                    }
+                    this.oApi._fnProcessingDisplay(oSettings, true);
+                    var that = this;
+                    var iStart = oSettings._iDisplayStart
+                    var aData = [];
+                    this.oApi._fnServerParams(oSettings, aData);
+                    oSettings.fnServerData.call(oSettings.oInstance, oSettings.sAjaxSource, aData, function(json) {
+                        that.oApi._fnClearTable(oSettings);
+                        var aData = (oSettings.sAjaxDataProp !== '') ?
+                            that.oApi._fnGetObjectDataFn(oSettings.sAjaxDataProp)(json) : json;
+                        for (var i = 0; i < aData.length; i++) {
+                            that.oApi._fnAddData(oSettings, aData[i]);
+                        }
+                        oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
+                        that.fnDraw();
+                        if (bStandingRedraw === true) {
+                            oSettings._iDisplayStart = iStart;
+                            that.oApi._fnCalculateEnd(oSettings);
+                            that.fnDraw(false);
+                        }
+                        that.oApi._fnProcessingDisplay(oSettings, false);
+                        if (typeof fnCallback == 'function' && fnCallback !== null) {
+                            fnCallback(oSettings);
+                        }
+                    }, oSettings);
+                }
+
+                /*  $('.datepicker').datetimepicker();  */
+                $('.datepicker').datetimepicker({
+                    format: 'YYYY-MM-DD hh:mm',
+                    useCurrent: false
+                });
+
+                $(".js-example-basic-hide-search").select2({
+                    minimumResultsForSearch: Infinity
+                });
+
+            });
+
+
+            function footerCallback(oSettings) {
+                $('div.pagination ul').addClass('pagination');
+                $('div.dataTables_wrapper div.row-fluid');
+                $('div.dataTables_wrapper div.span6').addClass('col-md-6 col-lg-6');
+            }
+
+            function myCustomDrawCallback(oSettings) {
+                var classMap = [];
+                for (var i = 0, iLen = oSettings.aoColumns.length; i < iLen; i++) {
+                    if (oSettings.aoColumns[i].nTh.className.indexOf('responsiveCol') > -1)
+                        classMap.push(i);
+                }
+                var iStart = oSettings._iDisplayStart + 1;
+                for (var i = 0, iLen = oSettings.aiDisplay.length; i < iLen; i++) {
+                    for (var j = 0; j < classMap.length; j++) {
+                        $('td:eq(' + classMap[j] + ')', oSettings.aoData[oSettings.aiDisplay[i]].nTr).addClass('responsiveCol');
+                    }
+                    $('td:eq(0)', oSettings.aoData[oSettings.aiDisplay[i]].nTr).html(iStart + i);
+                }
+                $('#AccountTable input[type=checkbox], #AccountTable input[type=radio]').iCheck({
+                    checkboxClass: "icheckbox_minimal",
+                    radioClass: "iradio_minimal"
+                });
+                $('#AccountTable input[type=checkbox], #AccountTable input[type=radio]').on('ifChanged', function(event) {
+                    $(this).trigger('change');
+                });
+                return false;
+            }
+
+            //]]>
+        </script>
+
+    </section>
+</body>
+
+</html>

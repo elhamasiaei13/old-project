@@ -1,0 +1,26 @@
+1485603278949	Delete elements
+1485603295116	Rename type 'GeneralAgentDao'
+1485603319224	Delete elements
+1485603328727	Rename type 'GeneralAgent'
+1485603444819	Delete element
+1485603455457	Rename type 'GeneralAgentVO'
+1485603495578	Delete elements
+1485603498394	Delete element
+1485603501100	Delete element
+1485603569247	Delete element
+1485603581969	Delete elements
+1485603593273	Rename type 'GeneralAgentCriteria'
+1485603642254	Delete elements
+1485603652551	Rename type 'GeneralAgentDaoJpa'
+1485603805125	Delete elements
+1485603875911	Delete elements
+1485603904283	Delete element
+1485603916142	Delete elements
+1485603920290	Delete elements
+1485603953608	Delete elements
+1485603963847	Delete elements
+1485604059853	Rename field 'generalAgentDao'
+1485604524218	Rename type 'GeneralAgentLocalService'
+1485604533358	Rename type 'GeneralAgentService'
+1485604542133	Rename type 'GeneralAgentLocalServiceImpl'
+1485604550107	Rename type 'GeneralAgentServiceImpl'

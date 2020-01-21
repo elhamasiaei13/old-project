@@ -1,0 +1,77 @@
+package com.parvanpajooh.agentmanagement.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+
+import com.parvanpajooh.agentmanagement.model.vo.PersonOrganizationVO;
+import com.parvanpajooh.agentmanagement.service.adapter.PersonManagementAdapter;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.personmanagement.PersonManagementApiRestClient;
+import com.parvanpajooh.client.personmanagement.model.OrganizationMsg;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+
+/**
+ * @author MO
+ *
+ */
+@Stateless
+public class PersonManagementAdapterImpl implements PersonManagementAdapter {
+
+	PersonManagementApiRestClient personManagmentRestClient = new PersonManagementApiRestClient();
+
+	@Override
+	public PageList<PersonOrganizationVO> findOrganizations(String term, int start, int length,
+			SortDirectionEnum sortDirection, String sortCriterion) throws ParvanServiceException {
+		PageList<PersonOrganizationVO> returnValue = null;
+		try {
+			String strSortDirection = null;
+			if (sortDirection != null) {
+				strSortDirection = sortDirection.toString();
+			}
+			PageList<OrganizationMsg> result = personManagmentRestClient.findOrganizations(term, start, length,
+					strSortDirection, sortCriterion);
+			if (result != null) {
+				List<OrganizationMsg> elements = result.getElements();
+				if (elements != null) {
+					List<PersonOrganizationVO> voList = new ArrayList<>(elements.size());
+					for (OrganizationMsg msg : elements) {
+						PersonOrganizationVO vo = _toPersonOrganizationVO(msg);
+						voList.add(vo);
+					}
+					returnValue = new PageList<>(voList, result.getTotal());
+				}
+			}
+			
+			
+			personManagmentRestClient.
+		} catch (ParvanClientException e) {
+			throw new ParvanUnrecoverableException(e.getMessage());
+		}
+		return returnValue;
+	}
+
+	@Override
+	public PersonOrganizationVO getOrganization(Long id) throws ParvanServiceException {
+		PersonOrganizationVO returnValue;
+		try {
+			OrganizationMsg result = personManagmentRestClient.getOrganization(id);
+			returnValue = _toPersonOrganizationVO(result);
+		} catch (ParvanClientException e) {
+			throw new ParvanUnrecoverableException(e.getMessage());
+		}
+		return returnValue;
+	}
+	
+	private PersonOrganizationVO _toPersonOrganizationVO(OrganizationMsg msg) {
+		PersonOrganizationVO vo = new PersonOrganizationVO();
+		vo.setId(msg.getId());
+		vo.setNameEn(msg.getNameEn());
+		vo.setNameLocal(msg.getNameLocal());
+		return vo;
+	}
+}

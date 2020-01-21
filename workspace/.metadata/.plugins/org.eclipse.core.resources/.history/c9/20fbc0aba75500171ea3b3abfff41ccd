@@ -1,0 +1,157 @@
+package com.parvanpajooh.transportationmanagement2.model.vo;
+
+import java.io.Serializable;
+import java.util.List;
+
+import com.parvanpajooh.client.routemanagement.model.NodeMsg;
+import com.parvanpajooh.client.routemanagement.model.enums.RouteEnums;
+import com.parvanpajooh.client.routemanagement.model.enums.RouteEnums.FreightNodeType;
+
+/**
+ * @author dev-03
+ *
+ */
+public class NodeVO implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1304277576944253813L;
+	
+	private Long id;
+	
+	private String codeName;
+	
+	private String name;
+	
+	private String otherNames;
+	
+	private FreightNodeType freightType;
+	
+	private Boolean active;
+	
+    private List<RouteVO> toRoutes;
+	
+	private List<RouteVO> fromRoutes;
+	
+	private ZoneVO zone;
+	
+//	private GeoEntityVO geoEntity;
+	
+	private String geoEntityCode;
+	
+	private Double geoLat;
+	
+	private Double geoLng;
+	
+	private List<String> tags;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the codeName
+	 */
+	public String getCodeName() {
+		return codeName;
+	}
+
+	/**
+	 * @param codeName the codeName to set
+	 */
+	public void setCodeName(String codeName) {
+		this.codeName = codeName;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the otherNames
+	 */
+	public String getOtherNames() {
+		return otherNames;
+	}
+
+	/**
+	 * @param otherNames the otherNames to set
+	 */
+	public void setOtherNames(String otherNames) {
+		this.otherNames = otherNames;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public NodeMsg toMsg() {
+		NodeMsg msg = new NodeMsg();
+
+		msg.setId(getId());
+		msg.setCodeName(this.codeName);
+		msg.setName(this.name);
+		msg.setGeoEntityCode(this.geoEntityCode);
+		msg.setGeoLat(this.geoLat);
+		msg.setGeoLng(this.geoLng);
+		msg.setOtherNames(this.otherNames);
+		if (freightType != null) {
+			msg.setFreightType( RouteEnums.FreightNodeType.valueOf( this.freightType.toString() ) );
+		}
+
+		msg.setActive(this.active);
+		/*if (toRoutes != null) {
+			msg.setToRoutes(this.toRoutes.toMsg());
+		}*/
+
+		/*if (fromRoutes != null) {
+			msg.setFromRoutes(this.fromRoutes.toMsg());
+		}*/
+
+		if (zone != null) {
+			msg.setZone(this.zone.toMsg());
+		}
+
+		if (tags != null) {
+			msg.setTags(this.tags);
+		}
+
+		return msg;
+	}
+
+	/**
+	 * 
+	 * @param msg
+	 * @return
+	 */
+	public void fromMsg(NodeMsg msg) {
+		this.id = msg.getId();
+		this.codeName = msg.getCodeName();
+		this.name = msg.getName();
+		this.otherNames = msg.getOtherNames();
+		this.geoEntityCode = msg.getGeoEntityCode();
+		this.geoLat =  msg.getGeoLat();
+		this.geoLng = msg.getGeoLng();
+	}
+}

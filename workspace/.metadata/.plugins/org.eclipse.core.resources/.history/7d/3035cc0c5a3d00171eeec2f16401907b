@@ -1,0 +1,371 @@
+package com.parvanpajooh.siteservices.model.vo;
+
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.parvanpajooh.client.identitymanagement2.model.IdentityManagement2Enums.Calendar;
+import com.parvanpajooh.client.identitymanagement2.model.RoleMsg;
+import com.parvanpajooh.client.identitymanagement2.model.UserMsg;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+
+@XmlRootElement
+public class UserVO implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5971686629027277987L;
+	
+	private Long id;
+
+	private boolean active;
+
+	private String userName;
+
+	private String password;
+
+	private String firstName;
+
+	private String lastName;
+
+	private String displayName;
+
+	private String uuid;
+
+	private String canonicalSearchName;
+
+	private String locale;
+
+	private String zoneId;
+
+	private String calendar;
+
+	private String email;
+	
+	private String personUuid;
+
+	private String remarks;
+
+	private UserGroupVO userGroup;
+
+	private Set<RoleVO> roles;
+		
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * @param active
+	 *            the active to set
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the userName
+	 */
+	public String getUserName() {
+		return userName;
+	}
+
+	/**
+	 * @param userName
+	 *            the userName to set
+	 */
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * @param password
+	 *            the password to set
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	/**
+	 * @return the firstName
+	 */
+	public String getFirstName() {
+		return firstName;
+	}
+
+	/**
+	 * @param firstName
+	 *            the firstName to set
+	 */
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	/**
+	 * @return the lastName
+	 */
+	public String getLastName() {
+		return lastName;
+	}
+
+	/**
+	 * @param lastName
+	 *            the lastName to set
+	 */
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	/**
+	 * @return the displayName
+	 */
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	/**
+	 * @param displayName
+	 *            the displayName to set
+	 */
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	/**
+	 * @return the canonicalSearchName
+	 */
+	public String getCanonicalSearchName() {
+		return canonicalSearchName;
+	}
+
+	/**
+	 * @param canonicalSearchName
+	 *            the canonicalSearchName to set
+	 */
+	public void setCanonicalSearchName(String canonicalSearchName) {
+		this.canonicalSearchName = canonicalSearchName;
+	}
+
+	/**
+	 * @return the locale
+	 */
+	public String getLocale() {
+		return locale;
+	}
+
+	/**
+	 * @param locale
+	 *            the locale to set
+	 */
+	public void setLocale(String locale) {
+		this.locale = locale;
+	}
+
+	/**
+	 * @return the zoneId
+	 */
+	public String getZoneId() {
+		return zoneId;
+	}
+
+	/**
+	 * @param zoneId
+	 *            the zoneId to set
+	 */
+	public void setZoneId(String zoneId) {
+		this.zoneId = zoneId;
+	}
+
+	/**
+	 * @return the calendar
+	 */
+	public String getCalendar() {
+		return calendar;
+	}
+
+	/**
+	 * @param calendar
+	 *            the calendar to set
+	 */
+	public void setCalendar(String calendar) {
+		this.calendar = calendar;
+	}
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @param email
+	 *            the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	/**
+	 * @return the remarks
+	 */
+	public String getRemarks() {
+		return remarks;
+	}
+
+	/**
+	 * @param remarks
+	 *            the remarks to set
+	 */
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+	/**
+	 * @return the userGroup
+	 */
+	public UserGroupVO getUserGroup() {
+		return userGroup;
+	}
+
+	/**
+	 * @param userGroup
+	 *            the userGroup to set
+	 */
+	public void setUserGroup(UserGroupVO userGroup) {
+		this.userGroup = userGroup;
+	}
+
+	/**
+	 * @return the roles
+	 */
+	public Set<RoleVO> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * @param roles the roles to set
+	 */
+	public void setRoles(Set<RoleVO> roles) {
+		this.roles = roles;
+	}
+
+	/**
+	 * @return the uuid
+	 */
+	public String getUuid() {
+		return uuid;
+	}
+
+	/**
+	 * @param uuid
+	 *            the uuid to set
+	 */
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	/**
+	 * @return the personUuid
+	 */
+	public String getPersonUuid() {
+		return personUuid;
+	}
+
+	/**
+	 * @param personUuid the personUuid to set
+	 */
+	public void setPersonUuid(String personUuid) {
+		this.personUuid = personUuid;
+	}
+
+	public UserMsg toMsg() {
+
+		UserMsg msg = new UserMsg();
+
+		msg.setId(getId());
+		msg.setUuid(this.uuid);
+		msg.setUserName(this.userName);
+		msg.setFirstName(this.firstName);
+		msg.setLastName(this.lastName);
+		msg.setLocale(this.locale);
+		msg.setZoneId(this.zoneId);
+		if (Validator.isNotNull(this.calendar)) {
+			msg.setCalendar(Calendar.valueOf(this.calendar.toString()));
+		}
+		msg.setEmail(this.email);
+		msg.setPersonUuid(this.personUuid);
+		if (Validator.isNotNull(this.userGroup)) {
+			msg.setUserGroup(this.userGroup.toMsg());
+		}
+		msg.setActive(this.active);
+
+		if (Validator.isNotNull(this.roles)) {
+			Set<RoleMsg> roleMsgs = new HashSet<>(roles.size());
+			for (RoleVO roleVO : this.roles) {
+				roleMsgs.add(roleVO.toMsg());
+			}
+			msg.setRoles(roleMsgs);
+		}
+
+		return msg;
+	}
+	
+	/**
+	 * 
+	 * @param msg
+	 */
+	public void fromMsg(UserMsg msg) {
+
+		this.id = msg.getId();
+		this.userName = msg.getUserName();
+		this.firstName = msg.getFirstName();
+		this.lastName = msg.getLastName();
+		this.displayName = msg.getDisplayName();
+		this.email = msg.getEmail();
+		if (Validator.isNotNull(msg.getCalendar())) {
+			this.calendar = Calendar.valueOf(msg.getCalendar().toString())
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "UserVO [active=" + active + ", userName=" + userName + ", firstName=" + firstName + ", lastName=" + lastName + ", displayName=" + displayName
+				+ ", uuid=" + uuid + ", canonicalSearchName=" + canonicalSearchName + ", locale=" + locale + ", zoneId=" + zoneId + ", calendar=" + calendar
+				+ ", email=" + email + "]";
+	}
+
+}

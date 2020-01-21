@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;com.parvanpajooh.sample.rest.AgentManagementRestController&apos; to &apos;SampleRestController&apos;&#x0A;- Original project: &apos;sample-rest&apos;&#x0A;- Original element: &apos;com.parvanpajooh.sample.rest.AgentManagementRestController&apos;&#x0A;- Renamed element: &apos;com.parvanpajooh.sample.rest.SampleRestController&apos;&#x0A;- Update references to refactored element&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;AgentManagementRestController&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src\/main\/java&lt;com.parvanpajooh.sample.rest{AgentManagementRestController.java[AgentManagementRestController" matchStrategy="1" name="SampleRestController" qualified="false" references="true" similarDeclarations="false" stamp="1485604809461" textual="false" version="1.0"/>
+</session>

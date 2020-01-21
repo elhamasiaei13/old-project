@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>WaybillNumber List</title>
+
+<style>
+.select-device-modal label {
+	margin-bottom: 0px;
+}
+
+.select-device-modal input {
+	width: auto;
+	height: 28px;
+}
+
+.select-device-modal .form-control {
+	width: auto;
+}
+
+.select-device-modal table.dataTable td {
+	padding: 1px 10px;
+}
+
+.select-device-modal .dataTables_filter label {
+	margin-bottom: 5px;
+}
+</style>
+</head>
+
+<body th:with="rightMenu='WaybillNumberGenerateCommands'">
+	<section layout:fragment="top-header" class="fixed-header">
+
+		<div class="ui-header-image pull-left">
+			<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/stock2-web/resources/images/stack.png" th:src="@{/resources/images/stack.png}" style="width: 48px; height: 48px;" />
+		</div>
+		<div class="ui-header-title">
+			<div class="split-left">
+				<h3>
+					<small>View</small>
+				</h3>
+				<h3>WaybillNumbers</h3>
+			</div>
+			<div class="split-right">
+				<a data-toggle="modal" onclick="createWaybillNumberGenerateCommand();" class="btn btn-success">
+					<i class="fa fa-plus">&nbsp;&nbsp;</i>
+					<span th:text="#{waybillNumberGenerateCommand.create}">ایجاد شماره‌های بارنامه</span>
+				</a>
+			</div>
+
+
+		</div>
+
+		<div class="hide">
+			<form id="frmWaybillNumberDisplayHiddenSearch" action="/stock2-web/waybillNumber/show" method="post"></form>
+		</div>
+	</section>
+
+	<!-- Main content -->
+	<!-- BODY -->
+	<section class="content" layout:fragment="content">
+		<div class="box box-primary">
+			<div class="box-header">
+				<h3 class="box-title" th:text="#{search}">جستجو</h3>
+				<div class="box-tools pull-right">
+					<button title="" data-widget="collapse" class="btn btn-primary btn-xs">
+						<i class="fa fa-minus"></i>
+					</button>
+				</div>
+			</div>
+
+			<div class="box-body" style="display: block;">
+				<form class="form-horizontal" role="form" id="frmWaybillNumberDisplaySearch" onsubmit="doSearch(); return false;" action="/stock2-web/">
+					<div th:include="customSearch :: search('waybillNumberGenerateCommand','false','Null')"></div>
+					<div th:include="customSearch :: searchButtons"></div>
+				</form>
+			</div>
+			<!-- /.box-body -->
+		</div>
+
+		<div class="box">
+			<div class="row">
+				<div class="ui-header-title">
+					<div class="pull-right" style="margin: 10px">
+						<a class="btn btn-success" onclick="modfiyWaybillNumberDisplayes('modifyWaybillNumbers');">
+							<span th:text="#{waybillNumber.modifyBatch}">به‌روزرسانی دسته‌ای</span>
+						</a>
+					</div>
+
+					<div class="pull-right" style="margin: 10px">
+						<a class="btn btn-success" onclick="modfiyWaybillNumberDisplayes('changeWaybillNumbersState');">
+							<span th:text="#{waybillNumber.changeState}"> تغییر وضعیت دسته‌ای</span>
+						</a>
+					</div>
+					<div class="pull-right" style="margin: 10px">
+						<a class="btn btn-success" onclick="modfiyWaybillNumberDisplayes('changeWaybillNumbersAssignee');">
+							<span th:text="#{waybillNumber.changeAssignee}"> تغییر نمایندگی دسته‌ای</span>
+						</a>
+					</div>
+				</div>
+			</div>
+			<div th:include="customSearch :: list"></div>
+		</div>
+
+		<div class="modal fade" id="createWaybillNumberGenerateCommandModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h4 class="modal-title" th:text="#{waybillNumberGenerateCommand.create}">ایجاد شماره‌ بارنامه</h4>
+					</div>
+					<div class="modal-body">
+						<dy:form entity="WaybillNumberGenerateCommand" form="create" type="create" />
+					</div>
+					<div class="modal-footer checkbox">
+						<label class="create-another" for="createWaybillNumberGenerateCommand-create-another">
+							<input type="checkbox" id="createWaybillNumberGenerateCommand-create-another" value="true" />
+							<span th:remove="tag" th:text="#{create-another}">Create another</span>
+						</label>
+
+						<button type="button" class="btn btn-primary" id="createWaybillNumberGenerateCommandBtn" th:text="#{button.save}">Save</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="modifyWaybillNumberGenerateCommandModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h4 class="modal-title" th:text="#{waybillNumberGenerateCommand.modify}">ویرایش اطلاعات شماره‌های بارنامه</h4>
+					</div>
+					<div class="modal-body">
+						<dy:form entity="WaybillNumberUpdateCommand" form="modify" type="create" />
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" onclick="modfiyWaybillNumberDisplayes();">Save</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="deleteWaybillNumberGenerateCommandModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h4 class="modal-title" th:text="#{waybillNumberGenerateCommand.delete}">حذف اطلاعات شماره‌های بارنامه</h4>
+					</div>
+					<div class="modal-body">
+						<dy:form entity="WaybillNumberGenerateCommand" form="delete" type="delete" />
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" id="deleteWaybillNumberGenerateCommandBtn" th:text="#{button.delete}">Delete</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+	</section>
+
+	<th:block layout:fragment="javascripts">
+		<script th:inline="javascript">
+
+				function domesticRender(entity, type, full){
+					if(entity){
+						return '<div class="text-center"><span class="label label-primary" th:text="#{waybillNumber.domestic}"></span></div>';
+					}
+					return '<div class="text-center"><span class="label label-error" th:text="#{waybillNumber.international}"></span></div>';
+				}
+
+				function waybillNumberTypeRender(entity, type, full){
+					
+					if(entity == 'ELECTRONIC'){
+						return '<div class="text-center"><span class="label label-info" th:text="#{waybillNumber.electronic}"></span></div>';
+					}else{
+						return '<div class="text-center"><span class="label label-warning" th:text="#{waybillNumber.print}"></span></div>';
+					}					
+				}
+
+				function currentStateRender(entity, type, full){
+					return '<div class="text-center"><span text="'+entity+'"></span></div>';								
+				}
+
+				
+				/*<![CDATA[*/
+				
+				function modfiyWaybillNumberDisplayes(templateName){
+					
+  					var frmWaybillNumberDisplaySearch = $("#frmWaybillNumberDisplaySearch").html();
+					$("#frmWaybillNumberDisplayHiddenSearch").html(frmWaybillNumberDisplaySearch);
+					console.debug($("#frmWaybillNumberDisplayHiddenSearch"));
+
+					var $hForm = $("#frmWaybillNumberDisplayHiddenSearch");
+					
+					$('#frmWaybillNumberDisplaySearch input, #frmWaybillNumberDisplaySearch select').each(function(i, v){
+						//console.debug($(v).attr('name'));
+						//console.debug($(v).val());
+						$hForm.find('[name=\''+$(v).attr('name')+'\']').val($(v).val());
+					})
+					
+					$('<input>').attr({type:'hidden',name:'templateName',value:templateName}).appendTo("#frmWaybillNumberDisplayHiddenSearch");
+					$("#frmWaybillNumberDisplayHiddenSearch").submit();  					
+				}	
+
+
+
+				/*]]>*/
+			</script>
+	</th:block>
+</body>
+</html>
+S

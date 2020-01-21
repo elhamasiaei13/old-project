@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>Update Task</title>
+
+<style>
+.select-device-modal label {
+	margin-bottom: 0px;
+}
+
+.select-device-modal input {
+	width: auto;
+	height: 28px;
+}
+
+.select-device-modal .form-control {
+	width: auto;
+}
+
+.select-device-modal table.dataTable td {
+	padding: 1px 10px;
+}
+
+.select-device-modal .dataTables_filter label {
+	margin-bottom: 5px;
+}
+</style>
+
+<script src="../../js/form-changes-checker.js" th:src="@{/js/form-changes-checker.js}"></script>
+</head>
+
+<body th:with="rightMenu='tasks'">
+	<section layout:fragment="top-header" class="fixed-header">
+
+		<div class="ui-header-image pull-left">
+			<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/stock2-web/resources/images/stack.png" th:src="@{/resources/images/stack.png}" style="width: 48px; height: 48px;" />
+		</div>
+		<div class="ui-header-title">
+			<div class="split-left">
+				<h3>
+					<small th:text="${taskDisplayDto.taskKey}"></small>
+				</h3>
+				<h3 th:text="${taskDisplayDto.taskSubject}"></h3>
+			</div>
+		</div>
+
+	</section>
+
+	<!-- Main content -->
+	<!-- BODY -->
+	<section class="content" layout:fragment="content">
+		<div class="box box-default">
+			<div class="box-header">
+				<h3 class="box-title" th:text="#{taskUpdateCommand.create}">ویرایش کار</h3>
+			</div>
+			<div class="box-body" style="display: block;">
+
+				<form action="#" class="form-horizontal" th:object="${taskDisplayDto}" method="post" id="taskUpdateCommandForm">
+					<div class="callout callout-danger hide">
+						<h4></h4>
+					</div>
+					<input type="hidden" class="input-small" th:value="${taskId}" name="taskId" />
+
+					<div class="form-group ">
+						<label class="col-sm-2 control-label" for="newNameCopy" th:text="#{product.name}">
+							Name
+							<span class="reqired"> *</span>
+						</label>
+						<div class="col-sm-7">
+							<input class="form-control validate[notempty]" id="newNameCopy" name="name" type="text" width="100" data-bv-notempty="true" data-bv-notempty-message="#{error-required(#{product.name})}" />
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="taskGroupId" class="col-sm-2 control-label" th:text="#{taskUpdateCommand.group}">
+							<span class="required"> *</span>
+						</label>
+						<div class="col-sm-7">
+							<input class="form-control validate[notempty]" data-bv-notempty="true" th:attr="data-bv-notempty-message=#{error-required(#{product.name})}" type="hidden" name="taskGroupId" id="groupIdModify" th:value="*{taskGroupId}"
+								style="width: 300px" />
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" th:text="#{taskUpdateCommand.subject}">موضوع</label>
+						<div class="col-sm-7">
+							<input class="form-control validate[notempty]" type="text" name="subject" placeholder="Subject" th:field="*{taskSubject}" th:value="${subject}" style="width: 300px" data-bv-notempty="true" data-bv-notempty-message="#{error-required(#{taskUpdateCommand.subject})}"/>
+						</div>
+					</div>
+
+					<div class="form-group required">
+						<label for="taskTypeModify" class="col-sm-2 control-label" th:text="#{taskUpdateCommand.taskType}">نوع</label>
+						<div class="col-sm-7">
+							<select class="form-control validate[notempty]" id="taskTypeModify" name="taskType" style="width: 300px" data-bv-notempty="true" data-bv-notempty-message="#{error-required(#{taskUpdateCommand.subject})}">
+								<option></option>
+								<option th:each="s : ${T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskType).values()}" th:value="${s}" th:text="${s.value}" th:selected="(${s} == *{taskType})"></option>
+							</select>
+						</div>
+					</div>
+
+					<div class="form-group required">
+						<label class="col-sm-2 control-label" for="priorityModify" th:text="#{taskUpdateCommand.priority}"> اولویت</label>
+						<div class="col-sm-7">
+							<select class="form-control" id="priorityModify" name="priority" style="width: 300px">
+								<option></option>
+								<option th:each="s : ${T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskPriority).values()}" th:value="${s}" th:text="${s.value}" th:selected="(${s} == *{priority})"></option>
+							</select>
+						</div>
+					</div>
+
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" th:text="#{taskUpdateCommand.dueDate}">تاریخ سررسید</label>
+						<div class="col-sm-7">
+							<input class="form-control datePicker" type="text" name="dueDate" th:field="*{dueDate}" style="width: 300px" />
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" th:text="#{taskUpdateCommand.remarks}">شرح</label>
+						<div class="col-sm-7">
+							<textarea class="form-control" rows="3" name="remarks" style="width: 300px" />
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" id="taskUpdateCommandBtn" th:text="#{button.save}" th:onclick="'confirmUpdate()'">Save</button>
+				<button type="button" class="btn btn-default" th:href="@{'/tasks'}" th:text="#{button.cancel}">Close</button>
+			</div>
+		</div>
+
+		<div class="modal fade" id="createTaskUpdateCommandModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h4 class="modal-title" th:text="#{taskUpdateCommand.create}">ویرایش اطلاعات کار</h4>
+					</div>
+					<div class="modal-body">
+						<form class="form-horizontal" role="form" id="deleteEmployeeForm" method="post" action="/agentmanagement-web/agentmanagement-web/employee/del">
+							<div class="callout callout-danger hide" />
+							<p class="confirm-title" id="updateConfirmTitle" th:text="#{taskUpdateCommand.create.confirm}">از ویرایش فیلدها اطمینان دارید؟</p>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" id="taskUpdateCommandModalBtn" th:text="#{button.save}" th:onclick="'updateTask(\'' + ${taskId} + '\')'">Save</button>
+						<a type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</section>
+
+	<th:block layout:fragment="javascripts">
+		<script th:inline="javascript">
+
+		/*<![CDATA[*/
+		
+		function confirmUpdate() {
+			
+ 			var changed = FormChanges("taskUpdateCommandForm");
+			$("#updateConfirmTitle").text(changed.length + " field(s) have been updated"); 
+			
+			$('#taskUpdateCommandForm').find('.callout').text('').addClass('hide');
+			$('#createTaskUpdateCommandModal').modal({ backdrop: 'static', keyboard: true });
+			$('#createTaskUpdateCommandModal').modal('show');
+		}
+
+		jQuery(document).ready(function(){	
+
+			$('#taskUpdateCommandForm').bootstrapValidator({excluded: [':disabled'], feedbackIcons: {valid: 'fa fa-check',invalid: 'fa fa-times',validating: 'fa fa-refresh'}});
+
+			var groupId = $('#taskUpdateCommandForm').find('input[name=taskGroupId]').val();
+			
+			$('#taskTypeModify').select2({
+			    placeholder: 'انتخاب کنید',
+			    allowClear: true
+			});
+			$('#priorityModify').select2({
+			    placeholder: 'انتخاب کنید',
+			    allowClear: true
+			});
+
+			$('#groupIdModify').select2({
+			    placeholder: 'انتخاب کنید',
+			    formatResult: function(aaData) {return aaData.name;},
+			    formatSelection: function(aaData) {return aaData.name;},
+			    allowClear: true,
+			    id: function(obj) {return obj.id;},
+			    ajax: {
+			        url: '/taskmanagement-web/taskgroups/paging',
+			        transport: transportFunction,
+			        dataType: 'json',
+			        params: {
+			            contentType: 'application/json;charset=utf-8',
+			            statusCode: {404: function() { showError('404');},403: function() {showError('403');},503: function() {showError('503');}}},
+			        quietMillis: 200,
+			        data: function(term, page) {
+			            return {
+			            	'columns[1][data]': 'id'
+		            		,'order[1][column]': 1
+		            		,'order[1][dir]': 'asc'
+		            		,start: (page - 1) * 20
+		            		,length: 20
+			                ,term: term
+			            };
+			        },
+			        results: function(data, page) {
+			            var more = (page * 20) < data.recordsFiltered;
+			            return {results: data.data,more: more}
+			        }
+			    },
+			    initSelection: function(element, callback) {
+			    	var id = $(element).val();
+			        if (id !== '') {
+			            	$.ajax('/taskmanagement-web/taskgroups/get', {
+			                data: {id: id},
+			                dataType: 'json'}).done(function(data) {callback(data);});
+			        }
+			    }
+			});			
+			});
+
+		function updateTask(taskId){	
+
+			 if (FormChanges("taskUpdateCommandForm").length != 0){
+			
+				$.post('/taskmanagement-web/tasks/update/save', $('#taskUpdateCommandForm').serialize()).done(function(data) {
+					if(data.status == 'success') {
+						showTopleftGrowl('success', 'Modify', 'Modify Successful');
+						$('#createTaskUpdateCommandModal').modal('hide');
+						window.open("/taskmanagement-web/tasks/" + taskId +"/details" , "_self");
+					} else if(data.status == 'ValidationException'){
+						$('#taskUpdateCommandForm').find('.callout').text(data.invalidField + ' invalid-value').removeClass('hide');
+					} else if(data.status == 'ObjectExistsException'){
+						$('#taskUpdateCommandForm').find('.callout').text((data.invalidField ? data.invalidField : 'data') + ' already-exists').removeClass('hide');
+					} else if(data.status == 'ErrorCode'){
+						if(data.errorMessage){
+							$('#taskUpdateCommandForm').find('.callout').text(data.errorMessage).removeClass('hide');
+						} else {
+							$('#taskUpdateCommandForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+						}
+					} else {
+						console.debug(data.status);
+						$('#taskUpdateCommandForm').find('.callout').text((data.message ? data.message : 'save.failed_fa_IR')).removeClass('hide');
+					}
+				}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'taskChangeStateBtn')});
+
+		    }else { 
+			    alert("no field have been updated");
+			}
+			    
+			return false;
+			}
+		  
+
+		/*]]>*/
+
+		</script>
+	</th:block>
+</body>
+</html>
+

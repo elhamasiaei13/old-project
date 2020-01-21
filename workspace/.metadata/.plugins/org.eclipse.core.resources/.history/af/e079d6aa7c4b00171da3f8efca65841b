@@ -1,0 +1,115 @@
+package com.parvanpajooh.transportationmanagement2.service.impl;
+
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.transportationmanagement2.model.vo.NodeVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.RouteVO;
+import com.parvanpajooh.transportationmanagement2.service.RouteManagementLocalService;
+import com.parvanpajooh.transportationmanagement2.service.adapter.RouteManagementServiceAdapter;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class RouteManagementLocalServiceImpl implements RouteManagementLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(RouteManagementLocalServiceImpl.class);
+
+	@Inject
+	private RouteManagementServiceAdapter routeManagementServiceAdapter;
+
+	@Override
+	public NodeVO getNodeByCode(String codeName) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getNodeByCode(codeName={})", codeName);
+		NodeVO node = null;
+
+		try {
+			node = routeManagementServiceAdapter.getNodeByCode(codeName);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getNodeByCode", e);
+		}
+
+		return node;
+	}
+
+	@Override
+	public List<NodeVO> getAllNodes() throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getAllNode()");
+		List<NodeVO> nodeVOs = null;
+		
+		try {
+			nodeVOs = routeManagementServiceAdapter.getAllNodes();
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getAllNode", e);
+		}
+
+		return nodeVOs;
+	}
+	
+	@Override
+	public PageList<RouteVO> findRoutes(String carrierCode, String term, int page, int size) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findRoutes(term={},page={},size={})", term,page,size);
+		PageList<RouteVO> transportations = null;
+		
+		try {
+			transportations = routeManagementServiceAdapter.findRoutes(term, page, size);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findRoutes", e);
+		}
+
+		return transportations;
+	}
+
+	@Override
+	public RouteVO getRoute(Long id) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getTransportaion(id={})", id);
+		RouteVO route = null;
+
+		try {
+			route = routeManagementServiceAdapter.getRoute(id);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getTransportaion", e);
+		}
+
+		return route;
+	}
+
+	@Override
+	public RouteVO getRouteByCarrierRouteNumber(String carrierRouteNumber) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering getRouteByCarrierRouteNumber(carrierRouteNumber={})", carrierRouteNumber);
+		RouteVO route = null;
+
+		try {
+			route = routeManagementServiceAdapter.getRouteByCarrierRouteNumber(carrierRouteNumber);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getRouteByCarrierRouteNumber:" + carrierRouteNumber, e);
+		}
+
+		return route;
+
+	}
+	
+}

@@ -1,0 +1,285 @@
+package com.parvanpajooh.accounting.dao.jpa;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+import javax.validation.ConstraintViolationException;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hibernate.StaleObjectStateException;
+
+import com.parvanpajooh.accounting.common.exceptions.ErrorCode;
+import com.parvanpajooh.accounting.common.exceptions.ObjectExistsException;
+import com.parvanpajooh.accounting.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.accounting.common.exceptions.ParvanException;
+import com.parvanpajooh.accounting.common.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.accounting.dao.AccountDao;
+import com.parvanpajooh.accounting.dao.VoucherDao;
+import com.parvanpajooh.accounting.dao.VoucherRowDao;
+import com.parvanpajooh.accounting.model.AccountType_;
+import com.parvanpajooh.accounting.model.Voucher;
+import com.parvanpajooh.accounting.model.VoucherRow;
+import com.parvanpajooh.accounting.model.Voucher_;
+import com.parvanpajooh.accounting.model.voucherRow_;
+import com.parvanpajooh.accounting.model.criteria.VoucherCriteria;
+import com.parvanpajooh.accounting.model.vo.VoucherRowVO;
+import com.parvanpajooh.common.CurrentContext;
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.util.DateUtil;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseCriteria;
+import com.parvanpajooh.ecourier.model.BaseModel;
+
+/**
+ * 
+ * @author moosa
+ *
+ */
+@Stateless
+public class VoucherDaoJpa extends GenericDaoJpa<Voucher, Long>implements VoucherDao {
+
+	public VoucherRowDao voucherRowDao;
+	public AccountDao accountDao;
+
+	@Inject
+	public void setVoucherRowDao(VoucherRowDao voucherRowDao) {
+		this.voucherRowDao = voucherRowDao;
+	}
+
+	@Inject
+	public void setAccountDao(AccountDao accountDao) {
+		this.accountDao = accountDao;
+	}
+
+	public VoucherDaoJpa() {
+		super(Voucher.class);
+	}
+
+	/**
+	 * Entity manager, injected by Spring using @PersistenceContext annotation
+	 * on setEntityManager()
+	 */
+	@PersistenceContext(unitName = PERSISTENCE_UNIT_NAME)
+	private EntityManager entityManager;
+
+	private Date getDate(LocalDateTime ldt) {
+
+		Date date = null;
+		if (Validator.isNotNull(ldt)) {
+			Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
+			date = Date.from(instant);
+		}
+
+		return date;
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<Voucher> root, Map<String, Join> joins)
+			throws ParvanException {
+
+		// LOG
+		log.debug("Entering buildPredicateList( ... )");
+
+		VoucherCriteria voucherCriteria = (VoucherCriteria) cri;
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		Boolean active = voucherCriteria.getActive();
+
+		// ----------------------------------------------------------------
+		// Active
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(active)) {
+			Predicate predicate = builder.equal(root.<Boolean> get(Voucher_.active), active);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Issue Date
+		// ----------------------------------------------------------------
+		Date issueDateFrom = getDate(voucherCriteria.getIssueDateFrom());
+		Date issueDateTo = getDate(voucherCriteria.getIssueDateTo());
+
+		if (Validator.isNotNull(issueDateFrom) || Validator.isNotNull(issueDateTo)) {
+
+			if (Validator.isNotNull(issueDateFrom)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(issueDateFrom);
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE, 0);
+				cal.set(Calendar.SECOND, 0);
+
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Voucher_.issueDate), DateUtil.getFirstTimeOfDate(issueDateFrom));
+				predicateList.add(predicate);
+			}
+
+			if (Validator.isNotNull(issueDateTo)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(issueDateTo);
+				cal.set(Calendar.HOUR_OF_DAY, 23);
+				cal.set(Calendar.MINUTE, 59);
+				cal.set(Calendar.SECOND, 59);
+
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Voucher_.issueDate), DateUtil.getFirstTimeOfDate(issueDateTo));
+				predicateList.add(predicate);
+			}
+
+		}
+
+		// ----------------------------------------------------------------
+		// Create Date
+		// ----------------------------------------------------------------
+		Date createDateFrom = getDate(voucherCriteria.getCreateDateFrom());
+		Date createDateTo = getDate(voucherCriteria.getCreateDateTo());
+
+		if (Validator.isNotNull(createDateFrom) || Validator.isNotNull(createDateTo)) {
+
+			if (Validator.isNotNull(createDateFrom)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(createDateFrom);
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE, 0);
+				cal.set(Calendar.SECOND, 0);
+
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(AccountType_.createDate),
+						DateUtil.getFirstTimeOfDate(createDateFrom));
+				predicateList.add(predicate);
+			}
+
+			if (Validator.isNotNull(createDateTo)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(createDateTo);
+				cal.set(Calendar.HOUR_OF_DAY, 23);
+				cal.set(Calendar.MINUTE, 59);
+				cal.set(Calendar.SECOND, 59);
+
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(AccountType_.createDate), DateUtil.getFirstTimeOfDate(createDateTo));
+				predicateList.add(predicate);
+			}
+
+		}
+
+		// ----------------------------------------------------------------
+		// Update Date
+		// ----------------------------------------------------------------
+		Date updateDateFrom = getDate(voucherCriteria.getUpdateDateFrom());
+		Date updateDateTo = getDate(voucherCriteria.getUpdateDateTo());
+		if (Validator.isNotNull(updateDateFrom) || Validator.isNotNull(updateDateTo)) {
+
+			if (Validator.isNotNull(updateDateFrom)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(updateDateFrom);
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE, 0);
+				cal.set(Calendar.SECOND, 0);
+
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(AccountType_.updateDate),
+						DateUtil.getFirstTimeOfDate(updateDateFrom));
+				predicateList.add(predicate);
+			}
+
+			if (Validator.isNotNull(updateDateTo)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(updateDateTo);
+				cal.set(Calendar.HOUR_OF_DAY, 23);
+				cal.set(Calendar.MINUTE, 59);
+				cal.set(Calendar.SECOND, 59);
+
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(AccountType_.updateDate), DateUtil.getFirstTimeOfDate(updateDateTo));
+				predicateList.add(predicate);
+			}
+		}
+
+		basePredicate((BaseCriteria) voucherCriteria, builder, root, predicateList);
+
+		// LOG
+		log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+
+	@Override
+	public Voucher save(Voucher object, List<VoucherRowVO> rows) throws ParvanDaoException {
+		// LOG
+		log.debug("Entering save( object={})", object);
+
+		Voucher entity = null;
+
+		try {
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+
+			if (!Validator.isNotNull(userInfo)) {
+				throw new ParvanDaoException("UserInfo is null");
+			}
+
+			// save
+			entity = this.entityManager.merge(object);
+			this.entityManager.flush();
+
+		} catch (ConstraintViolationException e) {
+			throw e;
+
+		} catch (OptimisticLockException e) {
+			if (e.getCause() != null && e.getCause() instanceof StaleObjectStateException) {
+				throw (StaleObjectStateException) e.getCause();
+			}
+
+			throw e;
+
+		} catch (Exception e) {
+
+			Throwable cause = ExceptionUtils.getRootCause(e);
+
+			if (cause != null && cause.getMessage() != null && cause.getMessage().indexOf("_UNIQUE") > -1) {
+				throw new ObjectExistsException();
+			}
+
+			throw new ParvanDaoException("Error occurred while saving record.", e);
+		}
+		
+		// save voucherRows
+					for (VoucherRowVO row : rows) {
+						if (Validator.isNull(row.getAccount()) || Validator.isNull(row.getDebit()) || Validator.isNull(row.getCredit())) {
+						}
+							if (Validator.isNotNull(row.getAccount().getId())) {
+
+								VoucherRow vRow = new VoucherRow();
+								LocalDateTime now = LocalDateTime.now();
+
+								vRow.fromVO(row);
+								vRow.setAccount(accountDao.get(row.getAccount().getId()));
+								vRow.setVoucher(get(entity.getId()));
+								vRow.setActive(true);
+								vRow.setCreateUserId(userInfo.getUserId());
+								vRow.setUpdateUserId(userInfo.getUserId());
+								vRow.setCreateDate(now);
+								vRow.setUpdateDate(now);
+								voucherRowDao.save(vRow);
+							}
+						}
+					
+
+		// LOG
+		log.debug("Leaving exists(): {}", entity);
+
+		return entity;
+
+	}
+}

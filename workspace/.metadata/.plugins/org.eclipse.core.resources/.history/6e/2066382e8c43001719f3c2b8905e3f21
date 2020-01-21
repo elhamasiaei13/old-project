@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>Verify</title>
+
+
+<style>
+.form-control-feedback {
+	right: 500px !important;
+}
+</style>
+
+</head>
+<body>
+
+	<section layout:fragment="top-header" class="page-header">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<ul class="breadcrumb">
+						<li>
+							<a href="#">صفحه نخست</a>
+						</li>
+
+						<li class="active">بازیابی کلمه عبور</li>
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<h1>بازیابی کلمه عبور</h1>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="content" layout:fragment="content">
+		<form id="verifyEmailOrMobileForm">
+			<div class="callout callout-danger hide">
+				<h4></h4>
+			</div>
+			<div class="container">
+				<div class="col-sm-8 col-lg-offset-2">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<div class="row">
+								<div class="col-sm-8 col-sm-offset-2">
+									<h2>بازیابی کلمه عبور</h2>
+
+									<input name="userId" type="hidden" th:value="${userId}" />
+									<div class="alert alert-info">لطفا کدی که به ایمیل یا موبایل شما فرستاده شده است را وارد کنید</div>
+									<div class="form-group">
+										<label th:inline="text">
+											[[#{profile.recoveryCode}]]
+											<span class="reqired"> *</span>
+										</label>
+										<input id="code" name="code" type="text" class="form-control" data-bv-notempty="true" 
+										th:attr="data-bv-notempty-message=#{error-required(#{profile.recoveryCode})}" />
+									</div>
+									<div class="form-group">
+										<a class="btn btn-success" id="verifyEmailOrMobileBtn" th:text="#{button.save}">ذخیره</a>
+									</div>
+								</div>
+							</div>
+							<!-- row -->
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</form>
+	</section>
+
+
+	<th:block layout:fragment="javascripts">
+
+
+		<script th:inline="javascript">
+
+			var titleModifyRelation = '<span class="label label-info"  th:remove="tag" th:text="#{relation.modify}">Modify Relation !</span>';
+
+		    $(document).ready(function() {
+
+				$('#verifyEmailOrMobileForm').bootstrapValidator({
+					excluded: [':disabled'], 
+					feedbackIcons:{
+						valid: 'fa fa-check',
+						invalid: 'fa fa-times',
+						validating: 'fa fa-refresh'
+					}
+				});
+
+		    	$('#verifyEmailOrMobileBtn').click(function(){
+		    		var $btn = $(this);
+		    		var isValidForm = false;		    		
+		    		$('#activateForm').find('.callout').text('').addClass('hide');
+    				$('#activateForm').data('bootstrapValidator').validate();
+    				isValidForm = $('#activateForm').data('bootstrapValidator').isValid();
+
+					if(isValidForm){ 
+		    			$btn.attr('disabled', true);
+			    		$.post('/siteservices-web/profile/open/user/emailormobile/verify', $('#activateForm').serialize()).done(function(data) {
+			    			if(data.status == 'success') {
+			    				showTopleftGrowl('success', 'Create', 'Create Successful');
+			    				window.open("/siteservices-web/profile/open/user/recover/confirm?userId=" + data.userId, "_self");
+			    			} else if(data.status == 'ValidationException'){
+			    				showTopleftGrowl('error', 'Error', data.invalidField);
+			    				$('#verifyEmailOrMobileForm').find('.callout').text(data.invalidField + 'invalid-value').removeClass('hide');
+			    			} else if(data.status == 'ErrorCode'){
+			    				if(data.errorMessage){
+			    					showTopleftGrowl('error', 'Error', data.errorMessage);
+			    					$('#verifyEmailOrMobileForm').find('.callout').text(data.errorMessage).removeClass('hide');
+			    				} else {
+			    					showTopleftGrowl('error', 'Error', data.errorCode);
+			    					$('#verifyEmailOrMobileForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+			    				}
+			    			} else {
+			    				console.debug(data.status);
+			    				showTopleftGrowl('error', 'Error', data.message);
+			    				$('#verifyEmailOrMobileForm').find('.callout').text((data.message ? data.message : 'delete.failed' )).removeClass('hide');
+			    			}
+			    			$btn.attr('disabled', false);
+			    		}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'activateBtn')});
+					} 
+			    		return false;
+		    	});
+		    });
+		    
+		    /*<![CDATA[*/
+	    	/*]]>*/
+    		</script>
+
+	</th:block>
+
+</body>
+</html>

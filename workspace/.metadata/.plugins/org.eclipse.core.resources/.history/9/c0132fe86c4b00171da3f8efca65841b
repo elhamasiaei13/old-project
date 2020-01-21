@@ -1,0 +1,213 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.model;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
+import com.parvanpajooh.commons.platform.ejb.model.BaseModel;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.shipment.model.vo.PackingItemActionVO;
+
+/**
+ * @author MO
+ *
+ */
+@Entity
+@Table(name = "packingItemaction_tbl")
+public class PackingItemAction extends BaseModel {
+
+	private static final long serialVersionUID = 2081984902547488747L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	
+	private String code;
+	
+	private String title;
+	
+	private String style;
+	
+	private int actionOrder;
+	
+	private boolean locationSensitive ;
+	
+	private boolean asButton;
+	
+	private String buttonType;
+	
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * @param title the title to set
+	 */
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	/**
+	 * @return the style
+	 */
+	public String getStyle() {
+		return style;
+	}
+
+	/**
+	 * @param style the style to set
+	 */
+	public void setStyle(String style) {
+		this.style = style;
+	}
+
+	/**
+	 * @return the actionOrder
+	 */
+	public int getActionOrder() {
+		return actionOrder;
+	}
+
+	/**
+	 * @param actionOrder the actionOrder to set
+	 */
+	public void setActionOrder(int actionOrder) {
+		this.actionOrder = actionOrder;
+	}
+	
+	/**
+	 * @return the asButton
+	 */
+	public boolean isAsButton() {
+		return asButton;
+	}
+
+	/**
+	 * @param asButton the asButton to set
+	 */
+	public void setAsButton(boolean asButton) {
+		this.asButton = asButton;
+	}
+
+	/**
+	 * @return the locationSensitive
+	 */
+	public boolean isLocationSensitive() {
+		return locationSensitive;
+	}
+
+	/**
+	 * @param locationSensitive the locationSensitive to set
+	 */
+	public void setLocationSensitive(boolean locationSensitive) {
+		this.locationSensitive = locationSensitive;
+	}
+
+	/**
+	 * @return the buttonType
+	 */
+	public String getButtonType() {
+		return buttonType;
+	}
+
+	/**
+	 * @param buttonType the buttonType to set
+	 */
+	public void setButtonType(String buttonType) {
+		this.buttonType = buttonType;
+	}
+	
+	@Override
+	public int hashCode(){
+		return Objects.hashCode(id);
+	}
+	
+	@Override
+	public boolean equals(Object object){
+		if (object instanceof PackingItemAction) {
+			PackingItemAction that = (PackingItemAction) object;
+			return Objects.equal(this.id, that.id);
+		}
+		return false;
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("id", id)
+			.add("code", code)
+			.add("title", title)
+			.add("style", style)
+			.add("actionOrder", actionOrder)
+			.add("locationSensitive", locationSensitive)
+			.add("asButton", asButton)
+			.add("buttonType", buttonType)
+			.toString();
+	}
+
+	@Override
+	public BaseVO toVO() {
+		PackingItemActionVO packingItemActionVO = this.toVOLite();
+		
+		return packingItemActionVO;
+	}
+
+	@Override
+	public PackingItemActionVO toVOLite() {
+		PackingItemActionVO vo = new PackingItemActionVO();
+		
+		vo.setId(this.id);
+		vo.setCode(this.code);
+		vo.setStyle(this.style);
+		vo.setActionOrder(this.actionOrder);
+		vo.setLocationSensitive(this.locationSensitive);
+		vo.setAsButton(this.asButton);
+		vo.setButtonType(this.buttonType);
+		
+		return vo;
+	}
+
+	@Override
+	public void fromVO(BaseVO baseVO) {
+		// TODO Auto-generated method stub
+		
+	}
+}

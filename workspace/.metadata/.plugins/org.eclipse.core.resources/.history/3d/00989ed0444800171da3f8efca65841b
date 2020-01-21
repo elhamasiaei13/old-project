@@ -1,0 +1,39 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.model.criteria;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+
+/**
+ * @author MO
+ *
+ */
+public class PackingItemCriteria extends BaseCriteria {
+	
+	private static final long serialVersionUID = -6871217652695005251L;
+	
+	private String currentStateCode;
+	private Long currentAssignedUserId;
+	private String waybillNumber;
+	private String currentState;
+	private String notCurrentState;
+	private String currentNodeId;
+	private String lastChangeStateDateFrom;
+	private String lastChangeStateDateTo;
+	private String consigneeCityCode;
+	
+	
+	public String getCurrentStateCode() {
+		return currentStateCode;
+	}
+	public void setCurrentStateCode(String currentStateCode) {
+		this.currentStateCode = currentStateCode;
+	}
+	public Long getCurrentAssignedUserId() {
+		return currentAssignedUserId;
+	}
+	public void setCurrentAssignedUserId(Long currentAssignedUserId) {
+		this.currentAssignedUserId = currentAssignedUserId;
+	}
+}

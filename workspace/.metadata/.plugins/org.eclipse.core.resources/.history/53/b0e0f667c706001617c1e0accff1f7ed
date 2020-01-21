@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>Task Details</title>
+</head>
+
+<body>
+  <section class="content" layout:fragment="content">
+		   <div class="jumbotron">
+             <h2 > افزودن یادداشت</h2>
+   		   </div>
+   		   <div id="section">
+			<form  class="form-inline" th:object="${commentVO}" th:action="@{save}" method="post">
+				
+					<h3 th:text="#{title_comments}"></h3>
+		                <input name="taskId"  th:value="${taskId}" hidden="hidden" th:field="*{taskId}"/>
+					<div id="commentInputId">  
+				        <br></br> <br></br>
+				        <input name="description" />			    							
+					</div>
+			
+					<br></br>
+					<div id="outer">
+					<div class="inner" >
+					<button class="btn btn-default btn-sm" th:text="#{btn_add}"></button>
+					</div>
+					<div class="inner" >
+                    	<a class="btn btn-default btn-sm" th:text="#{btn_return}" th:href="@{'/taskDetails/' + ${taskId}}"></a>
+                    </div>
+					</div>
+				
+		    </form>	
+		  </div>
+  </section>
+</body>
+</html>

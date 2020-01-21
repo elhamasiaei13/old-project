@@ -1,0 +1,153 @@
+package com.parvanpajooh.accounting.service.impl;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.accounting.common.exceptions.ErrorCode;
+import com.parvanpajooh.accounting.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.accounting.common.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.accounting.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.accounting.common.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.accounting.dao.AccountDao;
+import com.parvanpajooh.accounting.dao.FiscalYearDao;
+import com.parvanpajooh.accounting.dao.VoucherDao;
+import com.parvanpajooh.accounting.model.FiscalYear;
+import com.parvanpajooh.accounting.model.Voucher;
+import com.parvanpajooh.accounting.model.VoucherRow;
+import com.parvanpajooh.accounting.model.vo.VoucherRowVO;
+import com.parvanpajooh.accounting.model.vo.VoucherVO;
+import com.parvanpajooh.accounting.service.VoucherLocalService;
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseVO;
+
+/**
+ * 
+ * @author ali
+ * @author mehrdad
+ * @author moosa
+ *
+ */
+@Stateless
+public class VoucherLocalServiceImpl extends GenericLocalServiceImpl<Voucher, Long>implements VoucherLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(VoucherLocalServiceImpl.class);
+
+	public VoucherDao voucherDao;
+	public FiscalYearDao fiscalYearDao;
+	public AccountDao accountDao;
+
+	@Inject
+	public void setVoucherDao(VoucherDao voucherDao) {
+		this.dao = voucherDao;
+		this.voucherDao = voucherDao;
+	}
+
+	@Inject
+	public void setFiscalYearDao(FiscalYearDao fiscalYearDao) {
+		this.fiscalYearDao = fiscalYearDao;
+	}
+
+	@Inject
+	public void setAccountDao(AccountDao accountDao) {
+		this.accountDao = accountDao;
+	}
+
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		VoucherVO voucherVO = (VoucherVO) baseVO;
+		List<VoucherRowVO> rows = new ArrayList<VoucherRowVO>();
+		LocalDateTime now = LocalDateTime.now();
+		try {
+
+			if (Validator.isNull(voucherVO.getIssueDate())) {
+
+				throw new ParvanRecoverableException(ErrorCode.FEILDS_IS_EMPTY);
+			}
+
+			Voucher voucher = null;
+			FiscalYear fiscalYear = null;
+
+			if (Validator.isNull(voucherVO.getId())) {
+				voucher = new Voucher();
+				fiscalYear = fiscalYearDao.get();
+				rows = voucherVO.getVoucherRow();			
+				voucher.fromVO(voucherVO);
+				voucher.setActive(true);
+				voucher.setFiscalYear(fiscalYear);
+				voucher.setCreateDate(now);
+				voucher.setUpdateDate(now);
+				voucher.setCreateUserId(userInfo.getUserId());
+				voucher.setUpdateUserId(userInfo.getUserId());				
+
+			} else {
+				voucher = voucherDao.get(voucherVO.getId());
+				fiscalYear = fiscalYearDao.get();
+				rows = voucherVO.getVoucherRow();
+				voucher.fromVO(voucherVO);
+				voucher.setFiscalYear(fiscalYear);
+				voucher.setUpdateDate(now);
+				voucher.setUpdateUserId(userInfo.getUserId());
+			}
+
+			// save entity
+			voucher = voucherDao.save(voucher,rows);
+
+			voucherVO = (VoucherVO) voucher.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+
+		return voucherVO;
+	}
+
+	/**
+	 * 
+	 * @param members
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	private List<VoucherRow> convertToTree(List<VoucherRowVO> voucherRowVO) throws ParvanDaoException {
+
+		List<VoucherRow> result = new ArrayList<VoucherRow>();
+
+		Iterator<VoucherRowVO> iterator = voucherRowVO.iterator();
+		while (iterator.hasNext()) {
+
+			VoucherRow voucherRow = new VoucherRow();
+			VoucherRowVO thisVoucherRow = iterator.next();
+
+			if (Validator.isNotNull(thisVoucherRow) && Validator.isNotNull(thisVoucherRow.getAccount().getId())) {
+				voucherRow.fromVO(thisVoucherRow);
+				voucherRow.setAccount(accountDao.get(thisVoucherRow.getAccount().getId()));
+				result.add(voucherRow);
+			}
+
+			iterator.remove();
+		}
+
+		return result;
+	}
+
+
+}

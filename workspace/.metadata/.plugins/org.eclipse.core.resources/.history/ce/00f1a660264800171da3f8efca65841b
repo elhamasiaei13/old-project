@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+<head>
+	<meta charset="UTF-8" />
+	<title>Search Fragment</title>
+</head>
+<body>
+<section th:fragment="search-button">
+	<a href="#menu-toggle" class="btn btn-default" id="menu-toggle" onclick="setSearchViewState();return false">
+		<i class="fa fa-binoculars">&nbsp;&nbsp;</i>
+		<span th:text="#{filter}">Search</span>
+	</a>
+</section>
+<section th:fragment="search-filters (entity)">
+<style type="text/css">
+/*!
+ * Start Bootstrap - Simple Sidebar HTML Template (http://startbootstrap.com)
+ * Code licensed under the Apache License v2.0.
+ * For details, see http://www.apache.org/licenses/LICENSE-2.0.
+ */
+
+/* Toggle Styles */
+#wrapper {
+	padding-left: 0;
+	-webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+	transition: all 0.5s ease;
+}
+
+#wrapper.toggled {
+	padding-right: 350px;
+}
+
+#sidebar-wrapper {
+	z-index: 1000;
+	position: fixed;
+	right: 350px;
+	width: 0;
+	height: 100%;
+	margin-right: -350px;
+	overflow-y: auto;
+	-webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+	transition: all 0.5s ease;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+	width: 350px;
+}
+
+#page-content-wrapper {
+	width: 100%;
+	padding: 15px;
+}
+
+#wrapper.toggled #page-content-wrapper {
+	position: absolute;
+	margin-left: -350px;
+}
+
+/* Sidebar Styles */
+.sidebar-nav {
+	position: absolute;
+	top: 0;
+	width: 350px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sidebar-nav>.sidebar-brand {
+	height: 65px;
+	font-size: 18px;
+	line-height: 60px;
+}
+
+.sidebar-nav>.sidebar-brand a {
+	color: #999999;
+}
+
+.sidebar-nav>.sidebar-brand a:hover {
+	color: #fff;
+	background: none;
+}
+
+@media ( min-width :768px) {
+	#wrapper {
+		padding-right: 350px;
+	}
+	#wrapper.toggled {
+		padding-right: 0;
+	}
+	#sidebar-wrapper {
+		width: 350px;
+	}
+	#wrapper.toggled #sidebar-wrapper {
+		width: 0;
+	}
+	#page-content-wrapper {
+		padding: 20px;
+	}
+	#wrapper.toggled #page-content-wrapper {
+		position: relative;
+		margin-right: 0;
+	}
+}
+
+.clearable {
+	background: #fff
+		url(data:image/gif;base64,R0lGODlhBwAHAIAAAP///5KSkiH5BAAAAAAALAAAAAAHAAcAAAIMTICmsGrIXnLxuDMLADs=)
+		no-repeat right -10px center;
+	border: 1px solid #999;
+	padding: 3px 18px 3px 4px; /* Use the same right padding (18) in jQ! */
+	border-radius: 3px;
+	transition: background 0.4s;
+}
+
+.clearable.x {
+	background-position: right 5px center;
+}
+
+.clearable.onX {
+	cursor: pointer;
+}
+
+DIV.searchFormSection {
+	margin-bottom: 10px;
+	padding: 9px;
+}
+
+DIV#currentSection {
+	background-color: #f1fff1;
+}
+
+DIV#stateHistorySection {
+	background-color: #FFFFEF;
+}
+
+DIV#placesSection {
+	background-color: #FDFAF4;
+}
+
+DIV#shipmentInfoSection {
+	background-color: #F5FAFF;
+}
+
+DIV#distributionSection {
+	background-color: #F5FAFF;
+}
+
+#frmShipmentSearch legend {
+	color: #3366CC;
+}
+.genSearch .col-sm-7 {
+	padding-left: 0px;
+	margin-bottom: 5px;
+}
+.genSearch .col-sm-4 {
+	width: 70%;
+	margin: 10px 10px 10px 10px;
+}
+.genSearch .control-label {
+	text-align: inherit;
+	font-weight: bold;
+}
+</style>
+	<div id="sidebar-wrapper">
+		<div class="sidebar-nav">
+			<div class="box box-primary">
+				<form class="genSearch" role="form"
+					onsubmit="doSearch(); return false;">
+					<div id="search-box-body" class="box-body "
+						style="max-height: 10; overflow-y: scroll;">
+						 <div class="searchFormSection">
+							<dy:form th:attr="entity=${entity}" form="search" type="search" />
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script th:inline="javascript">
+		var cookieName = /*[[${entity}+'SideBarState']]*/;
+	/*<![CDATA[*/
+	  	$(document).ready(function(){
+	 	$("#menu-toggle").click(function(e) {
+	        e.preventDefault();
+	        $("#wrapper").toggleClass("toggled");
+	    });
+	 	var t = $(window).height() - 200;
+		    $('#search-box-body').css('max-height', t);
+	
+		   if (cookie.get(cookieName) === 'hide') {
+			$('#wrapper').addClass('toggled');
+		} else {
+			$('#wrapper').removeClass('toggled');
+		}
+	  	});
+	  	function _resetForm($form) {
+	    	$form.find('input:text, input:password, input:file, select, textarea').val('');
+	    	$form.find('input:radio, input:checkbox').removeAttr('checked').removeAttr('selected');
+		}
+		function setSearchViewState() {
+			if ($('#wrapper').hasClass('toggled')) {
+				cookie.set(cookieName,'show');
+			} else {
+				cookie.set(cookieName,'hide');
+			}
+		}
+   	/*]]>*/
+	</script>
+</section>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>Add</title>
+</head>
+
+<body>
+	<section class="content" layout:fragment="content">
+
+		<form action="#" class="form-inline" th:action="@{save}" th:object="${member}" method="post">
+			<input type="text" name="firstName" class="input-small" autofocus="autofocus" autocomplete="true" placeholder="First Name" th:field="*{firstName}"/> <br></br> 
+			<input type="text" name="lastName" class="input-small" placeholder="Last Name" th:field="*{lastName}" autofocus="autofocus" autocomplete="true"/> <br></br>
+			<input type="text" name="username" class="input-small" placeholder="Username" th:field="*{username}" autofocus="autofocus" autocomplete="true"/> <br></br> 
+			<input type="password" name="password" class="input-small" placeholder="Password" th:field="*{password}" autofocus="autofocus" autocomplete="false"/> <br></br> <br></br>
+			<button type="submit" class="btn btn-primary" th:text="#{btn_save}"></button>
+		</form>
+		
+	</section>
+</body>
+</html>

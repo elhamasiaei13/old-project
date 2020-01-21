@@ -1,0 +1,119 @@
+package com.parvanpajooh.client.geomanagement.model.criteria;
+
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.RouteMsg;
+
+public class CarrierCriteriaMsg extends BaseMsg {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7240289780498224634L;
+	
+	private String codeName;
+	
+	private String code;
+	
+	private String name;
+	
+	private String allNames;
+	
+	private Boolean active;
+	
+    private RouteMsg route;
+	
+	/**
+	 * @return the codeName
+	 */
+	public String getCodeName() {
+		return codeName;
+	}
+
+	/**
+	 * @param codeName the codeName to set
+	 */
+	public void setCodeName(String codeName) {
+		this.codeName = codeName;
+	}
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the route
+	 */
+	public RouteMsg getRoute() {
+		return route;
+	}
+
+	/**
+	 * @param route the route to set
+	 */
+	public void setRoute(RouteMsg route) {
+		this.route = route;
+	}
+
+	/**
+	 * @return the allNames
+	 */
+	public String getAllNames() {
+		return allNames;
+	}
+
+	/**
+	 * @param allNames the allNames to set
+	 */
+	public void setAllNames(String allNames) {
+		this.allNames = allNames;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "CarrierCriteria [codeName=" + codeName + ", code=" + code
+				+ ", name=" + name + ", allNames=" + allNames + ", active="
+				+ active + ", route=" + route + "]";
+	}
+
+}

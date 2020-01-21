@@ -1,0 +1,179 @@
+package com.parvanpajooh.taskmanagement.application;
+
+import java.util.List;
+
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.taskmanagement.domain.model.criteria.TaskCriteria;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskAttachmentCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskChangeAssigneeCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskChangeStateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCommentCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCreateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskDisplayDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskRelationCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskUpdateCommandDto;
+
+public interface TaskApplicationService {
+
+	/**
+	 * method used to get all TaskDisplayDto with tasks.
+	 * 
+	 * @param userInfo
+	 * @param tasks
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public List<TaskDisplayDto> findByTasks(UserInfo userInfo, List<String> tasks) throws ParvanServiceException;
+
+	/**
+	 * Generic method used to get all TaskDisplayDto by criteria.
+	 * 
+	 * @param userInfo
+	 * @param criteria
+	 * @param firstResult
+	 * @param maxResults
+	 * @param sortDirection
+	 * @param sortCriterion
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public List<TaskDisplayDto> findByCriteria(UserInfo userInfo, TaskCriteria criteria, int firstResult, int maxResults, SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param criteria
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public long countByCriteria(UserInfo userInfo, TaskCriteria criteria) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param taskCreateCommandDto
+	 * @throws ParvanServiceException
+	 */
+	public void createTask(UserInfo userInfo, TaskCreateCommandDto taskCreateCommandDto) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param taskUpdateCommandDto
+	 * @param taskId
+	 * @throws ParvanServiceException
+	 */
+	public void updateTask(UserInfo userInfo, TaskUpdateCommandDto taskUpdateCommandDto, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param taskChangeAssigneeCommandDto
+	 * @param taskId
+	 * @throws ParvanServiceException
+	 */
+	public void changeTaskAssignee(UserInfo userInfo, TaskChangeAssigneeCommandDto taskChangeAssigneeCommandDto, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param taskChangeStateCommandDto
+	 * @param taskId
+	 * @throws ParvanServiceException
+	 */
+	public void changeTaskState(UserInfo userInfo, TaskChangeStateCommandDto taskChangeStateCommandDto, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param taskCommentCommandDto
+	 * @param taskId
+	 * @throws ParvanServiceException
+	 */
+	public void addComment(UserInfo userInfo, TaskCommentCommandDto taskCommentCommandDto, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param taskRelationCommandDto
+	 * @param taskId
+	 * @throws ParvanServiceException
+	 */
+	public void addRelation(UserInfo userInfo, TaskRelationCommandDto taskRelationCommandDto, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param taskAttachmentCommandDto
+	 * @param taskId
+	 * @throws ParvanServiceException
+	 */
+	public void addAttachment(UserInfo userInfo, TaskAttachmentCommandDto taskAttachmentCommandDto, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param taskId
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public TaskDto get(UserInfo userInfo, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param taskId
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public TaskDisplayDto getTaskDisplay(UserInfo userInfo, String taskId) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param taskKey
+	 * @return
+	 * @throws ParvanServiceException 
+	 */
+	public TaskDisplayDto getTaskDisplayByTaskKey(UserInfo userInfo, String taskKey) throws ParvanServiceException;
+	
+	/**
+	 * 
+	 * @param userInfo
+	 * @param id
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public TaskAttachmentCommandDto getTaskAttachmentCommandDto(UserInfo userInfo, Long id) throws ParvanServiceException;
+	
+	/**
+	 * 
+	 * @param userInfo
+	 * @param id
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public TaskCreateCommandDto getCreateCommandDto(UserInfo userInfo, String id) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param id
+	 */
+	public void deleteTask(UserInfo userInfo, String id) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param taskId
+	 * @return
+	 * @throws ParvanServiceException 
+	 */
+	public TaskUpdateCommandDto getLastUpdateRecord(UserInfo userInfo, String taskId) throws ParvanServiceException;
+
+
+}

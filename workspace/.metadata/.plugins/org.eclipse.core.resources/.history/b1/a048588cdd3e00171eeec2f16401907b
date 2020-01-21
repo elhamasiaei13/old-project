@@ -1,0 +1,68 @@
+package com.parvanpajooh.siteservices.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.config.Config;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+import com.parvanpajooh.siteservices.model.vo.RegisterVO;
+import com.parvanpajooh.siteservices.service.PersonManagementLocalService;
+import com.parvanpajooh.siteservices.service.ProfileManagementLocalService;
+import com.parvanpajooh.siteservices.service.adapter.IdentityManagement2ServiceAdapter;
+import com.parvanpajooh.siteservices.service.adapter.JobManagementServiceAdapter;
+import com.parvanpajooh.siteservices.service.adapter.PersonManagementServiceAdapter;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class ProfileManagementLocalServiceImpl implements ProfileManagementLocalService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(ProfileManagementLocalServiceImpl.class);
+
+	@Inject
+	private JobManagementServiceAdapter jobManagementServiceAdapter;
+
+	@Inject
+	private PersonManagementServiceAdapter personManagementServiceAdapter;
+
+	@Inject
+	private IdentityManagement2ServiceAdapter identityManagement2ServiceAdapter;
+
+	@Override
+	public void register(RegisterVO registerVO) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering register(registerVO={})", registerVO);
+		try {
+
+			// save person
+			personVO = personManagementServiceAdapter.createPerson(personVO);
+
+			// create user
+			userVO = identityManagement2ServiceAdapter.createUser(userVO);
+
+			// send Email
+			// jobManagementService.sendEmail(userInfo, personVO);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while deletePerson", e);
+		}
+
+	}
+}

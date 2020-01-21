@@ -1,0 +1,103 @@
+package com.parvanpajooh.taskmanagement.domain.model.dto;
+
+import java.io.Serializable;
+
+import com.parvanpajooh.client.identitymanagement2.model.UserMsg;
+
+public class UserDto implements Serializable {
+	
+	private static final long serialVersionUID = 4666593525617358351L;
+
+	private Long id;
+	
+	private String userName;
+	
+	private String firstName;
+	
+	private String lastName;
+	
+	private String displayName;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the userName
+	 */
+	public String getUserName() {
+		return userName;
+	}
+
+	/**
+	 * @param userName the userName to set
+	 */
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	/**
+	 * @return the firstName
+	 */
+	public String getFirstName() {
+		return firstName;
+	}
+
+	/**
+	 * @param firstName the firstName to set
+	 */
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	/**
+	 * @return the lastName
+	 */
+	public String getLastName() {
+		return lastName;
+	}
+
+	/**
+	 * @param lastName the lastName to set
+	 */
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	/**
+	 * @return the displayName
+	 */
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	/**
+	 * @param displayName the displayName to set
+	 */
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	/**
+	 * 
+	 * @param msg
+	 */
+	public void fromMsg(UserMsg msg) {
+
+		this.id = msg.getId();
+		this.userName = msg.getUserName();
+		this.firstName = msg.getFirstName();
+		this.lastName = msg.getLastName();
+		this.displayName = msg.getDisplayName();
+	}
+}

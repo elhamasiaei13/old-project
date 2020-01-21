@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" layout:decorator="base-filter-layout">
+
+	<th:block layout:fragment="custom-head">
+		<script th:inline="javascript">
+		</script>
+	</th:block>
+	
+	<th:block layout:fragment="custom-userinfo1"><span></span></th:block>
+	<th:block layout:fragment="custom-userinfo2">
+		<small>Member since Nov. 2012</small>
+	</th:block>
+</html>

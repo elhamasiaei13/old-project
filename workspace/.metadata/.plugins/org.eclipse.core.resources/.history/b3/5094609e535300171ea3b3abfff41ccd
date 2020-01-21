@@ -1,0 +1,82 @@
+package com.parvanpajooh.complaintmanagement.mvc;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.common.auth.UserInfoLoader;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.ddd.application.GenericApplicationService;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.complaintmanagement.application.ComplaintApplicationService;
+import com.parvanpajooh.complaintmanagement.domain.model.Complaint;
+import com.parvanpajooh.complaintmanagement.domain.model.criteria.ComplaintCriteria;
+import com.parvanpajooh.complaintmanagement.domain.model.dto.ComplaintDto;
+import com.parvanpajooh.complaintmanagement.mvc.base.ComplaintManagementAbstractController;
+
+@Controller
+@RequestMapping("/complaintCustomerList")
+public class CustomerControllerList extends ComplaintManagementAbstractController<Complaint, ComplaintDto, ComplaintCriteria> {
+
+	@EJB(mappedName = "java:global/complaintmanagement-ear/complaintmanagement-ejb/ComplaintApplicationServiceImpl")
+    private ComplaintApplicationService complaintApplicationService;
+
+    @Override
+    protected String getName() {
+    	return "customerList";
+    }
+
+	@Override
+	protected GenericApplicationService<Complaint, Long> getService() {
+		return complaintApplicationService;
+	}
+	
+	@Override
+	public DatatablesResponse<ComplaintDto> paging(@DatatablesParams DatatablesCriterias criterias, ComplaintCriteria criteria,
+			HttpServletRequest request) {
+		
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = getDefaultSortDirection();
+		String sortCriterion = columnDef.getName();
+
+		if ("0".equals(sortCriterion)) {
+			sortCriterion = getDefaultSortCriterion();
+		}
+
+		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+			sortDirection = SortDirectionEnum.Descending;
+		}
+
+		DataSet<ComplaintDto> dataSet;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			PageList<ComplaintDto> pagedRows = complaintApplicationService.findComplaints(userInfo, firstResult,
+					maxResults, sortDirection, sortCriterion); 
+			List<ComplaintDto> rows = pagedRows.getElements();
+
+			long totalRecords = pagedRows.getTotal();
+			dataSet = new DataSet<ComplaintDto>(rows, (long) rows.size(), totalRecords);
+		} catch (Exception e) {
+			log.error("error occured in record paging...", e);
+			e.printStackTrace();
+			dataSet = new DataSet<ComplaintDto>(new ArrayList<ComplaintDto>(), 0l, 0l);
+		}
+		return DatatablesResponse.build(dataSet, criterias);
+		
+	}
+	
+}

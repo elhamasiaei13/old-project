@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	layout:decorator="filter-layout" ddl:bundle-includes="bootstrapValidator,select2,moment-duration">
+
+	<head>
+		<title>TransportationSchedule List</title>
+		  	
+	  	<style type="text/css">
+	  	.weight, .volume {
+	  		padding-right: 10px;
+	  	}
+	  	.carrier, .route {
+	  		display: inline-block;
+	  	}
+	  	</style>
+	</head>
+
+	<body th:with="rightMenu='admin', subRightMenu='transportationSchedules'">
+		<section layout:fragment="top-header" class="fixed-header">
+			<div class="ui-header-image pull-left">
+            	<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/transportationmanagement2-web/resources/images/calendar.png" style="width: 48px; height: 48px;" />
+           	</div>
+            <div class="ui-header-title">
+                <div class="split-left">
+                    <h3>
+                        <small>Search</small>
+                    </h3>
+                    <h3>Transportation Schedule</h3>
+                </div>
+                <div class="split-right">
+                	<a data-toggle="modal" onclick="createTransportationSchedule();" class="btn btn-success" >
+						<i class="fa fa-plus">&nbsp;&nbsp;</i><span th:text="#{transportationSchedule.create}">جدید</span>
+					</a>
+                </div>
+            </div>
+		</section>
+		
+		<!-- Main content -->
+		<!-- BODY -->
+		<section class="content" layout:fragment="content">
+			<div class="box box-primary collapsed-box">
+				<div class="box-header">
+					<h3 class="box-title" th:text="#{search}">Search</h3>
+	                <div class="box-tools pull-right">
+	                	<button title="" data-widget="collapse" class="btn btn-primary btn-xs" ><i class="fa fa-plus"></i></button>
+	               	</div>
+               	</div>
+               	<div class="box-body" style="display: none;">
+                   	<dy:form entity="TransportationSchedule" form="search" type="search"/>
+               	</div><!-- /.box-body -->
+           	</div>
+           	
+			<div class="box">
+				<div class="box-body table-responsive">
+					<dy:table entity="TransportationSchedule" table="list" customSearch="true"/>
+				</div>
+			</div>
+			
+			<div class="modal fade" id="bulkModifyTransportationScheduleModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog modal-xl">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" th:text="#{transportationSchedule.modify}">ویرایش</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <div class="modal-form-content">
+								<form class="form-horizontal" role="form" id="bulkModifyTransportationScheduleForm" method="post"
+									action="/transportationmanagement2-web/transportationSchedule/save">
+									<div class="callout callout-danger hide">
+										<h4></h4>
+									</div>
+									<input type="hidden" id="transportationCarrierCodeBulkEdit" name="transportationBulkEdit.carrierCode" />
+									
+									<fieldset>
+										<legend th:text="#{transportation}">Transportation</legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportation.carrier}" th:remove="tag">Carrier</span></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="transportationCarrierNameBulkEdit"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportation.duration}" th:remove="tag">duration</span></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="transportationDurationBulkEdit"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportation.weight}" th:remove="tag">weight</span></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="transportationWeightBulkEdit"></span>
+											</div>
+										</div>
+									</fieldset>
+									
+									<fieldset>
+										<legend></legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportationSchedule.departureTimeInUtc}" th:remove="tag">departure time</span></label>
+											<div class="pull-left">
+												<input name="departureTimeInUtcChecked" data-input-name="departureTimeInUtcBulkEdit" value="true" type="checkbox" class="edit-checked"/>
+											</div>
+											<div class="col-sm-7">
+												<span class="place-holder" id="departureDateInUtcBulkEdit"></span>
+												<input disabled="disabled" class="form-control timePicker input-disabled" type="text" name="departureTimeInUtcBulk" id="departureTimeInUtcBulkEdit" width="55" style="width: 55px; display: inline-block;" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.departureTimeInUtc})}" 
+													data-bv-notempty="true"
+													data-bv-field="departureTimeInUtcBulkEdit"/>
+													
+												<input type="hidden" name="departureDateTimeInUtcBulkEdit" id="departureDateTimeInUtcBulkEdit" value=""/>
+											</div>
+										</div>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportationSchedule.arrivalTimeInUtc}" th:remove="tag">arrival time</span></label>
+											<div class="pull-left">
+												<input name="arrivalDateTimeChecked" data-input-name="arrivalDateTimeBulkEdit" value="true" type="checkbox" class="edit-checked"/>
+											</div>
+											<div class="col-sm-7">
+												<input disabled="disabled" class="form-control datetimePicker input-disabled" type="text" name="arrivalDateTimeBulkEdit" id="arrivalDateTimeBulkEdit" width="150" style="width: 150px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.arrivalTimeInUtc})}" 
+													data-bv-notempty="true"
+													data-bv-field="arrivalTimeBulkEdit"/>
+											</div>
+										</div>
+										
+									</fieldset>
+									
+									<fieldset>
+										<legend th:text="#{vehicle}">Vehicle</legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{vehicle.carrierRegister}" th:remove="tag">vehicle carrier register</span></label>
+											<div class="pull-left">
+												<input name="vehicleIdChecked" data-input-name="vehicleIdBulkEdit" value="true" type="checkbox" class="edit-checked"/>
+											</div>
+											<div class="col-sm-7">
+												<input disabled="disabled" class="form-control input-disabled" type="hidden" name="vehicleBulkEdit.id" id="vehicleIdBulkEdit" width="300" style="width: 300px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{vehicle.carrierRegister})}" 
+													data-bv-notempty="true"
+													data-bv-field="vehicleBulkEdit.id"/>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{vehicle.capacity}" th:remove="tag">vehicle capacity</span></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="vehicleCapacityBulkEdit"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{vehicle.uldInfo}" th:remove="tag">vehicle uld info</span></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="vehicleUldInfoBulkEdit"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{vehicle.cargoOnly}" th:remove="tag">vehicle cargo only</span></label>
+											<div class="col-sm-1">
+												<span class="place-holder" id="vehicleCargoOnlyBulkEdit"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportationSchedule.totalWeight}" th:remove="tag">total weight</span></label>
+											<div class="pull-left">
+												<input name="totalWeightChecked" data-input-name="totalWeightBulkEdit" value="true" type="checkbox" class="edit-checked"/>
+											</div>
+											<div class="col-sm-7">
+												<input disabled="disabled" class="form-control input-disabled" type="text" name="totalWeightBulkEdit" id="totalWeightBulkEdit" width="100" style="width: 100px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.totalWeight})}" 
+													data-bv-notempty="true"
+													data-bv-field="totalWeightBulkEdit"/>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportationSchedule.reservableWeight}" th:remove="tag">reservable Weight</span></label>
+											<div class="pull-left">
+												<input name="reservableWeightChecked" data-input-name="reservableWeightBulkEdit" value="true" type="checkbox" class="edit-checked"/>
+											</div>
+											<div class="col-sm-7">
+												<input disabled="disabled" class="form-control input-disabled" type="text" name="reservableWeightBulkEdit" id="reservableWeightBulkEdit" width="100" style="width: 100px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.reservableWeight})}" 
+													data-bv-notempty="true"
+													data-bv-field="reservableWeightBulkEdit"/>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportationSchedule.uldInfo}" th:remove="tag">uld info</span></label>
+											<div class="pull-left">
+												<input name="uldInfoChecked" data-input-name="uldInfoBulkEdit" value="true" type="checkbox" class="edit-checked"/>
+											</div>
+											<div class="col-sm-7">
+												<input disabled="disabled" class="form-control input-disabled" type="text" name="uldInfoBulkEdit" id="uldInfoBulkEdit" width="300" style="width: 300px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.uldInfo})}" 
+													data-bv-notempty="true"
+													data-bv-field="uldInfoBulkEdit"/>
+											</div>
+										</div>
+										
+									</fieldset>
+									
+									<fieldset>
+										<legend></legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" for="remarksBulkEdit"><span th:text="#{transportationSchedule.remarks}" th:remove="tag">remarks</span></label>
+											<div class="col-sm-7">
+												<textarea class="form-control" name="remarksBulkEdit" id="remarksBulkEdit" cols="80" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.remarks})}" 
+													data-bv-notempty="true"
+													data-bv-field="remarksBulkEdit"></textarea>
+											</div>
+										</div>
+										
+									</fieldset>
+								</form>
+		                	</div>
+		                </div>
+		                <div class="modal-footer">
+		                    <button type="button" class="btn btn-primary" th:text="#{button.save}" id="bulkModifyTransportationScheduleBtn">Save</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+			
+			<div class="modal fade" id="modifyTransportationScheduleModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog modal-xl">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" th:text="#{transportationSchedule.modify}">ویرایش</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <div class="modal-form-content">
+								<form class="form-horizontal" role="form" id="modifyTransportationScheduleForm" method="post"
+									action="/transportationmanagement2-web/transportationSchedule/save">
+									<div class="callout callout-danger hide">
+										<h4></h4>
+									</div>
+									<input type="hidden" id="idModify" name="id" />
+									<input type="hidden" id="versionModify" name="version" />
+									<input type="hidden" id="carrierCodeModify" name="transportation.carrierCode" />
+									
+									<fieldset>
+										<legend th:text="#{transportation}">Transportation</legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportation.carrier}"></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="transportationCarrierNameModify"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportation.duration}"></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="transportationDurationModify"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportation.weight}"></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="transportationWeightModify"></span>
+											</div>
+										</div>
+									</fieldset>
+									
+									<fieldset>
+										<legend></legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportationSchedule.departureTimeInUtc}"></label>
+											<div class="col-md-5">
+												<div class="row">
+													<div class="col-md-4">
+														<input class="form-control" readonly="readonly" id="departureDateInUtcModify"></input>
+													</div>
+													<div class="col-md-4">
+														<input class="form-control timeMask" type="text" name="departureTimeInUtc" id="departureTimeInUtcModify" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.departureTimeInUtc})}" 
+													data-bv-notempty="true"
+													data-bv-field="departureTimeInUtc"/>
+													
+													<input type="hidden" name="departureDateTimeInUtc" id="departureDateTimeModify" value=""/>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportationSchedule.arrivalTimeInUtc}"></label>
+											<div class="col-md-3">
+												<input class="form-control datetimePicker" type="text" name="arrivalDateTimeInUtc" id="arrivalDateTimeInUtcModify" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.arrivalTimeInUtc})}" 
+													data-bv-notempty="true"
+													data-bv-field="arrivalTimeInUtc"/>
+											</div>
+										</div>
+										
+									</fieldset>
+									
+									<fieldset>
+										<legend th:text="#{vehicle}">Vehicle</legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{vehicle.carrierRegister}"></label>
+											<div class="col-sm-7">
+												<input class="form-control" type="hidden" name="vehicle.id" id="vehicleIdModify" width="300" style="width: 300px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{vehicle.carrierRegister})}" 
+													data-bv-notempty="true"
+													data-bv-field="vehicleId"/>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{vehicle.capacity}"></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="vehicleCapacityModify"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{vehicle.uldInfo}"></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="vehicleUldInfoModify"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{vehicle.cargoOnly}"></label>
+											<div class="col-sm-1">
+												<span class="place-holder" id="vehicleCargoOnlyModify"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportationSchedule.totalWeight}"></label>
+											<div class="col-sm-7">
+												<input class="form-control" type="text" name="totalWeight" id="totalWeightModify" width="100" style="width: 100px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.totalWeight})}" 
+													data-bv-notempty="true"
+													data-bv-field="totalWeight"/>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportationSchedule.reservableWeight}"></label>
+											<div class="col-sm-7">
+												<input class="form-control" type="text" name="reservableWeight" id="reservableWeightModify" width="100" style="width: 100px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.reservableWeight})}" 
+													data-bv-notempty="true"
+													data-bv-field="reservableWeight"/>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportationSchedule.uldInfo}"></label>
+											<div class="col-sm-7">
+												<input class="form-control" type="text" name="uldInfo" id="uldInfoModify" width="300" style="width: 300px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.uldInfo})}" 
+													data-bv-notempty="true"
+													data-bv-field="uldInfo"/>
+											</div>
+										</div>
+										
+									</fieldset>
+									
+									<fieldset>
+										<legend></legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportationSchedule.scheduled}"></label>
+											<div class="col-sm-7">
+												<input class="form-control" name="scheduled" type="checkbox" id="scheduledModify" value="true"/>
+											</div>
+										</div>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportationSchedule.status}"></label>
+											<div class="col-sm-7">
+												<select class="form-control" name="status" id="statusModify" style="width: 100px;"
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.status})}" 
+													data-bv-notempty="true"
+													data-bv-field="status">
+													<option value="ACTIVE" th:text="#{transportationSchedule.status.active}">active</option>
+													<option value="INACTIVE" th:text="#{transportationSchedule.status.inactive}">inactive</option>
+													<option value="CANCELED" th:text="#{transportationSchedule.status.canceled}">canceled</option>
+												</select>
+											</div>
+										</div>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" for="remarksModify" th:text="#{transportationSchedule.remarks}"></label>
+											<div class="col-sm-7">
+												<textarea class="form-control" name="remarks" id="remarksModify" cols="80"
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.remarks})}" 
+													data-bv-notempty="true"
+													data-bv-field="remarks"></textarea>
+											</div>
+										</div>
+										
+									</fieldset>
+								</form>
+		                	</div>
+		                </div>
+		                <div class="modal-footer">
+		                    <button type="button" class="btn btn-primary" th:text="#{button.save}" id="modifyTransportationScheduleBtn">Save</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+			
+			<div class="modal fade" id="deleteTransportationScheduleModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" th:text="#{transportationSchedule.delete}">حذف</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <dy:form entity="TransportationSchedule" form="delete" type="delete"/>
+		                </div>
+		                <div class="modal-footer">
+		                    <button type="button" class="btn btn-primary" th:text="#{button.delete}" id="deleteTransportationScheduleBtn">Delete</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+		    
+		    <div class="modal fade" id="createTransportationScheduleModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog modal-xl">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" th:text="#{transportationSchedule.create}">جدید</h4>
+		                </div>
+		                <div class="modal-body">
+
+							<div class="modal-form-content">
+								<form class="form-horizontal" role="form" id="createTransportationScheduleForm" method="post" action="/transportationSchedule-web/transportationSchedule">
+									<div class="callout callout-danger hide">
+										<h4></h4>
+									</div>
+									<input type="hidden" name="id" />
+									<input type="hidden" name="version" />
+									
+									<fieldset>
+										<legend th:text="#{carrier}">Carrier</legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" for="carrierCodeCreate"><span th:text="#{transportationSchedule.carrier}" th:remove="tag">carrier code</span><span class="reqired"> *</span></label>
+											<div class="col-sm-7">
+												<input class="form-control" type="hidden" name="carrierCode" id="carrierCodeCreate" width="300" style="width: 300px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.carrier})}" 
+													data-bv-notempty="true"
+													data-bv-field="carrierCode"/>
+											</div>
+										</div>
+										
+									</fieldset>
+									
+									<fieldset>
+										<legend th:text="#{transportation}">Transportation</legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" for="transportationIdCreate"><span th:text="#{transportation.transportationNumber}" th:remove="tag">Transportation</span><span class="reqired"> *</span></label>
+											<div class="col-sm-7">
+												<input class="form-control" type="hidden" name="carrierRouteNumber" id="transportationIdCreate" width="500" style="width: 500px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.transportation})}" 
+													data-bv-notempty="true"
+													data-bv-field="carrierRouteNumber"/>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportation.duration}" th:remove="tag">duration</span></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="transportationDurationCreate"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportation.weight}" th:remove="tag">weight</span></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="transportationWeightCreate"></span>
+											</div>
+										</div>
+									</fieldset>
+									
+									<fieldset>
+										<legend th:text="#{vehicle}">Vehicle</legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" for="vehicleIdCreate"><span th:text="#{vehicle.carrierRegister}" th:remove="tag">vehicle carrier register</span><span class="reqired"> *</span></label>
+											<div class="col-sm-7">
+												<input class="form-control" type="hidden" name="vehicleId" id="vehicleIdCreate" width="500" style="width: 500px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{vehicle.carrierRegister})}" 
+													data-bv-notempty="true"
+													data-bv-field="vehicleId"/>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{vehicle.capacity}" th:remove="tag">vehicle capacity</span></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="vehicleCapacityCreate"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{vehicle.uldInfo}" th:remove="tag">vehicle uld info</span></label>
+											<div class="col-sm-7">
+												<span class="place-holder" id="vehicleUldInfoCreate"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{vehicle.cargoOnly}" th:remove="tag">vehicle cargo only</span></label>
+											<div class="col-sm-1">
+												<span class="place-holder" id="vehicleCargoOnlyCreate"></span>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportationSchedule.totalWeight}" th:remove="tag">total weight</span></label>
+											<div class="col-sm-7">
+												<input class="form-control" type="text" name="totalWeight" id="totalWeightCreate" width="100" style="width: 100px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.totalWeight})}" 
+													data-bv-notempty="true"
+													data-bv-field="totalWeight"/>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportationSchedule.reservableWeight}" th:remove="tag">reservable Weight</span></label>
+											<div class="col-sm-7">
+												<input class="form-control" type="text" name="reservableWeight" id="reservableWeightCreate" width="100" style="width: 100px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.reservableWeight})}" 
+													data-bv-notempty="true"
+													data-bv-field="reservableWeight"/>
+											</div>
+										</div>
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportationSchedule.uldInfo}" th:remove="tag">uld info</span></label>
+											<div class="col-sm-7">
+												<input class="form-control" type="text" name="uldInfo" id="uldInfoCreate" width="300" style="width: 300px" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.uldInfo})}" 
+													data-bv-notempty="true"
+													data-bv-field="uldInfo"/>
+											</div>
+										</div>
+										
+									</fieldset>
+									
+									<fieldset>
+										<legend></legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportationSchedule.scheduled}" th:remove="tag">scheduled</span></label>
+											<div class="col-sm-7">
+												<input class="form-control" name="scheduled" type="checkbox" id="scheduledCreate" value="true"/>
+											</div>
+										</div>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportationSchedule.generateFromDateInUtc}"></label>
+											<div class="col-md-2">
+												<input class="form-control dateMask" type="text" name="fromDateInUtc" id="fromDateInUtc"  
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.generateFromDateInUtc})}" 
+													data-bv-notempty="true"
+													data-bv-field="fromDateInUtc"/>
+											</div>
+										</div>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportationSchedule.generateToDateInUtc}"></label>
+											<div class="col-md-2">
+												<input class="form-control dateMask" type="text" name="toDateInUtc" id="toDateInUtc" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.generateToDateInUtc})}" 
+													data-bv-notempty="true"
+													data-bv-field="toDateInUtc"/>
+											</div>
+										</div>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportationSchedule.departureTimeInUtc}"></label>
+											<div class="col-md-2">
+												<input class="form-control timeMask" type="text" name="departureTimeInUtc" id="departureTimeInUtc" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.departureTimeInUtc})}" 
+													data-bv-notempty="true"
+													data-bv-field="departureTimeInUtc"/>
+											</div>
+										</div>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" th:text="#{transportationSchedule.arrivalTimeInUtc}"></label>
+											<div class="col-md-2">
+												<input class="form-control timeMask" type="text" name="arrivalTimeInUtc" id="arrivalTimeInUtc" 
+													th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.arrivalTimeInUtc})}" 
+													data-bv-notempty="true"
+													data-bv-field="arrivalTimeInUtc"/>
+											</div>
+										</div>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label"><span th:text="#{transportationSchedule.dayOfWeeks}" th:remove="tag">day of weeks</span></label>
+											<div class="col-sm-8">
+												<label class="checkbox-inline">
+													<input class="form-control" name="dayOfWeeks" type="checkbox" value="6" 
+														th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.dayOfWeeks})}" 
+														data-bv-notempty="true"
+														data-bv-field="dayOfWeeks"/>
+													<span th:text="#{saturday.short}">SATURDAY</span>
+												</label>
+												<label class="checkbox-inline">
+													<input class="form-control" name="dayOfWeeks" type="checkbox" value="7" 
+														th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.dayOfWeeks})}" 
+														data-bv-notempty="true"
+														data-bv-field="dayOfWeeks"/>
+													<span th:text="#{sunday.short}">SUNDAY</span>
+												</label>
+												<label class="checkbox-inline">
+													<input class="form-control" name="dayOfWeeks" type="checkbox" value="1" 
+														th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.dayOfWeeks})}" 
+														data-bv-notempty="true"
+														data-bv-field="dayOfWeeks"/>
+													<span th:text="#{monday.short}">MONDAY</span>
+												</label>
+												<label class="checkbox-inline">
+													<input class="form-control" name="dayOfWeeks" type="checkbox" value="2" 
+														th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.dayOfWeeks})}" 
+														data-bv-notempty="true"
+														data-bv-field="dayOfWeeks"/>
+													<span th:text="#{tuesday.short}">TUESDAY</span>
+												</label>
+												<label class="checkbox-inline">
+													<input class="form-control" name="dayOfWeeks" type="checkbox" value="3" 
+														th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.dayOfWeeks})}" 
+														data-bv-notempty="true"
+														data-bv-field="dayOfWeeks"/>
+													<span th:text="#{wednesday.short}">WEDNESDAY</span>
+												</label>
+												<label class="checkbox-inline">
+													<input class="form-control" name="dayOfWeeks" type="checkbox" value="4" 
+														th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.dayOfWeeks})}" 
+														data-bv-notempty="true"
+														data-bv-field="dayOfWeeks"/>
+													<span th:text="#{thursday.short}">THURSDAY</span>
+												</label>
+												<label class="checkbox-inline">
+													<input class="form-control" name="dayOfWeeks" type="checkbox" value="5" 
+														th:attr="data-bv-notempty-message=#{error-required(#{transportationSchedule.dayOfWeeks})}" 
+														data-bv-notempty="true"
+														data-bv-field="dayOfWeeks"/>
+													<span th:text="#{friday.short}">FRIDAY</span>
+												</label>
+											</div>
+										</div>
+									</fieldset>
+									
+									<fieldset>
+										<legend></legend>
+										
+										<div class="form-group ">
+											<label class="col-sm-2 control-label" for="remarksCreate"><span th:text="#{transportationSchedule.remarks}" th:remove="tag">remarks</span></label>
+											<div class="col-sm-7">
+												<textarea class="form-control" name="remarks" id="remarksCreate" cols="80"></textarea>
+											</div>
+										</div>
+										
+									</fieldset>
+								</form>
+							</div>
+						</div>
+		                <div class="modal-footer checkbox">
+		                    <button type="button" class="btn btn-primary" th:text="#{button.save}" id="createTransportationScheduleBtn">Save</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+		    
+		</section>
+		
+		<th:block layout:fragment="javascripts">		     
+	        <script src="../../resources/lib/jquery.inputmask/inputmask/inputmask.date.extensions.js" 
+			     th:src="@{/resources/lib/jquery.inputmask/jquery.inputmask.bundle.js}"></script>
+
+		    <script th:inline="javascript">
+		   	//window.Date = pDate;
+			//$('#departureDateFromInUtcFilter').val('<span th:remove="tag" th:text="${today}"></span>');
+			
+			/*<![CDATA[*/
+			function getTransportationScheduleExtraParams() {
+				return {
+				    "data" : function(data){
+						customPush(data, 'remarks', $('#remarksFilter').val());
+						customPush(data, 'status', $('#statusFilter').val());
+						customPush(data, 'departureDateFromInUtc', $('#departureDateFromInUtcFilter').val());
+						customPush(data, 'departureDateToInUtc', $('#departureDateToInUtcFilter').val());
+						customPush(data, 'arrivalDateFrom', $('#arrivalDateFromInUtcFilter').val());
+						customPush(data, 'arrivalDateToInUtcInUtc', $('#arrivalDateToInUtcFilter').val());
+						customPush(data, 'transportation.carrierName', $('#transportationcarrierCodeFilter').val());
+						customPush(data, 'transportation.transportationNumber', $('#transportationtransportationNumberFilter').val());
+						customPush(data, 'vehicle.manufacturer', $('#vehiclemanufacturerFilter').val());
+						customPush(data, 'vehicle.manufacturerModel', $('#vehiclemanufacturerModelFilter').val());
+						customPush(data, 'vehicle.carrierRegister', $('#vehiclecarrierRegisterFilter').val());
+						customPush(data, 'vehicle.type', $('#vehicletypeFilter').val());
+						customPush(data, 'vehicle.cargoOnly', $('#vehiclecargoOnlyFilter').val());
+						customPush(data, 'scheduled', $('#scheduledFilter').val());
+						customPush(data, 'transportationSchedule.carrierCode', $('#transportationcarrierCodeFilter').val());
+				    }
+				};
+			}
+			jQuery(document).ready(function(){
+
+				$('.timeMask').inputmask('hh:mm');
+				$('.dateMask').inputmask('yyyy-mm-dd');
+				
+				$('#carrierCodeCreate').select2({
+					placeholder: 'انتخاب کنید'
+					,formatResult: function(aaData){return aaData.nameFa;}
+					,formatSelection: function(aaData){return aaData.nameFa;}
+					,allowClear: true
+					,id: function(obj) {return obj.carrierCode;},
+					ajax: {
+						url: '/transportationmanagement2-web/transportationSchedule/carriers',
+						 transport: transportFunction,
+						 dataType: 'json',
+						 params: {contentType: 'application/json;charset=utf-8', statusCode: {404: function(){showError('404');},403: function(){showError('403');},503: function(){showError('503');}}},
+						 quietMillis: 200,
+						 data: function (term, page) {
+						 	return {
+						 		'columns[1][data]': 'id',
+                                start: (page - 1) * 20,
+                                length: 20,
+                                'order[1][column]': 1,
+                                'order[1][dir]': 'asc',
+								term: term
+						 	};
+						 },
+						 results: function (data, page) {
+						 	var more = (page * 20) < data.recordsFiltered;
+						 	return {results: data.data, more: more}
+						 }
+					}
+					,initSelection: function(element, callback) {
+						var id=$(element).val();
+						if(id !== ''){
+							$.ajax('/transportationmanagement2-web/transportationSchedule/carrier', {
+						 		data: {carrierCode: id},
+								dataType: 'json'
+							}).done(function(data) { callback(data); });
+						}
+					}
+				}).change(function() {
+					$('#createTransportationScheduleForm').data('bootstrapValidator').updateStatus('carrierCode', 'NOT_VALIDATED', null).validateField('carrierCode');
+				});
+				
+				$('#transportationIdCreate').select2({
+					placeholder: 'انتخاب کنید'
+					,formatResult: function(aaData){
+						return aaData.carrierRouteNumber + ' - ' + aaData.fromNode.codeName + ' To ' + aaData.toNode.codeName;
+					}
+					,formatSelection: function(aaData){
+						return aaData.carrierRouteNumber + ' - ' + aaData.fromNode.codeName + ' To ' + aaData.toNode.codeName;
+					}
+					,allowClear: true
+					,id: function(obj) {return obj.carrierRouteNumber;},
+					ajax: {
+						url: '/transportationmanagement2-web/transportationSchedule/routes',
+						 transport: transportFunction,
+						 dataType: 'json',
+						 params: {contentType: 'application/json;charset=utf-8', statusCode: {404: function(){showError('404');},403: function(){showError('403');},503: function(){showError('503');}}},
+						 quietMillis: 200,
+						 data: function (term, page) {
+						 	return {
+						 		'columns[1][data]': 'id',
+                                start: (page - 1) * 20,
+                                length: 20,
+                                'order[1][column]': 1,
+                                'order[1][dir]': 'asc',
+								carrierCode: $('#carrierCodeCreate').val(),
+								term: term
+						 	};
+						 },
+						 results: function (data, page) {
+						 	var more = (page * 20) < data.recordsFiltered;
+						 	return {results: data.data, more: more}
+						 }
+					}
+					,initSelection: function(element, callback) {
+						var id=$(element).val();
+						if(id !== ''){
+							$.ajax('/transportationmanagement2-web/transportationSchedule/route/carrierroutenumber', {
+						 		data: {carrierRouteNumber: id},
+								dataType: 'json'
+							}).done(function(data) { callback(data); });
+						}
+					}
+
+				}).change(function() {
+					$('#createTransportationScheduleForm').data('bootstrapValidator').updateStatus('carrierRouteNumber', 'NOT_VALIDATED', null).validateField('carrierRouteNumber');
+				}).on('select2-removed', function(e) {
+					$('#transportationDurationCreate').text('');
+					$('#transportationWeightCreate').text('');
+				}).on('select2-selected', function(e) {
+					$('#transportationDurationCreate').text(durationRender(e.choice.duration));
+					$('#transportationWeightCreate').text(thousandSeparator(e.choice.weight) + ' kg');
+				});
+				
+				$('#vehicleIdCreate').select2({
+					placeholder: 'انتخاب کنید'
+					,formatResult: function(aaData){
+						return aaData.manufacturer + ' - ' + aaData.manufacturerModel + ' - ' + aaData.carrierRegister;
+					}
+					,formatSelection: function(aaData){
+						return aaData.manufacturer + ' - ' + aaData.manufacturerModel + ' - ' + aaData.carrierRegister;
+					}
+					,allowClear: true
+					,id: function(obj) {return obj.id;},
+					ajax: {
+						url: '/transportationmanagement2-web/transportationSchedule/vehicles',
+						 transport: transportFunction,
+						 dataType: 'json',
+						 params: {contentType: 'application/json;charset=utf-8', statusCode: {404: function(){showError('404');},403: function(){showError('403');},503: function(){showError('503');}}},
+						 quietMillis: 200,
+						 data: function (term, page) {
+						 	return {
+						 		'columns[1][data]': 'id',
+                                start: (page - 1) * 20,
+                                length: 20,
+                                'order[1][column]': 1,
+                                'order[1][dir]': 'asc',
+								carrierCode: $('#carrierCodeCreate').val(),
+								term: term
+						 	};
+						 },
+						 results: function (data, page) {
+						 	var more = (page * 20) < data.recordsFiltered;
+						 	return {results: data.data, more: more}
+						 }
+					}
+					,initSelection: function(element, callback) {
+						var id=$(element).val();
+						if(id !== ''){
+							$.ajax('/transportationmanagement2-web/transportationSchedule/vehicle', {
+						 		data: {id: id},
+								dataType: 'json'
+							}).done(function(data) { callback(data); });
+						}
+					}
+				}).change(function() {
+					$('#createTransportationScheduleForm').data('bootstrapValidator').updateStatus('vehicleId', 'NOT_VALIDATED', null).validateField('vehicleId');
+				}).on('select2-removed', function(e) {
+					$('#vehicleTypeCreate').text('');
+					$('#vehicleCreate').text('');
+					$('#vehicleCapacityCreate').text('');
+					$('#vehicleUldInfoCreate').text('');
+					$('#vehicleCargoOnlyCreate').html('');
+				}).on('select2-selected', function(e) {
+					$('#vehicleTypeCreate').text(vehicleTypeRender(e.choice.type));
+					$('#vehicleCreate').text(e.choice.manufacturer + ':' + e.choice.manufacturerModel);
+					$('#vehicleCapacityCreate').html('<span class="weight">' +thousandSeparator(e.choice.weight) + ' kg</span><span class="volume">' + thousandSeparator(e.choice.volume) + ' CBM</span>');
+					$('#vehicleUldInfoCreate').text(e.choice.uldInfo);
+					$('#vehicleCargoOnlyCreate').html(booleanRender(e.choice.cargoOnly));
+				});
+				
+				$('#vehicleIdModify').select2({
+					placeholder: 'انتخاب کنید'
+					,formatResult: function(aaData){
+						return aaData.manufacturer + ' - ' + aaData.manufacturerModel + ' - ' + aaData.carrierRegister;
+					}
+					,formatSelection: function(aaData){
+						return aaData.manufacturer + ' - ' + aaData.manufacturerModel + ' - ' + aaData.carrierRegister;
+					}
+					,allowClear: true
+					,id: function(obj) {return obj.id;},
+					ajax: {
+						url: '/transportationmanagement2-web/transportationSchedule/vehicles',
+						 transport: transportFunction,
+						 dataType: 'json',
+						 params: {contentType: 'application/json;charset=utf-8', statusCode: {404: function(){showError('404');},403: function(){showError('403');},503: function(){showError('503');}}},
+						 quietMillis: 200,
+						 data: function (term, page) {
+						 	return {
+						 		'columns[1][data]': 'id',
+                                start: (page - 1) * 20,
+                                length: 20,
+                                'order[1][column]': 1,
+                                'order[1][dir]': 'asc',
+								carrierCode: $('#carrierCodeModify').val(),
+								name: term
+						 	};
+						 },
+						 results: function (data, page) {
+						 	var more = (page * 20) < data.recordsFiltered;
+						 	return {results: data.data, more: more}
+						 }
+					}
+					,initSelection: function(element, callback) {
+						var id=$(element).val();
+						if(id !== ''){
+							$.ajax('/transportationmanagement2-web/transportationSchedule/vehicle', {
+						 		data: {id: id},
+								dataType: 'json'
+							}).done(function(data) { callback(data); });
+						}
+					}
+				}).change(function() {
+					$('#modifyTransportationScheduleForm').data('bootstrapValidator').updateStatus('vehicle.id', 'NOT_VALIDATED', null).validateField('vehicle.id');
+				}).on('select2-removed', function(e) {
+					$('#vehicleCapacityModify').text('');
+					$('#vehicleUldInfoModify').text('');
+					$('#vehicleCargoOnlyModify').html('');
+				}).on('select2-selected', function(e) {
+					$('#vehicleCapacityModify').html('<span class="weight">' +thousandSeparator(e.choice.weight) + ' kg</span><span class="volume">' + thousandSeparator(e.choice.volume) + ' CBM</span>');
+					$('#vehicleUldInfoModify').text(e.choice.uldInfo);
+					$('#vehicleCargoOnlyModify').html(booleanRender(e.choice.cargoOnly));
+				});
+				
+				$('#vehicleIdBulkEdit').select2({
+					placeholder: 'انتخاب کنید'
+					,formatResult: function(aaData){
+						return aaData.manufacturer + ' - ' + aaData.manufacturerModel + ' - ' + aaData.carrierRegister;
+					}
+					,formatSelection: function(aaData){
+						return aaData.manufacturer + ' - ' + aaData.manufacturerModel + ' - ' + aaData.carrierRegister;
+					}
+					,allowClear: true
+					,id: function(obj) {return obj.id;},
+					ajax: {
+						url: '/transportationmanagement2-web/transportationSchedule/vehicles',
+						 transport: transportFunction,
+						 dataType: 'json',
+						 params: {contentType: 'application/json;charset=utf-8', statusCode: {404: function(){showError('404');},403: function(){showError('403');},503: function(){showError('503');}}},
+						 quietMillis: 200,
+						 data: function (term, page) {
+						 	return {
+						 		'columns[1][data]': 'id',
+                                start: (page - 1) * 20,
+                                length: 20,
+                                'order[1][column]': 1,
+                                'order[1][dir]': 'asc',
+								carrierCode: $('#transportationCarrierCodeBulkEdit').val(),
+								name: term
+						 	};
+						 },
+						 results: function (data, page) {
+						 	var more = (page * 20) < data.recordsFiltered;
+						 	return {results: data.data, more: more}
+						 }
+					}
+					,initSelection: function(element, callback) {
+						var id=$(element).val();
+						if(id !== ''){
+							$.ajax('/transportationmanagement2-web/transportationSchedule/vehicle', {
+						 		data: {id: id},
+								dataType: 'json'
+							}).done(function(data) { callback(data); });
+						}
+					}
+				}).change(function() {
+					$('#bulkModifyTransportationScheduleForm').data('bootstrapValidator').updateStatus('vehicleBulkEdit.id', 'NOT_VALIDATED', null).validateField('vehicleBulkEdit.id');
+				}).on('select2-removed', function(e) {
+					$('#vehicleTypeBulkEdit').text('');
+					$('#vehicleBulkEdit').text('');
+					$('#vehicleCapacityBulkEdit').text('');
+					$('#vehicleUldInfoBulkEdit').text('');
+					$('#vehicleCargoOnlyBulkEdit').html('');
+				}).on('select2-selected', function(e) {
+					$('#vehicleTypeBulkEdit').text(vehicleTypeRender(e.choice.type));
+					$('#vehicleBulkEdit').text(e.choice.manufacturer + ':' + e.choice.manufacturerModel);
+					$('#vehicleCapacityBulkEdit').html('<span class="weight">' +thousandSeparator(e.choice.weight) + ' kg</span><span class="volume">' + thousandSeparator(e.choice.volume) + ' CBM</span>');
+					$('#vehicleUldInfoBulkEdit').text(e.choice.uldInfo);
+					$('#vehicleCargoOnlyBulkEdit').html(booleanRender(e.choice.cargoOnly));
+				});
+
+				$('.modal').on('shown.bs.modal', function() {
+					//$(this).find('input[type=text],textarea,select').filter(':visible:first').focus();
+					$('.modal .modal-body').css('overflow-y', 'auto');
+					$('.modal .modal-body').css('max-height', $(window).height() * 0.7);
+
+					$('.datePicker').each(function(i, v){ 
+						var elem = $(this);
+						$(elem).on('dp.change dp.show', function(e) {
+							try{
+								$(elem).parents('form').data('bootstrapValidator').updateStatus($(elem).attr('name'), 'NOT_VALIDATED', null).validateField($(elem).attr('name'));
+							}catch(Error){}
+						});
+					});
+					
+					$('.timePicker').each(function(i, v){ 
+						var elem = $(this);
+						$(elem).on('dp.change dp.show', function(e) {
+							try{
+								$(elem).parents('form').data('bootstrapValidator').updateStatus($(elem).attr('name'), 'NOT_VALIDATED', null).validateField($(elem).attr('name'));
+							}catch(Error){}
+						});
+					});
+					
+					$('.datetimePicker').each(function(i, v){ 
+						var elem = $(this);
+						$(elem).on('dp.change dp.show', function(e) {
+							try{
+								$(elem).parents('form').data('bootstrapValidator').updateStatus($(elem).attr('name'), 'NOT_VALIDATED', null).validateField($(elem).attr('name'));
+							}catch(Error){}
+						});
+					});
+					
+					$('#departureTimeInUtcModify').on('dp.change dp.show', function(e) {
+						$('#departureDateTimeModify').val($('#departureDateInUtcModify').val() + ' ' + $('#departureTimeInUtcModify').val());
+					});
+					
+					$('#departureTimeInUtcBulkEdit').on('dp.change dp.show', function(e) {
+						$('#departureDateTimeInUtcBulkEdit').val($('#departureDateInUtcBulkEdit').text() + ' ' + $('#departureTimeInUtcBulkEdit').val());
+					});
+				});
+
+				$('#statusModify').select2();
+				
+				$('#createTransportationScheduleBtn').click(function(event){
+					var $btn = $(this);
+					$('#createTransportationScheduleForm').find('.callout').text('').addClass('hide');
+					$('#createTransportationScheduleForm').data('bootstrapValidator').validate();
+					if($('#createTransportationScheduleForm').data('bootstrapValidator').isValid()){
+						
+						$btn.attr('disabled', true);
+						$.post('/transportationmanagement2-web/transportationSchedule/generate', $('#createTransportationScheduleForm').serialize()).done(function(data) {
+							if(data.status == 'success') {
+								showTopleftGrowl('success', 'Create', 'Create Successful');
+								oTable_TransportationScheduleTable.ajax.reload();
+								$('#createTransportationScheduleModal').modal('hide');
+							} else if(data.status == 'ValidationException'){
+								$('#createTransportationScheduleForm').find('.callout').text(data.invalidField + ' نا معتبر است').removeClass('hide');
+							} else if(data.status == 'ObjectExistsException'){
+								$('#createTransportationScheduleForm').find('.callout').text((data.invalidField ? data.invalidField : 'data') + ' تکراری است').removeClass('hide');
+							} else if(data.status == 'ErrorCode'){
+								if(data.errorMessage){
+									$('#createTransportationScheduleForm').find('.callout').text(data.errorMessage).removeClass('hide');
+								} else {
+									$('#createTransportationScheduleForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+								}
+							} else {
+								console.debug(data.status);
+								$('#createTransportationScheduleForm').find('.callout').text((data.message ? data.message : 'ذخیره با خطا مواجه شد')).removeClass('hide');
+							}
+							$btn.attr('disabled', false);
+						}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'createTransportationScheduleBtn')});
+					}
+					return false;
+				});
+				
+				$('#createTransportationScheduleModal').on('hidden.bs.modal', function () {
+					$('#createTransportationScheduleForm').data('bootstrapValidator').resetForm();
+				});
+				
+				$('#createTransportationScheduleForm').bootstrapValidator({excluded: [':disabled'], feedbackIcons: {valid: 'fa fa-check',invalid: 'fa fa-times',validating: 'fa fa-refresh'}});
+
+				$('#modifyTransportationScheduleBtn').click(function(event){
+					var $btn = $(this);
+					$('#modifyTransportationScheduleForm').find('.callout').text('').addClass('hide');
+					$('#modifyTransportationScheduleForm').data('bootstrapValidator').validate();
+					if($('#modifyTransportationScheduleForm').data('bootstrapValidator').isValid()){
+						
+						$btn.attr('disabled', true);
+						$.post('/transportationmanagement2-web/transportationSchedule/save', $('#modifyTransportationScheduleForm').serialize()).done(function(data) {
+							if(data.status == 'success') {
+								showTopleftGrowl('success', 'Modify', 'Modify Successful');
+								oTable_TransportationScheduleTable.ajax.reload();
+								$('#modifyTransportationScheduleModal').modal('hide');
+							} else if(data.status == 'ValidationException'){
+								$('#modifyTransportationScheduleForm').find('.callout').text(data.invalidField + ' نا معتبر است').removeClass('hide');
+							} else if(data.status == 'ObjectExistsException'){
+								$('#modifyTransportationScheduleForm').find('.callout').text((data.invalidField ? data.invalidField : 'data') + ' تکراری است').removeClass('hide');
+							} else if(data.status == 'ErrorCode'){
+								if(data.errorMessage){
+									$('#modifyTransportationScheduleForm').find('.callout').text(data.errorMessage).removeClass('hide');
+								} else {
+									$('#modifyTransportationScheduleForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+								}
+							} else {
+								console.debug(data.status);
+								$('#modifyTransportationScheduleForm').find('.callout').text((data.message ? data.message : 'ذخیره با خطا مواجه شد')).removeClass('hide');
+							}
+							$btn.attr('disabled', false);
+						}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'modifyTransportationScheduleBtn')});
+					}
+					return false;
+				});
+
+				$('#modifyTransportationScheduleModal').on('hidden.bs.modal', function () {
+					$('#modifyTransportationScheduleForm').data('bootstrapValidator').resetForm();
+				});
+
+				$('#modifyTransportationScheduleForm').bootstrapValidator({excluded: [':disabled'], feedbackIcons: {valid: 'fa fa-check',invalid: 'fa fa-times',validating: 'fa fa-refresh'}});
+
+				$('#bulkModifyTransportationScheduleBtn').click(function(event){
+					var $btn = $(this);
+					$('#bulkModifyTransportationScheduleForm').find('.callout').text('').addClass('hide');
+					$('#bulkModifyTransportationScheduleForm').data('bootstrapValidator').validate();
+					if($('#bulkModifyTransportationScheduleForm').data('bootstrapValidator').isValid()){
+
+						var transportationScheduleIds = '';
+				    	$.each(selectedTransportationSchedule, function(i, v){
+				    		transportationScheduleIds += 'transportationScheduleIds=' + v + '&';
+				    	});
+
+				    	var data = '';
+
+				    	if(transportationScheduleIds != ''){
+				    		data = transportationScheduleIds;
+					    } else {
+				    		data = $('#frmTransportationScheduleSearch').serialize();
+						}
+
+				    	data += '&' + $('#bulkModifyTransportationScheduleForm').serialize();
+						
+						$btn.attr('disabled', true);
+						$.post('/transportationmanagement2-web/transportationSchedule/bulkEdit', data).done(function(data) {
+							if(data.status == 'success') {
+								showTopleftGrowl('success', 'Modify', 'Modify Successful');
+								oTable_TransportationScheduleTable.ajax.reload();
+								$('#bulkModifyTransportationScheduleModal').modal('hide');
+							} else if(data.status == 'ValidationException'){
+								$('#bulkModifyTransportationScheduleForm').find('.callout').text(data.invalidField + ' نا معتبر است').removeClass('hide');
+							} else if(data.status == 'ObjectExistsException'){
+								$('#bulkModifyTransportationScheduleForm').find('.callout').text((data.invalidField ? data.invalidField : 'data') + ' تکراری است').removeClass('hide');
+							} else if(data.status == 'ErrorCode'){
+								if(data.errorMessage){
+									$('#bulkModifyTransportationScheduleForm').find('.callout').text(data.errorMessage).removeClass('hide');
+								} else {
+									$('#bulkModifyTransportationScheduleForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+								}
+							} else {
+								console.debug(data.status);
+								$('#bulkModifyTransportationScheduleForm').find('.callout').text((data.message ? data.message : 'ذخیره با خطا مواجه شد')).removeClass('hide');
+							}
+							$btn.attr('disabled', false);
+						}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'bulkModifyTransportationScheduleBtn')});
+					}
+					return false;
+				});
+
+				$('#bulkModifyTransportationScheduleModal').on('hidden.bs.modal', function () {
+					$('#bulkModifyTransportationScheduleForm').data('bootstrapValidator').resetForm();
+				});
+
+				$('#bulkModifyTransportationScheduleForm').bootstrapValidator({excluded: [':disabled'], feedbackIcons: {valid: 'fa fa-check',invalid: 'fa fa-times',validating: 'fa fa-refresh'}});
+			});
+			
+			function resetCreateForm(container) {
+				$(container).find('input[type=text]').val('');
+				$(container).find('textarea').val('');
+				$(container).find('.place-holder').text('');
+				$(container).find('input[type=checkbox]').prop('checked', false).iCheck('update');
+				$('#carrierCodeCreate').select2('val', '');
+				$('#transportationIdCreate').select2('val', '');
+				$('#vehicleIdCreate').select2('val', '');
+			}
+			
+			function resetModifyForm(container) {
+				$(container).find('input[type=hidden]').val('');
+				$(container).find('input[type=text]').val('');
+				$(container).find('textarea').val('');
+				$(container).find('.place-holder').text('');
+				$(container).find('input[type=checkbox]').prop('checked', false).iCheck('update');
+				$('#carrierCodeCreate').select2('val', '');
+				$('#transportationIdCreate').select2('val', '');
+				$('#vehicleIdCreate').select2('val', '');
+			}
+			
+			function createTransportationSchedule() {
+				resetCreateForm($('#createTransportationScheduleModal'));
+				$('#createTransportationScheduleModal').modal({ backdrop: 'static', keyboard: true });
+				$('#createTransportationScheduleModal').modal('show');
+				$('#createTransportationScheduleForm').find('.callout').text('').addClass('hide');
+				$('#createTransportationScheduleForm').find('input[type=checkbox]').prop('checked', false).iCheck('update');
+				$('#createTransportationScheduleModal').find('input[type=checkbox]').not('#scheduledCreate').on('ifChanged', function(e) {
+	                var field = $(this).attr('name');
+	                $('#createTransportationScheduleForm').data('bootstrapValidator').updateStatus(field, 'NOT_VALIDATED', null).validateField(field);
+	            });
+			}
+
+			function modifyTransportationSchedule(id) {
+				resetModifyForm($('#modifyTransportationScheduleModal'));
+				$.getJSON('/transportationmanagement2-web/transportationSchedule/' + id).done(function(data) {
+					if(data.status == 'success'){
+						$('#modifyTransportationScheduleModal').find('input[name="id"]').val(data.result.id);
+						$('#modifyTransportationScheduleModal').find('input[name="version"]').val(data.result.version);
+						$('#scheduledModify').prop('checked', data.result.scheduled);
+						$('#statusModify').select2('val', data.result.status);
+						$('#carrierCodeModify').val(data.result.transportation.carrierCode);
+						$('#remarksModify').val(data.result.remarks);
+						$('#transportationCarrierNameModify').html('<span class="carrier">' + data.result.transportation.carrierName + '-' + data.result.transportation.transportationNumber + '</span>  <span class="route">' + data.result.transportation.fromNodeName + ' To ' + data.result.transportation.toNodeName +'</span>');
+						$('#transportationDurationModify').text(durationRender(data.result.transportation.duration));
+						$('#transportationWeightModify').text(thousandSeparator(data.result.transportation.weight) + ' kg');
+						$('#departureDateInUtcModify').val(data.result.departureDateInUtc);
+						$('#departureTimeInUtcModify').val(data.result.departureTimeInUtc);
+						$('#departureDateTimeModify').val(data.result.departureDateInUtc + ' ' + data.result.departureTimeInUtc);
+						$('#arrivalDateTimeInUtcModify').val(data.result.arrivalDateTimeInUtc);
+						$('#vehicleIdModify').select2('val', data.result.vehicle.id);
+						$('#vehicleCapacityModify').html('<span class="weight">' +thousandSeparator(data.result.vehicle.weight) + ' kg</span><span class="volume">' + thousandSeparator(data.result.vehicle.volume) + ' CBM</span>');
+						$('#vehicleUldInfoModify').text(data.result.vehicle.uldInfo);
+						$('#vehicleCargoOnlyModify').html(booleanRender(data.result.vehicle.cargoOnly));
+						$('#totalWeightModify').val(data.result.totalWeight);
+						$('#reservableWeightModify').val(data.result.reservableWeight);
+						$('#uldInfoModify').val(data.result.uldInfo);
+						
+						$('#modifyTransportationScheduleModal').modal({ backdrop: 'static', keyboard: true });
+						$('#modifyTransportationScheduleModal').modal('show');
+						$('#modifyTransportationScheduleForm').find('.callout').text('').addClass('hide');
+						$('#modifyTransportationScheduleModal').find('input[type=checkbox], #modifyTransportationScheduleModal input[type=radio]').iCheck({checkboxClass: "icheckbox_minimal",radioClass: "iradio_minimal"});
+					}
+					else if(data.status == 'fail'){
+						console.debug('failed');
+						$('#modifyTransportationScheduleModal').find('.modal-footer span.label').removeClass('hide').text('save failed');
+					}
+				})
+				.fail(failAjax);
+			}
+
+			function bulkModifyTransportationSchedule(){
+				resetModifyForm($('#bulkModifyTransportationScheduleModal'));
+		    	$('#bulkModifyTransportationScheduleModal').find('.input-disabled').prop('disabled', true);
+
+		    	var transportationScheduleIds = '';
+		    	$.each(selectedTransportationSchedule, function(i, v){
+		    		transportationScheduleIds += 'transportationScheduleIds=' + v + '&';
+		    	});
+
+		    	var data = '';
+
+		    	if(transportationScheduleIds != ''){
+		    		data = transportationScheduleIds;
+			    } else {
+		    		data = $('#frmTransportationScheduleSearch').serialize();
+				}
+
+		    	$.ajax({
+				  	url: '/transportationmanagement2-web/transportationSchedule/preBulkEdit',
+				  	dataType: 'json',
+				  	async: false,
+				  	method: 'POST',
+				  	data: data
+				}).done(function(data) {
+					if(data.status == 'success') { 
+						
+						$('#transportationCarrierCodeBulkEdit').val(data.result.transportation.carrierCode);
+						$('#transportationCarrierNameBulkEdit').html('<span class="carrier">' +data.result.transportation.carrierName + '</span> - <span class="route">' + data.result.transportation.fromNodeName + ' To ' + data.result.transportation.toNodeName +'</span>');
+						$('#transportationDurationBulkEdit').text(durationRender(data.result.transportation.duration));
+						$('#transportationWeightBulkEdit').text(thousandSeparator(data.result.transportation.weight) + ' kg');
+						$('#departureDateInUtcBulkEdit').text(data.result.departureDateInUtc);
+						$('#departureTimeInUtcBulkEdit').val(data.result.departureTimeInUtc);
+						//$('#departureDateTimeInUtcBulkEdit').val(data.result.departureDateInUtc + ' ' + data.result.departureTimeInUtc);
+						$('#arrivalDateTimeBulkEdit').val(data.result.arrivalDateTimeInUtc);
+						if(data.result.vehicle){
+							$('#vehicleIdBulkEdit').select2('val', data.result.vehicle.id);
+							$('#vehicleCapacityBulkEdit').html('<span class="weight">' +thousandSeparator(data.result.vehicle.weight) + ' kg</span><span class="volume">' + thousandSeparator(data.result.vehicle.volume) + ' CBM</span>');
+							$('#vehicleUldInfoBulkEdit').text(data.result.vehicle.uldInfo);
+							$('#vehicleCargoOnlyBulkEdit').html(booleanRender(data.result.vehicle.cargoOnly));
+						}
+						$('#totalWeightBulkEdit').val(data.result.totalWeight);
+						$('#reservableWeightBulkEdit').val(data.result.reservableWeight);
+						$('#uldInfoBulkEdit').val(data.result.uldInfo);
+						
+						$('#bulkModifyTransportationScheduleModal').modal({ backdrop: 'static', keyboard: true });
+						$('#bulkModifyTransportationScheduleModal').modal('show');
+						$('#bulkModifyTransportationScheduleForm').find('.callout').text('').addClass('hide');
+						$('#bulkModifyTransportationScheduleModal').find('input[type=checkbox], #bulkModifyTransportationScheduleModal input[type=radio]').iCheck({checkboxClass: "icheckbox_minimal",radioClass: "iradio_minimal"});
+
+						$('#bulkModifyTransportationScheduleModal').find('.edit-checked').attr('checked', false)
+						.on('ifChecked', function(e) {
+			                var field = $(this).attr('name');
+			                var inputId = $(this).attr('data-input-name');
+			                $('#' + inputId).prop('disabled', false);
+
+			                if('departureTimeInUtcBulkEdit' == inputId){
+				                $('#departureDateTimeInUtcBulkEdit').val($('#departureDateInUtcBulkEdit').text() + ' ' + $('#departureTimeInUtcBulkEdit').val());
+				            }
+			                
+			            }).on('ifUnchecked', function(e) {
+			                var field = $(this).attr('name');
+			                var inputId = $(this).attr('data-input-name');
+			                $('#' + inputId).prop('disabled', true);
+
+			                if('departureTimeInUtcBulkEdit' == inputId){
+			                	$('#departureDateTimeInUtcBulkEdit').val('');
+			                }
+			            });
+						
+					} else if(data.status == 'ErrorCode') {
+						if(data.errorMessage){
+							showTopleftGrowl('error', 'Error', data.errorMessage);
+						} else {
+							showTopleftGrowl('error', 'Error', messages[data.errorCode]);
+						}
+					} else {
+						showTopleftGrowl('error', 'Error', (data.message ? data.message : 'فراخوانی با خطا مواجه شد'));
+					}
+				}).fail(failAjax);
+		    	
+			}
+			/*]]>*/
+			
+			function vehicleTypeRender(entity){
+				var res = entity;
+				if(entity == 'AIRCRAFT'){
+					res = '<span class="label label-info" th:text="#{vehicle.type.aircraft}" th:remove="tag"></span>';
+				} else if(entity == 'SHIP'){
+					res = '<span class="label label-info" th:text="#{vehicle.type.ship}" th:remove="tag"></span>';
+				} else if(entity == 'VAN'){
+					res = '<span class="label label-info" th:text="#{vehicle.type.van}" th:remove="tag"></span>';
+				} else if(entity == 'TRUCK'){
+					res = '<span class="label label-info" th:text="#{vehicle.type.truck}" th:remove="tag"></span>';
+				} else if(entity == 'PICKUP_TRUCK'){
+					res = '<span class="label label-info" th:text="#{vehicle.type.pickup_truck}" th:remove="tag"></span>';
+				} else if(entity == 'MINI_TRUCK'){
+					res = '<span class="label label-info" th:text="#{vehicle.type.mini_truck}" th:remove="tag"></span>';
+				} else if(entity == 'MOTORCYCLE'){
+					res = '<span class="label label-info" th:text="#{vehicle.type.motorcycle}" th:remove="tag"></span>';
+				} else if(entity == 'TRAIN'){
+					res = '<span class="label label-info" th:text="#{vehicle.type.train}" th:remove="tag"></span>';
+				}
+				
+				return res;
+			}
+			
+			function typeRender(entity, type, full){
+				return vehicleTypeRender(entity);
+			}
+			
+			function statusRender(entity){
+				var res = entity;
+				if(entity == 'ACTIVE'){
+					res = '<span class="label label-info" th:text="#{transportationSchedule.status.active}" th:remove="tag"></span>';
+				} else if(entity == 'INACTIVE'){
+					res = '<span class="label label-info" th:text="#{transportationSchedule.status.inactive}" th:remove="tag"></span>';
+				} else if(entity == 'CANCELED'){
+					res = '<span class="label label-info" th:text="#{transportationSchedule.status.canceled}" th:remove="tag"></span>';
+				}
+				return res;
+			}
+
+			function durationRender(entity, type, full){
+				if(!entity)
+					return entity;
+				return moment.duration(entity,'minutes').format('hh:mm');
+			}
+
+			function manufacturerRender(entity, type, full){
+				return full.vehicle.manufacturer + ' ' + full.vehicle.manufacturerModel;
+			}
+		    </script>
+		</th:block>
+	</body>
+</html>

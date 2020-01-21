@@ -1,0 +1,22 @@
+	<ul xmlns:th="http://www.thymeleaf.org" 
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		xmlns:idm="http://www.parvanpajooh/thymeleaf/idm"
+		xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" 
+		layout:fragment="menu" class="nav sidebar-menu">
+
+	<li th:title="#{persons}"
+		th:class="${rightMenu == '' || rightMenu == 'profile-register' ? 'active' : ''}">
+		
+		<a th:href="@{'/profile/register'}"> 
+			<i class="fa fa-user"></i>
+			<span th:text="#{persons}"></span>
+		</a>
+		
+		<a th:href="@{'/profile/registers'}"> 
+			<i class="fa fa-user"></i>
+			<span >Registers</span>
+		</a>
+		
+	</li>
+
+</ul>

@@ -1,0 +1,341 @@
+package com.parvanpajooh.agentmanagement.dao.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.agentmanagement.dao.GeneralAgentDao;
+import com.parvanpajooh.agentmanagement.model.GeneralAgent;
+import com.parvanpajooh.agentmanagement.model.GeneralAgent_;
+import com.parvanpajooh.agentmanagement.model.criteria.GeneralAgentCriteria;
+import com.parvanpajooh.agentmanagement.model.vo.GeneralAgentVO;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberDisplay;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class GeneralAgentDaoJpa extends GenericDaoJpa<GeneralAgent, Long>implements GeneralAgentDao {
+
+	public GeneralAgentDaoJpa() {
+		super(GeneralAgent.class);
+	}
+
+	@Override
+	public GeneralAgent save(GeneralAgent generalAgent) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering save( generalAgent={})", generalAgent);
+
+		generalAgent.setCanonicalSearchName(generalAgent.getName().replaceAll("\\s", StringPool.BLANK));
+
+		generalAgent = super.save(generalAgent);
+
+		// LOG
+		log.debug("Leaving save(): ret={}", generalAgent);
+
+		return generalAgent;
+	}
+
+	@Override
+	public GeneralAgent findByName(String name) throws ParvanDaoException {
+		log.trace("Entering findByName name={}", name);
+
+		GeneralAgent generalAgent = null;
+
+		try {
+			// Make query
+			Query q = getEntityManager().createQuery("from GeneralAgent obj where obj.name = ?");
+
+			q.setParameter(1, name);
+
+			List<GeneralAgent> list = q.getResultList();
+
+			if (list != null && list.size() > 0) {
+				generalAgent = list.get(0);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting generalAgent with Name: " + name, e);
+		}
+
+		log.trace("Leaving findByName name={}", name);
+
+		return generalAgent;
+	}
+
+	@Override
+	public boolean findByParentId(Long parentId) throws ParvanDaoException {
+
+		// LOG
+		log.trace("Entering findByAccountNumber accountNumber={}", parentId);
+
+		Boolean hasChildren = false;
+
+		try {
+			// Make query
+			Query q = getEntityManager().createQuery("from GeneralAgent obj where obj.parent.id = ? and obj.id <> ?");
+
+			q.setParameter(1, parentId);
+			q.setParameter(2, parentId);
+
+			List<GeneralAgent> list = q.getResultList();
+
+			if (list != null && list.size() > 0) {
+				hasChildren = true;
+			}
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting generalAgent with parentId: " + parentId, e);
+		}
+
+		// LOG
+		log.trace("Leaving findByParentId parentId={}", parentId);
+		return hasChildren;
+	}
+
+	@Override
+	public List<GeneralAgent> findByParent(Long parentId) throws ParvanDaoException {
+
+		log.trace("Entering findByParent parentId={}", parentId);
+
+		List<GeneralAgent> allSubAgents = new ArrayList<GeneralAgent>();
+		try {
+			Query aQuery = getEntityManager().createQuery("from GeneralAgent where parentId = ? ");
+
+			_findByParent(aQuery, allSubAgents, parentId);
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting generalAgent with parentId: " + parentId, e);
+		}
+
+		return allSubAgents;
+	}
+
+	/**
+	 * 
+	 * @param allSubAgents
+	 * @param parentAgentId
+	 */
+	private void _findByParent(Query query, List<GeneralAgent> allSubAgents, Long parentAgentId) {
+		// set param-value
+		query.setParameter(1, parentAgentId);
+
+		// execute query
+		@SuppressWarnings("unchecked")
+		List<GeneralAgent> list = query.getResultList();
+		allSubAgents.addAll(list);
+
+		for (GeneralAgent thisSubAgent : list) {
+			_findByParent(query, allSubAgents, thisSubAgent.getId());
+		}
+	}
+
+	@Override
+	public Map<Long, String> findAgentNamesByIds(List<Long> ids) throws ParvanDaoException {
+
+		// LOG
+		log.trace("Entering findAgentNamesByIds ids={}", ids);
+
+		List<Object> list = null;
+		Map<Long, String> mapresult = new HashMap<Long, String>();
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		// make criteria-builder
+		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+
+		// make criteria
+		CriteriaQuery<GeneralAgent> criteria = builder.createQuery(GeneralAgent.class);
+		Metamodel metamodel = getEntityManager().getMetamodel();
+		EntityType<GeneralAgent> GeneralAgent_ = metamodel.entity(GeneralAgent.class);
+		Root<GeneralAgent> root = criteria.from(GeneralAgent_);
+		criteria.multiselect(root.<Long> get("id"), root.<String> get("name"));
+
+		try {
+
+			predicateList.add(root.<Long> get("id").in(ids));
+
+			criteria.where(predicateList.get(0));
+
+			// create query
+			Query q = getEntityManager().createQuery(criteria);
+
+			// Query q = getEntityManager().createQuery("select new map(id as
+			// id,name as name) from GeneralAgent");
+
+			// execute query
+			list = q.getResultList();
+
+			for (Object object : list) {
+
+				mapresult.put(Long.parseLong(String.valueOf(object)), object.toString());
+			}
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting agentNames with ids", e);
+		}
+
+		// LOG
+		log.debug("Leaving findAgentNamesByIds(): ret={}", (list != null) ? list.size() : "Null");
+		return mapresult;
+	}
+
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<GeneralAgent> root,
+			Map<String, Join> joins) throws ParvanException {
+
+		// LOG
+		log.debug("Entering buildPredicateList( ... )");
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		GeneralAgentCriteria generalAgentCriteria = (GeneralAgentCriteria) cri;
+		String canonicalSearchName = generalAgentCriteria.getCanonicalSearchName();
+		Long id = generalAgentCriteria.getId();
+		GeneralAgentVO parent = generalAgentCriteria.getParent();
+		String iataCode = generalAgentCriteria.getIataCode();
+		String tel = generalAgentCriteria.getTel();
+		String address = generalAgentCriteria.getAddress();
+		Boolean branch = generalAgentCriteria.getBranch();
+		Boolean active = generalAgentCriteria.getActive();
+		String nodeCode = generalAgentCriteria.getNodeCode();
+
+		// ----------------------------------------------------------------
+		// parent
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(parent) && Validator.isNotNull(parent.getId())) {
+
+			Join<GeneralAgent, GeneralAgent> generalAgentJoin = root.join("parent");
+			if (Validator.isNotNull(parent.getId())) {
+
+				Predicate predicate = builder.equal(generalAgentJoin.<Long> get(GeneralAgent_.id), parent.getId());
+				predicateList.add(predicate);
+			}
+		}
+
+		// ----------------------------------------------------------------
+		// Id
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(id)) {
+			Predicate predicate = builder.equal(root.<Long> get(GeneralAgent_.id), id);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// IATA Code
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(iataCode)) {
+			Predicate predicate = builder.like(root.<String> get(GeneralAgent_.iataCode), iataCode);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Address
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(address)) {
+			Predicate predicate = builder.like(root.<String> get(GeneralAgent_.address), "%" + address + "%");
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Tel
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(tel)) {
+			Predicate predicate = builder.like(root.<String> get(GeneralAgent_.tel), "%" + tel + "%");
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Active
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(active)) {
+			Predicate predicate = builder.equal(root.<Boolean> get(GeneralAgent_.active), active);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Branch
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(branch)) {
+			Predicate predicate = builder.equal(root.<Boolean> get(GeneralAgent_.branch), branch);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// CanonicalSearchName
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(canonicalSearchName)) {
+			List<Predicate> preList = new ArrayList<Predicate>();
+
+			String[] splited = canonicalSearchName.trim().split("\\s+");
+
+			for (String str : splited) {
+
+				Predicate predicate = builder.like(root.<String> get(GeneralAgent_.canonicalSearchName), "%" + str + "%");
+				preList.add(predicate);
+
+			}
+			predicateList.add(builder.and(preList.toArray(new Predicate[0])));
+		}
+
+		// LOG
+		log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<GeneralAgent> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateTo());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateTo());
+			predicateList.add(predicate);
+		}
+	}
+
+}

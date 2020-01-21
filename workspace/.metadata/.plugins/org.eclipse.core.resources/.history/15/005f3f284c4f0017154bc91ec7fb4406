@@ -1,0 +1,74 @@
+package com.parvanpajooh.waybillmanagement.rest;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.parvanpajooh.client.waybillmanagement.model.WaybillMsg;
+import com.parvanpajooh.common.auth.BaseRestController;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.waybillmanagement.application.WaybillApplicationService;
+import com.parvanpajooh.waybillmanagement.domain.model.dto.CargoWaybillDto;
+
+/**
+ * @author sasan
+ */
+
+@RestController
+@RequestMapping("/v1")
+public class WaybillManagementRestController extends BaseRestController {
+	
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+	
+	@EJB(mappedName="java:global/waybillmanagement-ear/waybillmanagement-ejb/WaybillApplicationServiceImpl")
+	private WaybillApplicationService waybillService;
+	
+	@RequestMapping(value = "/hello", method = RequestMethod.GET)
+	public String helloWord(
+			HttpServletRequest request, 
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip) {
+
+		// LOG
+		log.debug("Entering helloWord(userName={} , ip={})", userName, ip);
+		
+		return "hello " + userName;
+	} 
+	
+	@RequestMapping(value = "/waybills/waybillnumber/{waybillNumber}", method = RequestMethod.GET)
+	public WaybillMsg getWaybill(@Context HttpServletRequest request,
+			@RequestHeader String userName,
+			@RequestHeader String ip,
+			@PathVariable(value = "waybillNumber") String waybillNumber,
+			@Context HttpServletResponse response)  throws ParvanServiceException {
+		
+		log.debug("Entering getWaybill(userName={} , ip={})", userName, ip);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+
+		CargoWaybillDto cargoWaybillDto = waybillService.getCargo(userInfo, waybillNumber);		
+		
+		if (cargoWaybillDto == null) {
+			throw new ParvanRecoverableException(
+					String.format("cargo not found by waybillNumber [%s]", waybillNumber),
+					ErrorCode.OBJECT_NOT_FOUND);
+		}
+
+		WaybillMsg waybillMsg = cargoWaybillDto.toMsg();
+		
+		return waybillMsg;
+	}
+}
+	

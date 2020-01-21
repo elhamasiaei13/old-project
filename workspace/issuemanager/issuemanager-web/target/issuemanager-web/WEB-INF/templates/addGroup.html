@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>AddGroup</title>
+</head>
+
+<body>
+	<section class="content" layout:fragment="content">
+
+		<form action="#" class="form-inline" th:action="@{save}" method="post">
+		
+			<input type="text" name="name" class="input-small" placeholder="Name" th:field="*{group.name}" /> <br></br> 
+			<input type="text" name="description" class="input-small" placeholder="Discription" th:field="*{group.description}" /> <br></br>
+			<br></br> <br></br>
+			<button type="submit" class="btn btn-primary" th:text="#{btn_save}"></button>
+			
+		</form>
+		
+	</section>
+</body>
+</html>

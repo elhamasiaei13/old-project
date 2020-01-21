@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>Task List</title>
+
+<style>
+.select-device-modal label {
+	margin-bottom: 0px;
+}
+
+.select-device-modal input {
+	width: auto;
+	height: 28px;
+}
+
+.select-device-modal .form-control {
+	width: auto;
+}
+
+.select-device-modal table.dataTable td {
+	padding: 1px 10px;
+}
+
+.select-device-modal .dataTables_filter label {
+	margin-bottom: 5px;
+}
+</style>
+</head>
+
+<body th:with="rightMenu='tasks'">
+	<section layout:fragment="top-header" class="fixed-header">
+
+		<div class="ui-header-image pull-left">
+			<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/stock2-web/resources/images/stack.png" th:src="@{/resources/images/stack.png}" style="width: 48px; height: 48px;" />
+		</div>
+		<div class="ui-header-title">
+			<div class="split-left">
+				<h3>
+					<small>View</small>
+				</h3>
+				<h3>Tasks</h3>
+			</div>
+			<div class="split-right">
+				<a th:href="@{'/tasks/show'}" class="btn btn-success">
+					<i class="fa fa-plus">&nbsp;&nbsp;</i>
+					<span th:text="#{taskCreateCommand.create}">ایجاد کار جدید</span>
+				</a>
+			</div>
+		</div>
+
+	</section>
+
+	<!-- Main content -->
+	<!-- BODY -->
+	<section class="content" layout:fragment="content">
+		<div class="box box-primary">
+			<div class="box-header">
+				<h3 class="box-title" th:text="#{search}">جستجو</h3>
+				<div class="box-tools pull-right">
+					<button title="" data-widget="collapse" class="btn btn-primary btn-xs">
+						<i class="fa fa-minus"></i>
+					</button>
+				</div>
+			</div>
+			<div class="box-body" style="display: block;">
+				<dy:form entity="TaskDisplay" form="search" type="search" />
+			</div>
+			<!-- /.box-body -->
+		</div>
+
+		<div class="box">
+			<div class="box-body table-responsive">
+				<dy:table entity="TaskDisplay" table="list" customSearch="true" customObjectActions="true"/>
+			</div>
+		</div>
+
+	</section>
+
+	<th:block layout:fragment="javascripts">
+		<script th:inline="javascript">
+
+		 var titleModifyTaskCreateCommand = '<span class="label label-info"  th:remove="tag" th:text="#{taskUpdateCommand.create}">Update !</span>';
+         var titleDeleteTaskCreateCommand = '<span class="label label-info"  th:remove="tag" th:text="#{taskCreateCommand.delete}">Delete !</span>';
+         var titleTaskDetail = '<span class="label label-info"  th:remove="tag" th:text="#{task.detail}">Task Detail !</span>';
+			
+            function getTaskDisplayExtraParams(aoData) {
+            	return {
+		    	    "data" : function(data){
+				    	customPush(data, 'currentState', $('#currentStateFilter').val());
+				    	customPush(data, 'taskType', $('#taskTypeFilter').val());
+		    	    }
+		    	};
+            }
+
+            function taskDisplayRowActions(data, type, full) {
+
+                var d = '<div class="btn-group" style="width: 100px;">'
+                	d += '<a class="btn btn-xs btn-info" title="' + titleTaskDetail + '" href="/taskmanagement-web/taskDetails/' + full.id + '/detail"><i class="fa fa-eye"></i></a>';
+                	d += '<a class="btn btn-xs btn-primary" title="' + titleModifyTaskCreateCommand + '" href="/taskmanagement-web/editTask/' + full.id + '><i class="fa fa-pencil"></i></a> ';
+                	d += '<a class="btn btn-xs btn-danger"  title="' + titleDeleteTaskCreateCommand + '" onclick="deleteTaskCreateCommand(' + full.id + ')"><i class="fa fa-times"></i></a> ';
+                	d += '</div>';
+                    return d;
+            }
+
+			</script>
+	</th:block>
+</body>
+</html>
+

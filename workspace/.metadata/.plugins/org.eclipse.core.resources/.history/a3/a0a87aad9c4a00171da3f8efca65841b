@@ -1,0 +1,113 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.personmanagement;
+
+import java.util.List;
+import java.util.Map;
+
+import com.parvanpajooh.client.common.GenericRestClient;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.common.RestClientConstants;
+import com.parvanpajooh.client.personmanagement.model.OrganizationMsg;
+import com.parvanpajooh.client.personmanagement.model.PersonManagementEnums.RelationType;
+import com.parvanpajooh.client.personmanagement.model.PersonMsg;
+import com.parvanpajooh.client.personmanagement.service.PersonManagementApi;
+import com.parvanpajooh.commons.config.Config;
+
+import retrofit2.Call;
+
+/**
+ * @author MO
+ *
+ */
+public class PersonManagementApiRestClient extends GenericRestClient<PersonManagementApi> {
+	
+	private static final String ENDPOINT_PATH = "/personmanagement-rest/v1/";
+
+	private PersonManagementApi personManagementApi;
+
+	public PersonManagementApiRestClient() {
+		super(
+				Config.getProperty("personmanagement.rest.endpoint.protocol", RestClientConstants.ENDPOINT_DEF_PROTOCOL__HTTP),
+				Config.getProperty("personmanagement.rest.endpoint.host", RestClientConstants.ENDPOINT_DEF_HOST__LOCALHOST),
+				Config.getProperty("personmanagement.rest.endpoint.port", RestClientConstants.ENDPOINT_DEF_PORT__80),
+				ENDPOINT_PATH,
+				Config.getLongProperty("personmanagement.rest.endpoint.timeout", RestClientConstants.TIMEOUT));
+		
+		personManagementApi = super.createRestClient();
+	}
+	
+	public PageList<PersonMsg> searchActivePeopleInOrganization(
+			Long organizationId,
+			String term,
+			Integer start,
+			Integer length,
+			String sortDirection,
+			String sortCriterion) throws ParvanClientException {
+		
+		Call<List<PersonMsg>> call = personManagementApi.searchActivePeopleInOrganization(
+				organizationId,
+				term, 
+				start, 
+				length, 
+				sortDirection, 
+				sortCriterion);
+		return executePageCall(call);
+	}
+
+	public PersonMsg getPersonByUuid(String uuid) throws ParvanClientException {
+		Call<PersonMsg> call = personManagementApi.getPersonByUuid(uuid);
+		return executeCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param uuids
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public Map<String, String> getPersonsByUuids(String[] uuids) throws ParvanClientException {
+		Call<Map<String, String>> call = personManagementApi.getPersonsByUuids(uuids);
+		return executeCall(call);
+	}
+	
+	public PageList<OrganizationMsg> findOrganizations(
+			String term,
+			Integer start,
+			Integer length,
+			String sortDirection,
+			String sortCriterion) throws ParvanClientException {
+		
+		Call<List<OrganizationMsg>> call = personManagementApi.findOrganizations(term, start, length, sortDirection, sortCriterion);
+		return executePageCall(call);
+	}
+
+	public OrganizationMsg getOrganization(Long id) throws ParvanClientException {
+		Call<OrganizationMsg> call = personManagementApi.getOrganization(id);
+		return executeCall(call);
+	}
+	
+	public PersonMsg createPerson(PersonMsg personMsg) throws ParvanClientException {
+		Call<PersonMsg> call = personManagementApi.createPerson(personMsg);
+		return executeCall(call);
+	}
+	
+	public void deletePerson(String uuid) throws ParvanClientException {
+		Call<Void> call = personManagementApi.deletePerson(uuid);
+		executeCall(call);
+	}
+	
+	public PageList<PersonMsg> findRelatedFrom(
+			String uuid,
+			String term,
+			Integer page,
+			Integer size,
+			RelationType type) throws ParvanClientException {
+		
+		Call<List<PersonMsg>> call = personManagementApi.findRelatedFrom(uuid, term, page, size, type);
+		return executePageCall(call);
+	}
+	
+}

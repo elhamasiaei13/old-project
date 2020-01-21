@@ -1,0 +1,23 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.dao;
+
+import java.util.List;
+
+import com.parvanpajooh.commons.platform.ejb.dao.GenericDao;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.siteservices.model.RecoveryCode;
+
+
+/**
+ * @author dev-03
+ *
+ */
+public interface RecoveryCodeDao extends GenericDao<RecoveryCode, Long> {
+
+	public RecoveryCode findActiveByUserId(Long userId) throws ParvanDaoException;
+
+	public List<RecoveryCode> findByUserId(Long userId) throws ParvanDaoException;
+
+}

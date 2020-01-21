@@ -1,0 +1,118 @@
+action = Action
+
+actions = Actions
+
+active = active
+
+objectAccessScope = Object Access Scope
+
+updateDate = Update Date
+
+createDate = CreateDate
+
+choose = Choose
+
+enabled = Enabled
+
+create-another = Create another
+
+button.add      = Add
+button.cancel   = Cancel
+button.close    = Close
+button.create   = Create
+button.delete   = Delete
+button.save     = Save
+button.reset    = reset
+
+task                                = Task
+task.detail							= Detail
+task.changeState                    = Change State
+task.changeAssignee                 = Change Assignee
+task.comments                       = Comments
+task.history						= History
+task.addAttachment                  = Add Attachment
+task.addComment						= Add Comment
+task.addRelation                    = Add Relation
+
+taskDisplay 		 					= Tasks
+taskDisplay.id      					= Id
+taskDisplay.taskSubject 				= Task Subject 
+taskDisplay.dueDate 					= Due Date
+taskDisplay.userUuid 					= UserUuid
+taskDisplay.createUser 					= Create User
+taskDisplay.updateUser 					= Update User
+taskDisplay.priority 					= Priority
+taskDisplay.taskGroup 					= Task Group
+taskDisplay.createTaskRemarks 			= Create Task Remarks
+taskDisplay.currentState 				= CurrentState
+taskDisplay.recordCreateDate 			= Record Create Date
+taskDisplay.recordUpdateDate 			= Record Update Date
+taskDisplay.createDateTime 				= create Date
+taskDisplay.updateDateTime 				= update Date
+taskDisplay.taskType 					= Task Type
+taskDisplay.taskId						= TaskId
+taskDisplay.currentAssigneeUserId       = Current Assignee
+
+taskCreateCommand 					= CreateCommand
+taskCreateCommand.create 			= Create Task
+taskCreateCommand.dueDate           = Due date
+taskCreateCommand.subject 			= Subject
+taskCreateCommand.remarks 			= Remarks
+taskCreateCommand.userType 			= User Type
+taskCreateCommand.taskType 			= Task Type
+taskCreateCommand.emailStatus 		= Email Status
+taskCreateCommand.group  			= Group
+taskCreateCommand.delete			= Delete Task
+taskCreateCommand.priority     		= Priority
+taskCreateCommand.delete.confirm	= Are you sure you want to delete this task?
+
+taskUpdateCommand.create        	= Update Task
+taskUpdateCommand.dueDate           = Due date
+taskUpdateCommand.subject 			= Subject
+taskUpdateCommand.remarks 			= Remarks
+taskUpdateCommand.userType 			= User Type
+taskUpdateCommand.taskType 			= Task Type
+taskUpdateCommand.emailStatus 		= Email Status
+taskUpdateCommand.group  			= Group
+taskUpdateCommand.delete			= Delete Task
+taskUpdateCommand.priority     		= Priority
+taskUpdateCommand.create.confirm    = Are you sure you want to modify this fields?
+
+taskChangeAssigneeCommand				     = Change TaskAssignee
+taskChangeAssigneeCommand.id    			 = Id
+taskChangeAssigneeCommand.employeeIdFrom     = From Employee
+taskChangeAssigneeCommand.employeeIdTo		 = To Employee
+taskChangeAssigneeCommand.createUser         = Create User
+taskChangeAssigneeCommand.updateUser         = Update User
+taskChangeAssigneeCommand.remarks            = Remarks
+
+taskChangeStateCommand                       = Change State
+taskChangeStateCommand.newState              = New State 
+taskChangeStateCommand.remarks               = Remarks 
+
+taskAttachmentCommand
+taskAttachmentCommand.remarks                = Remarks
+taskAttachmentCommand.chooseFile             = Choose File
+
+taskCommentCommand                           = Comment
+taskCommentCommand.remarks                   = Remarks
+
+taskRelationCommand                          = Add Relation
+taskRelationCommand.taskIdTo                 = To Task
+taskRelationCommand.type                     = Relation Type
+taskRelationCommand.remarks                  = Remarks
+
+taskGroup 					= Task Group
+taskGroup.name  			= Name
+taskGroup.remarks 			= Remarks
+taskGroup.id 				= Id
+taskGroup.create 			= Create Group
+taskGroup.groupKey          = Group Key
+taskGroup.delete            = Delete Group
+taskGroup.modify            = Modify Group
+taskGroup.delete.confirm	= Are you sure you want to delete this group?
+
+error-required			   						 = The {0} is required
+error-alphabetical-uppercase-characters-only     = The {0} can consist of alphabetical uppercase characters only
+errorCode.80000                                  = Group already used by some task
+errorCode.80001									 = only task creator can update task

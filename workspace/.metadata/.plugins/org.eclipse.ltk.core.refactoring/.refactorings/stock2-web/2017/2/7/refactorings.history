@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;waybillnumber-detail.html&apos; to &apos;templates&apos;&#x0A;- Original project: &apos;stock2-web&apos;&#x0A;- Destination element: &apos;templates&apos;&#x0A;- Original element: &apos;waybillnumber-detail.html&apos;" description="Copy file" element1="src/main/webapp/WEB-INF/templates/waybillnumber-detail.html" files="1" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1487072905413" target="/stock2-web/src/main/webapp/WEB-INF/templates" units="0" version="1.0"/>
+</session>

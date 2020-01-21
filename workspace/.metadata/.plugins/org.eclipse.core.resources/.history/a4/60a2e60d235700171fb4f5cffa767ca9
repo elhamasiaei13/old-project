@@ -1,0 +1,242 @@
+package com.parvanpajooh.siteservices.model;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.persistence.Cacheable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.validator.constraints.Email;
+
+import com.google.common.base.Objects;
+import com.parvanpajooh.commons.platform.ejb.model.BaseModel;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.siteservices.model.enums.Destination;
+import com.parvanpajooh.siteservices.model.enums.Origin;
+import com.parvanpajooh.siteservices.model.enums.PasswordRecoveryMethod;
+import com.parvanpajooh.siteservices.model.vo.RecoveryCodeVO;
+
+
+/**
+ * @author dev-03
+ *
+ */
+@Entity
+@Cacheable
+@Table(name="visitor_tbl")
+public class Visitor extends BaseModel{
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8148418429521524980L;
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long id;
+	
+	private String organizationName;
+	
+	private String agentName;
+	
+	private String agentPosition;
+	
+	private String phone;
+	
+	@Email
+	private String email;
+	
+	private String mobile;
+	
+	private String dailyCouriersAverage;
+	
+	private String couriersWeightAverage;
+	
+	private List<Destination> destinations;
+	
+	private List<Origin> origins;
+	
+	private boolean COD;
+	
+	private String remarks;
+	
+	@Version
+	private Integer version;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getOrganizationName() {
+		return organizationName;
+	}
+
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
+	}
+
+	public String getAgentName() {
+		return agentName;
+	}
+
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+
+	public String getAgentPosition() {
+		return agentPosition;
+	}
+
+	public void setAgentPosition(String agentPosition) {
+		this.agentPosition = agentPosition;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public String getDailyCouriersAverage() {
+		return dailyCouriersAverage;
+	}
+
+	public void setDailyCouriersAverage(String dailyCouriersAverage) {
+		this.dailyCouriersAverage = dailyCouriersAverage;
+	}
+
+	public String getCouriersWeightAverage() {
+		return couriersWeightAverage;
+	}
+
+	public void setCouriersWeightAverage(String couriersWeightAverage) {
+		this.couriersWeightAverage = couriersWeightAverage;
+	}
+
+	public List<Destination> getDestinations() {
+		return destinations;
+	}
+
+	public void setDestinations(List<Destination> destinations) {
+		this.destinations = destinations;
+	}
+
+	public List<Origin> getOrigins() {
+		return origins;
+	}
+
+	public void setOrigins(List<Origin> origins) {
+		this.origins = origins;
+	}
+
+	public boolean isCOD() {
+		return COD;
+	}
+
+	public void setCOD(boolean COD) {
+		this.COD = COD;
+	}
+
+	public String getRemarks() {
+		return remarks;
+	}
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	@Override
+	public RecoveryCodeVO toVO() {
+		RecoveryCodeVO vo = toVOLite();
+		
+		return vo;
+	}
+
+	@Override
+	public RecoveryCodeVO toVOLite() {
+		RecoveryCodeVO vo = new RecoveryCodeVO();
+		
+		vo.setId(this.id);
+		vo.setOr
+		return vo;
+	}
+
+	@Override
+	public void fromVO(BaseVO baseVO) {
+		RecoveryCodeVO vo = (RecoveryCodeVO) baseVO;
+		
+		this.id = vo.getId();
+		this.userId = vo.getUserId();
+		this.email = vo.getEmail();
+		this.mobile = vo.getMobile();
+		this.recoveryMethod = vo.getRecoveryMethod();
+		this.code = vo.getCode();
+		this.expireDate = vo.getExpireDate();
+		this.version = vo.getVersion();
+		this.active = vo.isActive();
+	}
+
+	@Override
+	public int hashCode(){
+		return Objects.hashCode(id);
+	}
+	
+	@Override
+	public boolean equals(Object object){
+		if (object instanceof Visitor) {
+			Visitor that = (Visitor) object;
+			return Objects.equal(this.id, that.id);
+		}
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Visitor [id=" + id + ", organizationName=" + organizationName + ", agentName=" + agentName + ", agentPosition=" + agentPosition + ", phone="
+				+ phone + ", email=" + email + ", mobile=" + mobile + ", dailyCouriersAverage=" + dailyCouriersAverage + ", couriersWeightAverage="
+				+ couriersWeightAverage + ", destinations=" + destinations + ", origins=" + origins + ", COD=" + COD + ", remarks=" + remarks + ", version="
+				+ version + "]";
+	}
+
+}

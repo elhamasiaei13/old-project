@@ -1,0 +1,32 @@
+1457338990821	Rename type 'UserVO'
+1457339958356	Rename type 'User'
+1457340056560	Copy compilation unit
+1457341436638	Copy compilation unit
+1457341982578	Copy compilation unit
+1457342080892	Copy compilation unit
+1457348083317	Copy compilation unit
+1457348100055	Rename type 'SampleDaoJpa'
+1457348121470	Copy compilation unit
+1457348296719	Rename type 'SampleDao'
+1457348313520	Copy compilation unit
+1457348332029	Copy compilation unit
+1457348694508	Rename type 'GroupDaoJpa'
+1457348737505	Rename type 'GroupDao'
+1457348851742	Delete element
+1457349046915	Rename type 'GroupsDao'
+1457349060048	Rename type 'GroupsDaoJpa'
+1457349120152	Copy compilation unit
+1457349274936	Rename type 'SampleLocalService'
+1457349289153	Rename type 'SampleService'
+1457349608274	Copy compilation unit
+1457349624868	Copy compilation unit
+1457349637875	Copy compilation unit
+1457349662808	Copy compilation unit
+1457349719961	Copy compilation unit
+1457349743194	Delete element
+1457349756643	Delete element
+1457349761105	Delete element
+1457349763809	Delete element
+1457349766209	Delete element
+1457350708041	Rename type 'SampleLocalService'
+1457350721763	Rename type 'SampleService'

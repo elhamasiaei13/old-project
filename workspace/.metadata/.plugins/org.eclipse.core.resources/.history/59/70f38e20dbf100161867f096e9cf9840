@@ -1,0 +1,623 @@
+package com.parvanpajooh.taskmanagement.domain.service.Impl;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.taskmanagement.domain.model.Task;
+import com.parvanpajooh.taskmanagement.domain.model.TaskCommand;
+import com.parvanpajooh.taskmanagement.domain.model.TaskDisplay;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroup;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroupCounter;
+import com.parvanpajooh.taskmanagement.domain.model.criteria.TaskCriteria;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskAttachmentCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskChangeAssigneeCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskChangeStateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCommentCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCreateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskDisplayDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskRelationCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskUpdateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.UserDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.ViewTaskRelationCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType;
+import com.parvanpajooh.taskmanagement.domain.repository.TaskGroupRepository;
+import com.parvanpajooh.taskmanagement.domain.repository.TaskRepository;
+import com.parvanpajooh.taskmanagement.domain.service.Idm2Service;
+import com.parvanpajooh.taskmanagement.domain.service.TaskService;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class TaskServiceImpl implements TaskService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(TaskServiceImpl.class);
+
+	@Inject
+	private TaskRepository taskRepository;
+
+	@Inject
+	private TaskGroupRepository taskGroupRepository;	
+	
+	@Inject
+	private Idm2Service idm2Service;
+
+	@Override
+	public List<TaskDisplayDto> findByTaskIds(List<String> taskIds) throws ParvanServiceException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<TaskDisplayDto> findByCriteria(TaskCriteria criteria, int firstResult, int maxResults, SortDirectionEnum sortDirection, String sortCriterion)
+			throws ParvanServiceException {
+		// LOG
+		log.debug("Entering findByCriteria( criteria={}, firstResult={}, maxResults={}, sortDirection={}, sortCriterion={})", criteria, firstResult, maxResults,
+				sortDirection, sortCriterion);
+
+		List<TaskDisplayDto> taskDisplayDtoList = null;
+
+		try {
+
+			// find by criteria
+			List<TaskDisplay> list = taskRepository.findTaskDisplayByCriteria(criteria, firstResult, maxResults, sortDirection, sortCriterion);
+			
+			//convert to dto
+			taskDisplayDtoList = getTaskDisplayDtos(list);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting paged-list of records by criteria.", e);
+		}
+
+		return taskDisplayDtoList;
+	}
+
+	@Override
+	public long countByCriteria(TaskCriteria criteria) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering countByCriteria( criteria={})", criteria);
+
+		long count = 0;
+
+		try {
+			// get count by criteria
+			count = taskRepository.countTaskDisplayByCriteria(criteria);
+
+			// LOG
+			log.info("count by criteria = {}; criteria={}", count, criteria);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting count of records by criteria.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method countByCriteria(): ret={}", count);
+
+		return count;
+
+	}
+
+	@Override
+	public TaskDto get(String taskId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering get(taskId={})", taskId);
+		Task task = null;
+		TaskDto taskDto = null;
+		Set<Long> userIds = new HashSet<Long>();
+		List<UserDto> userDtoList = null;
+
+		try {
+			task = taskRepository.getTask(taskId);
+						
+			if (Validator.isNotNull(task)) {
+				taskDto = task.toDto();
+			}
+
+			for (TaskCommandDto commandDto : taskDto.getTaskCommands()) {
+				if (Validator.equals(commandDto.getTaskCommandType(), TaskCommandType.ChangeAssignee)) {
+
+					TaskChangeAssigneeCommandDto changeAssigneeCommandDto = (TaskChangeAssigneeCommandDto) commandDto;
+					userIds.add(changeAssigneeCommandDto.getEmployeeIdFrom());
+					userIds.add(changeAssigneeCommandDto.getEmployeeIdTo());
+				}
+			}
+
+			// get users by ids
+			userDtoList = idm2Service.getUsersByIds(userIds);
+
+			for (TaskCommandDto commandDto : taskDto.getTaskCommands()) {
+				if (Validator.equals(commandDto.getTaskCommandType(), TaskCommandType.ChangeAssignee)) {
+
+					TaskChangeAssigneeCommandDto changeAssigneeCommandDto = (TaskChangeAssigneeCommandDto) commandDto;
+
+					for (UserDto user : userDtoList) {
+						if (Validator.equals(user.getId(), changeAssigneeCommandDto.getEmployeeIdFrom())) {
+							changeAssigneeCommandDto.setEmployeeFrom(user.getUserName());
+						}
+						if (Validator.equals(user.getId(), changeAssigneeCommandDto.getEmployeeIdTo())) {
+							changeAssigneeCommandDto.setEmployeeTo(user.getUserName());
+						}
+					}
+					
+					if(Validator.equals(commandDto.getTaskCommandType(), TaskCommandType.Relation)){
+						ViewTaskRelationCommandDto viewTaskRelationCommandDto = (ViewTaskRelationCommandDto) commandDto;
+						
+						
+					}
+				}
+			}
+
+		} catch (ParvanDaoException e) {
+			throw new ParvanRecoverableException(e);
+		}
+
+		return taskDto;
+	}
+
+	@Override
+	public TaskDisplayDto getTaskDisplay(String taskId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getTaskDisplay(taskId={})", taskId);
+		TaskDisplay taskDisplay = null;
+		TaskDisplayDto taskDisplayDto = null;
+		List<TaskDisplayDto> taskDisplayDtoList;
+
+		try {
+			List<TaskDisplay> taskDisplayList = new ArrayList<TaskDisplay>();
+
+			taskDisplay = taskRepository.getTaskDisplay(taskId);
+			taskDisplayList.add(taskDisplay);
+
+			// get dto List
+			taskDisplayDtoList = getTaskDisplayDtos(taskDisplayList);
+
+			if (Validator.isNotNull(taskDisplayDtoList)) {
+				taskDisplayDto = taskDisplayDtoList.get(0);
+			}
+
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getTaskDisplay.", e);
+		}
+
+		return taskDisplayDto;
+	}
+	
+	@Override
+	public TaskDisplayDto getTaskDisplayByTaskKey(String taskKey) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getTaskDisplayByKey(taskKey={})", taskKey);
+		TaskDisplay taskDisplay = null;
+		TaskDisplayDto taskDisplayDto = null;
+		List<TaskDisplayDto> taskDisplayDtoList;
+
+		try {
+			List<TaskDisplay> taskDisplayList = new ArrayList<TaskDisplay>();
+			
+			taskDisplay = taskRepository.getTaskDisplayByKey(taskKey);
+			taskDisplayList.add(taskDisplay);
+
+			// get dto List
+			taskDisplayDtoList = getTaskDisplayDtos(taskDisplayList);
+
+			if (Validator.isNotNull(taskDisplayDtoList)) {
+				taskDisplayDto = taskDisplayDtoList.get(0);
+			}
+
+		} catch (ParvanDaoException e) {
+			throw new ParvanRecoverableException(e);
+		}
+
+		return taskDisplayDto;
+	}
+
+	@Override
+	public void createTask(TaskCreateCommandDto taskCreateCommandDto) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering saveTask( taskCreateCommandDto={})", taskCreateCommandDto);
+
+		try {
+
+			Long groupId = taskCreateCommandDto.getGroupId();
+			
+			// get TaskGroupCounter
+			TaskGroupCounter taskGroupCounter = getTaskGroupCounter(groupId);
+			
+			Task task = Task.createCommand(taskCreateCommandDto);
+
+			task.setTaskGroupId(groupId);
+			task.setTaskNumber(taskGroupCounter.getCounter());
+			task.setTaskKey(taskGroupCounter.getTaskGroupKey() + StringPool.DASH + taskGroupCounter.getCounter());
+			
+			//save task and taskGroupCounter
+			taskRepository.saveTaskAndTaskGroupCounter(task, taskGroupCounter);
+			
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saveTask.", e);
+		}
+	}
+
+	@Override
+	public void updateTask(TaskUpdateCommandDto taskUpdateCommandDto, String taskId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering updateTask( taskDisplayDto={},taskId={},remarks={})", taskUpdateCommandDto, taskId);
+
+		try {
+			
+			Task task = new Task();
+
+			task = taskRepository.getTask(taskId);
+
+			TaskUpdateCommandDto changedUpdateCommandDto = getChangedUpdateCommand(taskUpdateCommandDto, taskId);
+
+			// add TaskUpdateCommandDto to Task
+			task.updateCommand(changedUpdateCommandDto);
+
+			// save Task
+			taskRepository.saveTask(task);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while updateTask.", e);
+		}
+	}
+
+	@Override
+	public void changeTaskAssignee(TaskChangeAssigneeCommandDto taskChangeAssigneeCommandDto, String taskId) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering changeTaskAssignee( taskChangeAssigneeCommandDto={},taskId={})", taskChangeAssigneeCommandDto, taskId);
+
+		try {
+
+			Task task = new Task();
+
+			task = taskRepository.getTask(taskId);
+
+			// load taskDisplay for getting currentAssignee
+			TaskDisplay taskDisplay = taskRepository.getTaskDisplay(taskId);
+
+			taskChangeAssigneeCommandDto.setEmployeeIdFrom(taskDisplay.getCurrentAssigneeUserId());
+
+			task.changeAssigneeCommand(taskChangeAssigneeCommandDto);
+
+			// save Task
+			taskRepository.saveTask(task);
+			
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while changeTaskAssignee.", e);
+		}
+	}
+
+	@Override
+	public void changeTaskState(TaskChangeStateCommandDto taskChangeStateCommandDto, String taskId) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering changeTaskState( taskChangeStateCommandDto={},taskId={})", taskChangeStateCommandDto, taskId);
+
+		try {
+
+			Task task = new Task();
+
+			task = taskRepository.getTask(taskId);
+
+			// load taskDisplay for getting currentState
+			TaskDisplay taskDisplay = taskRepository.getTaskDisplay(taskId);
+
+			taskChangeStateCommandDto.setOldState(taskDisplay.getCurrentState());
+
+			task.changeStateCommand(taskChangeStateCommandDto);
+
+			//save task
+			taskRepository.saveTask(task);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while changeTaskState.", e);
+		}
+	}
+
+	@Override
+	public void addComment(TaskCommentCommandDto taskCommentCommandDto, String taskId) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering addComment( taskCommentCommandDto={},taskId={})", taskCommentCommandDto, taskId);
+
+		try {
+
+			Task task = new Task();
+
+			task = taskRepository.getTask(taskId);
+
+			task.addCommentCommand(taskCommentCommandDto);
+
+			//save task
+			taskRepository.saveTask(task);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saveTask.", e);
+		}
+	}
+
+	@Override
+	public void addRelation(TaskRelationCommandDto taskRelationCommandDto, String taskId) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering addRelation( taskRelationCommandDto={},taskId={})", taskRelationCommandDto, taskId);
+
+		try {
+
+			Task task = new Task();
+
+			task = taskRepository.getTask(taskId);
+
+			task.addRelationCommand(taskRelationCommandDto);
+
+			//save task
+			taskRepository.saveTask(task);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saveTask.", e);
+		}
+	}
+
+	@Override
+	public void addAttachment(TaskAttachmentCommandDto taskAttachmentCommandDto, String taskId) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering addAttachment( taskAttachmentCommandDto={},taskId={})", taskAttachmentCommandDto, taskId);
+
+		try {
+
+			Task task = new Task();
+
+			task = taskRepository.getTask(taskId);
+
+			task.addAttachmentCommand(taskAttachmentCommandDto);
+
+			taskRepository.saveTask(task);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while addAttachment.", e);
+		}
+	}
+
+	@Override
+	public TaskUpdateCommandDto getLastUpdateRecord(String taskId) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering getLastUpdateRecord(taskKey={})", taskId);
+		Task task = null;
+		TaskUpdateCommandDto taskUpdateCommandDto = null;
+
+		try {
+			task = taskRepository.getTask(taskId);
+			taskUpdateCommandDto = task.getLastUpdateRecord();
+
+		} catch (ParvanDaoException e) {
+			throw new ParvanRecoverableException(e);
+		}
+
+		return taskUpdateCommandDto;
+	}
+
+	@Override
+	public TaskCommand getTaskCommand(Long id) throws ParvanRecoverableException {
+
+		// LOG
+		log.debug("Entering getTaskCommand(id={})", id);
+		TaskCommand taskCommand = null;
+
+		try {
+			taskCommand = taskRepository.getTaskCommand(id);
+
+		} catch (ParvanDaoException e) {
+			throw new ParvanRecoverableException(e);
+		}
+
+		return taskCommand;
+	}
+
+	@Override
+	public List<TaskCommand> getTaskCommands(String taskId, TaskCommandType taskCommandType) throws ParvanRecoverableException {
+
+		// LOG
+		log.debug("Entering getTaskCommand(taskId={},taskCommandType={})", taskId, taskCommandType);
+		List<TaskCommand> taskCommandList = null;
+
+		try {
+			taskCommandList = taskRepository.getTaskCommands(taskId, taskCommandType);
+
+		} catch (ParvanDaoException e) {
+			throw new ParvanRecoverableException(e);
+		}
+
+		return taskCommandList;
+	}
+
+	@Override
+	public void deleteTask(String id) throws ParvanRecoverableException {
+
+		// LOG
+		log.debug("Entering deleteTask(id={})", id);
+
+		try {
+			taskRepository.deleteTask(id);
+
+		} catch (ParvanDaoException e) {
+			throw new ParvanRecoverableException(e);
+		}
+	}
+
+	private TaskUpdateCommandDto getChangedUpdateCommand(TaskUpdateCommandDto taskUpdateCommandDto, String taskId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getChangedUpdateCommand(taskUpdateCommandDto={},taskId={})", taskUpdateCommandDto, taskId);
+
+		// get saved TaskDisplay
+		TaskDisplayDto savedTaskDisplayDto = getTaskDisplay(taskId);
+
+		TaskUpdateCommandDto updateCommandDto = new TaskUpdateCommandDto();
+
+		if (Validator.isNotNull(savedTaskDisplayDto)) {
+
+			if (!Validator.equals(taskUpdateCommandDto.getSubject(), savedTaskDisplayDto.getTaskSubject())) {
+				updateCommandDto.setSubject(taskUpdateCommandDto.getSubject());
+			}
+			
+			if (!Validator.equals(taskUpdateCommandDto.getGroupId(), savedTaskDisplayDto.getTaskGroupId())) {
+				updateCommandDto.setGroupId(taskUpdateCommandDto.getGroupId());
+			}
+			
+			if (!Validator.equals(taskUpdateCommandDto.getTaskType(), savedTaskDisplayDto.getTaskType())) {
+				updateCommandDto.setTaskType(taskUpdateCommandDto.getTaskType());
+			}
+
+			if (!Validator.equals(taskUpdateCommandDto.getPriority(), savedTaskDisplayDto.getPriority())) {
+				updateCommandDto.setPriority(taskUpdateCommandDto.getPriority());
+			}
+
+			if (!Validator.equals(taskUpdateCommandDto.getDueDate(), savedTaskDisplayDto.getDueDate())) {
+				updateCommandDto.setDueDate(taskUpdateCommandDto.getDueDate());
+			}
+			
+			if (!Validator.equals(taskUpdateCommandDto.getRemarks(), savedTaskDisplayDto.getCreateTaskRemarks())) {
+				updateCommandDto.setRemarks(taskUpdateCommandDto.getRemarks());
+			}
+		}
+
+		return updateCommandDto;
+	}
+
+	@Override
+	public TaskGroupCounter getTaskGroupCounter(Long taskGroupId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getTaskGroupCounter(taskGroupId={})", taskGroupId);
+		TaskGroupCounter taskGroupCounter = null;
+
+		try {
+			// get TaskGroupCounter
+			taskGroupCounter = taskRepository.getTaskGroupCounter(taskGroupId);
+
+			if (Validator.isNull(taskGroupCounter)) {
+
+				TaskGroup taskGroup = taskGroupRepository.get(taskGroupId);
+
+				taskGroupCounter = new TaskGroupCounter();
+				taskGroupCounter.setTaskGroupId(taskGroupId);
+				taskGroupCounter.setCounter(1l);
+				taskGroupCounter.setTaskGroupKey(taskGroup.getGroupKey());
+
+			} else {
+
+				taskGroupCounter.setCounter(taskGroupCounter.getCounter() + 1);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getTaskGroupCounter.", e);
+		}
+
+		return taskGroupCounter;
+	}
+	
+	/**
+	 * 
+	 * @param taskDisplayList
+	 * @return
+	 * @throws ParvanServiceException
+	 * @throws ParvanDaoException 
+	 */
+	private List<TaskDisplayDto> getTaskDisplayDtos(List<TaskDisplay> taskDisplayList) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getTaskDisplayDtoList( taskDisplayList={})", taskDisplayList);
+
+		
+		List<UserDto> userDtoList = new ArrayList<UserDto>();
+		Set<Long> userIds = new HashSet<Long>();
+		List<TaskDisplayDto> dtoList = null;
+
+		try {
+			for (TaskDisplay taskDisplay : taskDisplayList) {
+				Long currentAssigneeUserId = taskDisplay.getCurrentAssigneeUserId();
+
+				if (Validator.isNotNull(currentAssigneeUserId)) {
+					userIds.add(currentAssigneeUserId);
+				}
+			}
+
+			if (Validator.isNotNull(userIds)) {
+				// get users by ids
+				userDtoList = idm2Service.getUsersByIds(userIds);
+			}
+
+			dtoList = new ArrayList<TaskDisplayDto>(taskDisplayList.size());
+
+			for (TaskDisplay taskDisplay : taskDisplayList) {
+
+				TaskDisplayDto taskDisplayDto = taskDisplay.toDto();
+
+				// set taskGroupName
+				if (Validator.isNotNull(taskDisplay.getTaskGroupId())) {
+					TaskGroup taskGroup = taskGroupRepository.get(taskDisplay.getTaskGroupId());
+					taskDisplayDto.setTaskGroup(taskGroup.getName());
+				}
+
+				// set CurrentAssigneeUserName
+				for (UserDto user : userDtoList) {
+					if (Validator.equals(user.getId(), taskDisplay.getCurrentAssigneeUserId())) {
+						taskDisplayDto.setCurrentAssigneeUserName(user.getUserName());
+					}
+				}
+
+				dtoList.add(taskDisplayDto);
+			}
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getTaskGroupCounter.", e);
+		}
+		return dtoList;
+	}
+
+}

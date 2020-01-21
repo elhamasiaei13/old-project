@@ -1,0 +1,115 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.model.criteria;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+
+/**
+ * @author Mohammad
+ *
+ */
+public class PackingItemCriteria extends BaseCriteria{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1398889630806340120L;
+	
+	private String code;
+	
+	private String standard;
+	
+	private String nameEn;
+	
+	private String nameFa;
+	
+	private Integer displayOrder;
+	
+	private Boolean active;
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the standard
+	 */
+	public String getStandard() {
+		return standard;
+	}
+
+	/**
+	 * @param standard the standard to set
+	 */
+	public void setStandard(String standard) {
+		this.standard = standard;
+	}
+
+	/**
+	 * @return the nameEn
+	 */
+	public String getNameEn() {
+		return nameEn;
+	}
+
+	/**
+	 * @param nameEn the nameEn to set
+	 */
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
+	}
+
+	/**
+	 * @return the nameFa
+	 */
+	public String getNameFa() {
+		return nameFa;
+	}
+
+	/**
+	 * @param nameFa the nameFa to set
+	 */
+	public void setNameFa(String nameFa) {
+		this.nameFa = nameFa;
+	}
+
+	/**
+	 * @return the displayOrder
+	 */
+	public Integer getDisplayOrder() {
+		return displayOrder;
+	}
+
+	/**
+	 * @param displayOrder the displayOrder to set
+	 */
+	public void setDisplayOrder(Integer displayOrder) {
+		this.displayOrder = displayOrder;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+	
+}

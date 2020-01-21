@@ -1,0 +1,17 @@
+1493532677904	Delete elements
+1493532711348	Rename type 'RouteManagementLocalServiceImpl'
+1493532725276	Rename type 'RouteManagementServiceImpl'
+1493535210433	Rename field 'rootManagementLocalService'
+1493535294472	Rename local variable 'transportationVO'
+1493535315631	Rename local variable 'transportationVOs'
+1493535413924	Rename type 'RouteManagementServiceAdapter'
+1493535444841	Rename type 'RouteManagementServiceAdapterRest'
+1493535470033	Rename local variable 'transportations'
+1493552189137	Rename local variable 'ecUserInfo'
+1493554410935	Delete elements
+1493554474377	Delete elements
+1493554479536	Delete element
+1493554485619	Delete element
+1493554496455	Delete element
+1493554499950	Delete element
+1493554509352	Delete element

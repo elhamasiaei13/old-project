@@ -1,0 +1,348 @@
+package com.parvanpajooh.agentmanagement.service.impl;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.agentmanagement.dao.EmployeeDao;
+import com.parvanpajooh.agentmanagement.dao.GeneralAgentDao;
+import com.parvanpajooh.agentmanagement.model.AccountNumber;
+import com.parvanpajooh.agentmanagement.model.Employee;
+import com.parvanpajooh.agentmanagement.model.GeneralAgent;
+import com.parvanpajooh.agentmanagement.model.vo.AccountNumberVO;
+import com.parvanpajooh.agentmanagement.model.vo.EmployeeVO;
+import com.parvanpajooh.agentmanagement.model.vo.GeneralAgentVO;
+import com.parvanpajooh.agentmanagement.service.GeneralAgentLocalService;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.commons.util.Validator;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class GeneralAgentLocalServiceImpl extends GenericLocalServiceImpl<GeneralAgent, Long>implements GeneralAgentLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(GeneralAgentLocalServiceImpl.class);
+
+	public GeneralAgentDao generalAgentDao;
+	public EmployeeDao employeeDao;
+
+	@Inject
+	public void setGeneralAgentDao(GeneralAgentDao generalAgentDao) {
+		this.dao = generalAgentDao;
+		this.generalAgentDao = generalAgentDao;
+	}
+
+	@Inject
+	public void setEmployeeDao(EmployeeDao employeeDao) {
+		this.employeeDao = employeeDao;
+	}
+
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		GeneralAgentVO generalAgentVO = (GeneralAgentVO) baseVO;
+		String accountNumber = null;
+		List<EmployeeVO> employeeVOs = generalAgentVO.getEmployee();
+		List<Employee> employeeList = new ArrayList<Employee>();
+		GeneralAgent parentAgent = null;
+
+		try {
+			boolean isNew = Validator.isNull(generalAgentVO.getId());
+			GeneralAgent generalAgent = null;
+			GeneralAgent parent = null;
+
+			// Check that accountNumber was saved before
+			if (Validator.isNotNull(generalAgentVO.getAccountNumber())) {
+				accountNumber = generalAgentVO.getAccountNumber().get(1).getAccountNumber();
+				if (Validator.isNotNull(accountNumber)) {
+					if (!_isAccountValid(accountNumber)) {
+						throw new ParvanRecoverableException(ErrorCode.DATA_IS_INVALID);
+					}
+				}
+			}
+
+			if (isNew) {
+
+				generalAgent = new GeneralAgent();
+				AccountNumber accNumber = new AccountNumber();
+				accNumber.setAccountNumber(accountNumber);
+				Set<AccountNumber> accounts = new HashSet<AccountNumber>();
+				accounts.add(accNumber);				
+				generalAgent.fromVO(generalAgentVO);
+				generalAgent.setActive(true);
+				generalAgent.setBranch(true);
+				generalAgent.setAccountNumber(accounts);
+				
+				if (Validator.isNotNull(generalAgentVO.getParent().getId())) {
+					parent = generalAgentDao.get(generalAgentVO.getParent().getId());
+					generalAgent.setParent(parent);
+				}
+
+			} else {
+				generalAgent = generalAgentDao.get(generalAgentVO.getId());
+				generalAgent.fromVO(generalAgentVO);
+
+				if (Validator.isNotNull(generalAgentVO.getParent()) || Validator.isNotNull(generalAgentVO.getParent().getId())) {
+					parentAgent = generalAgentDao.get(generalAgentVO.getParent().getId());
+					generalAgent.setParent(parentAgent);
+				}
+				if (Validator.isNotNull(generalAgentVO.getAccountNumber())) {
+					AccountNumberVO accountNumbers = generalAgentVO.getAccountNumber().get(1);
+					Set<AccountNumber> accountSet = new HashSet<AccountNumber>();
+					AccountNumber acN = new AccountNumber();
+					acN.fromVO(accountNumbers);
+					accountSet.add(acN);
+					generalAgent.setAccountNumber(accountSet);
+				}
+
+				// Get employee with id from external service
+				if (Validator.isNotNull(generalAgentVO.getEmployee())) {
+					for (EmployeeVO vo : employeeVOs) {
+
+						// // get
+						// // add
+						// Set employeeSet = new
+						// HashSet<Employee>(employeeList);
+						// generalAgent.setEmployee(employeeSet);
+
+						String REPO_PATH = "/usr/local/issuemanager/";
+						InputStream ExcelFileToRead = null;
+						XSSFWorkbook wb = null;
+						XSSFSheet sheet = null;
+						try {
+
+							ExcelFileToRead = new FileInputStream(REPO_PATH + "employees.xlsx");
+							wb = new XSSFWorkbook(ExcelFileToRead);
+							sheet = wb.getSheetAt(0);
+							Iterator rows = sheet.rowIterator();
+
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+						XSSFRow row = null;
+						Iterator rows = sheet.rowIterator();
+
+						while (rows.hasNext()) {
+							row = (XSSFRow) rows.next();
+							if (Validator.equals(row.getCell(0).getRawValue(), vo.getId().toString())) {
+
+								Employee employee = new Employee();
+								employee.setId(Long.parseLong(row.getCell(0).getRawValue()));
+								employee.setUserName(row.getCell(1).getStringCellValue());
+								employee.setFullName(row.getCell(2).getStringCellValue() + " " + row.getCell(3).getStringCellValue());
+								employee.setActive(true);
+								employee.setRemarks(vo.getRemarks());
+
+								employeeList.add(employee);
+							}
+
+						}
+					}
+					generalAgent.setEmployee(new HashSet<Employee>(employeeList));
+				}
+			}
+			// save entity
+			generalAgent = save(generalAgent, userInfo);
+			generalAgentVO = (GeneralAgentVO) generalAgent.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+
+		return generalAgentVO;
+	}
+	/*
+	 * @Override public GeneralAgentVO save(BaseVO baseVO, UserInfo userInfo,
+	 * String[] ids, String remarks) throws ParvanServiceException { log.info(
+	 * "Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+	 * 
+	 * GeneralAgentVO generalAgentVO = (GeneralAgentVO) baseVO; List<Employee>
+	 * employeeList = new ArrayList<Employee>();
+	 * 
+	 * try {
+	 * 
+	 * employeeList = employeeDao.findEmployeeByAgentId(generalAgentVO.getId());
+	 * GeneralAgent generalAgent = null; // if
+	 * (Validator.isNotNull(generalAgentVO.getAccountNumber())) { // String
+	 * accountNumber = //
+	 * generalAgentVO.getAccountNumber().get(1).getAccountNumber(); // if
+	 * (Validator.isNotNull(accountNumber)) { // if
+	 * (!_isAccountValid(accountNumber)) { // throw new
+	 * ParvanRecoverableException(ErrorCode.DATA_IS_INVALID); // } // } // }
+	 * 
+	 * if (Validator.isNull(generalAgentVO.getId())) { generalAgent = new
+	 * GeneralAgent(); generalAgent.fromVO(generalAgentVO);
+	 * generalAgent.setActive(true);
+	 * 
+	 * } else { generalAgent = generalAgentDao.get(generalAgentVO.getId()); }
+	 * 
+	 * // get employee with id from external service for (String id : ids) {
+	 * Employee newEmployee = new Employee();
+	 * 
+	 * // // get // // add // Set employeeSet = new
+	 * HashSet<Employee>(employeeList); //
+	 * generalAgent.setEmployee(employeeSet);
+	 * 
+	 * String REPO_PATH = "/usr/local/issuemanager/"; InputStream
+	 * ExcelFileToRead = null; XSSFWorkbook wb = null; XSSFSheet sheet = null;
+	 * try {
+	 * 
+	 * ExcelFileToRead = new FileInputStream(REPO_PATH + "employees.xlsx"); wb =
+	 * new XSSFWorkbook(ExcelFileToRead); sheet = wb.getSheetAt(0); Iterator
+	 * rows = sheet.rowIterator();
+	 * 
+	 * } catch (FileNotFoundException e) { e.printStackTrace(); } catch
+	 * (IOException e) { e.printStackTrace(); }
+	 * 
+	 * XSSFRow row = null; Iterator rows = sheet.rowIterator();
+	 * 
+	 * while (rows.hasNext()) { row = (XSSFRow) rows.next(); if
+	 * (Validator.equals(row.getCell(0).getRawValue(), id)) {
+	 * 
+	 * Employee employee = new Employee();
+	 * employee.setId(Long.parseLong(row.getCell(0).getRawValue()));
+	 * employee.setUserName(row.getCell(1).getStringCellValue());
+	 * employee.setFullName(row.getCell(2).getStringCellValue() + " " +
+	 * row.getCell(3).getStringCellValue()); employee.setActive(true);
+	 * employee.setRemarks(remarks);
+	 * 
+	 * employeeList.add(employee); }
+	 * 
+	 * } }
+	 * 
+	 * generalAgent.setEmployee(new HashSet<Employee>(employeeList));
+	 * 
+	 * // save entity generalAgent = save(generalAgent, userInfo);
+	 * 
+	 * generalAgentVO = (GeneralAgentVO) generalAgent.toVO();
+	 * 
+	 * } catch (ParvanServiceException e) { throw e;
+	 * 
+	 * } catch (Exception e) { throw new ParvanUnrecoverableException(
+	 * "Error occurred while saving object.", e); }
+	 * 
+	 * return generalAgentVO; }
+	 */
+
+	/**
+	 * 
+	 * @param accountNumber
+	 * @return boolean
+	 */
+	private boolean _isAccountValid(String accountNumber) {
+
+		String REPO_PATH = "/usr/local/issuemanager/";
+		InputStream ExcelFileToRead = null;
+		XSSFWorkbook wb = null;
+		XSSFSheet sheet = null;
+		boolean validate = false;
+		try {
+
+			ExcelFileToRead = new FileInputStream(REPO_PATH + "accounts.xlsx");
+			wb = new XSSFWorkbook(ExcelFileToRead);
+			sheet = wb.getSheetAt(0);
+			Iterator rows = sheet.rowIterator();
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		XSSFRow row = null;
+		Iterator rows = sheet.rowIterator();
+
+		while (rows.hasNext()) {
+			row = (XSSFRow) rows.next();
+			if (Validator.equals(accountNumber, row.getCell(0).getRawValue())) {
+				validate = true;
+
+			}
+		}
+		return validate;
+	}
+
+	// @Override
+	// public BaseVO save(BaseVO baseVO, UserInfo userInfo) throws
+	// ParvanServiceException {
+	// log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+	//
+	// GeneralAgentVO sampleVO = (GeneralAgentVO) baseVO;
+	//
+	// try {
+	//
+	// GeneralAgent sample = null;
+	//
+	// if(Validator.isNull(sampleVO.getId())){
+	// sample = new GeneralAgent();
+	// sample.fromVO(sampleVO);
+	// }
+	// else {
+	// sample = sampleDao.get(sampleVO.getId());
+	// sample.fromVO(sampleVO);
+	// }
+	//
+	// if (Validator.isNotNull(sampleVO.getParent()) &&
+	// Validator.isNotNull(sampleVO.getParent().getId())) {
+	//
+	// GeneralAgent parent = get(sampleVO.getParent().getId());
+	//
+	// if (!_isParentValid(sample, parent)) {
+	// throw new ParvanRecoverableException(ErrorCode.INVALID_PARENT);
+	// }
+	//
+	// sample.setParent(parent);
+	// } else {
+	// sample.setParent(null);
+	// }
+	//
+	// // save entity
+	// sample = save(sample, userInfo);
+	//
+	// sampleVO = (GeneralAgentVO) sample.toVO();
+	//
+	// } catch (ParvanServiceException e) {
+	// throw e;
+	//
+	// } catch (Exception e) {
+	// throw new ParvanUnrecoverableException("Error occurred while saving
+	// object.", e);
+	// }
+	//
+	// return sampleVO;
+	// }
+
+}

@@ -1,0 +1,50 @@
+package com.parvanpajooh.siteservices.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.ddd.application.AbstractApplicationServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.siteservices.model.vo.RegisterVO;
+import com.parvanpajooh.siteservices.service.IdentityManagement2LocalService;
+import com.parvanpajooh.siteservices.service.ProfileManagementLocalService;
+import com.parvanpajooh.siteservices.service.ProfileManagementService;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class ProfileManagementServiceImpl extends AbstractApplicationServiceImpl implements ProfileManagementService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(ProfileManagementServiceImpl.class);
+
+	@Inject
+	private ProfileManagementLocalService profileManagementLocalService;
+	
+	@Inject
+	private IdentityManagement2LocalService identityManagemen2tLocalService;
+
+	@Override
+	public void register(UserInfo userInfo, RegisterVO registerVO) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering register( registerVO={})", registerVO);
+		profileManagementLocalServiceImpl.register(registerVO);
+	}
+
+	@Override
+	public void activateUserAndSetPassword(UserInfo userInfo, Long userId, String password) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering activateUserAndSetPassword( userInfo={}, userId={}, password={})", userInfo, userId, password);
+		identityManagemen2tLocalServiceImpl.activateUserAndSetPassword(userId, password);
+	}
+}

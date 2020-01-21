@@ -1,0 +1,101 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.agentmanagement.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.parvanpajooh.client.agentmanagement.model.AgentManagementEnums.EmployeeGroup;
+import com.parvanpajooh.client.agentmanagement.model.EmployeeMsg;
+import com.parvanpajooh.client.agentmanagement.model.GeneralAgentMsg;
+import com.parvanpajooh.client.common.PageList;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+
+/**
+ * @author dev-03
+ * @author MO
+ * @author mehrdad
+ */
+public interface AgentManagementApi {
+	
+	@GET("v1/initlogin/all_subagents_by_parent_id")
+	public Call<List<GeneralAgentMsg>> initLoginFindAllSubAgentsByParentId(
+			@Query("parentAgentId") Long parentAgentId);
+	
+	@GET("v1/all_subagents_by_parent_id")
+	public Call<PageList<GeneralAgentMsg>> getAllSubAgentsByParentId(
+			@Query("parentAgentId") Long parentAgentId);
+		
+	@GET("v1/all_subagents_by")
+	public Call<List<GeneralAgentMsg>> findAllSubAgentsBy(
+			@Query("parentId") Long parentId,
+			@Query("term") String term);
+	
+	@GET("v1/initlogin/employee_by_username")
+	public Call<EmployeeMsg> initLoginFindEmployeeByUsername(
+			@Query("employeeUserName") String employeeUserName);
+	
+	@GET("v1/agentNames_by_ids")
+	public Call<Map<Long, String>> getAgentNamesByIds(
+			@Query("ids") Long[] ids);
+	
+	@GET("v1/initlogin/agents/by_employee_username")
+	public Call<GeneralAgentMsg> initLoginFindAgentByEmployeeUserName(
+			@Query("userName") String userName);
+	
+	@GET("v1/agents")
+	public Call<PageList<GeneralAgentMsg>> findAgentsBy(
+			@Query("page") int page, 
+			@Query("size") int size, 
+			@Query("active") String active,
+			@Query("name") String name,
+			@Query("nodeCode") String nodeCode,
+			@Query("nodeId") Long nodeId);
+	
+	@GET("v1/agents/{id}")
+	public Call<GeneralAgentMsg> getAgent(
+			@Path("id") Long id);
+	
+	@GET("v1/agents/direct_subagents/{id}")
+	public Call<List<GeneralAgentMsg>> findAgentDirectSubAgents(
+			@Path("id") Long id);
+	
+	@GET("v1/agents_by_nodeid/{nodeId}")
+	public Call<GeneralAgentMsg> findAgentByNodeId(
+			@Path("nodeId") Long nodeId);
+	
+	@GET("v1/agents_by_iatacode/{iataCode}")
+	public Call<GeneralAgentMsg> findAgentByIataCode(
+			@Path("iataCode") String iataCode);
+	
+	@GET("v1/agents_by_accountnumber/{accountNumber}")
+	public Call<GeneralAgentMsg> findAgentByAccountNumber(
+			@Path("accountNumber") String accountNumber);
+	
+	@GET("v1/agents_by_ids")
+	public Call<List<GeneralAgentMsg>> getAgentsByIds(
+			@Query("ids") Long[] ids);
+	
+	@GET("v1/employees")
+	public Call<List<EmployeeMsg>> findEmployeesBy(
+			@Query("page") int page, 
+			@Query("size") int size, 
+			@Query("active") Boolean active,
+			@Query("agentIds") Long[] agentIds,
+			@Query("fullName") String fullName,
+			@Query("groups") EmployeeGroup[] groups);
+	
+	@GET("v1/agents/{id}/employees")
+	public Call<List<EmployeeMsg>> getAllEmployeesOfAgentById(
+			@Path("id") Long agentId);
+	
+	@GET("v1/employees/{id}")
+	public Call<EmployeeMsg> getEmployee(
+			@Path("id") Long id);
+}

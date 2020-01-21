@@ -1,0 +1,177 @@
+package com.parvanpajooh.accounting.model.criteria;
+
+
+import java.time.LocalDateTime;
+import java.util.Date;
+
+import com.parvanpajooh.common.vo.BaseCriteria;
+
+public class VoucherCriteria extends BaseCriteria {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6692696276170013041L;
+
+
+	private String referenceId;
+	
+	private Boolean active;
+	
+	private Date issueDateFrom;
+
+	private LocalDateTime issueDateTo;
+	
+	private LocalDateTime createDateFrom;
+
+	private LocalDateTime createDateTo;
+
+	private LocalDateTime updateDateFrom;
+
+	private LocalDateTime updateDateTo;
+	
+	
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "VoucherCriteria [referenceId=" + referenceId + "]";
+	}
+
+
+
+	/**
+	 * @return the referenceId
+	 */
+	public String getReferenceId() {
+		return referenceId;
+	}
+
+
+
+	/**
+	 * @param referenceId the referenceId to set
+	 */
+	public void setReferenceId(String referenceId) {
+		this.referenceId = referenceId;
+	}
+
+	/**
+	 * @return the issueDateFrom
+	 */
+	public Date getIssueDateFrom() {
+		return issueDateFrom;
+	}
+
+
+
+	/**
+	 * @param issueDateFrom the issueDateFrom to set
+	 */
+	public void setIssueDateFrom(Date issueDateFrom) {
+		this.issueDateFrom = issueDateFrom;
+	}
+
+
+
+	/**
+	 * @return the issueDateTo
+	 */
+	public LocalDateTime getIssueDateTo() {
+		return issueDateTo;
+	}
+
+
+
+	/**
+	 * @param issueDateTo the issueDateTo to set
+	 */
+	public void setIssueDateTo(LocalDateTime issueDateTo) {
+		this.issueDateTo = issueDateTo;
+	}
+
+
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+
+	/**
+	 * @return the createDateFrom
+	 */
+	public LocalDateTime getCreateDateFrom() {
+		return createDateFrom;
+	}
+
+
+	/**
+	 * @param createDateFrom the createDateFrom to set
+	 */
+	public void setCreateDateFrom(LocalDateTime createDateFrom) {
+		this.createDateFrom = createDateFrom;
+	}
+
+
+	/**
+	 * @return the createDateTo
+	 */
+	public LocalDateTime getCreateDateTo() {
+		return createDateTo;
+	}
+
+
+	/**
+	 * @param createDateTo the createDateTo to set
+	 */
+	public void setCreateDateTo(LocalDateTime createDateTo) {
+		this.createDateTo = createDateTo;
+	}
+
+
+	/**
+	 * @return the updateDateFrom
+	 */
+	public LocalDateTime getUpdateDateFrom() {
+		return updateDateFrom;
+	}
+
+
+	/**
+	 * @param updateDateFrom the updateDateFrom to set
+	 */
+	public void setUpdateDateFrom(LocalDateTime updateDateFrom) {
+		this.updateDateFrom = updateDateFrom;
+	}
+
+
+	/**
+	 * @return the updateDateTo
+	 */
+	public LocalDateTime getUpdateDateTo() {
+		return updateDateTo;
+	}
+
+
+	/**
+	 * @param updateDateTo the updateDateTo to set
+	 */
+	public void setUpdateDateTo(LocalDateTime updateDateTo) {
+		this.updateDateTo = updateDateTo;
+	}
+
+
+}

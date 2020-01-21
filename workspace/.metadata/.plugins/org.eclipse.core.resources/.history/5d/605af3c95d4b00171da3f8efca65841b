@@ -1,0 +1,358 @@
+package com.parvanpajooh.personmanagement.mvc;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.common.auth.UserInfoLoader;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.GenericService;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.personmanagement.model.Person;
+import com.parvanpajooh.personmanagement.model.criteria.OrganizationCriteria;
+import com.parvanpajooh.personmanagement.model.criteria.PersonCriteria;
+import com.parvanpajooh.personmanagement.model.enums.RelationType;
+import com.parvanpajooh.personmanagement.model.vo.CityInfoVO;
+import com.parvanpajooh.personmanagement.model.vo.OrganizationVO;
+import com.parvanpajooh.personmanagement.model.vo.PersonVO;
+import com.parvanpajooh.personmanagement.model.vo.RelationVO;
+import com.parvanpajooh.personmanagement.mvc.base.PersonAbstractController;
+import com.parvanpajooh.personmanagement.service.CityInfoService;
+import com.parvanpajooh.personmanagement.service.OrganizationService;
+import com.parvanpajooh.personmanagement.service.PersonService;
+import com.parvanpajooh.personmanagement.service.RelationService;
+
+/**
+ * 
+ * @author ali
+ * @author MO
+ *
+ */
+@Controller
+@RequestMapping("/person")
+public class PersonController extends PersonAbstractController<Person, PersonVO, PersonCriteria> {
+
+	@EJB(mappedName = "java:global/personmanagement-ear/personmanagement-ejb/PersonServiceImpl")
+	private PersonService personService;
+	
+	@EJB(mappedName = "java:global/personmanagement-ear/personmanagement-ejb/RelationServiceImpl")
+	private RelationService relationService;
+	
+	@EJB(mappedName = "java:global/personmanagement-ear/personmanagement-ejb/OrganizationServiceImpl")
+	private OrganizationService organizationService;
+	
+	@EJB(mappedName = "java:global/personmanagement-ear/personmanagement-ejb/CityInfoServiceImpl")
+	private CityInfoService cityInfoService;
+
+	@Override
+	protected GenericService<Person, Long> getService() {
+		return personService;
+	}
+
+	@Override
+	protected String getName() {
+		return "persons";
+	}
+	
+	@Override
+	protected String getDefaultSortCriterion(){
+		return "createDate";
+	}
+	
+	@Override
+	protected SortDirectionEnum getDefaultSortDirection(){
+		return SortDirectionEnum.Descending;
+	}
+	
+	
+//	@Override
+//	public DatatablesResponse<PersonVO> paging(@DatatablesParams DatatablesCriterias criterias, PersonCriteria criteria,
+//			HttpServletRequest request) {
+//		
+//		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+//		UserInfoWrapper uiw = new UserInfoWrapper(userInfo);
+//		OrganizationVO userOrg= new OrganizationVO();
+//		userOrg.setId(uiw.getAgentAllowedOrgId());
+//		criteria.setOrganization(userOrg);
+//		return super.paging(criterias, criteria, request);
+//	}
+	
+	@ModelAttribute("allSubOrganizations")
+	public List<OrganizationVO> loadSubOrganizationsByParentId(HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+
+		// LOG
+		log.debug("Entering loadSubOrganizationsByParentId()");
+
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		Long orgId = userInfoWrapper.getAgentAllowedOrgId();
+
+		return organizationService.findSubOrganizationsByParentId(userInfo , orgId);
+	}
+	
+	/**
+	 * 
+	 * @param waybillNumber
+	 * @param request
+	 * @param model
+	 * @return
+	 * @throws ObjectNotFoundException
+	 * @throws ParvanServiceException
+	 */
+	@RequestMapping(value = "/view/{id}")
+	public String viewPerson(@PathVariable Long id, HttpServletRequest request, Model model) throws ParvanServiceException {
+		log.debug("Entering viewPerson(id={})", id);
+
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+		PersonVO person = (PersonVO) personService.getCompletePerson(userInfo, id);
+
+		model.addAttribute("person", person);
+		model.addAttribute("mode", "viewPerson");
+		model.addAttribute("redirectUrl", request.getHeader("referer"));
+		
+		log.debug("Exiting viewPerson()");
+		return "person-detail";
+	}
+	
+	@RequestMapping(value = "/edit/{id}")
+	public String editPerson(@PathVariable Long id, HttpServletRequest request, Model model) throws ParvanServiceException {
+		log.debug("Entering editPerson(id={})", id);
+
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+		PersonVO person = (PersonVO) personService.getCompletePerson(userInfo, id);
+
+		model.addAttribute("person", person);
+		model.addAttribute("mode", "editPerson");
+		
+		log.debug("Exiting editPerson()");
+		return "person-detail";
+	}
+	
+	@RequestMapping(value="/save/page", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> savePerson(PersonVO personVO, HttpServletRequest request, final Model model) throws ParvanServiceException {
+		log.debug("Entering save(vo={})", personVO);
+		Map<String, Object> result = new HashMap<String, Object>();
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+		try {
+			personService.save(userInfo, personVO);
+			
+			result.put("status", "success");
+			
+		} catch (ParvanServiceException e) {
+			proccessException(e, result);
+			model.addAttribute("result", result);
+			model.addAttribute("person", personVO);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/new", method = RequestMethod.GET)
+	public String newPerson(HttpServletRequest request, final Model model, final RedirectAttributes redirectAttributes) throws ParvanServiceException {
+		log.debug("Entering newPerson()");
+		try {
+			PersonVO newPerson = new PersonVO();
+			model.addAttribute("person", newPerson);
+			model.addAttribute("mode", "createPerson");
+		} catch (Exception e) {
+			Map<String, Object> result = new HashMap<String, Object>();
+			proccessException(e, result);
+			model.addAttribute("result", result);
+			return "error-default";
+		}
+		return "person-detail";
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/getByUuid", method = RequestMethod.GET)
+	public @ResponseBody PersonVO getByUuid(String uuid, HttpServletRequest request) {
+		log.debug("Entering getByUuid(uuid={})", uuid);
+		PersonVO personVO = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			personVO = personService.getByUuid(userInfo, uuid);
+			
+		} catch (Exception e) {
+			log.error("Error occurred while getByUuid.", e);
+		}
+		log.debug("Exiting getByUuid()");
+		return personVO;
+	}
+	
+	@RequestMapping(value="/relation/save", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> saveRelation(String personUuid, RelationVO relationVO, HttpServletRequest request) {
+		log.debug("Entering saveRelation(relationVO={})", relationVO);
+		RelationType type = null;
+		String term = null;
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			relationVO = (RelationVO) relationService.save(userInfo, relationVO);
+			
+			result.put("status", "success");
+			result.put("result", relatedFromPersonVOs);
+			result.put("result", relatedToPersonVOs);
+			
+			request.getSession().removeAttribute(getName());
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/relation/{id}", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> getRelation(@PathVariable Long id, HttpServletRequest request) {
+		log.debug("Entering getRelation(id={})", id);
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			RelationVO baseVO = (RelationVO) relationService.get(userInfo, id);
+			
+			result.put("status", "success");
+			result.put("result", baseVO);
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/cities/{shortCode}", method = RequestMethod.GET)
+	public @ResponseBody CityInfoVO getGeoEntity(@PathVariable String shortCode, HttpServletRequest request) {
+		log.debug("Entering getGeoEntity(shortCode={})", shortCode);
+		CityInfoVO result = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			if (Validator.isNotNull(shortCode)) {
+				result = cityInfoService.getCityByShortCode(userInfo, shortCode);
+			}
+		} catch (Exception e) {
+			log.error("Error occurred while getGeoEntity.", e);
+		}
+		log.debug("Exiting getGeoEntity()");
+		return result;
+	}
+	
+	@RequestMapping(value = "/cities", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<CityInfoVO> findCity(
+			@DatatablesParams DatatablesCriterias criterias, String term, HttpServletRequest request)
+			throws ParvanServiceException, ObjectNotFoundException {
+		log.debug("Entering findCity( criterias={}, term={})", criterias, term);
+		DataSet<CityInfoVO> dataSet = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			int firstResult = criterias.getStart();
+			int maxResults = criterias.getLength();
+			ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+			SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+			String sortCriterion = columnDef.getName();
+			if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+				sortDirection = SortDirectionEnum.Descending;
+			}
+			PageList<CityInfoVO> result = cityInfoService.findCityByNameOrShortCode(userInfo, term,
+					firstResult, maxResults, sortDirection, sortCriterion);
+			long totalRecords = result.getTotal();
+			List<CityInfoVO> elements = result.getElements();
+			dataSet = new DataSet<CityInfoVO>(elements, (long) elements.size(), totalRecords);
+		} catch (ParvanServiceException e) {
+			throw e;
+		}
+		log.debug("Exiting findCity()");
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	@RequestMapping(value = "/organizations", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<BaseVO> findOrganization(
+			@DatatablesParams DatatablesCriterias criterias, String term, HttpServletRequest request)
+			throws ParvanServiceException, ObjectNotFoundException {
+		log.debug("Entering findOrganization(criterias={}, term={})", criterias, term);
+		DataSet<BaseVO> dataSet = null;
+		try {
+			int firstResult = criterias.getStart();
+			int maxResults = criterias.getLength();
+			ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+			SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+			String sortCriterion = columnDef.getName();
+			if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+				sortDirection = SortDirectionEnum.Descending;
+			}
+			OrganizationCriteria criteria = new OrganizationCriteria();
+			criteria.setNameEn(term);
+			criteria.setNameLocal(term);
+
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			List<BaseVO> result = organizationService.findByCriteria(userInfo, criteria,
+					firstResult, maxResults, sortDirection, sortCriterion);
+			
+			long totalRecords = organizationService.countByCriteria(userInfo, criteria);
+			dataSet = new DataSet<BaseVO>(result, (long) result.size(), totalRecords);
+		} catch (ParvanServiceException e) {
+			throw e;
+		}
+		log.debug("Exiting findCity()");
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	@RequestMapping(value = "/index", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> index(HttpServletRequest request) throws ParvanServiceException {
+		log.debug("Entering index()");
+		Map<String, Object> result = new HashMap<String, Object>();
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			personService.index(userInfo);
+			
+			result.put("status", "success");
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+}

@@ -1,0 +1,327 @@
+package com.parvanpajooh.common.auth;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.cloudfoundry.identity.uaa.client.SocialClientUserDetails;
+import org.cloudfoundry.identity.uaa.user.UaaAuthority;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
+import org.springframework.util.Assert;
+import org.springframework.web.client.RestOperations;
+
+import com.parvanpajooh.client.agentmanagement.model.EmployeeMsg;
+import com.parvanpajooh.client.agentmanagement.model.GeneralAgentMsg;
+import com.parvanpajooh.client.identitymanagement2.model.UserMsg;
+import com.parvanpajooh.common.util.IpUtils;
+import com.parvanpajooh.common.util.TenantUtil;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.service.GlobalCacheService;
+
+
+public class IdmUserDetailsSource implements InitializingBean, IdmPreAuthenticatedPrincipalSource<Authentication>, org.springframework.security.core.userdetails.UserDetailsService {
+	
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+	
+	@Autowired
+	private UserServiceAdapter userServiceAdapter;
+	
+	@Autowired
+	private AgentManagementServiceAdapterRest agentManagementServiceAdapterRest;
+	
+	@EJB(mappedName = "java:app/common-crosscutting-ejb/parvanGlobalCache")
+	private GlobalCacheService globalCacheService;
+	
+	private RestOperations restTemplate;
+
+    private String userInfoUrl;
+
+    /**
+     * A rest template to be used to contact the remote user info endpoint.
+     * Normally would be an instance of {@link OAuth2RestTemplate}, but there is
+     * no need for that dependency to be explicit, and there are advantages in
+     * making it implicit (e.g. for testing purposes).
+     * 
+     * @param restTemplate a rest template
+     */
+    public void setRestTemplate(RestOperations restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    /**
+     * The remote URL of the <code>/userinfo</code> endpoint or equivalent. This
+     * should be a resource on the remote
+     * server that provides user profile data.
+     * 
+     * @param userInfoUrl
+     */
+    public void setUserInfoUrl(String userInfoUrl) {
+        this.userInfoUrl = userInfoUrl;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        Assert.state(userInfoUrl != null, "User info URL must be provided");
+        Assert.state(restTemplate != null, "RestTemplate URL must be provided");
+    }
+
+    /**
+     * Get as much generic information as possible about the current user from
+     * the remote endpoint. The aim is to
+     * collect as much of the properties of a {@link SocialClientUserDetails} as
+     * possible but not to fail if there is an
+     * authenticated user. If one of the tested remote providers is used at
+     * least a user id will be available, asserting
+     * that someone has authenticated and permitted us to see some public
+     * information.
+     * 
+     * @return some user details
+     */
+	@SuppressWarnings("unchecked")
+	@Override
+    public Authentication getPrincipal(HttpServletRequest request) {
+    	// ---------------------------------------------------------------------
+    	// get userInfo from userInfo end-point of UAA
+    	// ---------------------------------------------------------------------
+		Map<String, String> map;
+		try {
+			map = restTemplate.getForObject(userInfoUrl, Map.class);
+			
+		} catch (UserRedirectRequiredException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		// get userName
+        String userName = getUserName(map);
+        String email = null;
+        if (map.containsKey("email")) {
+            email = map.get("email");
+        }
+        
+        if (userName == null && email != null) {
+            userName = email;
+        }
+        
+        if (userName == null) {
+            userName = map.get("id"); // no user-friendly identifier for linked
+                                      // in and google
+        }
+        
+        // get fullName
+        String fullName = getFullName(map);
+        
+        String ip = IpUtils.getIpFromRequest(request);
+		String tenantId = TenantUtil.getTenantId(request);
+        
+        return populateIdmUserDetails(userName, fullName, email, ip, tenantId);
+    }
+	
+	private IdmUserDetails populateIdmUserDetails(String userName, String fullName, String email, String ip, String tenantId){
+		List<UaaAuthority> userAuthorities = UaaAuthority.USER_AUTHORITIES;
+        IdmUserDetails authentication = new IdmUserDetails(userName, userAuthorities);
+        authentication.setSource("0");
+        //authentication.setSource(Source.classify(userInfoUrl));
+        //authentication.setExternalId(getUserId(map));
+        
+        // get fullName
+        if (fullName != null) {
+        	authentication.setFullName(fullName);
+        }
+        
+        if (email != null) {
+        	authentication.setEmail(email);
+        }
+    
+        try {
+        	// ---------------------------------------------------------------------
+        	// get from global-cache
+        	// ---------------------------------------------------------------------
+			Map<String, Object> userDataCacheMap = 
+					(Map<String, Object>) globalCacheService.get(
+					GlobalCacheService.CacheType.USER_DATAMAP_BY_USERNAME, 
+					userName);
+        	
+        	//if (userDataCacheMap == null) {
+	        	// ---------------------------------------------------------------------
+	        	// cache miss, so load user, agent, employee from remote services
+	        	// ---------------------------------------------------------------------
+        		
+        		// ---------------------------------------------------------------------
+        		// load user
+        		// ---------------------------------------------------------------------
+	        	UserMsg user = userServiceAdapter.initLoginLoadUserByUsername(userName);
+	        	if(user == null){
+	        		log.info("user [{}] not found", userName);
+	        		throw new ObjectNotFoundException(String.format("user [%s] is not valid", userName));
+	        	}
+				
+				// ---------------------------------------------------------------------
+				// load employee
+				// ---------------------------------------------------------------------
+				EmployeeMsg employeeMsg = agentManagementServiceAdapterRest.initLoginFindEmployeeByUsername(userName);
+        		log.info("employeeMsg loaded: [{}]", employeeMsg);
+				
+				// ---------------------------------------------------------------------
+				// load agent
+				// ---------------------------------------------------------------------
+				GeneralAgentMsg generalAgentMsg = agentManagementServiceAdapterRest.initLoginLoadAgentByUsername(userName);
+//				if(generalAgentMsg == null){
+//	        		log.info("user [{}] dosn't assigned to any agent", userName);
+//					throw new ObjectNotFoundException("user dosn't assigned to any agent.");
+//				}
+				
+        		log.info("generalAgentMsg loaded: [{}]", generalAgentMsg);
+				
+				// ---------------------------------------------------------------------
+				// load all subAgents
+				// ---------------------------------------------------------------------
+				List<GeneralAgentMsg> generalAgentMsgs = agentManagementServiceAdapterRest.initLoginGetAllSubAgentsByParentId(generalAgentMsg.getId());
+				
+        		log.info("All SubAgents loaded: [{}]", generalAgentMsgs.size());
+        		
+				Set<Long> allSubAgentIds = new HashSet<Long>();
+				
+				for (GeneralAgentMsg agentMsg : generalAgentMsgs) {			
+					allSubAgentIds.add(agentMsg.getId());
+				}
+				
+				// ---------------------------------------------------------------------
+				// put user-agent-employee data to global-cache
+				// ---------------------------------------------------------------------
+				UserDataCacheMapper userDataCacheMapper = new UserDataCacheMapper(user, generalAgentMsg, employeeMsg, allSubAgentIds);
+				userDataCacheMap = userDataCacheMapper.toMap();
+				globalCacheService.put(GlobalCacheService.CacheType.USER_DATAMAP_BY_USERNAME, userName, userDataCacheMap);
+        	//}
+        	
+			// ---------------------------------------------------------------------
+			// initialize userInfo
+			// ---------------------------------------------------------------------
+        	UserInfo userInfo = UserDataCacheMap2UserInfoInitializer.initializeUserInfo(userDataCacheMap);
+        	
+        	String context = null;
+        	
+        	userInfo.setIp(ip);
+        	userInfo.setTenantId(tenantId);
+        	userInfo.setContext(context);
+			
+			// ---------------------------------------------------------------------
+			// make authentication object
+			// ---------------------------------------------------------------------
+        	List<GrantedAuthority> grantedAuths = (List<GrantedAuthority>) authentication.getAuthorities();
+        	ArrayList<GrantedAuthority> grantedAuths2 = new ArrayList<>(grantedAuths.size());
+        	
+        	Set<String> roleNames = userInfo.getRoleNames();
+			grantedAuths2.addAll(grantedAuths);
+			if(roleNames != null){
+				for (String roleName : roleNames) {
+					grantedAuths2.add( new SimpleGrantedAuthority(roleName));
+				}
+			}
+			
+			Collection<GrantedAuthority> authorities = Collections.unmodifiableList(grantedAuths2);
+			authentication = new IdmUserDetails((String)authentication.getPrincipal(), authorities);
+			authentication.setSource(authentication.getSource());
+			authentication.setExternalId(authentication.getExternalId());
+        	authentication.setFullName(authentication.getFullName());
+        	authentication.setEmail(authentication.getEmail());
+        	authentication.setUserInfo(userInfo);
+        	
+		} catch (ObjectNotFoundException | ParvanServiceException e) {
+			log.error("error in loading user and agent with userName: [{}]", userName, e);
+			throw new UsernameNotFoundException("error in loading user and agent with userName: " + authentication.getPrincipal() , e);
+		}
+        	
+        return authentication;
+	}
+
+    /**
+     * 
+     * @param map
+     * @return
+     */
+    private String getFullName(Map<String, String> map) {
+        if (map.containsKey("name")) {
+            return map.get("name");
+        }
+        if (map.containsKey("formattedName")) {
+            return map.get("formattedName");
+        }
+        if (map.containsKey("fullName")) {
+            return map.get("fullName");
+        }
+        String firstName = null;
+        if (map.containsKey("firstName")) {
+            firstName = map.get("firstName");
+        }
+        if (map.containsKey("givenName")) {
+            firstName = map.get("givenName");
+        }
+        String lastName = null;
+        if (map.containsKey("lastName")) {
+            lastName = map.get("lastName");
+        }
+        if (map.containsKey("familyName")) {
+            lastName = map.get("familyName");
+        }
+        if (firstName != null) {
+            if (lastName != null) {
+                return firstName + " " + lastName;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 
+     * @param map
+     * @return
+     */
+    private String getUserName(Map<String, String> map) {
+        String key = "username";
+        if (map.containsKey(key)) {
+            return map.get(key);
+        }
+        if (userInfoUrl.contains("run.pivotal.io") || userInfoUrl.contains("ecargo") || userInfoUrl.contains("mahex") || userInfoUrl.contains("sso.mahex") || userInfoUrl.endsWith("/uaa/userinfo") || userInfoUrl.endsWith("/userinfo")) {
+            key = "user_name";
+        }
+        if (userInfoUrl.contains("github.com")) {
+            key = "login";
+        }
+        if (userInfoUrl.contains("twitter.com")) {
+            key = "screen_name";
+        }
+        String value = map.get(key);
+        return value;
+    }
+
+	@Override
+	public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+		UserInfo currrentUserInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+		return populateIdmUserDetails(userName, null, null, currrentUserInfo.getIp(), currrentUserInfo.getTenantId());
+	}
+    
+}

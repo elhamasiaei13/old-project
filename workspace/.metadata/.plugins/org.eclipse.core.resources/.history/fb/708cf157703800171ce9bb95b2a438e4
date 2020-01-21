@@ -1,0 +1,210 @@
+package com.parvanpajooh.transportationmanagement.model.vo;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.routemanagement.model.RouteMsg;
+import com.parvanpajooh.client.routemanagement.model.enums.RouteEnums;
+import com.parvanpajooh.client.routemanagement.model.enums.RouteEnums.RouteCategory;
+import com.parvanpajooh.client.routemanagement.model.enums.RouteEnums.RouteType;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+
+/**
+ * @author mohammad
+ *
+ */
+public class RouteVO extends BaseVO {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1304277576944253813L;
+	
+	private RouteType type;
+	
+	private RouteCategory category;
+	
+	private String carrierRouteNumber;
+	
+	private Boolean active;
+	
+    private NodeVO toNode;
+	
+	private NodeVO fromNode;
+	
+	private String carrierCode;
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public RouteType getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(RouteType type) {
+		this.type = type;
+	}
+	
+	/**
+	 * @return the category
+	 */
+	public RouteCategory getCategory() {
+		return category;
+	}
+
+	/**
+	 * @param category the category to set
+	 */
+	public void setCategory(RouteCategory category) {
+		this.category = category;
+	}
+
+	/**
+	 * @return the toNode
+	 */
+	public NodeVO getToNode() {
+		return toNode;
+	}
+
+	/**
+	 * @param toNode the toNode to set
+	 */
+	public void setToNode(NodeVO toNode) {
+		this.toNode = toNode;
+	}
+
+	/**
+	 * @return the fromNode
+	 */
+	public NodeVO getFromNode() {
+		return fromNode;
+	}
+
+	/**
+	 * @param fromNode the fromNode to set
+	 */
+	public void setFromNode(NodeVO fromNode) {
+		this.fromNode = fromNode;
+	}
+
+	/**
+	 * @return the carrierRouteNumber
+	 */
+	public String getCarrierRouteNumber() {
+		return carrierRouteNumber;
+	}
+
+	/**
+	 * @param carrierRouteNumber the carrierRouteNumber to set
+	 */
+	public void setCarrierRouteNumber(String carrierRouteNumber) {
+		this.carrierRouteNumber = carrierRouteNumber;
+	}
+
+	/**
+	 * @return the carrierCode
+	 */
+	public String getCarrierCode() {
+		return carrierCode;
+	}
+
+	/**
+	 * @param carrierCode the carrierCode to set
+	 */
+	public void setCarrierCode(String carrierCode) {
+		this.carrierCode = carrierCode;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public RouteMsg toMsg() {
+		RouteMsg msg = new RouteMsg();
+
+		msg.setId(this.getId());
+		if (this.type != null) {
+			msg.setType( RouteEnums.RouteType.valueOf(this.type.toString()) );
+		}
+
+		if (this.category != null) {
+			msg.setCategory( RouteEnums.RouteCategory.valueOf( this.category.toString() ) );
+		}
+
+		msg.setCarrierRouteNumber(this.carrierRouteNumber);
+		msg.setActive(this.active);
+		if (this.toNode != null) {
+			msg.setToNode(this.toNode.toMsg());
+		}
+
+		if (this.fromNode != null) {
+			msg.setFromNode(this.fromNode.toMsg());
+		}
+
+		return msg;
+	}
+	
+	/**
+	 * 
+	 * @param msg
+	 * @return
+	 */
+	public void fromMsg(RouteMsg msg) {
+
+		this.setId(msg.getId());
+		if (msg.getType() != null) {
+			this.setType(RouteType.valueOf(msg.getType().toString()));
+		}
+
+		if (msg.getCategory() != null) {
+			this.setCategory( RouteCategory.valueOf( msg.getCategory().toString() ) );
+		}
+
+		this.setCarrierRouteNumber(msg.getCarrierRouteNumber());
+		this.setActive(msg.getActive());
+		
+		if (msg.getToNode() != null) {
+			NodeVO nodeVO = new NodeVO();
+			nodeVO.fromMsg(msg.getToNode());
+			this.setToNode(nodeVO);
+		}
+
+		if (msg.getFromNode() != null) {
+			NodeVO nodeVO = new NodeVO();
+			nodeVO.fromMsg(msg.getFromNode());
+			this.setFromNode(nodeVO);
+		}
+
+//		if (msg.getCarrier() != null) {
+//			vo.setCarrier(CarrierVO.fromMsg(msg.getCarrier()));
+//		}
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("id", getId())
+			.add("type", type)
+			.add("carrierRouteNumber", carrierRouteNumber)
+			.add("active", active)
+			.add("toNode", toNode)
+			.add("fromNode", fromNode)
+			.add("carrierCode", carrierCode)
+			.toString();
+	}
+}

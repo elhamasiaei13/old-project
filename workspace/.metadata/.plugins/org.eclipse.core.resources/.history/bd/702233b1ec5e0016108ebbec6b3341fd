@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+
+	<ul layout:fragment="menu" class="nav sidebar-menu" >
+		<!-- <div th:each="menu : ${session.menus}" th:remove="tag"> -->
+		
+
+			<li  th:title="لیست" >
+                <a th:href="@{'/employee'}" >
+                    <i ></i>
+                    <span>کارمندان</span>
+                </a>
+
+            </li>
+            
+            <li  th:title="لیست" >
+                <a th:href="@{'/generalAgent'}" >
+                    <i ></i>
+                    <span>مدیران عامل</span>
+                </a>
+
+            </li>
+            
+            <li  th:title="لیست" >
+                <a th:href="@{'/accountNumber'}" >
+                    <i ></i>
+                    <span>شماره‌های حساب</span>
+                </a>
+
+            </li>
+            
+            
+<!-- 			<li th:if="${#lists.size(menu.children) == 0 and #authorization.expression('hasAnyRole('' __${#strings.listJoin(menu.roles,',')}__ '')')}" th:title="${#locale.language == 'fa' ? menu.title : menu.titleEn}" th:class="${rightMenu == '' || rightMenu == menu.code ? 'active' : ''}">
+                <a th:href="${menu.link}" th:if="${menu.type == 'link'}">
+                    <i th:class="${menu.cssClass}"></i>
+                    <span th:text="${#locale.language == 'fa' ? menu.title : menu.titleEn}">title</span>
+                </a>
+                
+                <div class="sidebar-button" th:if="${menu.type == 'button'}">
+					<a th:class="${menu.cssClass}" th:href="${menu.link}">
+						<span th:text="${#locale.language == 'fa' ? menu.title : menu.titleEn}">title</span>
+					</a>
+				</div>
+            </li> -->
+			
+<!-- 	      	<li class="treeview" th:if="${#lists.size(menu.children) > 0 and #authorization.expression('hasAnyRole('' __${#strings.listJoin(menu.roles,',')}__ '')')}" th:class="${rightMenu == 'admin' ? 'treeview active' : 'treeview'}">
+				<a href="#">
+				    <i th:class="${menu.cssClass}"></i>
+				    <span th:text="${#locale.language == 'fa' ? menu.title : menu.titleEn}">title</span>
+				    <i class="fa fa-angle-left pull-right"></i>
+				</a>
+				<ul class="treeview-menu">
+	      			<li th:each="submenu : ${menu.children}" th:class="${subRightMenu == submenu.code ? 'active' : ''}">
+		                <a th:href="${submenu.link}">
+		                    <i th:class="${submenu.cssClass}"></i>
+		                    <span th:text="${#locale.language == 'fa' ? submenu.title : submenu.titleEn}">title</span>
+		                </a>
+	            	</li>
+	        	</ul>
+	    	</li> -->
+		<!-- </div> -->
+	</ul>
+
+</html>

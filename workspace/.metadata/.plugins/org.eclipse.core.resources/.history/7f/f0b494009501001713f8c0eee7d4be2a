@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>Roles List</title>
+<script th:src="@{/js/dynamic-crumbs.js}"></script>
+
+<style>
+.select-device-modal label {
+	margin-bottom: 0px;
+}
+
+.select-device-modal input {
+	width: auto;
+	height: 28px;
+}
+
+.select-device-modal .form-control {
+	width: auto;
+}
+
+.select-device-modal table.dataTable td {
+	padding: 1px 10px;
+}
+
+.select-device-modal .dataTables_filter label {
+	margin-bottom: 5px;
+}
+</style>
+</head>
+
+<body th:with="rightMenu='group-addroles'">
+	<section layout:fragment="top-header" class="fixed-header">
+		<div class="ui-header-image pull-left">
+			<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/identitymanagement2-web/resources/images/contacts.png" th:src="@{/resources/images/contacts.png}"
+				style="width: 48px; height: 48px;" />
+		</div>
+		<div class="ui-header-title">
+			<div class="split-left">
+				<h3>
+					<small>Add roles to</small>
+				</h3>
+				<h3 th:text="${taskGroupDto.name}"></h3>
+			</div>
+		</div>
+	</section>
+
+	<!-- Main content -->
+	<!-- BODY -->
+	<section class="content" layout:fragment="content">
+
+		<div class="box box-primary" style="display: block;">
+			<div class="box-header">
+				<h3 class="box-title" th:text="#{role.searchAndChoose}">جستجو و انتخاب نقش</h3>
+			</div>
+			<div class="box-body" style="display: block;">
+				<div class="row">
+					<div class="col-sm-3 col-sm-offset-9">
+						<div class="input-group">
+							<input class="form-control" id="nameFilter" name="name" type="text" th:placeholder="#{role.name}" />
+							<span class="input-group-btn">
+								<a class="btn btn-primary" onclick="doSearch()">
+									<i class="fa fa-search" />
+								</a>
+								<a class="btn btn-warning" onclick="resetSearch();">
+									<i class="fa fa-refresh" />
+								</a>
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<form class="form-horizontal" id="addRolesForm" method="post">
+				<div class="callout callout-danger hide">
+					<h4></h4>
+				</div>
+				<input type="hidden" name="taskGroupId" th:value="${taskGroupDto.id}" />
+				<div class="box-body table-responsive">
+					<table id="RoleTable" class="table table-responsive table-hover table-bordered table-condensed table-striped drop-shadow has-tickbox" dt:pagingType="full" dt:serverside="true"
+						dt:url="@{'/taskgroups/roles/paging'}" dt:table="true" dt:proccessing="true" dt:filter="false" dt:ajaxParams="'getRoleExtraParams'">
+						<thead>
+							<tr>
+								<th class="text-center" width="50px">
+									<input id="selectAllRoles" type="checkbox" dt:renderFunction="'rowCheckbox'" dt:sortable="false" name="allRoleNames" onchange="toggleSelecteAllRoles(this)" />
+								</th>
+								<th style="width: 5%" dt:property="id" th:text="#{role.id}">شناسه</th>
+								<th dt:property="name" style="width: 45%" th:text="#{role.name}">نام</th>
+								<th dt:property="type" style="width: 45%" th:text="#{role.type}">نوع</th>
+							</tr>
+						</thead>
+					</table>
+					<div class="box-footer">
+						<button type="button" class="btn btn-primary pull-right" id="addRolesBtn" th:text="#{button.save}">Save</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</section>
+
+	<th:block layout:fragment="javascripts">
+
+		<script th:inline="javascript">
+	            var titleModify = '<span class="label label-info"  th:remove="tag">Update !</span>';
+	            var titleDelete = '<span class="label label-info"  th:remove="tag">Delete !</span>';
+	            
+	
+	            /*<![CDATA[*/
+	
+	            function resetSearch() {
+	                $('#frmRoleSearch').trigger('reset');
+	                $('#canonicalSearchNameFilter').val('');
+	                doSearch();
+	            }
+
+	        	var selectedRole = {};
+	            function rowCheckbox(data, type, full) {
+		            var roleNames = [[${roleNames}]];
+		            var isSelected = (selectedRole[full.id] !== undefined ? true : false);
+		            var d = '<div class="text-center" style="white-space: nowrap;">';
+	                d += '<input onchange="toggleSelectRole('+full.name+')" type="checkbox" value="' + full.name + '" name="roleNames" '+(isSelected ? 'checked="checked"' : '')+'/>';
+	                d += '</div>';
+	                return d;
+	            }
+
+	            function toggleSelecteAllRoles(elem){
+	            	var action=($(elem).prop('checked') ? 'select' : 'deselect');
+	            	var names = [];
+	            	$('#WaybillNumberDisplayTable input[type="checkbox"][name="roleNames"]').each(function(i, v){
+	            		names.push($(v).val());
+	            	
+	            	});
+	            	$('#WaybillNumberDisplayTable input[type="checkbox"][name="roleNames"]').prop('checked', $(elem).prop('checked'));
+	            	$('#WaybillNumberDisplayTable input[type="checkbox"][name="roleNames"]').iCheck('update');
+	            	toggleRowSelectRole(action, names);
+	            }
+	            
+	            function toggleSelectRole(name){
+	            	if($('#selectAllRoles').prop('checked')){
+	            		$('#selectAllRoles').iCheck('uncheck');
+	            	}
+	            	$('#RoleTable input[value="'+name+'"]').toggle('checked');
+	            	$('#RoleTable input[value="'+name+'"]').iCheck('update');
+	            	var action=($('#RoleTable input[value="'+name+'"]').prop('checked') ? 'select' : 'deselect');
+	            	toggleRowSelectRole(action, [name]);
+	            }
+
+	            function toggleRowSelectRole(action, names){
+	            	var data = 'action=' + action;
+	            	$.each(ids, function(i, v) {
+	            		data += '&name=' + v;
+	            	});
+	            	$.post('/taskmanagement-web/taskgroups/roles/pagingSelective', data).done(function(data) {
+	            		if(data.status == 'success') {
+	            			if(action == 'select'){
+	            				$.each(names, function(i, v) {
+	            					selectedRole[v] = v;
+	            				});
+	            			} else {
+	            				$.each(ids, function(i, v) {
+	            					delete selectedRole[v];
+	            				});
+	            			}
+	            			try{
+	            				$.each(ids, function(i, v) {
+	            					afterSuccesstoggleSelectRowRole(action, v);
+	            				});
+	            			}catch(Error){}
+	            			//showTopleftGrowl('success', 'Success', 'selected');
+	            		} else if(data.status == 'fail'){
+	            				showError(data.status);
+	            		} else if(data.status == 'ErrorCode'){
+	            			if(data.errorMessage){
+	            				showTopleftGrowl('error', 'Error', data.errorMessage);
+	            			} else {
+	            				showTopleftGrowl('error', 'Error', messages[data.errorCode]);
+	            			}
+	            		} else {
+	            			console.debug(data.status);
+	            			showTopleftGrowl('error', 'Error', (data.message ? data.message : 'Select failed'));
+	            		}
+	            	}).fail(failAjax);
+	            }
+	
+	            function doSearch() {
+	                oTable_RoleTable.ajax.reload();
+	            }
+
+	            function myCustomDrawCallback(settings){
+	            	var classMap = [];
+	            	for ( var i=0, iLen=settings.aoColumns.length ; i<iLen ; i++ ){
+	            		if(settings.aoColumns[i].nTh.className.indexOf('responsiveCol') > -1)
+	            			classMap.push(i);
+	            	}
+	            	var iStart = settings._iDisplayStart+1;
+	            	for ( var i=0, iLen=settings.aiDisplay.length ; i<iLen ; i++ )
+	            	{
+	            		for ( var j=0; j<classMap.length ; j++ ){
+	            			$('td:eq('+classMap[j]+')', settings.aoData[ settings.aiDisplay[i] ].nTr ).addClass('responsiveCol');
+	            		}
+	            		$('td:eq(0)', settings.aoData[ settings.aiDisplay[i] ].nTr ).html( iStart + i );
+	            	}
+	            	$('#RoleTable input[type=checkbox], #RoleTable input[type=radio]').iCheck({checkboxClass: "icheckbox_minimal",radioClass: "iradio_minimal"});
+	            	$('#RoleTable input[type=checkbox], #RoleTable input[type=radio]').on('ifChanged', function(event){$(this).trigger('change');});
+	            	return false;
+	            }
+	
+	            function getRoleExtraParams(aoData) {
+	            	 return {
+	                     "data": function(data) {                       
+	                         customPush(data, 'name', $('#nameFilter').val());
+	                     }
+	                 };            	
+	            }
+	
+	            jQuery(document).ready(function() {
+
+		            $('#addRolesBtn').click(function() {
+                        var $btn = $(this);
+                        $('#addRolesForm').find('.callout').text('').addClass('hide');
+                        var id = $('#addRolesForm').find('input[name="taskGroupId"]').val();
+
+                        $.post('/taskmanagement-web/taskgroups/roles/save', $('#addRolesForm').serialize()).done(function(data) {
+                            if (data.status == 'success') {
+                                try {
+                                    createRoleAfterSaveSuccess()
+                                } catch (error) {}
+                                showTopleftGrowl('success', 'Create', 'Create Successful');
+                                window.open("/taskmanagement-web/taskgroups", "_self");
+
+                            } else if (data.status == 'ValidationException') {
+                                $('#addRolesForm').find('.callout').text(data.invalidField + ' invalid-value').removeClass('hide');
+                            } else if (data.status == 'ObjectExistsException') {
+                                $('#caddRolesForm').find('.callout').text((data.invalidField ? data.invalidField : 'data') + ' already-exists').removeClass('hide');
+                            } else if (data.status == 'ErrorCode') {
+                                if (data.errorMessage) {
+                                    $('#addRolesForm').find('.callout').text(data.errorMessage).removeClass('hide');
+                                } else {
+                                    $('#addRolesForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+                                }
+                            } else {
+                                console.debug(data.status);
+                                $('#addRolesForm').find('.callout').text((data.message ? data.message : 'save.failed')).removeClass('hide');
+                            }
+                            $btn.attr('disabled', false);
+                        }).fail(function(jqXHR, textStatus, errorThrown) {
+                            failAjax(jqXHR, textStatus, errorThrown, 'addRolesBtn')
+                        });
+                    return false;
+                });
+	            });
+	
+	            /*]]>*/
+	        </script>
+	</th:block>
+</body>
+
+</html>

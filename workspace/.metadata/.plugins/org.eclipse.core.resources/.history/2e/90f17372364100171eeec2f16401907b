@@ -1,0 +1,68 @@
+package com.parvanpajooh.carriermanagement.domain.repository.jpa;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.carriermanagement.domain.model.Carrier;
+import com.parvanpajooh.carriermanagement.domain.model.Carrier_;
+import com.parvanpajooh.carriermanagement.domain.model.criteria.CarrierCriteria;
+import com.parvanpajooh.carriermanagement.domain.repository.CarrierRepository;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseCriteria;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.repository.jpa.GenericRepositoryJpa;
+import com.parvanpajooh.commons.util.Validator;
+
+public class CarrierRepositoryJpa extends GenericRepositoryJpa<Carrier, Long> implements CarrierRepository {
+
+	
+	@PersistenceContext(unitName = "ApplicationEntityManager")
+	private EntityManager entityManager;
+
+	public CarrierRepositoryJpa() {
+		super(Carrier.class);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<Carrier> root, Map<String, Join> joins) {
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+		CarrierCriteria carrierCriteria=(CarrierCriteria) cri;
+		String nameEn = carrierCriteria.getNameEn();
+		String nameFa = carrierCriteria.getNameFa();
+		String carrierCode = carrierCriteria.getCarrierCode();
+		String carrierPrefix = carrierCriteria.getCarrierPrefix();
+		
+		if(Validator.isNotNull(nameEn)){
+			Predicate predicate = builder.and(builder.like(root.<String>get(Carrier_.nameEn), "%" + nameEn + "%"));
+			predicateList.add(predicate);
+		
+		}
+		if(Validator.isNotNull(nameFa)){
+			Predicate predicate = builder.and(builder.like(root.<String>get(Carrier_.nameFa), "%" + nameFa + "%"));
+			predicateList.add(predicate);
+		
+		}
+		if(Validator.isNotNull(carrierCode)){
+			Predicate predicate = builder.and(builder.equal(root.<String>get(Carrier_.carrierCode), carrierCode ));
+			predicateList.add(predicate);
+		
+		}
+		if(Validator.isNotNull(carrierPrefix)){
+			Predicate predicate = builder.and(builder.equal(root.<String>get(Carrier_.carrierPrefix),  carrierPrefix ));
+			predicateList.add(predicate);
+		
+		}
+		
+		return predicateList;
+	}
+
+}

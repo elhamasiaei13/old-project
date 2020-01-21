@@ -1,0 +1,110 @@
+package com.parvanpajooh.issuemanager.dao.jpa;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.issuemanager.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.issuemanager.dao.AggregatedHistoryDao;
+import com.parvanpajooh.issuemanager.dao.TaskAssignmentHistoryDao;
+import com.parvanpajooh.issuemanager.dao.TaskDao;
+import com.parvanpajooh.issuemanager.model.AggregatedHistory;
+import com.parvanpajooh.issuemanager.model.Task;
+import com.parvanpajooh.issuemanager.model.TaskAssignmentHistory;
+import com.parvanpajooh.issuemanager.model.enums.TableNameEnum;
+
+/**
+ * 
+ * @author 
+ * 
+ */
+@Stateless
+public class TaskAssignmentHistoryDaoJpa extends GenericDaoJpa<TaskAssignmentHistory, Long> implements TaskAssignmentHistoryDao {
+
+	public TaskAssignmentHistoryDaoJpa() {
+		super(TaskAssignmentHistory.class);
+	}
+	
+	public AggregatedHistoryDao aggregatedHistoryDao;
+	public TaskDao taskDao;
+	
+	@Inject
+	public void setAggregatedHistoryDao(AggregatedHistoryDao aggregatedHistoryDao) {
+		this.aggregatedHistoryDao = aggregatedHistoryDao;
+	}
+	
+	@Inject
+	public void setTaskDao(TaskDao taskDao) {
+		this.taskDao = taskDao;
+	}
+	
+	/**
+	 * Entity manager, injected by Spring using @PersistenceContext annotation
+	 * on setEntityManager()
+	 */
+	@PersistenceContext(unitName = PERSISTENCE_UNIT_NAME)
+	private EntityManager entityManager;
+
+
+	public List<TaskAssignmentHistory> findByTaskId(Long id) throws ParvanDaoException {
+		Query query = getEntityManager().createQuery("from TaskAssignmentHistory where taskId = ?");
+		query.setParameter(1, id);
+		List<TaskAssignmentHistory> taskAssignment = query.getResultList();
+
+		if (taskAssignment != null && taskAssignment.size() > 0) {
+			return taskAssignment;
+		} else {
+			return null;
+		}
+	}
+	
+	@Override
+	public TaskAssignmentHistory save(TaskAssignmentHistory taskAssignmentHistory) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering save(taskStatusHistory={})", taskAssignmentHistory);
+		
+		TaskAssignmentHistory savedTaskAssignmentHistory = null;
+		try {
+
+			// save taskAssignmentHistory object
+			savedTaskAssignmentHistory = super.save(taskAssignmentHistory);
+			
+			// serialize to JSON
+			String serializedStr = TaskAssignmentHistory.mapToJson(savedTaskAssignmentHistory);
+		
+			// save a new Aggregated record
+			AggregatedHistory aggregatedHistory = new AggregatedHistory();
+			aggregatedHistory.setActive(true);
+			aggregatedHistory.setBody(serializedStr);
+			aggregatedHistory.setTaskAssignmentHistory(savedTaskAssignmentHistory);
+			aggregatedHistory.setType(TableNameEnum.valueOf("TaskAssignmentHistory"));
+			aggregatedHistory.setTask(savedTaskAssignmentHistory.getTask());
+			
+			aggregatedHistoryDao.save(aggregatedHistory);
+			
+			// refresh Task record
+			Task task = taskDao.get(savedTaskAssignmentHistory.getTask().getId());
+			task.setCurrentMember(savedTaskAssignmentHistory.getMemberTo());
+			taskDao.refresh(task);
+			
+
+		} catch (ParvanDaoException e) {
+			throw e;
+			
+		} catch (IOException e) {
+			log.error("error occurred while serializing to JSON", e);
+			throw new ParvanDaoException("error occurred while serializing to JSON", e);
+		}
+		
+		// LOG
+		log.debug("Leaving exists(): {}", savedTaskAssignmentHistory.getId());
+
+		return savedTaskAssignmentHistory;
+	}
+}

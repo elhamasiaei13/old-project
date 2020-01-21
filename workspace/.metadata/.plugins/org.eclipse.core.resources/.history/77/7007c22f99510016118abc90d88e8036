@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout">
+
+<head>
+    <title>Voucher List</title>
+
+    <link href="../../resources/lib/select2-3.5.0/select2.css" th:href="@{/resources/lib/select2-3.5.0/select2.css}" rel="stylesheet" />
+
+    <link href="../../resources/lib/select2-3.5.0/select2-bootstrap.css" th:href="@{/resources/lib/select2-3.5.0/select2-bootstrap.css}" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../../resources/lib/bootstrap-validator-0.5.0/css/bootstrapValidator.min.css" th:href="@{/resources/lib/bootstrap-validator-0.5.0/css/bootstrapValidator.min.css}"></link>
+
+    <style>
+        .select-device-modal label {
+            margin-bottom: 0px;
+        }
+        
+        .select-device-modal input {
+            width: auto;
+            height: 28px;
+        }
+        
+        .select-device-modal .form-control {
+            width: auto;
+        }
+        
+        .select-device-modal table.dataTable td {
+            padding: 1px 10px;
+        }
+        
+        .select-device-modal .dataTables_filter label {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body th:with="rightMenu='admin', subRightMenu='vouchers'">
+    <section layout:fragment="top-header" class="fixed-header">
+        <div class="ui-header-image pull-left">
+            <img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/identitymanagement2-web/resources/images/contacts.png" th:src="@{/resources/images/contacts.png}" style="width: 48px; height: 48px;" />
+        </div>
+        <div class="ui-header-title">
+            <div class="split-left">
+                <h3>
+                        <small>View</small>
+                    </h3>
+                <h3>Vouchers</h3>
+            </div>
+            <div class="split-right">
+                <a data-toggle="modal" onclick="createVoucher();" class="btn btn-success">
+                    <i class="fa fa-plus">&nbsp;&nbsp;</i><span>سند جدید</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <!-- BODY -->
+    <section class="content" layout:fragment="content">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title">جستجو</h3>
+                <div class="box-tools pull-right">
+                    <button title="" data-widget="collapse" class="btn btn-primary btn-xs"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body" style="display: block;">
+                <dy:form entity="Voucher" form="search" type="search" />
+            </div>
+            <!-- /.box-body -->
+        </div>
+
+        <div class="box">
+            <div class="box-body table-responsive">
+                <dy:table entity="Voucher" table="list" customSearch="true" />
+            </div>
+        </div>
+
+        <div class="modal fade" id="createVoucherModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">جدید</h4>
+                    </div>
+					<div class="modal-body">
+					
+					    <div class="modal-form-content">
+					        <form class="form-horizontal" role="form" id="createVoucherForm" method="post" action="/accounting-web/accounting-web/voucher/save">
+					            <div class="callout callout-danger hide">
+					                <h4></h4></div>
+					            <div class="form-group "><label class="col-sm-2 control-label" for="description">شرح</label>
+					                <div class="col-sm-7"><input class="form-control " id="descriptionCreate" name="description" type="text" width="200" style="width:200px" /></div>
+					            </div>
+					            <div class="form-group "><label class="col-sm-2 control-label" for="referenceId">شناسه مرجع</label>
+					                <div class="col-sm-7"><input class="form-control " id="referenceIdCreate" name="referenceId" type="text" width="200" style="width:200px" /></div>
+					            </div>
+					            <div class="form-group "><label class="col-sm-2 control-label" for="issueDate">تاریخ سررسید</label>
+					                <div class="col-sm-7"><input class="form-control datepicker"  name="dateTimePicker" type="text" width="200" style="width:200px"/></div>
+					            </div>
+					            
+					            <fieldset>
+					            <div class="panel panel-default" style="margin-top: 30px;">
+			                    <div class="panel-heading">ردیف‌های سند</div>
+			                    <div class="panel-body">
+
+                                <!-- SANAD-ROWS -->
+                                <div id="sanadRows" class="row minPadding">
+                                    <!-- SANAD-ROWs-HEADER -->
+                                    <div class="row newRow minPadding">
+                                        <div class="col-md-8 ">
+                                            <div class="col-md-3 required">
+                                            <div class="form-group required">
+                                            	<label class="control-label" for="accountType.id">حساب‌ها</label>
+                                            	</div>
+                                            </div>
+                                            <div class="col-md-2 required">
+                                            <div class="form-group">
+                                            <label class="control-label">شناسه مرجع</label>
+                                            </div>
+                                            </div>
+                                            <div class="col-md-7 required">
+                                            <div class="form-group">
+                                            <label class="control-label">شرح</label>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 ">
+                                            <div class="col-md-5 required">
+                                            <div class="form-group required">
+                                            <label class="control-label">بدهکار</label>
+                                            </div>
+                                            </div>
+
+                                            <div class="col-md-5 required">
+                                            <div class="form-group required">
+                                            <label class="control-label">بستانکار</label>
+                                            </div>
+                                            </div>
+                                            <div class="col-md-2">&nbsp;</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SANAD-ROWs-Row1 -->
+                                    <div class="row newRow minPadding">
+                                        <div class="col-md-8 ">
+                                            <div class="col-md-3">
+ 											<div class="col-sm-7"><input class="form-control validate[notempty]" type="hidden" name="accountType.id" id="accountTypeidCreate" width="200" style="width:200px" data-bv-notempty="true" /></div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input placeholder="شناسه مرجع" name="voucherRow[0].referenceId" class="form-control " type="text" />
+                                            </div>
+                                            <div class="col-md-7">
+                                                <input placeholder="شرح" class="form-control" name="voucherRow[0].description" type="text" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 ">
+                                            <div class="col-md-5">
+                                                <input placeholder="بدهکار" name="voucherRow[0].debit" class="form-control bedehkar money" type="text" maxlength="31" autocomplete="off" />
+                                            </div>
+
+                                            <div class="col-md-5">
+                                                <input placeholder="بستانکار" name="voucherRow[0].credit" class="form-control  bestankar money" type="text" maxlength="31" autocomplete="off" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SANAD-ROWs-Row2 -->
+                                    <div class="row minPadding">
+                                        <div class="col-md-8 ">
+                                            <div class="col-md-3">
+
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input placeholder="شناسه مرجع" name="voucherRow[1].referenceId" class="form-control " type="text" />
+                                            </div>
+                                            <div class="col-md-7">
+                                                <input placeholder="شرح" class="form-control" name="voucherRow[1].description" type="text" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4 ">
+                                            <div class="col-md-5">
+                                                <input placeholder="بدهکار" name="voucherRow[1].debit" class="form-control bedehkar money" type="text" maxlength="31" autocomplete="off" />
+                                            </div>
+
+                                            <div class="col-md-5">
+                                                <input placeholder="بستانکار" name="voucherRow[1].credit" class="form-control  bestankar money " type="text" maxlength="31" autocomplete="off" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="#" class="btn btn-success" id="cloneButton1"><span class="glyphicon glyphicon-plus"></span></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SANAD-ROWs-RowTemplate -->
+                                    <div class="row minPadding" id="test1" style="display: none;">
+                                        <div class="col-md-8 ">
+                                            <div class="col-md-3">
+
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input placeholder="شناسه مرجع" class="form-control " type="text" />
+                                            </div>
+                                            <div class="col-md-7">
+                                                <input placeholder="شرح" class="form-control" type="text" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 ">
+                                            <div class="col-md-5">
+                                                <input placeholder="بدهکار" class="form-control bedehkar money" type="text" maxlength="31" autocomplete="off" />
+                                            </div>
+                                            <div class="col-md-5">
+                                                <input placeholder="بستانکار" class="form-control  bestankar money" type="text" maxlength="31" autocomplete="off" />
+                                            </div>
+                                            <div class="col-md-2 newbotton">
+                                                <a href="#" class="btn btn-danger btn-xs" class-data="remove" onclick="removeRow(this);"> <span class="glyphicon glyphicon-remove"></span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="test2">
+                                        <div class="row newRow minPadding" id="voucherRow[2]" style="display:block">
+                                            <div class="col-md-8 ">
+                                                <div class="col-md-3">
+
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <input placeholder="شناسه مرجع" name="voucherRow[2].referenceId" class="form-control " type="text" />
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <input placeholder="شرح" class="form-control" name="voucherRow[2].description" type="text" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 ">
+                                                <div class="col-md-5">
+                                                    <input placeholder="بدهکار" name="voucherRow[2].debit" class="form-control bedehkar money" type="text" maxlength="31" autocomplete="off" />
+                                                </div>
+
+                                                <div class="col-md-5">
+                                                    <input placeholder="بستانکار" name="voucherRow[2].credit" class="form-control bestankar money" type="text" maxlength="31" autocomplete="off" />
+                                                </div>
+                                                <div class="col-md-2 newbotton">
+                                                    <a href="#" class="btn btn-danger btn-xs" class-data="remove" onclick="removeRow(this);">
+                                                        <span class="glyphicon glyphicon-remove"></span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SANAD-ROWs- -->
+                                    <div class="row minPadding">
+                                        <div class="col-md-8 ">
+                                            <div class="col-md-5">&nbsp;</div>
+
+                                            <div class="col-md-7">&nbsp;</div>
+                                        </div>
+
+                                        <div class="col-md-4 ">
+                                            <div class="col-md-5">
+                                                <input type="text" class="form-control" readonly="readonly" placeholder="جمع کل بدهکار" id="bedehkar_sum" />
+                                            </div>
+
+                                            <div class="col-md-5">
+                                                <input type="text" class="form-control" readonly="readonly" placeholder="جمع کل بستانکار" id="bestankar_sum" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- SANAD-ROWs -->
+                            </div>
+                            <!-- SANAD -->
+                            </div>
+                            </fieldset>
+					        </form>
+					    </div>
+					
+					</div>
+                    <div class="modal-footer checkbox">
+                        <label class="create-another" for="createVoucher-create-another">
+		                		<input type="checkbox" id="createVoucher-create-another" value="true"/>
+		                		<span  th:remove="tag">Create another</span>
+		                	</label>
+
+                        <button type="button" class="btn btn-primary" id="createVoucherBtn">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>       
+
+        <div class="modal fade" id="modifyVoucherModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">ویرایش اطلاعات</h4>
+                    </div>
+                    <div class="modal-body">
+                        <dy:form entity="Voucher" form="modify" type="modify" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="modifyVoucherBtn">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteVoucherModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">حذف</h4>
+                    </div>
+                    <div class="modal-body">
+                        <dy:form entity="Voucher" form="delete" type="delete" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="deleteVoucherBtn">Delete</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </section>
+
+    <th:block layout:fragment="javascripts">
+        <script src="../../resources/lib/bootstrap-validator-0.5.0/js/bootstrapValidator.min.js" th:src="@{/resources/lib/bootstrap-validator-0.5.0/js/bootstrapValidator.min.js}"></script>
+        <script src="../../resources/lib/select2-3.5.0/select2.min.js" th:src="@{/resources/lib/select2-3.5.0/select2.min.js}"></script>
+
+        <script th:inline="javascript">
+            var titleModify = '<span class="label label-info"  th:remove="tag">Update !</span>';
+            var titleDelete = '<span class="label label-info"  th:remove="tag">Delete !</span>';
+            var resetPasswordTitle = '<span class="label label-info"  th:remove="tag">ResetPassword !</span>';
+            var titleChangeRole = '<span class="label label-info"  th:remove="tag">ChangeRole !</span>';
+
+            jQuery(document).ready(function() {
+                $('#accountTypeidCreate').select2({
+                    placeholder: 'انتخاب کنید',
+                    formatResult: function(aaData) {
+                        return aaData.name;
+                    },
+                    formatSelection: function(aaData) {
+                        if (aaData.name) {
+                            return aaData.name
+                        } else {
+                            return aaData.id
+                        };
+                    },
+                    allowClear: true,
+                    id: function(obj) {
+                        return obj.id;
+                    },
+                    ajax: {
+                        url: '/accounting-web/accountType/paging',
+                        transport: transportFunction,
+                        dataType: 'json',
+                        params: {
+                            contentType: 'application/json;charset=utf-8',
+                            statusCode: {
+                                404: function() {
+                                    showError('404');
+                                },
+                                403: function() {
+                                    showError('403');
+                                },
+                                503: function() {
+                                    showError('503');
+                                }
+                            }
+                        },
+                        quietMillis: 200,
+                        data: function(term, page) {
+                            return {
+                                iColumns: 1,
+                                iSortCol_0: 0,
+                                mDataProp_0: 'id',
+                                bSortable_0: 'false',
+                                iSortingCols: 1,
+                                iDisplayStart: (page - 1) * 20,
+                                iDisplayLength: 20,
+                                sEcho: 1,
+                                sSortDir_0: 'asc',
+                                term: term
+                            };
+                        },
+                        results: function(data, page) {
+                    
+                            return {
+                                results: data.aaData,
+                                more: 10
+                            }
+                        }
+                    },
+                    initSelection: function(element, callback) {
+                        var id = $(element).val();
+                        if (id !== '') {
+                            $.ajax('/accounting-web/accountType/get', {
+                                data: {
+                                    id: id
+                                },
+                                dataType: 'json'
+                            }).done(function(data) {
+                                callback(data);
+                            });
+                        }
+                    }
+
+                }).change(function() {
+                    $('#createAccountForm').data('bootstrapValidator').updateStatus('accountType.id', 'NOT_VALIDATED', null).validateField('accountType.id');
+                });
+                $('#groupidCreate').select2({
+                    placeholder: 'انتخاب کنید',
+                    formatResult: function(aaData) {
+                        return aaData.name;
+                    },
+                    formatSelection: function(aaData) {
+                        if (aaData.name) {
+                            return aaData.name
+                        } else {
+                            return aaData.id
+                        };
+                    },
+                    allowClear: true,
+                    id: function(obj) {
+                        return obj.id;
+                    },
+                    ajax: {
+                        url: '/accounting-web/group/paging',
+                        transport: transportFunction,
+                        dataType: 'json',
+                        params: {
+                            contentType: 'application/json;charset=utf-8',
+                            statusCode: {
+                                404: function() {
+                                    showError('404');
+                                },
+                                403: function() {
+                                    showError('403');
+                                },
+                                503: function() {
+                                    showError('503');
+                                }
+                            }
+                        },
+                        quietMillis: 200,
+                        data: function(term, page) {
+                            return {
+                                iColumns: 1,
+                                iSortCol_0: 0,
+                                mDataProp_0: 'id',
+                                bSortable_0: 'false',
+                                iSortingCols: 1,
+                                iDisplayStart: (page - 1) * 20,
+                                iDisplayLength: 20,
+                                sEcho: 1,
+                                sSortDir_0: 'asc',
+                                term: term
+                            };
+                        },
+                        results: function(data, page) {
+                          
+                            return {
+                                results: data.aaData,
+                                more: 10
+                            }
+                        }
+                    },
+                    initSelection: function(element, callback) {
+                        var id = $(element).val();
+                        if (id !== '') {
+                            $.ajax('/accounting-web/group/get', {
+                                data: {
+                                    id: id
+                                },
+                                dataType: 'json'
+                            }).done(function(data) {
+                                callback(data);
+                            });
+                        }
+                    }
+
+                }).change(function() {
+                    $('#createAccountForm').data('bootstrapValidator').updateStatus('group.id', 'NOT_VALIDATED', null).validateField('group.id');
+                });
+
+            });
+
+            /*<![CDATA[*/
+
+            jQuery(document).ready(function(){
+
+
+            $('.datepicker').datetimepicker({
+                format: 'YYYY-MM-DD',
+                useCurrent: false
+            });
+                
+            $('.modal').on('shown.bs.modal', function() {
+            $('.modal .modal-body').css('max-width', '900px');
+            $('.modal .modal-body').css('overflow-y', 'auto');
+            $('.modal .modal-body').css('max-height', $(window).height() * 0.7);
+            });
+            });
+            
+            jQuery(document).ready(function(){
+
+            $('#createVoucherModal').find('.datePicker').each(function(i, v){ var elem = $(this);$(v).datetimepicker({locale: userCalendarLanguage, format: dateFormat, useCurrent: false}); $(elem).on('dp.change dp.show', function(e) {try{$(elem).parents('form').data('bootstrapValidator').updateStatus($(elem).attr('name'), 'NOT_VALIDATED', null).validateField($(elem).attr('name'));}catch(Error){}});});
+
+            $('#createVoucherModal').find('.dateTimePicker').each(function(i, v){ var elem = $(this);$(v).datetimepicker({locale: userCalendarLanguage, format: datetimeFormat, useCurrent: false}); $(elem).on('dp.change dp.show', function(e) {try{$(elem).parents('form').data('bootstrapValidator').updateStatus($(elem).attr('name'), 'NOT_VALIDATED', null).validateField($(elem).attr('name'));}catch(Error){}});});
+            try{
+            $('[data-inputmask]').inputmask();
+            }catch (Error){}
+            $('#createVoucherBtn').click(function(event){
+            	var $btn = $(this);
+            	var isInMultipleMode = $('#createVoucher-create-another').is(':checked');
+            	$('#createVoucherForm').find('.callout').text('').addClass('hide');
+            		
+            		$btn.attr('disabled', true);
+            		$.post('/accounting-web/voucher/save', $('#createVoucherForm').serialize()).done(function(data) {
+            			if(data.status == 'success') {
+            				try{createVoucherAfterSaveSuccess()}catch(error){}
+            				showTopleftGrowl('success', 'Create', 'Create Successful');
+            				try{oTable_VoucherTable.fnReloadAjax();}catch(error){}
+            				if(isInMultipleMode){
+            					resetCreateForm($('#createVoucherModal'));
+            				} else {
+            					$('#createVoucherModal').modal('hide');
+            				}
+            			} else if(data.status == 'ValidationException'){
+            				$('#createVoucherForm').find('.callout').text(data.invalidField + ' ??invalid-value_fa_IR??').removeClass('hide');
+            			} else if(data.status == 'ObjectExistsException'){
+            				$('#createVoucherForm').find('.callout').text((data.invalidField ? data.invalidField : 'data') + ' ??already-exists_fa_IR??').removeClass('hide');
+            			} else if(data.status == 'ErrorCode'){
+            				if(data.errorMessage){
+            					$('#createVoucherForm').find('.callout').text(data.errorMessage).removeClass('hide');
+            				} else {
+            					$('#createVoucherForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+            				}
+            			} else {
+            				console.debug(data.status);
+            				$('#createVoucherForm').find('.callout').text((data.message ? data.message : '??save.failed_fa_IR??')).removeClass('hide');
+            			}
+            			$btn.attr('disabled', false);
+            		}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'createVoucherBtn')});
+            	return false;
+            });
+            });
+            $('.modal').on('shown.bs.modal', function() {
+            $(this).find('input[type=text],textarea,select').filter(':visible:first').focus();
+            $('.modal .modal-body').css('overflow-y', 'auto');
+            $('.modal .modal-body').css('max-height', $(window).height() * 0.7);
+            });
+            function resetCreateForm(container) {
+            	$('#descriptionCreate').val('');
+            	$('#referenceIdCreate').val('');
+            	$('#issueDateCreate').val('');
+            }
+            function createVoucher() {
+            	try{createVoucherModalBeforShow()}catch(error){}
+            	resetCreateForm($('#createVoucherModal'));
+            	$('#createVoucherModal').modal({ backdrop: 'static', keyboard: true });
+            	$('#createVoucherModal').modal('show');
+            	$('#createVoucherForm').find('.callout').text('').addClass('hide');
+            	$('#createVoucherModal').find('input[type=checkbox]').attr('checked', false).iCheck({checkboxClass: "icheckbox_minimal",radioClass: "iradio_minimal"});
+            	$('#createVoucherModal').find('input[type=radio]').attr('checked', false).iCheck({checkboxClass: "icheckbox_minimal",radioClass: "iradio_minimal"});
+            	try{createVoucherModalOnShow()}catch(error){}
+            }
+
+
+            /*]]>*/
+
+            
+
+
+            function getVoucherExtraParams(aoData) {
+                aoData.push({
+                    'name': 'active',
+                    'value': $('#activeFilter').val()},
+                    {'name': 'name',
+                    'value': $('#nameFilter').val()}
+                    );
+            }
+
+            
+            //<![CDATA[
+
+
+            function removeRow(elm) {
+                $(elm).parent().parent().parent().remove();
+            }
+
+            var i = 3;
+
+
+            $("#cloneButton1").click(function() {
+
+
+                var referenceNodes = document.getElementById("test1").getElementsByTagName("input");
+                var referenceSelect = document.getElementById("test1").getElementsByTagName("select");
+
+                referenceSelect[0].name = "voucherRow[" + i + "].account.id";
+
+                // loop the cells.
+                var cells = ["referenceId", "description", "debit", "credit"];
+                for (var j = 0; j < cells.length; j++) {
+                    var cell = cells[j];
+
+
+                    // set the name property.
+                    referenceNodes[j].name = "voucherRow[" + i + "]." + cell;
+
+                }
+
+                $("#test1").clone().attr('id', 'voucherRow[' + (i++) + ']').attr('class', 'row newRow minPadding').attr('style', 'display:block').appendTo("#test2");
+
+                $summands = $form.find('.bedehkar');
+                $summands1 = $form.find('.bestankar');
+            });
+
+
+
+            var $form = $('#sum'),
+                $summands = $form.find('.bedehkar'),
+                $sumDisplay = $('#bedehkar_sum');
+
+            $form.delegate('.bedehkar', 'keyup', function() {
+                var sum = 0;
+                $summands.each(function() {
+                    var value = Number($(this).val());
+                    if (!isNaN(value)) sum += value;
+
+                });
+
+                $sumDisplay.val(sum);
+            });
+
+
+            var $form = $('#sum'),
+                $summands1 = $form.find('.bestankar'),
+                $sumDisplay1 = $('#bestankar_sum');
+
+            $form.delegate('.bestankar', 'keyup', function() {
+                var sum1 = 0;
+                $summands1.each(function() {
+                    var value = Number($(this).val());
+                    if (!isNaN(value)) sum1 += value;
+
+                });
+
+                $sumDisplay1.val(sum1);
+            });
+
+            function validateForm() {
+                var bedehkar_sum = $("#bedehkar_sum").val();
+                var bestankar_sum = $("#bestankar_sum").val();
+
+                if (bestankar_sum != bedehkar_sum) {
+                    document.getElementById("error").innerHTML = 'جمع کل بستانکار و بدهکار برابر نیست';
+                    return false;
+                }
+                if ((bestankar_sum == "" || bestankar_sum == 0) && (bestankar_sum == "" || bestankar_sum == 0)) {
+
+                    document.getElementById("error").innerHTML = 'جمع کل بستانکار و جمع کل بدهکار نمی تواند صفر باشد';
+                    return false;
+                }
+              
+            }
+            //]]>
+        </script>
+    </th:block>
+</body>
+
+</html>

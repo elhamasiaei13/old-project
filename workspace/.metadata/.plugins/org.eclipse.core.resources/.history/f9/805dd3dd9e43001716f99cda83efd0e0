@@ -1,0 +1,5 @@
+package com.parvanpajooh.siteservices.model.enums;
+
+public enum PasswordRecoveryMethod {
+	REAL, LEGAL;
+}

@@ -1,0 +1,157 @@
+package com.parvanpajooh.taskmanagement.domain.repository.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.taskmanagement.domain.model.Task;
+import com.parvanpajooh.taskmanagement.domain.model.TaskDisplay;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroup;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroup_;
+import com.parvanpajooh.taskmanagement.domain.model.criteria.TaskGroupCriteria;
+import com.parvanpajooh.taskmanagement.domain.repository.TaskGroupRepository;
+
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class TaskGroupRepositoryJpa extends GenericDaoJpa<TaskGroup, Long> implements TaskGroupRepository {
+
+	public TaskGroupRepositoryJpa() {
+		super(TaskGroup.class);
+	}
+
+	@PersistenceContext(unitName = "ApplicationEntityManager")
+	private EntityManager entityManager;
+
+	@Override
+	public void deleteTaskGroup(String id) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering deleteTask( id={})", id);
+
+		try {
+			// get record
+			Task task = this.getTask(id);
+			TaskDisplay taskDisplay = this.getTaskDisplay(id);
+
+			// remove taskDisplay
+			this.entityManager.remove(taskDisplay);
+
+			// remove task
+			this.entityManager.remove(task);
+			this.entityManager.flush();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while deleteTask: id [" + id + "]", e);
+		}
+	}
+	
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<TaskGroup> root,
+			Map<String, Join> joins) {
+
+		// LOG
+		log.trace("Entering buildPredicateList( ... )");
+
+		TaskGroupCriteria taskGroupCriteria = (TaskGroupCriteria) cri;
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		long id = taskGroupCriteria.getId();
+		String name = taskGroupCriteria.getName();
+		String remarks = taskGroupCriteria.getRemarks();
+		String groupKey = taskGroupCriteria.getGroupKey();
+
+		// ----------------------------------------------------------------
+		// Id
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(id)) {
+			Predicate predicate = builder.equal(root.<Long> get(TaskGroup_.id), id);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Name
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(name)) {
+			Predicate predicate = builder.like(root.<String> get(TaskGroup_.name), "%" + name + "%");
+			predicateList.add(predicate);
+		}
+		
+		// ----------------------------------------------------------------
+		// PrefixCode
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(groupKey)) {
+			Predicate predicate = builder.like(root.<String> get(TaskGroup_.groupKey), "%" + groupKey + "%");
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Remarks
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(remarks)) {
+			Predicate predicate = builder.equal(root.<String> get(TaskGroup_.remarks), remarks);
+			predicateList.add(predicate);
+		}
+
+		// LOG
+		log.trace("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+
+	/**
+	 * 
+	 */
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<TaskGroup> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateTo());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateTo());
+			predicateList.add(predicate);
+		}
+	}
+
+}

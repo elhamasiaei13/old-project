@@ -1,0 +1,109 @@
+package com.parvanpajooh.identitymanagement2.mvc;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+//import org.json.simple.JSONArray;
+//import org.json.simple.JSONObject;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.GenericService;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.identitymanagement2.model.Constraint;
+import com.parvanpajooh.identitymanagement2.model.criteria.ConstraintCriteria;
+import com.parvanpajooh.identitymanagement2.model.vo.ConstraintVO;
+import com.parvanpajooh.identitymanagement2.mvc.base.Idm2AbstractController;
+import com.parvanpajooh.identitymanagement2.service.ConstraintService;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+@Controller
+@RequestMapping("/constraint")
+public class ConstraintController extends Idm2AbstractController<Constraint, ConstraintVO, ConstraintCriteria> {
+
+	@EJB(mappedName = "java:global/identitymanagement2-ear/identitymanagement2-ejb/ConstraintServiceImpl")
+	private ConstraintService constraintService;
+	
+	@Override
+	protected GenericService<Constraint, Long> getService() {
+		return constraintService;
+	}
+
+	@Override
+	protected String getName() {
+		return "constraints";
+	}
+
+	@RequestMapping(value = "/save", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> save(ConstraintVO constraintVO, HttpServletRequest request) {
+		log.debug("Entering save(vo={})", constraintVO);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			if(Validator.isNull(constraintVO.getId())){
+				constraintVO.setActive(true);
+			}
+			
+			if(Validator.isNull(constraintVO.getActive())){
+				constraintVO.setActive(false);
+			}
+			
+			constraintVO = (ConstraintVO) constraintService.save(getUserInfo(request), constraintVO);
+
+			result.put("status", "success");
+			result.put("result", constraintVO);
+
+			request.getSession().removeAttribute(getName());
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value="/list", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> list(HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			
+			UserInfo userInfo = getUserInfo(request);
+			
+			List<BaseVO> constraintVOs = constraintService.findAll(userInfo);
+			
+			JSONArray jsonArray = new JSONArray();
+			for (BaseVO baseVO : constraintVOs) {
+				ConstraintVO constraintVO = (ConstraintVO) baseVO;
+				
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("id", constraintVO.getId());
+				jsonObject.put("title", constraintVO.getTitle());
+				
+				jsonArray.add(jsonObject);
+			}
+			
+			result.put("status", "success");
+			result.put("result", jsonArray);
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+}

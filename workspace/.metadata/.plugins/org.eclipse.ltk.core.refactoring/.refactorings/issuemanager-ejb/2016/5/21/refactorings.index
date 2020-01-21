@@ -1,0 +1,38 @@
+1463390222451	Rename enum constant 'ERROR_LOGIN_USER_PASS_NOT_CORRECT'
+1463570384739	Copy compilation unit
+1463572776276	Copy compilation unit
+1463572827039	Copy compilation unit
+1463578092997	Copy compilation unit
+1463580836183	Rename local variable 'objVO'
+1463634116158	Change method 'addTaskStatus'
+1463635347518	Copy compilation unit
+1463635902526	Rename type 'tableNameEnum'
+1463638537439	Rename type 'TaskAssignment'
+1463638688333	Rename type 'TaskAssignmentVO'
+1463638760378	Rename type 'TaskAssignmentDaoJpa'
+1463638789682	Rename type 'TaskAssignmentDao'
+1463638822092	Change method 'setTaskAssignmentDao'
+1463639122884	Rename type 'TaskAssignmentLocalService'
+1463639138942	Rename type 'TaskAssignmentService'
+1463639186387	Rename type 'TaskAssignmentLocalServiceImpl'
+1463639207270	Rename type 'TaskAssignmentServiceImpl'
+1463640443741	Change method 'addTaskAssignment'
+1463640540888	Rename local variable 'baseVO'
+1463641487607	Change method 'addTaskAssignment'
+1463641860989	Rename local variable 'taskAssignmentHistory'
+1463643879855	Delete elements
+1463643885829	Delete elements
+1463643891501	Delete element
+1463643900314	Delete element
+1463643946258	Delete element
+1463643951290	Delete element
+1463644314563	Copy compilation unit
+1463653677186	Copy compilation unit
+1463653698430	Copy compilation unit
+1463653869348	Copy compilation unit
+1463653905851	Copy compilation unit
+1463662455895	Rename field 'creatUser'
+1463813677500	Rename local variable 'c'
+1463814789493	Rename local variable 'savedTaskAttachment'
+1463815105106	Rename local variable 'savedTaskStatusHistory'
+1463830126526	Copy compilation unit

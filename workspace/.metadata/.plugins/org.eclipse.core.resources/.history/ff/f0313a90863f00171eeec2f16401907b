@@ -1,0 +1,18 @@
+package com.parvanpajooh.siteservices.service;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.siteservices.model.vo.CityInfoVO;
+
+/**
+ * @author MO
+ */
+public interface GeoManagementService {
+	
+	CityInfoVO getCityByShortCode(UserInfo userInfo, String shortCode) throws ParvanServiceException;
+	
+	PageList<CityInfoVO> findCityByNameOrShortCode(UserInfo userInfo, String term, int firstResult, int maxResults,
+			SortDirectionEnum sortDirection, String sortCriterion) throws ParvanServiceException;
+}

@@ -1,0 +1,95 @@
+package com.parvanpajooh.siteservices.model.vo;
+
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseDto;
+
+public class ComplaintCategoryDto extends BaseDto {
+
+	private static final long serialVersionUID = 1L;
+
+	private Long id;
+
+	private String code;
+
+	private String nameFa;
+
+	private String nameEn;
+
+	private Integer version;
+
+	private boolean active;
+
+	private String description;
+
+	private ComplaintCategoryVO parentCategoryDto;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getNameFa() {
+		return nameFa;
+	}
+
+	public void setNameFa(String nameFa) {
+		this.nameFa = nameFa;
+	}
+
+	public String getNameEn() {
+		return nameEn;
+	}
+
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
+	}
+
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	public boolean getActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public ComplaintCategoryVO getParentCategoryDto() {
+		return parentCategoryDto;
+	}
+
+	public void setParentCategoryDto(ComplaintCategoryVO parentCategoryDto) {
+		this.parentCategoryDto = parentCategoryDto;
+	}
+
+	@Override
+	public String toString() {
+		return "CompliantCategory [id=" + id + ", code=" + code + ", nameFa=" + nameFa + ", nameEn=" + nameEn
+				+ ", version=" + version + ", active=" + active + ", description=" + description + "]";
+	}
+
+}

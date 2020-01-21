@@ -1,0 +1,36 @@
+	<ul xmlns:th="http://www.thymeleaf.org" 
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		xmlns:idm="http://www.parvanpajooh/thymeleaf/idm"
+		xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" 
+		layout:fragment="menu" class="nav sidebar-menu">
+
+		
+		<li th:title="#{zones}">
+			<a th:href="@{'/zone'}">
+				<i class="fa fa-user"></i> 
+				<span th:text="#{zones}">zones</span>
+			</a>
+		</li>
+		
+		<li th:title="#{nodes}">
+			<a th:href="@{'/node'}">
+				<i class="fa fa-map-marker nodes"></i> 
+				<span th:text="#{nodes}">nodes</span>
+			</a>
+		</li>
+		
+		<li th:title="#{routes}">
+			<a th:href="@{'/route'}">
+				<i class="fa fa-code-fork routes"></i> 
+				<span th:text="#{routes}">routes</span>
+			</a>
+		</li>
+	
+		<li th:title="#{nodesAndRoutes}">
+			<a th:href="@{'/nodeAndRoute'}">
+				<i class="ion ion-map"></i> 
+				<span th:text="#{nodesAndRoutes}">nodesAndRoutes</span>
+			</a>
+		</li>
+	
+	</ul>

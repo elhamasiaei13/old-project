@@ -1,0 +1,109 @@
+package com.parvanpajooh.client.geomanagement.model;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.TransferNodeType;
+
+/**
+ * 
+ * @author mehrdad
+ *
+ */
+
+public class EvaluatedRouteMsg extends RouteMsg {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1304277576944253813L;
+
+	private boolean valid;
+	
+    private RateAndRouteEnums.TransferNodeType toNodeTransferNodeType;
+	
+	private RateAndRouteEnums.TransferNodeType fromNodeTransferNodeType;
+
+	/**
+	 * 
+	 * @param RouteMsg
+	 */
+	public EvaluatedRouteMsg () {
+		
+	}
+	
+	/**
+	 * 
+	 * @param RouteMsg
+	 */
+	public EvaluatedRouteMsg (RouteMsg RouteMsg) {
+		super.setId(RouteMsg.getId());
+		super.setType(RouteMsg.getType());
+		super.setCarrierRouteNumber(RouteMsg.getCarrierRouteNumber());
+		super.setActive(RouteMsg.getActive());
+		super.setToNode(RouteMsg.getToNode());
+		super.setFromNode(RouteMsg.getFromNode());
+		super.setCarrier(RouteMsg.getCarrier());
+	}
+
+	/**
+	 * @return the valid
+	 */
+	public boolean isValid() {
+		return valid;
+	}
+
+	/**
+	 * @param valid the valid to set
+	 */
+	public void setValid(boolean valid) {
+		this.valid = valid;
+	}
+
+	/**
+	 * @return the toNodeTransferNodeType
+	 */
+	public TransferNodeType getToNodeTransferNodeType() {
+		return toNodeTransferNodeType;
+	}
+
+	/**
+	 * @param toNodeTransferNodeType the toNodeTransferNodeType to set
+	 */
+	public void setToNodeTransferNodeType(TransferNodeType toNodeTransferNodeType) {
+		this.toNodeTransferNodeType = toNodeTransferNodeType;
+	}
+
+	/**
+	 * @return the fromNodeTransferNodeType
+	 */
+	public TransferNodeType getFromNodeTransferNodeType() {
+		return fromNodeTransferNodeType;
+	}
+
+	/**
+	 * @param fromNodeTransferNodeType the fromNodeTransferNodeType to set
+	 */
+	public void setFromNodeTransferNodeType(
+			TransferNodeType fromNodeTransferNodeType) {
+		this.fromNodeTransferNodeType = fromNodeTransferNodeType;
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("valid", valid)
+			.add("id", super.getId())
+			.add("type", super.getType())
+			.add("carrierRouteNumber", super.getCarrierRouteNumber())
+			.add("active", super.getActive())
+			.add("toNode", super.getToNode())
+			.add("toNodeTransferNodeType", toNodeTransferNodeType)
+			.add("fromNode", super.getFromNode())
+			.add("fromNodeTransferNodeType", fromNodeTransferNodeType)
+			.add("carrier", super.getCarrier())
+			.toString();
+	}
+
+
+
+}

@@ -1,0 +1,542 @@
+package com.parvanpajooh.transportationmanagement2.model;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import com.parvanpajooh.commons.platform.ejb.model.BaseModel;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.transportationmanagement2.model.enums.CapacityDeterminant;
+import com.parvanpajooh.transportationmanagement2.model.enums.TransportationScheduleStatus;
+import com.parvanpajooh.transportationmanagement2.model.vo.TransportationScheduleVO;
+
+/**
+ * @author ali
+ *
+ */
+@Entity
+@XmlRootElement
+@Table(name="transportationSchedule_tbl")
+public class TransportationSchedule extends BaseModel{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6367780641305560041L;
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long id;
+	
+	private boolean scheduled;
+	
+	private String remarks;
+	
+	@NotNull
+	private Integer departureDateInUtc;
+	
+	@NotNull
+	private Integer departureDateInOriginLocal;
+	
+	@NotNull
+	private String departureTimeInUtc;
+	
+	@NotNull
+	private String departureTimeInOriginLocal;
+	
+	@NotNull
+	private Integer arrivalDateInUtc;
+	
+	@NotNull
+	private Integer arrivalDateInDestinationLocal;
+	
+	@NotNull
+	private String arrivalTimeInUtc;
+	
+	@NotNull
+	private String arrivalTimeInDestinationLocal;
+	
+	private Double totalWeight;
+	
+	private Double reservableWeight;
+	
+	private String uldInfo;
+	
+	@Enumerated(EnumType.STRING)
+	private TransportationScheduleStatus status;
+
+	@Enumerated(EnumType.STRING)
+	private CapacityDeterminant capacityDeterminant;
+	
+	private String carrierRouteNumber;
+	
+	private String carrierCode;
+	
+	private Long vehicleId;
+	
+//	@ManyToOne(fetch=FetchType.EAGER)
+//	@JoinColumn(name="transportationId")
+//	private Transportation transportation;
+//	
+//	@ManyToOne(fetch=FetchType.EAGER)
+//	@JoinColumn(name="vehicleId")
+//	private Vehicle vehicle;
+	
+	@Version
+    private Integer version;
+	
+	@Override
+	public TransportationScheduleVO toVOLite() {
+		TransportationScheduleVO vo = new TransportationScheduleVO();
+		
+		vo.setId(this.id);
+		vo.setScheduled(this.scheduled);
+		vo.setRemarks(this.remarks);
+		vo.setDepartureDateInUtc(this.departureDateInUtc);
+		vo.setDepartureDateInOriginLocal(this.departureDateInOriginLocal);
+		vo.setDepartureTimeInUtc(this.departureTimeInUtc);
+		vo.setDepartureTimeInOriginLocal(this.departureTimeInOriginLocal);
+		vo.setArrivalDateInUtc(this.arrivalDateInUtc);
+		vo.setArrivalDateInDestinationLocal(this.arrivalDateInDestinationLocal);
+		vo.setArrivalTimeInUtc(this.arrivalTimeInUtc);
+		vo.setArrivalTimeInDestinationLocal(this.arrivalTimeInDestinationLocal);
+		vo.setTotalWeight(this.totalWeight);
+		vo.setReservableWeight(this.reservableWeight);
+		vo.setUldInfo(this.uldInfo);
+		vo.setStatus(this.status);
+		vo.setCapacityDeterminant(this.capacityDeterminant);
+		vo.setVersion(this.version);
+		vo.setCarrierRouteNumber(this.carrierRouteNumber);
+		vo.setVehicleId(this.vehicleId);
+		
+		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyyMMdd");
+		DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HHmm");
+		
+		if(Validator.isNotNull(this.departureDateInUtc) && Validator.isNotNull(this.departureTimeInUtc)){
+			vo.setDepartureInUtc( LocalDateTime.of( LocalDate.parse(this.departureDateInUtc.toString(), dateFormat), LocalTime.parse(this.departureTimeInUtc, timeFormat) ) );
+		}
+		
+		if(Validator.isNotNull(this.arrivalDateInUtc) && Validator.isNotNull(this.arrivalTimeInUtc)){
+			vo.setArrivalInUtc( LocalDateTime.of( LocalDate.parse(this.arrivalDateInUtc.toString(), dateFormat), LocalTime.parse(this.arrivalTimeInUtc, timeFormat) ) );
+		}
+		
+//		if(this.transportation != null){
+//			vo.setTransportation(this.transportation.toVOLite());
+//		}
+//		
+//		if(this.vehicle != null){
+//			vo.setVehicle(this.vehicle.toVOLite());
+//		}
+		
+		setAuditToVO(vo);
+		
+		return vo;
+	}
+	
+	@Override
+	public TransportationScheduleVO toVO () {
+		
+		TransportationScheduleVO transportationScheduleVO = (TransportationScheduleVO) toVOLite();
+		
+		return transportationScheduleVO;
+	}
+
+	@Override
+	public void fromVO(BaseVO baseVO) {
+		
+		TransportationScheduleVO vo = (TransportationScheduleVO) baseVO;
+		
+		this.id = vo.getId();
+		this.scheduled = vo.isScheduled();
+		this.remarks = vo.getRemarks();
+		this.departureDateInUtc = vo.getDepartureDateInUtc();
+		this.departureDateInOriginLocal = vo.getDepartureDateInOriginLocal();
+		this.departureTimeInUtc = vo.getDepartureTimeInUtc();
+		this.departureTimeInOriginLocal = vo.getDepartureTimeInOriginLocal();
+		this.arrivalDateInUtc = vo.getArrivalDateInUtc();
+		this.arrivalDateInDestinationLocal = vo.getArrivalDateInDestinationLocal();
+		this.arrivalTimeInUtc = vo.getArrivalTimeInUtc();
+		this.arrivalTimeInDestinationLocal = vo.getArrivalTimeInDestinationLocal();
+		this.totalWeight = vo.getTotalWeight();
+		this.reservableWeight = vo.getReservableWeight();
+		this.uldInfo = vo.getUldInfo();
+		this.status = vo.getStatus();
+		this.capacityDeterminant = vo.getCapacityDeterminant();
+		this.version = vo.getVersion();
+		this.carrierRouteNumber = vo.getCarrierRouteNumber();
+		this.vehicleId = vo.getVehicleId();
+		
+		getAuditFromVO(vo);
+	}
+	
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the scheduled
+	 */
+	public boolean isScheduled() {
+		return scheduled;
+	}
+
+	/**
+	 * @param scheduled the scheduled to set
+	 */
+	public void setScheduled(boolean scheduled) {
+		this.scheduled = scheduled;
+	}
+
+	/**
+	 * @return the remarks
+	 */
+	public String getRemarks() {
+		return remarks;
+	}
+
+	/**
+	 * @param remarks the remarks to set
+	 */
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+//
+//	/**
+//	 * @return the transportation
+//	 */
+//	public Transportation getTransportation() {
+//		return transportation;
+//	}
+//
+//	/**
+//	 * @param transportation the transportation to set
+//	 */
+//	public void setTransportation(Transportation transportation) {
+//		this.transportation = transportation;
+//	}
+
+	/**
+	 * @return the status
+	 */
+	public TransportationScheduleStatus getStatus() {
+		return status;
+	}
+
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(TransportationScheduleStatus status) {
+		this.status = status;
+	}
+
+	/**
+	 * @return the departureDateInUtc
+	 */
+	public Integer getDepartureDateInUtc() {
+		return departureDateInUtc;
+	}
+
+	/**
+	 * @param departureDateInUtc the departureDateInUtc to set
+	 */
+	public void setDepartureDateInUtc(Integer departureDateInUtc) {
+		this.departureDateInUtc = departureDateInUtc;
+	}
+
+	/**
+	 * @return the departureDateInOriginLocal
+	 */
+	public Integer getDepartureDateInOriginLocal() {
+		return departureDateInOriginLocal;
+	}
+
+	/**
+	 * @param departureDateInOriginLocal the departureDateInOriginLocal to set
+	 */
+	public void setDepartureDateInOriginLocal(Integer departureDateInOriginLocal) {
+		this.departureDateInOriginLocal = departureDateInOriginLocal;
+	}
+
+	/**
+	 * @return the departureTimeInUtc
+	 */
+	public String getDepartureTimeInUtc() {
+		return departureTimeInUtc;
+	}
+
+	/**
+	 * @param departureTimeInUtc the departureTimeInUtc to set
+	 */
+	public void setDepartureTimeInUtc(String departureTimeInUtc) {
+		this.departureTimeInUtc = departureTimeInUtc;
+	}
+
+	/**
+	 * @return the departureTimeInOriginLocal
+	 */
+	public String getDepartureTimeInOriginLocal() {
+		return departureTimeInOriginLocal;
+	}
+
+	/**
+	 * @param departureTimeInOriginLocal the departureTimeInOriginLocal to set
+	 */
+	public void setDepartureTimeInOriginLocal(String departureTimeInOriginLocal) {
+		this.departureTimeInOriginLocal = departureTimeInOriginLocal;
+	}
+
+	/**
+	 * @return the arrivalDateInUtc
+	 */
+	public Integer getArrivalDateInUtc() {
+		return arrivalDateInUtc;
+	}
+
+	/**
+	 * @param arrivalDateInUtc the arrivalDateInUtc to set
+	 */
+	public void setArrivalDateInUtc(Integer arrivalDateInUtc) {
+		this.arrivalDateInUtc = arrivalDateInUtc;
+	}
+
+	/**
+	 * @return the arrivalDateInDestinationLocal
+	 */
+	public Integer getArrivalDateInDestinationLocal() {
+		return arrivalDateInDestinationLocal;
+	}
+
+	/**
+	 * @param arrivalDateInDestinationLocal the arrivalDateInDestinationLocal to set
+	 */
+	public void setArrivalDateInDestinationLocal(Integer arrivalDateInDestinationLocal) {
+		this.arrivalDateInDestinationLocal = arrivalDateInDestinationLocal;
+	}
+
+	/**
+	 * @return the arrivalTimeInUtc
+	 */
+	public String getArrivalTimeInUtc() {
+		return arrivalTimeInUtc;
+	}
+
+	/**
+	 * @param arrivalTimeInUtc the arrivalTimeInUtc to set
+	 */
+	public void setArrivalTimeInUtc(String arrivalTimeInUtc) {
+		this.arrivalTimeInUtc = arrivalTimeInUtc;
+	}
+
+	/**
+	 * @return the arrivalTimeInDestinationLocal
+	 */
+	public String getArrivalTimeInDestinationLocal() {
+		return arrivalTimeInDestinationLocal;
+	}
+
+	/**
+	 * @param arrivalTimeInDestinationLocal the arrivalTimeInDestinationLocal to set
+	 */
+	public void setArrivalTimeInDestinationLocal(String arrivalTimeInDestinationLocal) {
+		this.arrivalTimeInDestinationLocal = arrivalTimeInDestinationLocal;
+	}
+
+	/**
+	 * @return the totalWeight
+	 */
+	public Double getTotalWeight() {
+		return totalWeight;
+	}
+
+	/**
+	 * @param totalWeight the totalWeight to set
+	 */
+	public void setTotalWeight(Double totalWeight) {
+		this.totalWeight = totalWeight;
+	}
+
+	/**
+	 * @return the reservableWeight
+	 */
+	public Double getReservableWeight() {
+		return reservableWeight;
+	}
+
+	/**
+	 * @param reservableWeight the reservableWeight to set
+	 */
+	public void setReservableWeight(Double reservableWeight) {
+		this.reservableWeight = reservableWeight;
+	}
+
+	/**
+	 * @return the uldInfo
+	 */
+	public String getUldInfo() {
+		return uldInfo;
+	}
+
+	/**
+	 * @param uldInfo the uldInfo to set
+	 */
+	public void setUldInfo(String uldInfo) {
+		this.uldInfo = uldInfo;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	/**
+	 * @return the capacityDeterminant
+	 */
+	public CapacityDeterminant getCapacityDeterminant() {
+		return capacityDeterminant;
+	}
+
+	/**
+	 * @param capacityDeterminant the capacityDeterminant to set
+	 */
+	public void setCapacityDeterminant(CapacityDeterminant capacityDeterminant) {
+		this.capacityDeterminant = capacityDeterminant;
+	}
+
+//	/**
+//	 * @return the vehicle
+//	 */
+//	public Vehicle getVehicle() {
+//		return vehicle;
+//	}
+//
+//	/**
+//	 * @param vehicle the vehicle to set
+//	 */
+//	public void setVehicle(Vehicle vehicle) {
+//		this.vehicle = vehicle;
+//	}
+
+	/**
+	 * @return the carrierRouteNumber
+	 */
+	public String getCarrierRouteNumber() {
+		return carrierRouteNumber;
+	}
+
+	/**
+	 * @param carrierRouteNumber the carrierRouteNumber to set
+	 */
+	public void setCarrierRouteNumber(String carrierRouteNumber) {
+		this.carrierRouteNumber = carrierRouteNumber;
+	}
+
+	/**
+	 * @return the vehicleId
+	 */
+	public Long getVehicleId() {
+		return vehicleId;
+	}
+
+	/**
+	 * @param vehicleId the vehicleId to set
+	 */
+	public void setVehicleId(Long vehicleId) {
+		this.vehicleId = vehicleId;
+	}
+
+	/**
+	 * @return the carrierCode
+	 */
+	public String getCarrierCode() {
+		return carrierCode;
+	}
+
+	/**
+	 * @param carrierCode the carrierCode to set
+	 */
+	public void setCarrierCode(String carrierCode) {
+		this.carrierCode = carrierCode;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "TransportationSchedule [id=" + id + ", scheduled=" + scheduled + ", remarks=" + remarks
+				+ ", departureDateInUtc=" + departureDateInUtc + ", departureDateInOriginLocal="
+				+ departureDateInOriginLocal + ", departureTimeInUtc=" + departureTimeInUtc
+				+ ", departureTimeInOriginLocal=" + departureTimeInOriginLocal + ", arrivalDateInUtc="
+				+ arrivalDateInUtc + ", arrivalDateInDestinationLocal=" + arrivalDateInDestinationLocal
+				+ ", arrivalTimeInUtc=" + arrivalTimeInUtc + ", arrivalTimeInDestinationLocal="
+				+ arrivalTimeInDestinationLocal + ", totalWeight=" + totalWeight + ", reservableWeight="
+				+ reservableWeight + ", uldInfo=" + uldInfo + ", status=" + status + ", capacityDeterminant="
+				+ capacityDeterminant + ", transportation=" +", version="
+				+ version + "]";
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TransportationSchedule)) {
+            return false;
+        }
+
+        final TransportationSchedule obj = (TransportationSchedule) o;
+
+        return new EqualsBuilder()
+    			.append(this.id, obj.getId())
+    			.isEquals();
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(-970989579, 1884842917)
+			.append(this.id)
+			.toHashCode();
+	}
+
+}

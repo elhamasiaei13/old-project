@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;agentmanagement-rest/src/main/protobuf/accounting.proto&apos; to &apos;agentmanagement.proto&apos;" description="Rename resource &apos;accounting.proto&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/main/protobuf/accounting.proto" name="agentmanagement.proto" stamp="1475328533833" updateReferences="true"/>
+</session>

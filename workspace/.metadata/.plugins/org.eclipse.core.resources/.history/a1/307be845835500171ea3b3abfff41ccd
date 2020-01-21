@@ -1,0 +1,26 @@
+/**
+ * 
+ */
+package com.parvanpajooh.commons.platform.ejb.util.converter;
+
+import java.time.LocalDateTime;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
+/**
+ * @author MO
+ *
+ */
+public class LocalDateTimeXmlAdapter extends XmlAdapter<String, LocalDateTime> {
+	
+	@Override
+	public LocalDateTime unmarshal(String v) throws Exception {
+		return LocalDateTime.parse(v);
+	}
+
+	@Override
+	public String marshal(LocalDateTime v) throws Exception {
+		return v.toString();
+	}
+	
+}

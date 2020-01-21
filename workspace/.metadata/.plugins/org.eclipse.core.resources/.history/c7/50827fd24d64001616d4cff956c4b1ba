@@ -1,0 +1,65 @@
+package com.parvanpajooh.identitymanagement2.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericServiceImpl;
+import com.parvanpajooh.identitymanagement2.model.User;
+import com.parvanpajooh.identitymanagement2.model.vo.UserVO;
+import com.parvanpajooh.identitymanagement2.service.UserLocalService;
+import com.parvanpajooh.identitymanagement2.service.UserService;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+@Stateless
+public class UserServiceImpl extends GenericServiceImpl<User, Long>implements UserService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
+	private UserLocalService userLocalService;
+
+	@Inject
+	public void setUserLocalService(UserLocalService userLocalService) {
+		this.localService = userLocalService;
+		this.userLocalService = userLocalService;
+	}
+
+	@Override
+	public void changeRoles(UserInfo userInfo, long userId, long[] roleIds) throws ParvanServiceException {
+		log.trace("save (userInfo={}, userId={}, roleIds={})", userInfo, userId, roleIds);
+		userLocalService.changeRoles(userId, roleIds, userInfo);
+	}
+
+	@Override
+	public void changePass(UserInfo userInfo, String newPassword, String confirmNewPassword, String currentPassword) throws ParvanServiceException {
+		log.trace("resetPassword (userInfo={}, newpassword = {},confirmNewPassword = {}, currentPassword = {})", userInfo, newPassword, confirmNewPassword, currentPassword);
+		userLocalService.changePass(password,confirmPassword,oldPassword, userInfo);
+	}
+
+	@Override
+	public void resetPassword(UserInfo userInfo, Long id, String newPassword) throws ParvanServiceException {
+		log.trace("resetPassword (userInfo={}, id={}, userInfo={})", id, "[PROTECTED]");
+		userLocalService.resetPassword(id, newPassword, userInfo);
+	}
+
+	@Override
+	public UserVO loadUserByUsername(String username) throws ObjectNotFoundException {
+		log.trace("load user by username {}", username);
+
+		User user = userLocalService.loadUserByUsername(username);
+
+		return user.toVO();
+	}
+}

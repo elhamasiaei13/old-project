@@ -1,0 +1,6 @@
+package com.parvanpajooh.siteservices.service;
+
+public interface RecoveryCodeService {
+
+
+}

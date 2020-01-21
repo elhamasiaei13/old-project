@@ -1,0 +1,17 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.dao;
+
+import com.parvanpajooh.commons.platform.ejb.dao.GenericDao;
+import com.parvanpajooh.siteservices.model.RecoveryCode;
+
+
+/**
+ * @author dev-03
+ *
+ */
+public interface RecoveryCodeDao extends GenericDao<RecoveryCode, Long> {
+
+	public void deactivateRecoveryCode(Long userId);
+}

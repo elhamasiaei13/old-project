@@ -1,0 +1,826 @@
+
+<!DOCTYPE html>
+<html>
+
+	<head>
+<title>Register</title>
+		
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		
+		<style>
+		@font-face {
+		    font-family: "0 Bardiya";
+		    src: url('/ecourier-web/resources/fonts/bardiya.eot'); /* IE9 Compat Modes */
+		    src: url('/ecourier-web/resources/fonts/bardiya.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ 
+		    url('/ecourier-web/resources/fonts/bardiya.woff') format('woff'), /* Modern Browsers */ 
+		    url('/ecourier-web/resources/fonts/bardiya.ttf') format('truetype'), /* Safari, Android, iOS */ 
+		    url('/ecourier-web/resources/fonts/bardiya.svg.svg#svgFontName') format('svg'); /* Legacy iOS */
+		    font-weight: normal;
+		    font-style: normal;
+		}
+		
+		@font-face {
+		    font-family: "B Bardiya";
+		    src: url('/ecourier-web/resources/fonts/bbardiyabold.eot'); /* IE9 Compat Modes */
+		    src: url('/ecourier-web/resources/fonts/bbardiyabold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ 
+		    url('/ecourier-web/resources/fonts/bbardiyabold.woff') format('woff'), /* Modern Browsers */ 
+		    url('/ecourier-web/resources/fonts/bbardiyabold.ttf') format('truetype'), /* Safari, Android, iOS */ 
+		    url('/ecourier-web/resources/fonts/bbardiyabold.svg.svg#svgFontName') format('svg'); /* Legacy iOS */
+		    font-weight: bold;
+		    font-style: normal;
+		}
+		
+		@font-face {
+		    font-family: "B Mitra2";
+		    src: url('/ecourier-web/resources/fonts/bmitrabold-webfont.eot'); /* IE9 Compat Modes */
+		    src: url('/ecourier-web/resources/fonts/bmitrabold-webfont.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ 
+		    	url('/ecourier-web/resources/fonts/bmitrabold-webfont.woff') format('woff'), /* Modern Browsers */ 
+		    	url('/ecourier-web/resources/fonts/bmitrabold-webfont.ttf') format('truetype'), /* Safari, Android, iOS */ 
+		    	url('/ecourier-web/resources/fonts/bmitrabold-webfont.svg.svg#svgFontName') format('svg'); /* Legacy iOS */
+		    font-weight: bold;
+		    font-style: normal;
+		}
+		
+		</style>
+			
+		<link rel="stylesheet" href="/siteservices-web/resources/lib/bootstrap-3.3.4/css/bootstrap.min.css"></link>
+<link rel="stylesheet" href="/siteservices-web/resources/lib/select2-3.5.0/select2.css"></link>
+<link rel="stylesheet" href="/siteservices-web/resources/lib/select2-3.5.0/select2-bootstrap.css"></link>
+<link rel="stylesheet" href="/siteservices-web/resources/lib/bootstrap-multiselect/css/bootstrap-multiselect.css"></link>
+<link rel="stylesheet" href="/siteservices-web/resources/lib/font-awesome-4.4.0/css/font-awesome.min.css"></link>
+<link rel="stylesheet" href="/siteservices-web/resources/lib/ionicons-2.0.1/css/ionicons.min.css"></link>
+<link rel="stylesheet" href="/siteservices-web/resources/lib/iCheck/minimal/minimal.css"></link>
+<link rel="stylesheet" href="/siteservices-web/resources/lib/pnotify-3/pnotify.custom.min.css"></link>
+<link rel="stylesheet" href="/siteservices-web/resources/css/AdminLTE.min.css"></link>
+<link rel="stylesheet" href="/siteservices-web/resources/css/skin-black.min.css"></link>
+<link rel="stylesheet" href="/siteservices-web/resources/css/style.css"></link>
+<link rel="stylesheet" href="/siteservices-web/resources/lib/bootstrap-datetimepicker-4.7.14/bootstrap-persian-datetimepicker.css"></link>
+
+			
+	    <!-- JQuery -->
+		<script src="/siteservices-web/resources/lib/jquery-2.1.4/jQuery-2.1.4.min.js"></script>
+	
+		<!-- Just for debugging purposes. Don't actually copy this line! -->
+	    <!--[if lt IE 9]><script src="../../js/ie8-responsive-file-warning.js"></script><![endif]-->
+	    
+		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]>
+	      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+	      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+	    <![endif]-->
+	    
+	    <script>
+		var messages = {
+			'parsererror':'Parser error',
+			'timeout':'Time out',
+			'302':'زمان استفاده از سیستم به پایان رسیده است. لطفا دوباره وارد سیستم شوید',
+			'404':'صفحه مورد نظر پیدا نشد',
+			'403':'شما به این بخش دسترسی ندارید',
+			'503':'503',
+			'0':'errorCode.0','10001':'خطای داخلی سیستم','10002':'خطای داخلی IO','10003':'دیتا رکورد مورد نظر قبلا توسط کاربر دیگر تغییر یافته است. قبل از ویرایش تغییرات جدید رکورد را دریافت کنید','10004':'LOCKED','10005':'دیتای وارد شده نا معتبر است','10006':'ذخیره رکورد با خطا مواجه شد','10007':'حذف رکورد با خطا مواجه شد','10008':'فراخوانی رکورد با خطا مواجه شد','10009':'رکورد درخواست شده یافت نشد','10010':'دیتای وارد شده موجود است','10011':'رکورد تکراری است','10012':'عدم دسترسی','10013':'این رکورد توسط رکورد دیگری استفاده می شود','10014':'فیلدهای ضروری مقدار دهی نشده اند','10015':'تاریخ وارد شده معتبر نیست','10016':'همه موارد مورد نیاز وارد نشده','10017':'خطا در محاسبه','10018':'تاریخ پایان قبل یا برابر تاریخ شروع است','10100':'حداقل یک track نیاز است','10101':'هیچ track برای بارنامه ثبت نشده است','10102':'کلید تکراری است','10103':'Invalid Instance Class','10104':'فرمت داده معتبر نیست','10105':'errorCode.10105','10106':'errorCode.10106','10200':'شروع و پایان مسیر یکسان است','10201':'مبدا یا مقصد در به عنوان نقطه ترانزیت انتخاب شده','10300':'مقدار شماره شروع کد بارنامه نا معتبر است','10301':'مقدار شماره پایان کد بارنامه نا معتبر است','10302':'مقدار فاصله برای کد بارنامه نا معتبر است','10303':'بارنامه ای صادر شده را نمی توان به نماینده دیگر منصوب کرد ','10304':'مخزن شماره بارنامه های «الکترونیک» تمام شده است','10305':'تنها بارنامه های «چاپی» قابل انتصاب به شکل دستی هستند','10306':'شماره بارنامه وارد شده منتصب به نمایندگی شما نیست','10307':'شماره بارنامه بر اساس فرمت تعیین شده معتبر نیست','10400':'Parent انتخاب شده معتبر نیست','10500':'یک RateType نمی تواند به خودش بطور مستقیم و یا غیر مستقیم وابسته باشد','10501':'errorCode.10501','10502':'errorCode.10502','10503':'errorCode.10503','10504':'errorCode.10504','10505':'errorCode.10505','10600':'محاسبه نرخ یکی از قوانین، به نوع نرخ دیگری وابسته است، ولی هیچ قانونی که شامل آن نوع نرخ شود، وجود ندارد.','10601':'مقدار وارد شده برای نرخ کمتر از صفر است','10602':'قوانین نرخ فقط برای محصولی که در وضعیت پیش نویس است قابل تغییر است','10700':'به این مکان انتخاب شده، قبلا یک نماینده انتساب داده شده است. لطفا مکان دیگری را انتخاب کنید، یا ابتدا نماینده قبلی را به مکان دیگری انتساب دهید.','10701':'برای نماینده ای که شعبه باشد نمی توان آرم اضافه کرد','10702':'errorCode.10702','10703':'errorCode.10703','10704':'errorCode.10704','10705':'errorCode.10705','10706':'errorCode.10706','10707':'errorCode.10707','10708':'errorCode.10708','10800':'لطفا نام نوع بارنامه را وارد کنید','10900':'پیشنویس بارنامه قابل ابطال نیست','10901':'تنها پیشنویس بارنامه قابل صدور است','10902':'بارنامه مانیفست شده قابل ویرایش نیست','10903':'شماره بارنامه پیشتر انتصاب داده شده','10904':'فقط بارنامه هایی که باطل شده اند را می توان دوباره انتساب داد','10907':'عملیات نامعتبر از وضعیت کنونی','10908':'مرسوله ای با این شماره بارنامه پیدا نشد','10909':'برای این بارنامه مانیفست ایجاد شده است. لطفا آنرا از طریق مانیفست اسکن کنید','10910':'هیچ مرسوله ای در مانیفست های فعال وجود ندارد','10911':'این مرسوله در بیشتر از یک مانیفست فعال وجود دارد','10912':'این مرسوله در یک مانیفست فعال دیگر وجود دارد','10913':'این مرسوله در یک یا چند مانیفست وجود دارد','10914':'این مرسوله در گمشده ها و پیدا شده ها ثبت شده است.','10915':'مرسوله مورد نظر در مکان دیگری قرار دارد.','10916':'وضعیت محصول نا معتبر است','10917':'مرسوله مورد نظر در شهر محل تحویل قرار ندارد','10918':'errorCode.10918','10919':'errorCode.10919','10920':'errorCode.10920','10921':'CARGO HAS NOT ORIGIN NODE','10922':'CARGO HAS NOT DESTINATION NODE','10923':'CARGO HAS NOT SHIPPER NAME','10924':'CARGO HAS NOT SHIPPER ADDRESS','10925':'CARGO HAS NOT SHIPPER COUNTRY CODE','10926':'CARGO HAS NOT CONSIGNEE NAME','10927':'CARGO HAS NOT CONSIGNEE ADDRESS','10928':'CARGO HAS NOT TOTAL PIECES','10930':'CARGO HAS NOT PACKAGE TYPE','10931':'CARGO HAS NOT TOTAL GROSS VEIGHT','10932':'CARGO HAS NOT WAYBILLNUMBER','10933':'تعداد بارنامه انتخاب شده بیش از تعداد مچاز برای چاپ دسته ای است','10934':'برای این بارنامه حواله تحویل صادر شده است','10935':'Cargo doesnt have any PersonId','10936':'Cargo doesnt have any PackingItem','10937':'برای این بارنامه قبض انبار صادر نشده است','10938':'این بارنامه بصورت بدون قبض انبار تعیین شده است','10939':'کارگو در وضعیت نگهداری است','10940':'ابعاد کامل وارد نشده','10941':'اقدام نامعتبر، باید در بازه ۷۲ ساعت باشد','10950':'errorCode.10950','10951':'errorCode.10951','10942':'errorCode.10942','10944':'errorCode.10944','10945':'errorCode.10945','10946':'errorCode.10946','11000':'زمان خروج پیش از زمان ورود است','11001':'زمان خروج و ورود یکسان است','11002':'شما نمی توانید مانیفستی که قبلا اسکن شده را دوباره اسکن نمایید','11003':'فقط مانیفستهای در وضعیت صادر شده قابل ویرایش هستند','11004':'مانیفستی که اسکن شده باشد قابل حذف نیست','11005':'زمان خروج صحیح نیست.','11006':'زمان ورود صحیح نیست.','11007':'مانیفست نمی تواند بعد از تایید خروج تغییر کند','11008':'وضعیت مانیفست برای در خواست شما معتبر نیست','11009':'مانیفست در وضعیت تایید خروج است','11010':'این مانیفست به پیک انتساب داده شده است','11011':'دستور نا معتبر برای مانیفست','11012':'نوع مانیفست برای اجرای این دستور نا معتبر است','11013':'زمان خروج صحیح نیست.','11014':'Manifest has invalid Expected-Departure-Time.','11015':'Manifest doesnt have any Received-Pieces for waybill number','11016':'Manifest doesnt have any Received-Gross-Weight for waybill number','11050':'errorCode.11050','11053':'شماره بارکد ULD تکراری است','11054':'بارکد ظرف نا معتبر است','11056':'خطا در ایجاد فایل مانیفست الکترونیکی گمرک','11057':'بارنامه موجود است و وزن خالص آن با وزن ورودی  جدید همخوانی ندارد :','11058':'بارنامه موجود است و تعداد قطعات آن با تعداد ورودی  جدید همخوانی ندارد :','11059':'در حین ایجاد فایل خروجی اکسل، خطا رخ داد','11060':'متن FFM مورد نظر قابل بازیابی نیست','12000':'ترکیب استاندارد و کد بایدمنحصر به فرد باشد','13000':'چنین مسیری با ترکیب نوع حامل و شماره مسیر موجود است','13001':'برای نقاط انتخاب شده، هیچ مسیر معتبری در سیستم تعریف نشده است','13002':'errorCode.13002','14001':'شما نمی توانید نرخ هایی را که بصورت سیستمی تعریف شده اند، ویرایش کنید.','14002':'شما نمی توانید نرخ هایی را که بصورت سیستمی تعریف شده اند، ویرایش کنید.','14003':'شما نمی توانید نرخ هایی را که بصورت سیستمی تعریف شده اند، حذف کنید.','14004':'نوع نرخ فقط برای محصولی که در وضعیت پیش نویس است قابل تغییر است','15000':'برای انجام این دستور باید نماینده باشید','15001':'برای انجام این دستور باید پیک باشید','15002':'برای انجام این دستور باید نماینده صادر کننده باشید','15003':'برای انجام این دستور باید نماینده مقصد باشید','15004':'برای انجام این دستور باید نماینده صادر کننده و یا نماینده مقصد باشید','15005':'برای انجام این دستور باید پیک یا نماینده صادر کننده و یا نماینده مقصد باشید','15100':'حساب پیدا نشد','15101':'برای این نماینده حساب مالی تعیین نشده است','15102':'اعتبار دهنده این مشتری تعیین نشده است','15103':'errorCode.15103','16001':'errorCode.16001','17001':'کد تخفیف وارد شده معتبر نیست.','17002':'کد تخفیف وارد شده برای نماینده شما معتبر نیست.','17003':'کد تخفیف وارد شده مربوط به محصول انتخاب شده نیست.','17004':'برای اعتبار سنجی کد تخفیف وارد شده، ابتدا می بایست شماره بارنامه را وارد کنید.','17005':'کد تخفیف وارد شده برای این شماره بارنامه معتبر نیست.','17006':'کد تخفیف وارد شده برای این محدوده وزنی معتبر نیست.','17007':'کد تخفیف وارد شده منقضی شده است.','17008':'errorCode.17008','17009':'نوع تخفیف قابل استفاده توسط نماینده نیست','18000':'محصول استفاده شده قابل تغییر وضعیت نیست','18001':'نسخه های متفاوت از یک محصول نمی توانند همزمان در وضعیت انتشار باشند','19000':'بیش از یک شماره پرواز در برنامه های انتخاب شده وجود دارد','19001':'برنامه پرواز های گذشته در برنامه های انتخاب شده وجود دارد','19002':'زمان تعیین شده کمتر از مدت زمان پرواز است','19003':'وزن رزرو نا معتبر است','19004':'زمان خروج بعد از زمان ورود است','19005':'تاریخ خروج نا معتبر است','19006':'زمان خروج نا معتبر است','19007':'تاریخ ورود نا معتبر است','19008':'زمان ورود نا معتبر است','19009':'با این شماره پرواز و زمان خروج برنامه انتقال وجود دارد','19010':'errorCode.19010','19011':'errorCode.19011','19012':'errorCode.19012','19013':'errorCode.19013','19014':'errorCode.19014','20000':'errorCode.20000','20001':'بارنامه تکراری در ULD','20002':'تعداد بار لود شده بیشتر از تعداد کل بار در بارنامه است','20003':'Total Pieces doesnt match with total pieces in manifest','20004':'Total Gross Weight doesnt match with sum total of manifest gross weight','20005':'جمع بسته های لود شده، بیشتر از کل بستهای بارنامه است','20006':'جمع بسته ها شده، بیشتر از کل بسته های بارنامه است','20007':'برای این پرواز مانیفست ثبت شده وجود دارد','20008':'مقصد متفاوت برای یک بارنامه انتخاب شده','20009':'تعداد بار دریافت شده بیشتر از تعداد کل بار در بارنامه است','20010':'جمع بسته های دریافت شده، بیشتر از کل بسته های بارنامه است','20011':'جمع بسته های قبض انبار شده، بیشتر از کل بسته های بارنامه است','30000':'شخص حقیقی/حقوقی پیدا نشد','30001':'شخص مورد نظر وضعیت فعال نیست','40000':'ترخیص کار وجود ندارد','40001':'ترخیص کار مورد نظر وضعیت فعال نیست','40002':'برای ایجاد رابطه از نوع شعبه، شخص حقوقی باید انتخاب شود','50001':'MANIFEST HAS NOT CARRIER CODE','50002':'MANIFEST HAS NOT VEHICLE CARRIER REG NUMBER','50003':'MANIFEST HAS NOT TRANSPORTATION NUMBER','50004':'MANIFEST HAS NOT DESTINATION COUNTRY SHORT CODE','50005':'MANIFEST HAS NOT DESTINATION NODE CODE','50006':'MANIFEST HAS NOT DESTINATION COUNTRY SHORT-CODE OR DESTINATION NODE CODE','50007':'MANIFEST HAS NOT EXPECTED ARRIVE DATE','50008':'MANIFEST HAS NOT CUSTOMS-REFERENCE-NO','50009':'errorCode.50009','50010':'errorCode.50010','50011':'errorCode.50011','60000':'errorCode.60000','60001':'errorCode.60001','10106':'errorCode.10106','10107':'errorCode.10107','10108':'errorCode.10108','10108':'errorCode.10108','10109':'errorCode.10109','10110':'errorCode.10110','10111':'errorCode.10111','10112':'errorCode.10112','10113':'errorCode.10113','70000':'errorCode.70000','70001':'errorCode.70001','70002':'errorCode.70002','70003':'errorCode.70003','80000':'errorCode.80000','80001':'errorCode.80001','80002':'errorCode.80002','90000':'errorCode.90000','90001':'errorCode.90001','90002':'errorCode.90002'
+		};
+		/* var scopes = {}; */
+		var username = 'anonymousUser';
+		var userLocale = 'en_US';
+		var userLanguage = 'en';
+		var userCalendar = 'GREGORIAN';
+		var userCalendarLanguage = userCalendar == 'JALALI' ? 'fa' : 'en';
+		var dateFormat = 'YYYY-MM-DD';
+		var datetimeFormat = 'YYYY-MM-DD HH:mm';
+		var timeFormat = 'HH:mm';
+		</script>
+		
+	
+
+		
+		<script>
+		</script>
+	
+	
+		
+			
+		<style>
+			.invoice {
+			    margin: 0;
+			}
+		</style>
+	</head>
+
+	<body class="wysihtml5-supported  pace-done skin-black fixed">
+		<div class="wrapper row-offcanvas row-offcanvas-left">
+		
+			<!-- header logo: style can be found in header.less -->
+		    <header class="main-header">
+		        <a href="/siteservices-web/" class="logo">e-Courier</a>
+		        
+		        <!-- Header Navbar: style can be found in header.less -->
+		        <nav class="navbar navbar-static-top" role="navigation">
+		            <!-- Sidebar toggle button-->
+		            <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+            			<span class="sr-only">Toggle navigation</span>
+          			</a>
+		            
+		            
+		        </nav>
+		    </header>
+		
+	        <!-- Left side column. contains the logo and sidebar -->
+	        <aside class="main-sidebar sidebar-offcanvas">
+	            <!-- sidebar: style can be found in sidebar.less -->
+	            <section class="sidebar">
+	                <!-- Sidebar user panel -->
+	                
+
+	                <!-- sidebar menu: : style can be found in sidebar.less -->
+	                
+	                <ul class="nav sidebar-menu">
+
+	<li title="اشخاص">
+		
+		<a href="/siteservices-web/profile/register"> 
+			<i class="fa fa-user"></i>
+			<span>اشخاص</span>
+		</a>
+		
+	</li>
+
+</ul>
+
+	                
+	                <br />
+	                <br />
+	            </section>
+	            <!-- /.sidebar -->
+	        </aside>
+
+			<div class="content-wrapper">
+	            <!-- Content Header (Page header) -->
+	            <section class="content-header ui-header">
+	            
+	            	<!-- title placeholder -->
+	            	<section>
+			<div class="fixed-header">
+				<div class="ui-header-image pull-left">
+					<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/siteservices-web/resources/images/profile.png" style="width: 48px; height: 48px;" />
+				</div>
+				<div class="ui-header-title">
+					<div class="split-left">
+						<h3>
+							<small>Profile</small>
+						</h3>
+						<h3>Register</h3>
+					</div>
+					<div class="split-right">
+						<button class="btn btn-primary" id="createPersonBtn">ذخیره</button>
+					</div>
+				</div>
+			</div>
+		</section>
+	            
+	            </section>
+	
+	            <!-- Main content -->
+	            <section class="content">
+				
+				<div class="box box-primary">
+					<div class="box-header with-border">
+						<h3 class="box-title">
+							<i class="fa fa-user"></i> Person
+						</h3>
+					</div>
+				<div class="box-body">
+					<form id="createPersonForm" class="form-horizontal" role="form" method="post">
+						<div class="callout callout-danger hide"><h4></h4></div>
+						<input type="submit" value="FormSubmitBtn" id="submitBtn" style="display: none;" />
+						<fieldset>
+							<input type="hidden" id="id" name="id" value="" />
+						</fieldset>
+						<div class="row">
+							<div class="col-md-6">
+								
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label class="col-sm-3 control-label">نوع</label>
+									<div class="col-sm-7">
+										<label class="radio-inline">
+											<input class="iradio_minimal" type="radio" value="REAL" id="type1" name="type">حقیقی</input>
+										</label>
+										<label class="radio-inline">
+											<input class="iradio_minimal" type="radio" value="LEGAL" id="type2" name="type">حقوقی</input>
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+						<legend></legend>
+						
+						<!-- REAL ############################################################################### -->
+						<div id="realPersonFragment">
+							<div class="row">
+							<!-- real person column 1 ################################################################################# -->
+								<div class="col-md-6">
+
+									<div class="form-group">
+										<label class="col-sm-3 control-label">جنسیت<span class="reqired"> *</span></label>
+										<div class="col-sm-7">
+											<select class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="جنسیت مورد نیاز است" id="gender" name="gender">
+												<option value=""></option>
+												<option value="MALE">مرد</option>
+												<option value="FEMALE">زن</option>
+												<option value="OTHER">سایر</option>
+											</select>
+										</div>
+									</div>							
+									
+									<div class="form-group">
+										<label class="col-sm-3 control-label">نام<span class="reqired"> *</span></label>
+										<div class="col-sm-7">
+											<input class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="نام مورد نیاز است" id="firstNameLocal" name="firstNameLocal" value="" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">نام خانوادگی<span class="reqired"> *</span></label>
+										<div class="col-sm-7">
+											<input class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="نام خانوادگی مورد نیاز است" id="lastNameLocal" name="lastNameLocal" value="" />
+										</div>
+									</div>	
+									<div class="form-group">
+										<label class="col-sm-3 control-label">کد ملی<span class="reqired"> *</span></label>
+										<div class="col-sm-7">
+											<input class="form-control validate[notempty]" data-bv-notempty="true" data-bv-nationalId="true" data-bv-nationalId-message="کد/شناسه ملی معتبر نیست" data-bv-notempty-message="کد ملی مورد نیاز است" id="nationalId" name="nationalId" value="" />
+										</div>
+									</div>	
+
+								</div>
+								<!-- real person column 2 ################################################################################# -->
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="col-sm-3 control-label">شماره شناسنامه</label>
+										<div class="col-sm-7">
+											<input class="form-control" id="issueId" name="issueId" value="" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">تاریخ صدور</label>
+										<div class="col-sm-7">
+											<input class="form-control datePicker" id="issueDate" name="issueDate" value="" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">محل صدور</label>
+										<div class="col-sm-7">
+											<input class="form-control" id="issueLocation" name="issueLocation" value="" />
+										</div>
+									</div>									
+								</div>
+							</div>
+						</div>
+						
+						<!-- LEGAL ############################################################################### -->
+						<div id="legalPersonFragment">
+							<div class="row">
+							<!-- legal person column 1 ################################################################################# -->
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="col-sm-3 control-label">پیشوند<span class="reqired"> *</span></label>
+										<div class="col-sm-7">
+											<input type="hidden" id="legalPersonPrefix" class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="پیشوند مورد نیاز است" name="prefix" value="" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">نام<span class="reqired"> *</span></label>
+										<div class="col-sm-7">
+											<input class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="نام مورد نیاز است" id="firstNameLocal" name="firstNameLocal" value="" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">نام مستعار</label>
+										<div class="col-sm-7">
+											<input class="form-control" id="nickNameLocal" name="nickNameLocal" value="" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">شناسه ملی<span class="reqired"> *</span></label>
+										<div class="col-sm-7">
+											<input class="form-control" data-bv-notempty="true" data-bv-nationalId="true" data-bv-nationalId-message="کد/شناسه ملی معتبر نیست" data-bv-notempty-message="شناسه ملی مورد نیاز است" id="nationalId" name="nationalId" value="" />
+										</div>
+									</div>											
+								</div>
+								<!-- legal person column 2 ################################################################################# -->
+								<div class="col-md-6">
+						
+									<div class="form-group">
+										<label class="col-sm-3 control-label">کد اقتصادی<span class="reqired"> *</span></label>
+										<div class="col-sm-7">
+											<input class="form-control" data-bv-notempty="true" data-bv-notempty-message="شناسه ملی مورد نیاز است" id="economicCode" name="economicCode" value="" />
+										</div>
+									</div>	
+									<div class="form-group">
+										<label class="col-sm-3 control-label">شماره ثبت</label>
+										<div class="col-sm-7">
+											<input class="form-control" id="issueId" name="issueId" value="" />
+										</div>
+									</div>								
+									<div class="form-group">
+										<label class="col-sm-3 control-label">تاریخ ثبت</label>
+										<div class="col-sm-7">
+											<input class="form-control datePicker" id="issueDate" name="issueDate" value="" />
+										</div>
+									</div>	
+									<div class="form-group">
+										<label class="col-sm-3 control-label">محل ثبت</label>
+										<div class="col-sm-7">
+											<input class="form-control" id="issueLocation" name="issueLocation" value="" />
+										</div>
+									</div>	
+								</div>
+							</div>
+						</div>
+						<legend></legend>
+
+						<!-- CONTACT ############################################################################### -->
+						<div id="contactInfoFragment" style="margin-top: 60px">
+							<div class="row">
+								<!-- column 1 ############################################################################### -->
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="col-sm-3 control-label">تلفن<span class="reqired"> *</span></label>
+										<div class="col-sm-7">
+											<div class="input-group">
+												<input class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="تلفن مورد نیاز است" id="primaryContactInfo.tel" name="primaryContactInfo.tel" value="" />
+												<span class="input-group-addon">
+													<i class="fa fa-phone"></i>
+												</span>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">موبایل</label>
+										<div class="col-sm-7">
+											<div class="input-group">
+												<input id="mobile" class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="موبایل مورد نیاز است" name="primaryContactInfo.mobile" value="" />
+												<span class="input-group-addon">
+													<i class="fa fa-mobile-phone"></i>
+												</span>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">نمابر</label>
+										<div class="col-sm-7">
+											<div class="input-group">
+												<input class="form-control" id="primaryContactInfo.fax" name="primaryContactInfo.fax" value="" />
+												<span class="input-group-addon">
+													<i class="fa fa-fax"></i>
+												</span>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">ایمیل<span class="reqired"> *</span></label>
+										<div class="col-sm-7">
+											<div class="input-group">
+												<input class="form-control" data-bv-notempty="true" data-bv-notempty-message="ایمیل مورد نیاز است" id="primaryContactInfo.email" name="primaryContactInfo.email" value="" />
+												<span class="input-group-addon">
+													<i class="fa fa-at"></i>
+												</span>
+											</div>
+										</div>
+									</div>									
+								</div>
+								<!-- column 2 ############################################################################### -->
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="col-sm-3 control-label">شهر<span class="reqired"> *</span></label>
+										<div class="col-sm-7">
+											<select class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="شهر مورد نیاز است" id="primaryContactInfoCityCode" name="primaryContactInfo.cityCode">
+												<option value=""></option>
+												<option value="">مرد</option>
+												<option value="">زن</option>
+												<option value="">سایر</option>
+											</select>
+										</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">کدپستی</label>
+										<div class="col-sm-7">
+											<input id="postalCode" class="form-control" data-bv-notempty="true" data-bv-notempty-message="کدپستی مورد نیاز است" name="primaryContactInfo.postalCode" value="" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">آدرس<span class="reqired"> *</span></label>
+										<div class="col-sm-7">
+											<textarea class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="آدرس مورد نیاز است" id="primaryContactInfo.address" name="primaryContactInfo.address"></textarea>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- END   ################################################################################# -->
+						</form>
+					</div>
+				</div>
+			
+		</section><!-- /.content -->
+	        </div><!-- /.content-wrapper -->
+	    </div><!-- ./wrapper -->
+	    
+	    <footer class="main-footer">
+	        <div class="pull-right hidden-xs">
+	          <p>
+	          	Coded with <i class="fa fa-heart text-red"></i> + <i class="fa fa-coffee"></i> at <b><a target="_blank" href="http://parvanpajooh.com">Parvan Pajooh</a></b>
+	          </p>
+	        </div>
+	        <strong><i class="fa fa-lightbulb-o text-yellow"></i></strong>
+      	</footer>
+      	
+      	
+	    
+	    <div class="modal fade" id="showNotifyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+	        <div class="modal-dialog">
+	            <div class="modal-content">
+	                <div class="modal-header">
+	                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+	                    <h4 class="modal-title">Message from admin</h4>
+	                </div>
+	                <div class="modal-body">
+	                	
+	                </div>
+	                <div class="modal-footer">
+	                    <button type="button" class="btn btn-default" data-dismiss="modal">انصراف</button>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    
+	    <fieldset>
+	    	
+	    </fieldset>
+	    
+	    
+	    
+	    <!-- Page JavaScripts -->
+        
+			<script>
+			var legalPrefix = [
+				{id:'company', text: '\u0634\u0631\u06A9\u062A'
+				},
+				{id:'institution', text: '\u0645\u0648\u0633\u0633\u0647'
+				},
+				{id:'office', text: '\u062F\u0641\u062A\u0631'
+				},
+				{id:'organization', text: '\u0633\u0627\u0632\u0645\u0627\u0646'
+				},
+				{id:'ministry', text: '\u0648\u0632\u0627\u0631\u062A\u062E\u0627\u0646\u0647'
+				},
+				{id:'representative', text: '\u0646\u0645\u0627\u06CC\u0646\u062F\u06AF\u06CC'
+				},
+				{id:'laboratory', text: '\u0622\u0632\u0645\u0627\u06CC\u0634\u06AF\u0627\u0647'
+				},
+				{id:'hospital', text: '\u0628\u06CC\u0645\u0627\u0631\u0633\u062A\u0627\u0646'
+				},
+				{id:'clinic', text: '\u06A9\u0644\u06CC\u0646\u06CC\u06A9'
+				},
+				{id:'union', text: '\u0627\u062A\u062D\u0627\u062F\u06CC\u0647'
+				},
+				{id:'community', text: '\u0627\u0646\u062C\u0645\u0646'
+				},
+				{id:'garrison', text: '\u067E\u0627\u062F\u06AF\u0627\u0646'
+				},
+				{id:'cooperative', text: '\u062A\u0639\u0627\u0648\u0646\u06CC'
+				},
+				{id:'bank', text: '\u0628\u0627\u0646\u06A9'
+				}
+			];
+   			
+			var currentPersonId = null;
+			//var currentPersonUrl =
+
+   	    	$('input[type=radio][name=type]').on('ifChanged', function() {
+   	   	    	
+   	    		if (this.checked) {
+   	    			var $legalPersonFragment = $('#legalPersonFragment');
+   	    			var $realPersonFragment = $('#realPersonFragment');
+   	    			var $contactInfoFragment = $('#contactInfoFragment');
+   	    			if (this.value == 'REAL') {
+   	    				$("#legalPersonFragment :input").prop("disabled", true);
+   	    				$("#realPersonFragment :input").prop("disabled", false);
+   	    				$('#realPersonFragment').css('display','block');
+   	    				$('#legalPersonFragment').css('display','none');
+   	    				
+   	    				$('#legalPersonFragment').find('[data-bv-field]').each(function() {
+   	    					$legalPersonFragment.bootstrapValidator('removeField', this.name);
+   	    				});
+   	    				$('#realPersonFragment').find('[data-bv-field]').each(function() {
+   	    					$realPersonFragment.bootstrapValidator('addField', this.name);
+   	    				});
+ 	    				$contactInfoFragment.bootstrapValidator('destroy');
+   	    				$contactInfoFragment.bootstrapValidator({
+	   						excluded: [':disabled'], 
+	   						feedbackIcons:{valid: 'fa fa-check',invalid: 'fa fa-times',validating: 'fa fa-refresh'}
+   						});
+ 	    				$contactInfoFragment.bootstrapValidator('addField', $('#createPersonForm').find('#mobile'));
+ 	    				$contactInfoFragment.bootstrapValidator('removeField', $('#createPersonForm').find('#postalCode'));
+   	    				resetLegalPersonFragment($legalPersonFragment);
+   	    				resetContactInfoFragment($contactInfoFragment);
+   	    				
+   	    			} else if (this.value == 'LEGAL') {
+   	    				$("#legalPersonFragment :input").prop("disabled", false);
+   	    				$("#realPersonFragment :input").prop("disabled", true);
+   	    				$('#realPersonFragment').css('display','none');
+   	    				$('#legalPersonFragment').css('display','block');
+   	    				$('#realPersonFragment').find('[data-bv-field]').each(function() {
+   	    					$realPersonFragment.bootstrapValidator('removeField', this.name);
+   	    				});
+   	    				$('#legalPersonFragment').find('[data-bv-field]').each(function() {
+   	    					$legalPersonFragment.bootstrapValidator('addField', this.name);
+   	    				});
+   	    				$contactInfoFragment.bootstrapValidator('destroy');
+   	    				$contactInfoFragment.bootstrapValidator({
+	   						excluded: [':disabled'], 
+	   						feedbackIcons:{valid: 'fa fa-check',invalid: 'fa fa-times',validating: 'fa fa-refresh'}
+   						});
+   	    				$contactInfoFragment.bootstrapValidator('removeField', $('#createPersonForm').find('#mobile'));
+   	    				$contactInfoFragment.bootstrapValidator('addField', $('#createPersonForm').find('#postalCode'));
+   	    				resetRealPersonFragment($realPersonFragment);
+   	    				resetContactInfoFragment($contactInfoFragment);
+   	    			}
+   	    		}
+   	    	});
+
+   	    	function resetContactInfoFragment($contactInfoFragment) {
+   	    		$contactInfoFragment.find('input:text,select, textarea').val('');
+   	    		try{$('#primaryContactInfoCityCode').select2('val', '');}catch(Erro){}
+   			}
+
+   	    	function resetRealPersonFragment($realPersonFragment) {
+   			    $realPersonFragment.find('input:text,select, textarea').val('');
+   			    $realPersonFragment.find('input:radio, input:checkbox').iCheck('uncheck');
+   			 	try{$('#gender').select2('val', '');}catch(Erro){}
+   			 	try{$('#realPersonPrefix').select2('val', '');}catch(Erro){}
+   			}
+
+   	    	function resetLegalPersonFragment($legalPersonFragment) {
+   			    $legalPersonFragment.find('input:text,select, textarea').val('');
+   			    $legalPersonFragment.find('input:radio, input:checkbox').iCheck('uncheck');
+   			 	try{$('#legalPersonPrefix').select2('val', '');}catch(Erro){}
+   			}
+			
+		    $(document).ready(function() {
+
+		    	 /*<![CDATA[*/
+				$('#legalPersonFragment ,#realPersonFragment ,#contactInfoFragment').bootstrapValidator({
+					excluded: [':disabled'], 
+					feedbackIcons:{
+						valid: 'fa fa-check',
+						invalid: 'fa fa-times',
+						validating: 'fa fa-refresh'
+					}
+				});
+		    	
+		    	$('#legalPersonPrefix').select2({
+		    		id: function(obj) { return obj.text; },
+		    		placeholder: '\u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F',
+		    		allowClear: true,
+		    		data: legalPrefix,
+		    	    formatSelection: function(item){return item.text },
+		    	    formatResult: function(item){return item.text },
+		    	    initSelection: function (element, callback) {
+		    	        var data = {id: element.val(), text: element.val()};
+		    	        callback(data);
+		    	    }
+		    	}).change(function() {
+					$('#legalPersonFragment').data('bootstrapValidator').updateStatus('prefix', 'NOT_VALIDATED', null).validateField('prefix');
+				});
+
+
+		    	$('#organization').select2({
+		    		placeholder: '\u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F',
+			        allowClear: true				
+			    });
+
+		    	$('#primaryContactInfoCityCode').select2({
+	    				placeholder: '\u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F'
+	    				,formatResult: geoEntityFormat
+	    				,id: function(obj) { return obj.shortCode; }
+	    				,formatSelection: geoEntityFormat
+	    				,initSelection: geoEntityInitSelection
+	    				,allowClear: true
+	    				,ajax: {
+	    					url: '/siteservices-web/profile/register/cities',
+	    					 transport: transportFunction,
+	    					 dataType: 'json',
+	    					 params: {contentType: 'application/json;charset=utf-8', statusCode: {404: function(){showError('404');},403: function(){showError('403');},503: function(){showError('503');}}},
+	    					 quietMillis: 200,
+	    					 data: function (term, page) {
+	    					 	return {
+				    				'columns[1][data]': 'id'
+				    				,start: (page - 1) * 20
+				    				,length: 20
+				    				,'order[1][column]': 1
+				    				,'order[1][dir]': 'asc'
+				    				,term: term
+	    					 	};
+	    					 },
+	    					 results: function (data, page) {
+	    					 	var more = (page * 20) < data.recordsFiltered;
+	    					 	return {results: data.data, more: more}
+	    					 }
+	    				}
+  				}).change(function() {
+					$('#contactInfoFragment').data('bootstrapValidator').updateStatus('primaryContactInfo.cityCode', 'NOT_VALIDATED', null).validateField('primaryContactInfo.cityCode');
+				});
+
+			    if(true){
+	    	 		$('input[name="type"][value="REAL"]').iCheck('check').iCheck('enable').trigger('ifChanged');
+			    }else if (false){
+					$('input[name="type"]').trigger('ifChanged');
+					$('input[name="type"]').iCheck('disable');
+					$('input[name="active"]').iCheck('disable');
+					$("#gender , #organization").select2("readonly", true);
+			    }
+				else if (false){
+					$('input[name="type"]').trigger('ifChanged');
+			    }
+
+			    function generateUUID() {
+			        var d = new Date().getTime();
+			        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+			            var r = (d + Math.random()*16)%16 | 0;
+			            d = Math.floor(d/16);
+			            return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+			        });
+			        return uuid;
+			    };
+
+		    	$('#createPersonBtn').click(function(){
+
+			    	var uuid =  generateUUID();
+		    		var $btn = $(this);
+		    		var isValidForm = false;
+		    		var isContactInfosValid = false;
+		    		$('#createPersonForm').find('.callout').text('').addClass('hide');
+    				$('#contactInfoFragment').data('bootstrapValidator').validate();
+    				isContactInfosValid = $('#contactInfoFragment').data('bootstrapValidator').isValid();
+    				
+		    		if($('input[name="type"][value="REAL"]').is(":checked")){
+		    			$('#realPersonFragment').data('bootstrapValidator').validate();
+		    			isValidForm = isContactInfosValid ? $('#realPersonFragment').data('bootstrapValidator').isValid() : false;
+					}else if($('input[name="type"][value="LEGAL"]').is(":checked")){
+						$('#legalPersonFragment').data('bootstrapValidator').validate();
+						isValidForm = isContactInfosValid ? $('#legalPersonFragment').data('bootstrapValidator').isValid() : false;
+					}
+					if(isValidForm){
+		    			$btn.attr('disabled', true);
+		    			sessionStorage.setItem(uuid, $('#createPersonForm').serialize());
+
+					}
+			    		return false;
+		    	});
+		    	
+		    });
+		    
+		    function personInitSelection(element, callback) {
+	    		var id = $(element).val();
+	    		$.ajax({
+	    			url : '/siteservices-web/person/get', 
+	    			data : {id : id}, 
+	    			dataType: 'json'
+	    		}).done(function(data) {callback(data);});
+	    	}
+
+	    	function personFormat(aaData) {
+	    		return aaData.fullNameLocal; 
+	    	}
+
+	    	function ajaxResult(data, page) {
+				var more = (page * 20) < data.recordsFiltered;
+				$.each(data.data, function(i,obj) {
+					if (/* currentPersonId == obj.id ||  */!obj.active) {
+						obj.disabled = true;
+						return;
+					}
+				});
+				return {results: data.data, more: more};
+			}
+
+	    	function geoEntityFormat(aaData) {
+	    		var res = '<strong>' + aaData.nameFa + '</strong>';
+	    		var resAdditional = '';
+	    		if(aaData.parent){
+	    			resAdditional = aaData.parent.nameFa + ' , ';
+	    			
+	    			if(aaData.parent.parent){
+	    				resAdditional = aaData.parent.parent.nameFa + ' , ' + resAdditional;
+	    			}
+	    			
+	    			res = '<span style="color: #999;">' + resAdditional + '</span>' + res;
+	    		}
+	    		return res; 
+	    	}
+
+		    function geoEntityInitSelection(element, callback) {
+	    		var id = $(element).val();
+	    		$.ajax({
+	    			url : '/siteservices-web/profile/register/cities/' + id, 
+	    			dataType: 'json'
+	    		}).done(function(data) {callback(data);});
+	    	}
+
+			function createToRelationModalOnShow(){
+				$('input[name="fromPerson.id"]').val(currentPersonId);
+			}
+
+			function createToRelationAfterSaveSuccess(){
+				document.location.href = currentPersonUrl;
+			}
+
+			function modifyToRelationAfterSaveSuccess(){
+				document.location.href = currentPersonUrl;
+			}
+
+			function createFromRelationModalOnShow(){
+				$('input[name="toPerson.id"]').val(currentPersonId);
+			}
+
+			function createFromRelationAfterSaveSuccess(){
+				document.location.href = currentPersonUrl;
+			}
+
+			function modifyFromRelationAfterSaveSuccess(){
+				document.location.href = currentPersonUrl;
+			}
+
+	    	/*]]>*/
+    		</script>
+		
+        
+        <script src="/siteservices-web/dandelion/datatables/js/jquery.dataTables.js"></script>
+<script src="/siteservices-web/resources/lib/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+<script src="/siteservices-web/resources/lib/bootstrap-validator-0.5.0/js/bootstrapValidator.min.js"></script>
+<script src="/siteservices-web/resources/lib/bootstrap-validator-0.5.0/js/bootstrapValidator-custom.js"></script>
+<script src="/siteservices-web/resources/lib/select2-3.5.0/select2.min.js"></script>
+<script src="/siteservices-web/resources/lib/iCheck/icheck.min.js"></script>
+<script src="/siteservices-web/resources/lib/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/siteservices-web/resources/lib/cookie.js/cookie.min.js"></script>
+<script src="/siteservices-web/resources/lib/pnotify-3/pnotify.custom.min.js"></script>
+<script src="/siteservices-web/resources/js/app.min.js"></script>
+<script src="/siteservices-web/resources/js/custom.js"></script>
+<script src="/siteservices-web/resources/js/websocket.js"></script>
+<script src="/siteservices-web/resources/lib/moment.js/moment.min.js"></script>
+<script src="/siteservices-web/resources/lib/moment.js/moment-with-locales.min.js"></script>
+<script src="/siteservices-web/resources/lib/bootstrap-datetimepicker-4.7.14/pdate.js"></script>
+<script src="/siteservices-web/resources/lib/bootstrap-datetimepicker-4.7.14/bootstrap-persian-datetimepicker.js"></script>
+
+        
+        <script>
+
+	    if(userCalendar == 'JALALI'){
+			window.Date = pDate;
+		}
+
+	    $(document).ready(function(){
+		    $('.datePicker').datetimepicker({
+				locale: userCalendarLanguage,
+				format: dateFormat,
+				useCurrent: false
+			});
+			
+		    $('.timePicker').datetimepicker({
+				locale: userCalendarLanguage,
+				format: timeFormat,
+				useCurrent: false
+			});
+
+		    $('.datetimePicker,.dateTimePicker').datetimepicker({
+				locale: userCalendarLanguage,
+				format: datetimeFormat,
+				inline: false,
+				useCurrent: false
+			});
+
+		    $('.persianDatePicker').datetimepicker({
+		    	locale: 'fa',
+				format: dateFormat,
+				useCurrent: false
+			});
+			
+		    $('.persianDatetimePicker').datetimepicker({
+				locale: 'fa',
+				format: datetimeFormat,
+				useCurrent: false
+			});
+	    });
+	    </script>
+	</body>
+
+</html>
+

@@ -1,0 +1,127 @@
+package com.parvanpajooh.complaintmanagement.domain.repository.jpa;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseCriteria;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.repository.jpa.GenericRepositoryJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.complaintmanagement.domain.model.Complaint;
+import com.parvanpajooh.complaintmanagement.domain.model.ComplaintCategory;
+import com.parvanpajooh.complaintmanagement.domain.model.Complaint_;
+import com.parvanpajooh.complaintmanagement.domain.model.criteria.ComplaintCriteria;
+import com.parvanpajooh.complaintmanagement.domain.model.enums.ComplaintStatus;
+import com.parvanpajooh.complaintmanagement.domain.repository.ComplaintRepository;
+
+public class ComplaintReposirotyJpa extends GenericRepositoryJpa<Complaint, Long> implements ComplaintRepository {
+
+	public ComplaintReposirotyJpa() {
+		super(Complaint.class);
+	}
+
+	@Override
+	public List<Complaint> findByComplaintCategoryId(Long complaintCategoryId) throws ParvanDaoException {
+		
+		// LOG
+		log.trace("Entering findByComplaintCategoryId(complaintCategoryId={})", complaintCategoryId);
+		
+		try {
+			// Make query
+			TypedQuery<Complaint> q = getEntityManager().createQuery("from Complaint obj where obj.category.id = ? " , Complaint.class);
+
+			q.setParameter(1, complaintCategoryId);
+
+			List<Complaint> list = q.getResultList();
+
+			return list;
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while finding complaint by complaintCategoryId:" + complaintCategoryId, e);
+		}
+	}
+	
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel,
+			Root<Complaint> root, Map<String, Join> joins) throws ParvanException {
+
+		log.trace("Entering buildPredicateList( ... )");
+
+		ComplaintCriteria complaintCriteria = (ComplaintCriteria) cri;
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		// ----------------------------------------------------------------
+		// UserName
+		// ----------------------------------------------------------------
+		String userName = complaintCriteria.getUserName();
+		if (Validator.isNotNull(userName)) {
+			Predicate predicate = builder.like(root.<String>get(Complaint_.userName), "%" + userName + "%");
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// FirstName
+		// ----------------------------------------------------------------
+		String firstName = complaintCriteria.getFirstName();
+		if (Validator.isNotNull(firstName)) {
+			Predicate predicate = builder.like(root.<String>get(Complaint_.firstName), "%" + firstName + "%");
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// LastName
+		// ----------------------------------------------------------------
+		String lastName = complaintCriteria.getLastName();
+		if (Validator.isNotNull(lastName)) {
+			Predicate predicate = builder.like(root.<String>get(Complaint_.lastName), "%" + lastName + "%");
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Subject
+		// ----------------------------------------------------------------
+		String subject = complaintCriteria.getSubject();
+		if (Validator.isNotNull(subject)) {
+			Predicate predicate = builder.like(root.<String>get(Complaint_.subject), "%" + subject + "%");
+			predicateList.add(predicate);
+		}
+		
+		// ----------------------------------------------------------------
+		// Status
+		// ----------------------------------------------------------------
+		ComplaintStatus status = complaintCriteria.getStatus();
+		if (Validator.isNotNull(status)) {
+			Predicate predicate = builder.equal(root.<ComplaintStatus>get(Complaint_.status), status );
+			predicateList.add(predicate);
+		}
+		
+		// ----------------------------------------------------------------
+		// Term
+		// ----------------------------------------------------------------
+		String term = complaintCriteria.getTerm();
+		if (Validator.isNotNull(term)) {
+			Predicate predicate = builder.or(builder.like(root.<String> get(Complaint_.subject), "%" + term + "%"),
+								  			 builder.like(root.<String> get(Complaint_.description), "%" + term + "%"));
+			predicateList.add(predicate);
+		}
+
+		basePredicate((BaseCriteria) complaintCriteria, builder, root, predicateList);
+		
+		// LOG
+		log.trace("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+
+
+}

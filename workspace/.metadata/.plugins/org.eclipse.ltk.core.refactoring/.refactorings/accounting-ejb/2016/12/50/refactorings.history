@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;AccountBalanceVO.java&apos; to &apos;customercontract-ejb/src/main/java/com.parvanpajooh.customercontract.model.vo&apos;&#x0A;- Original project: &apos;accounting-ejb&apos;&#x0A;- Destination element: &apos;customercontract-ejb/src/main/java/com.parvanpajooh.customercontract.model.vo&apos;&#x0A;- Original element: &apos;com.parvanpajooh.accounting.model.vo.AccountBalanceVO.java&apos;" description="Copy compilation unit" destination="=customercontract-ejb/src\/main\/java&lt;com.parvanpajooh.customercontract.model.vo" element1="/src\/main\/java&lt;com.parvanpajooh.accounting.model.vo{AccountBalanceVO.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1480850739531" units="1" version="1.0"/>
+</session>

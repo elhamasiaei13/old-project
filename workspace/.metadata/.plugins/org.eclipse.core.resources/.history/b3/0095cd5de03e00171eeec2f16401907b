@@ -1,0 +1,15 @@
+package com.parvanpajooh.siteservices.service;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+import com.parvanpajooh.siteservices.model.vo.RegisterVO;
+
+public interface PersonManagementLocalService {
+
+	public PersonVO createPerson(RegisterVO registerVO) throws ParvanServiceException;
+	
+	public PersonVO getPerson(String uuid) throws ParvanServiceException;
+	
+	public void deletePerson(String uuid) throws ParvanServiceException;
+
+}

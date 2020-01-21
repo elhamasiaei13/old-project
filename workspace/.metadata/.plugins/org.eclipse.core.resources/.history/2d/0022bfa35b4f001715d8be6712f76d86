@@ -1,0 +1,129 @@
+package com.parvanpajooh.transportationmanagement2.service.adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.routemanagement.RouteManagementApiRestClient;
+import com.parvanpajooh.client.routemanagement.model.NodeMsg;
+import com.parvanpajooh.client.routemanagement.model.RouteMsg;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.transportationmanagement2.model.vo.NodeVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.RouteVO;
+
+@Stateless
+public class RouteManagementServiceAdapterRest implements RouteManagementServiceAdapter {
+
+	private RouteManagementApiRestClient routeManagementApiRestClient;
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	public RouteManagementServiceAdapterRest() {
+		this.routeManagementApiRestClient = new RouteManagementApiRestClient();
+	}
+	
+	@Override
+	public NodeVO getNodeByCode(String codeName) throws ParvanUnrecoverableException {
+
+		NodeVO nodeVO = null;
+		try {
+			NodeMsg nodeMsg = routeManagementApiRestClient.getNodeByCode(codeName);
+
+			nodeVO = new NodeVO();
+			nodeVO.fromMsg(nodeMsg);
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getNodeByCode", e);
+		}
+		return nodeVO;
+	}
+
+	@Override
+	public List<NodeVO> getAllNodes() throws ParvanServiceException {
+		
+		List<NodeVO> nodeVOs = null; 
+		List<NodeMsg> nodeMsgs = null; 
+		try {
+			
+			nodeMsgs = routeManagementApiRestClient.getAllNodes();
+			
+				nodeVOs = new ArrayList<NodeVO>();
+				for (NodeMsg msg : nodeMsgs) {
+					NodeVO nodeVO = new NodeVO();
+					nodeVO.fromMsg(msg);
+					nodeVOs.add(nodeVO);
+				}
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getAllNode", e);
+		}
+		return nodeVOs;
+		
+	}
+
+	@Override
+	public PageList<RouteVO> findRoutes(String carrierCode, String term, int page, int size) throws ParvanUnrecoverableException {
+		PageList<RouteVO> routeVOsPageList = null;
+		List<RouteVO> routeVOs = null; 
+		try {
+			
+			PageList<RouteMsg> routeMsgsPageList = routeManagementApiRestClient.findRoutesByCarrierCode(carrierCode, term, page, size);
+			
+			if (routeMsgsPageList != null) {
+				routeVOs = new ArrayList<RouteVO>();
+				for (RouteMsg msg : routeMsgsPageList.getElements()) {
+					RouteVO routeVO = new RouteVO();
+					routeVO.fromMsg(msg);
+					routeVOs.add(routeVO);
+				}
+			}
+
+			routeVOsPageList = new PageList<>(routeVOs, routeMsgsPageList.getTotal());
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findRoutes", e);
+		}
+		return routeVOsPageList;
+	}
+
+	@Override
+	public RouteVO getRoute(Long id) throws ParvanUnrecoverableException {
+
+		RouteVO routeVO = null;
+		try {
+			RouteMsg routeMsg = routeManagementApiRestClient.getRoute(id);
+
+			routeVO = new RouteVO();
+			routeVO.fromMsg(routeMsg);
+		
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getRoute", e);
+		}
+		return routeVO;
+	}
+
+	@Override
+	public RouteVO getRouteByCarrierRouteNumber(String carrierRouteNumber) throws ParvanUnrecoverableException {
+
+		RouteVO routeVO = null;
+		try {
+			RouteMsg routeMsg = routeManagementApiRestClient.getRouteByCarrierRouteNumber(carrierRouteNumber);
+
+			routeVO = new RouteVO();
+			routeVO.fromMsg(routeMsg);
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getRouteByCarrierRouteNumber", e);
+		}
+		return routeVO;
+		
+	}
+
+}

@@ -1,0 +1,45 @@
+
+actions = actions
+
+baseModel.createDate = CreateDate
+baseModel.updateDate = Update Date
+
+button.add    = Add
+button.cancel = Cancel
+button.close  = Close
+button.create = Create
+button.delete = Delete
+button.reset  = reset
+button.save   = Save
+button.search = search
+
+complaint = Complaint
+
+error.data-duplicate = Field {0} is duplicate
+error.error-required = The {0} is required
+
+errorCode.10702 = Node already has another agent
+errorCode.10706 = Cannot set owner agent as parent
+errorCode.10707 = Only one root agent should be exists
+errorCode.10708 = Accountnumber is used by another agent
+errorCode.20000 = atleast one needed
+
+header.delete = delete
+header.search = search
+
+packingType = packing type
+
+packingType.active       = active
+packingType.code         = code
+packingType.displayOrder = display order
+packingType.height       = height
+packingType.length       = length
+packingType.maxWeight    = max weight
+packingType.nameEn       = name(En)
+packingType.nameFa       = Name(\u0641\u0627)
+packingType.standard     = standard
+packingType.width        = width
+
+reset = reset
+
+search = search

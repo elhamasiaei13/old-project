@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>Task Details</title>
+</head>
+
+<body>
+	<section class="content" layout:fragment="content">
+	
+	<form action="#" class="form-inline" th:object="${task}" method="post">
+	  
+	   <div class="jumbotron">
+	   <h2 > 
+		   <i class="fa fa-tasks" aria-hidden="true"></i>
+	   </h2>
+	   </div>
+          
+
+		<div id="navigationTabs" class="tabs" ng-multi-transclude="tabs">
+				<div class="ui menu attached headerWrapperTabs myWorkTabs ng-scope" name="tabs">
+					<a id="story-tab" class="item link active" ui-sref-active="active" ui-sref="mywork.stories" ng-mouseenter="mouseEnterMenuItem($event)" th:href="@{'/taskDetails/'+ ${id}}">
+						<span th:text="#{lbl_home}"></span>
+					</a>
+					<a id="story-tab" class="item link" ui-sref-active="active" ui-sref="mywork.stories" ng-mouseenter="mouseEnterMenuItem($event)" th:href="@{'/comment/'+ ${id}}">
+						<span th:text="#{title_comments}"></span>
+					</a>
+					<a id="task-tab" class="item link" ui-sref-active="active" ui-sref="mywork.tasks" ng-mouseenter="mouseEnterMenuItem($event)" th:href="@{'/assignTo/'+ ${id}}">
+						<span th:text="#{title_changestatus_assignto}"></span>
+					</a>
+					<!-- <a id="calendar-tab" class="item link" ui-sref-active="active" ui-sref="mywork.calendar" ng-mouseenter="mouseEnterMenuItem($event)" th:href="@{'/changeStatus/'+ ${id}}">
+						<span th:text="#{title_change_status}"></span>
+					</a> -->
+					<div class="right menu">
+					</div>
+				</div>
+		</div>
+		
+		<div id="section">
+		
+			<input name="taskId"  th:value="${id}" hidden="hidden"/>
+			<input type="hidden" class="input-small"  th:value="${id}" th:field="*{id}" placeholder="Subject" readonly="true"/>
+			<div class="list-group">
+				  <a class="list-group-item" ><i class="fa fa-file-text-o fa-3x" aria-hidden="true"></i>&nbsp; شرح :</a>
+				  
+					  <div class="list-group-item" >					 
+						  <p  th:text ="*{description}" ></p>		
+					  </div>				
+			</div>					
+		</div>
+		
+		<div id="leftSection">
+		    <div class="list-group">
+		     	<a class="list-group-item" ><i class="fa fa-search-plus fa-3x" aria-hidden="true"></i>&nbsp;جزییات :</a>
+		     	
+		    <div id="rightSection">
+				<div class="list-group-item">
+				    <label th:text="#{lbl_reporter}"></label>
+				    <br></br>
+				    <br></br>
+				    <label th:text="#{lbl_assignto}"></label>
+				    <br></br>
+				    <br></br>
+				    <label th:text="#{lbl_assignto_comment}"></label>
+				    <br></br>
+				    <br></br>
+				    <label th:text="#{lbl_status}"></label>
+				    <br></br>
+				    <br></br>
+				    <label th:text="#{lbl_status_comment}"></label>
+				    <br></br>
+				    <br></br>
+				    <label th:text="#{lbl_creatdate}"></label>
+				    <br></br>
+				    <br></br>
+				    <label th:text="#{lbl_updatedate}"></label>
+				    <br></br>
+				    <br></br>
+				    <label th:text="#{lbl_dodate}"></label>
+			    
+			    </div>
+		    </div>	
+
+		    </div>
+		</div>	
+		
+			<div id="footer">
+				<div class="list-group">
+				  <a class="list-group-item" ><i class="fa fa-comments-o fa-3x" aria-hidden="true" ></i>&nbsp; یادداشت‌ها :</a>
+				  <div th:each="comment : ${comments}">
+					  <div class="list-group-item" th:if="comment.taskId.taskAssignmentId !=null">
+				  
+						  <p   th:text =" '#' + ${comment.id}"></p>						  
+						 <!--  <a   th:text ="${comment.taskId.taskAssignmentId.memberId.username}" th:href="@{'/showMembers/'}"></a> -->
+						  <p   th:text ="${comment.description}"></p>
+		
+					  </div>
+				  </div>
+				</div>
+			</div>
+		</form>
+
+	<script>
+
+		function memberSelected(){
+			var e=document.getElementById("memberId").value;
+			var e2=document.getElementById("statusId").value;
+			$('#memberId').val(e);
+			$('#statusId').val(e2);
+		}
+	     var hidden = false;
+		 function showComment(){
+			        hidden = !hidden;
+			        if(hidden) {
+			            document.getElementById('commentInputId').style.visibility = 'hidden';
+			            document.getElementById('saveCommentBtnId').style.visibility = 'hidden';
+			        } else {
+			            document.getElementById('commentInputId').style.visibility = 'visible';
+			            document.getElementById('saveCommentBtnId').style.visibility = 'visible';
+			        }
+	     }
+		 function statusSelected(){				
+				var e=document.getElementById("statusId").value;
+				$('#statusId').val(e);
+		 }
+		 function saveComment(){
+
+			 $('#saveCommentFormId').submit();
+		 }
+			
+	</script>	
+	</section>
+</body>
+</html>

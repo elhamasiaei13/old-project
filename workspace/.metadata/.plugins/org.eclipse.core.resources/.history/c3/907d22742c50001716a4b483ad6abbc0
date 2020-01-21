@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" 
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout" 
+	  ddl:bundle-includes="bootstrapValidator,select2">
+<head>
+	<meta charset="UTF-8" />
+	<title>Complaint</title>
+	
+	<style>
+		.select-device-modal label {
+			margin-bottom: 0px;
+		}
+		
+		.select-device-modal input {
+			width: auto;
+			height: 28px;
+		}
+		
+		.select-device-modal .form-control {
+			width: auto;
+		}
+		
+		.select-device-modal table.dataTable td {
+			padding: 1px 10px;
+		}
+		
+		.select-device-modal .dataTables_filter label {
+			margin-bottom: 5px;
+		}
+	</style>
+
+</head>
+<body th:with="rightMenu='profile-complaint'">
+
+	<section layout:fragment="top-header" class="page-header">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<ul class="breadcrumb">
+						<li>
+							<a href="#">صفحه نخست</a>
+						</li>
+
+						<li class="active">ثبت شکایت</li>
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<h1>ثبت شکایت</h1>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="content" layout:fragment="content">
+		<form id="activateForm">
+			<div class="callout callout-danger hide">
+				<h4></h4>
+			</div>
+			<div class="container">
+				<div class="col-sm-8 col-lg-offset-2">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<div class="row">
+								<div class="col-sm-8 col-sm-offset-2">
+									<h2>فعالسازی</h2>
+
+									<input name="userId" type="hidden" th:value="${userId}" />
+									<div class="form-group">
+										<label th:inline="text">
+											[[#{register.password}]]
+											<span class="reqired"> *</span>
+										</label>
+										<input id="password" name="password" type="password" class="form-control" data-bv-notempty="true" th:attr="data-bv-notempty-message=#{error-required(#{register.password})}" />
+									</div>
+									<div class="form-group">
+										<label th:inline="text">
+											[[#{register.confirmPassword}]]
+											<span class="reqired"> *</span>
+										</label>
+										<input id="confirmPassword" name="confirmPassword" type="password" class="form-control" data-bv-notempty="true" th:attr="data-bv-notempty-message=#{error-required(#{register.confirmPassword})}" />
+									</div>
+									<div class="form-group">
+										<a class="btn btn-success" id="activateBtn" th:text="#{button.save}">ذخیره</a>
+									</div>
+								</div>
+							</div>
+							<!-- row -->
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</form>
+	</section>
+
+</body>
+</html>

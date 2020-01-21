@@ -1,0 +1,716 @@
+package com.parvanpajooh.rateandroute.rest;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.parvanpajooh.client.rateandroute.model.CarrierMsg;
+import com.parvanpajooh.client.rateandroute.model.CityInfoMsg;
+import com.parvanpajooh.client.rateandroute.model.CountryInfoMsg;
+import com.parvanpajooh.client.rateandroute.model.EvaluatedRouteMsg;
+import com.parvanpajooh.client.rateandroute.model.GeoEntityMsg;
+import com.parvanpajooh.client.rateandroute.model.GeoTypeMsg;
+import com.parvanpajooh.client.rateandroute.model.NodeMsg;
+import com.parvanpajooh.client.rateandroute.model.StateInfoMsg;
+import com.parvanpajooh.client.rateandroute.model.ZoneMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RouteType;
+import com.parvanpajooh.common.auth.BaseRestController;
+import com.parvanpajooh.common.util.IpUtils;
+import com.parvanpajooh.common.util.JsonHelper;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.rateandroute.model.criteria.CarrierCriteria;
+import com.parvanpajooh.rateandroute.model.criteria.GeoEntityCriteria;
+import com.parvanpajooh.rateandroute.model.criteria.NodeCriteria;
+import com.parvanpajooh.rateandroute.model.enums.FreightNodeType;
+import com.parvanpajooh.rateandroute.model.enums.RouteCategory;
+import com.parvanpajooh.rateandroute.model.vo.CarrierVO;
+import com.parvanpajooh.rateandroute.model.vo.EvaluatedRouteVO;
+import com.parvanpajooh.rateandroute.model.vo.GeoEntityVO;
+import com.parvanpajooh.rateandroute.model.vo.GeoTypeVO;
+import com.parvanpajooh.rateandroute.model.vo.NodeVO;
+import com.parvanpajooh.rateandroute.model.vo.NodeVOSimple;
+import com.parvanpajooh.rateandroute.model.vo.TransferNodeVO;
+import com.parvanpajooh.rateandroute.model.vo.ZoneVO;
+import com.parvanpajooh.rateandroute.service.CarrierService;
+import com.parvanpajooh.rateandroute.service.GeoEntityService;
+import com.parvanpajooh.rateandroute.service.NodeService;
+import com.parvanpajooh.rateandroute.service.ProductService;
+import com.parvanpajooh.rateandroute.service.RarUserService;
+import com.parvanpajooh.rateandroute.service.RouteService;
+
+@RestController
+@RequestMapping("/v1")
+public class RateAndRouteRestController2 extends BaseRestController {
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	@EJB(mappedName="java:global/rateAndRoute-ear/rateAndRoute-ejb/GeoEntityServiceImpl") 
+	private GeoEntityService geoEntityService;
+	
+	@EJB(mappedName="java:global/rateAndRoute-ear/rateAndRoute-ejb/NodeServiceImpl") 
+	private NodeService nodeService;
+	
+	@EJB(mappedName="java:global/rateAndRoute-ear/rateAndRoute-ejb/RouteServiceImpl") 
+	private RouteService routeService;
+	
+	@EJB(mappedName="java:global/rateAndRoute-ear/rateAndRoute-ejb/ProductServiceImpl") 
+	private ProductService productService;
+	
+	@EJB(mappedName="java:global/rateAndRoute-ear/rateAndRoute-ejb/CarrierServiceImpl") 
+	private CarrierService carrierService;
+
+	@EJB(mappedName = "java:global/rateAndRoute-ear/rateAndRoute-ejb/RarUserServiceImpl")
+	private RarUserService rarUserService;
+
+	@RequestMapping(value = "/hello", method = RequestMethod.GET)
+	public String helloWord(
+			HttpServletRequest request, 
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip) {
+
+		// LOG
+		log.debug("Entering helloWord(userName={} , ip={})", userName, ip);
+		
+		return "hello " + userName;
+	}
+	
+	@RequestMapping(value = "/nodes/all", method = RequestMethod.POST)
+	public List<NodeVO> findAllNode(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip) {
+		log.debug("Entering findAllNode(userName={},ip={})", userName,ip);
+		
+		List<?> result = null;
+		
+		try {
+			
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			
+			result = nodeService.findAll(userInfo);
+			
+		} catch (Exception e) {
+			log.error("error in findAllNode", e);
+		}
+		
+		return (List<NodeVO>) result;
+	}
+	
+	@RequestMapping(value = "/nodes", method = RequestMethod.GET)
+	public List<NodeMsg> findNodesBy(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip, 
+			@RequestParam (value = "term", required=false) String term,
+			@RequestParam (value = "freight_types", required=false) RateAndRouteEnums.FreightNodeType[] freightTypes,
+			@RequestParam (value = "active", required=false) Boolean active,
+			@RequestParam (value = "city_short_code", required=false) String cityShortCode,
+			@RequestParam (value = "page", required=false) int page,
+			@RequestParam (value = "size", required=false) int size,
+			@RequestParam (value = "sort_direction", required=false) String sortDirection,
+			@RequestParam (value = "sort_criterion", required=false) String sortCriterion,
+			@Context HttpServletResponse response) throws ParvanServiceException {
+		
+		log.debug("Entering findNodesBy(...)");
+		
+		List<NodeMsg> nodeMsgs = null;
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		SortDirectionEnum directionEnum = SortDirectionEnum.Descending;
+		if ( Validator.isNotNull(sortDirection) ) {
+			directionEnum = SortDirectionEnum.fromString(sortDirection);
+		}
+
+		NodeCriteria criteria = new NodeCriteria();
+		criteria.setAllNames(term);
+		criteria.setActive(active);
+		if(freightTypes != null){
+			FreightNodeType nodeTypes[] = new FreightNodeType[freightTypes.length];
+			for (int i = 0; i < freightTypes.length; ++i) {
+				nodeTypes[i] = FreightNodeType.valueOf(freightTypes[i].toString());
+			}
+			criteria.setFreightType(nodeTypes);
+		}
+		
+		GeoEntityVO parentGeoVO = new GeoEntityVO();
+		parentGeoVO.setShortCode(cityShortCode);
+		GeoEntityVO nodeGeoVO = new GeoEntityVO();
+		nodeGeoVO.setParent(parentGeoVO);
+		criteria.setGeoEntity(nodeGeoVO);
+		
+		List<BaseVO> baseVOs = nodeService.findByCriteria(userInfo, criteria, page, size, directionEnum, sortCriterion);
+		int total = nodeService.countByCriteria(userInfo, criteria);
+		nodeMsgs = new ArrayList<NodeMsg>();
+
+		for (BaseVO thisBaseVO : baseVOs) {
+			NodeVO thisNodeVO = (NodeVO) thisBaseVO;
+			nodeMsgs.add(thisNodeVO.toMsg());
+
+		}
+			
+		response.addIntHeader("total", total);
+		return nodeMsgs;
+	}
+	
+	@RequestMapping(value = "/initLogin/nodes/{id}", method = RequestMethod.GET)
+	public NodeMsg getNodeForInitLogin(
+			@PathVariable(value = "id") Long id) {
+		
+		log.debug("Entering getNode(id={})", id);
+		NodeMsg nodeMsg = null;
+		try {
+			NodeVO nodeVO = nodeService.getForInitLogin(id);
+			nodeMsg = nodeVO.toMsg();
+		} catch (Exception e) {
+			log.error("error in findAllSubAgentsByParentId", e);
+		}
+		return nodeMsg;
+	}
+	
+	@RequestMapping(value = "/nodes/{id}", method = RequestMethod.GET)
+	public NodeMsg getNode(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip, 
+			@PathVariable(value = "id") Long id) {
+		
+		log.debug("Entering getNode(id={})", id);
+		
+		NodeMsg nodeMsg = null;
+
+		try {
+
+			UserInfo userInfo = loadUserInfo(userName, ip);
+
+			NodeVOSimple nodeVOSimple = nodeService.getNodeAndCity(userInfo, id);
+
+			nodeMsg = nodeVOSimple.toMsg();
+
+		} catch (Exception e) {
+			log.error("error in getNode", e);
+		}
+		
+		return nodeMsg;
+	}
+	
+	@RequestMapping(value = "/nodes/code/{code}", method = RequestMethod.GET)
+	public NodeMsg getNodeByCode(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip, 
+			@PathVariable(value = "code") String code) {
+		
+		log.debug("Entering getNodeByCode(code={})", code);
+		
+		NodeMsg nodeMsg = null;
+
+		try {
+
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			NodeCriteria nodeCriteria = new NodeCriteria();
+			nodeCriteria.setCodeName(code);
+
+			List<BaseVO> baseVOs = nodeService.findByCriteria(userInfo, nodeCriteria);
+
+			if (baseVOs != null) {
+				for (BaseVO baseVO : baseVOs) {
+					NodeVO nodeVO = (NodeVO) baseVO;
+					nodeMsg = new NodeMsg();
+					nodeMsg = nodeVO.toMsg();
+				}
+			}
+
+		} catch (Exception e) {
+			log.error("error in getNodeByCode", e);
+		}
+		
+		return nodeMsg;
+	}
+	
+	@RequestMapping(value = "/nodes/hub/{cityShortCode}", method = RequestMethod.GET)
+	public List<NodeMsg> findHubNodesByCity(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip, 
+			@PathVariable(value = "cityShortCode") String cityShortCode) throws ParvanServiceException {
+		log.debug("Entering findHubNodesByCity(userName={},cityShortCode={})", userName, cityShortCode);
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		List<NodeVO> cityHubNodes = routeService.findHubByGeoCity(userInfo, cityShortCode);
+		List<NodeMsg> msgs = null;
+		if (cityHubNodes != null) {
+			msgs = new ArrayList<>(cityHubNodes.size());
+			for (NodeVO vo : cityHubNodes) {
+				msgs.add( vo.toMsg() );
+			}
+		}
+		return msgs;
+	}
+	
+	@RequestMapping(value = "/nodes/collection/{cityShortCode}/to/{nodeId}", method = RequestMethod.GET)
+	public List<NodeMsg> findCollectionNodesByCity(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip, 
+			@PathVariable(value = "cityShortCode") String cityShortCode,
+			@PathVariable(value = "nodeId") Long toNodeId,
+			@RequestParam(value = "term") String term) throws ParvanServiceException {
+		log.debug("Entering findCollectionNodesByCity(userName={},cityShortCode={},toNodeId={})", userName, cityShortCode, toNodeId);
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		List<NodeVO> cityCollectionNodes = routeService.findCollectionByGeoCity(userInfo, cityShortCode, toNodeId, term);
+		List<NodeMsg> msgs = null;
+		if (cityCollectionNodes != null) {
+			msgs = new ArrayList<>(cityCollectionNodes.size());
+			for (NodeVO vo : cityCollectionNodes) {
+				msgs.add( vo.toMsg() );
+			}
+		}
+		return msgs;
+	}
+	
+	@RequestMapping(value = "/nodes/distribution/{cityShortCode}/from/{nodeId}", method = RequestMethod.GET)
+	public List<NodeMsg> findDistributionNodesByCity(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip, 
+			@PathVariable(value = "cityShortCode") String cityShortCode,
+			@PathVariable(value = "nodeId") Long fromNodeId,
+			@RequestParam(value = "term") String term) throws ParvanServiceException {
+		log.debug("Entering findDistributionNodesByCity(userName={},cityShortCode={},toNodeId={})", userName, cityShortCode, fromNodeId);
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		//List<NodeVO> cityCollectionNodes = routeService.findCollectionByGeoCity(userInfo, cityShortCode, toNodeId, term);
+		List<NodeVO> cityDistributionNodes = routeService.findDistributionByGeoCity(userInfo, cityShortCode, fromNodeId, term);
+		List<NodeMsg> msgs = null;
+		if (cityDistributionNodes != null) {
+			msgs = new ArrayList<>(cityDistributionNodes.size());
+			for (NodeVO vo : cityDistributionNodes) {
+				msgs.add( vo.toMsg() );
+			}
+		}
+		return msgs;
+	}
+	
+	@RequestMapping(value = "/cities", method = RequestMethod.GET)
+	public List<CityInfoMsg> findCityByNameOrShortCode(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value="parent_code", required=false) String parentCode,
+			@RequestParam(value="term", required=false) String term,
+			@RequestParam(value="start", required=false) Integer start,
+			@RequestParam(value="length", required=false) Integer length,
+			@RequestParam(value="sort_direction", required=false) String sortDirection,
+			@RequestParam(value="sort_criterion", required=false) String sortCriterion,
+			@Context HttpServletResponse response) throws ObjectNotFoundException, ParvanServiceException {
+		
+		log.debug("Entering findCityByNameOrShortCode(userName={},term={})", userName, term);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		if(Validator.isNull(start)){
+			start = 0;
+		}
+		
+		if(Validator.isNull(length)){
+			length = 20;
+		}
+		
+		List<CityInfoMsg> cityInfoMsgs = null;
+		
+		GeoTypeVO geoType = new GeoTypeVO();
+		geoType.setCode("CITY");
+		GeoEntityCriteria criteria = new GeoEntityCriteria();
+		criteria.setType(geoType);
+		criteria.setAllNames(term);
+		
+		if (Validator.isNotNull(parentCode)) {
+			GeoEntityVO parent = new GeoEntityVO();
+			parent.setShortCode(parentCode);
+			criteria.setParent(parent);
+		}
+		
+		SortDirectionEnum directionEnum = SortDirectionEnum.Descending;
+		if ( Validator.isNotNull(sortDirection) ) {
+			directionEnum = SortDirectionEnum.fromString(sortDirection);
+		}
+		
+		List<BaseVO> cities = geoEntityService.findByCriteria(userInfo, criteria, start, length, directionEnum, sortCriterion);
+		int total = geoEntityService.countByCriteria(userInfo, criteria);
+		
+		cityInfoMsgs = new ArrayList<>(cities.size());
+		
+		if (cities != null) {
+			for (BaseVO baseVO : cities) {
+				GeoEntityVO city = (GeoEntityVO) baseVO;
+				CityInfoMsg msg = _toCityInfoMsg(city);
+				cityInfoMsgs.add(msg);
+			}
+		}
+		
+		response.addIntHeader("total", total);
+		
+		return cityInfoMsgs;
+	}
+	
+	@RequestMapping(value = "/cities/{shortCode}", method = RequestMethod.GET)
+	public CityInfoMsg getCityByShortCode(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable(value="shortCode") String shortCode) throws ObjectNotFoundException, ParvanServiceException {
+		log.debug("Entering getCityByShortCode(userName={},shortCode={})", userName, shortCode);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		CityInfoMsg result = null;
+		
+		GeoTypeVO geoType = new GeoTypeVO();
+		geoType.setCode("CITY");
+		GeoEntityCriteria crit = new GeoEntityCriteria();
+		crit.setType(geoType);
+		crit.setShortCode(shortCode);
+		
+		List<BaseVO> cities = geoEntityService.findByCriteria(userInfo, crit);
+		
+		if (cities != null && cities.size() == 1) {
+			GeoEntityVO city = (GeoEntityVO) cities.get(0);
+			result = _toCityInfoMsg(city);
+		} else {
+			throw new ObjectNotFoundException("No city found with short code : " + shortCode);
+		}
+		
+		return result;
+	}
+	
+	private CityInfoMsg _toCityInfoMsg(GeoEntityVO vo) {
+		CityInfoMsg msg = new CityInfoMsg();
+		GeoEntityVO province = vo.getParent();
+		GeoEntityVO country = province.getParent();
+		msg.setShortCode(vo.getShortCode());
+		msg.setNameEn(vo.getNameEn());
+		msg.setNameFa(vo.getNameFa());
+		msg.setProvinceShortCode(province.getShortCode());
+		msg.setProvinceNameEn(province.getNameEn());
+		msg.setProvinceNameFa(province.getNameFa());
+		msg.setCountryShortCode(country.getShortCode());
+		msg.setCountryNameEn(country.getNameEn());
+		msg.setCountryNameFa(country.getNameFa());
+		return msg;
+	}
+	
+	@RequestMapping(value = "/states", method = RequestMethod.GET)
+	public List<StateInfoMsg> findStatesByNameOrShortCode(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip, 
+			@RequestParam(value="parent_code", required=false) String parentCode,
+			@RequestParam(value="term", required=false) String term,
+			@RequestParam(value="start", required=false) Integer start,
+			@RequestParam(value="length", required=false) Integer length,
+			@RequestParam(value="sort_direction", required=false) String sortDirection,
+			@RequestParam(value="sort_criterion", required=false) String sortCriterion,
+			@Context HttpServletResponse response) throws ObjectNotFoundException, ParvanServiceException {
+		
+		log.debug("Entering findStatesByNameOrShortCode(userName={},term={})", userName, term);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		if(Validator.isNull(start)){
+			start = 0;
+		}
+		
+		if(Validator.isNull(length)){
+			length = 20;
+		}
+		
+		List<StateInfoMsg> stateInfoMsgs = null;
+		
+		GeoTypeVO geoType = new GeoTypeVO();
+		geoType.setCode("STATE");
+		GeoEntityCriteria criteria = new GeoEntityCriteria();
+		criteria.setType(geoType);
+		criteria.setAllNames(term);
+		
+		if (Validator.isNotNull(parentCode)) {
+			GeoEntityVO parent = new GeoEntityVO();
+			parent.setShortCode(parentCode);
+			criteria.setParent(parent);
+		}
+		
+		SortDirectionEnum directionEnum = SortDirectionEnum.Descending;
+		if ( Validator.isNotNull(sortDirection) ) {
+			directionEnum = SortDirectionEnum.fromString(sortDirection);
+		}
+		
+		List<BaseVO> states = geoEntityService.findByCriteria(userInfo, criteria, start, length, directionEnum, sortCriterion);
+		int total = geoEntityService.countByCriteria(userInfo, criteria);
+		
+		stateInfoMsgs = new ArrayList<>(states.size());
+		
+		if (states != null) {
+			for (BaseVO baseVO : states) {
+				GeoEntityVO state = (GeoEntityVO) baseVO;
+				StateInfoMsg msg = _toStateInfoMsg(state);
+				stateInfoMsgs.add(msg);
+			}
+		}
+		
+		response.addIntHeader("total", total);
+		
+		return stateInfoMsgs;
+	}
+	
+	private StateInfoMsg _toStateInfoMsg(GeoEntityVO vo) {
+		StateInfoMsg msg = new StateInfoMsg();
+		GeoEntityVO country = vo.getParent();
+		msg.setShortCode(vo.getShortCode());
+		msg.setNameEn(vo.getNameEn());
+		msg.setNameFa(vo.getNameFa());
+		msg.setCountryShortCode(country.getShortCode());
+		msg.setCountryNameEn(country.getNameEn());
+		msg.setCountryNameFa(country.getNameFa());
+		return msg;
+	}
+	
+	@RequestMapping(value = "/countries", method = RequestMethod.GET)
+	public List<CountryInfoMsg> findCountriesByNameOrShortCode(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip, 
+			@RequestParam(value="term", required=false) String term,
+			@RequestParam(value="start", required=false) Integer start,
+			@RequestParam(value="length", required=false) Integer length,
+			@RequestParam(value="sort_direction", required=false) String sortDirection,
+			@RequestParam(value="sort_criterion", required=false) String sortCriterion,
+			@Context HttpServletResponse response) throws ObjectNotFoundException, ParvanServiceException {
+		
+		log.debug("Entering findCountriesByNameOrShortCode(userName={},term={})", userName, term);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		if(Validator.isNull(start)){
+			start = 0;
+		}
+		
+		if(Validator.isNull(length)){
+			length = 20;
+		}
+		
+		List<CountryInfoMsg> countryInfoMsgs = null;
+		
+		GeoTypeVO geoType = new GeoTypeVO();
+		geoType.setCode("COUNTRY");
+		GeoEntityCriteria criteria = new GeoEntityCriteria();
+		criteria.setType(geoType);
+		criteria.setAllNames(term);
+		
+		SortDirectionEnum directionEnum = SortDirectionEnum.Descending;
+		if ( Validator.isNotNull(sortDirection) ) {
+			directionEnum = SortDirectionEnum.fromString(sortDirection);
+		}
+		
+		List<BaseVO> countries = geoEntityService.findByCriteria(userInfo, criteria, start, length, directionEnum, sortCriterion);
+		int total = geoEntityService.countByCriteria(userInfo, criteria);
+		
+		countryInfoMsgs = new ArrayList<>(countries.size());
+		
+		if (countries != null) {
+			for (BaseVO baseVO : countries) {
+				GeoEntityVO state = (GeoEntityVO) baseVO;
+				CountryInfoMsg msg = _toCountryInfoMsg(state);
+				countryInfoMsgs.add(msg);
+			}
+		}
+		
+		response.addIntHeader("total", total);
+		
+		return countryInfoMsgs;
+	}
+
+	private CountryInfoMsg _toCountryInfoMsg(GeoEntityVO vo) {
+		CountryInfoMsg msg = new CountryInfoMsg();
+		msg.setShortCode(vo.getShortCode());
+		msg.setNameEn(vo.getNameEn());
+		msg.setNameFa(vo.getNameFa());
+		return msg;
+	}
+
+	@RequestMapping(value = "/carriers", method = RequestMethod.GET)
+	public List<CarrierMsg> findCarrier(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip, 
+			@RequestParam(value="term", required=false) String term,
+			@RequestParam(value="start", required=false) Integer start,
+			@RequestParam(value="length", required=false) Integer length,
+			@RequestParam(value="sort_direction", required=false) String sortDirection,
+			@RequestParam(value="sort_criterion", required=false) String sortCriterion,
+			@Context HttpServletResponse response) throws ObjectNotFoundException, ParvanServiceException {
+		
+		log.debug("Entering findCarrier(userName={},term={})", userName, term);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		if(Validator.isNull(start)){
+			start = 0;
+		}
+		
+		if(Validator.isNull(length)){
+			length = 20;
+		}
+		
+		List<CarrierMsg> carrierMsgs = null;
+		
+		CarrierCriteria criteria = new CarrierCriteria();
+		criteria.setAllNames(term);
+		criteria.setActive(true);
+		
+		SortDirectionEnum directionEnum = SortDirectionEnum.Descending;
+		if ( Validator.isNotNull(sortDirection) ) {
+			directionEnum = SortDirectionEnum.fromString(sortDirection);
+		}
+		
+		List<BaseVO> vos = carrierService.findByCriteria(userInfo, criteria, start, length, directionEnum, sortCriterion);
+		int total = carrierService.countByCriteria(userInfo, criteria);
+		
+		carrierMsgs = new ArrayList<>(vos.size());
+		
+		if (vos != null) {
+			for (BaseVO baseVO : vos) {
+				CarrierVO vo = (CarrierVO) baseVO;
+				CarrierMsg msg = _toCarrierMsg(vo);
+				carrierMsgs.add(msg);
+			}
+		}
+		
+		response.addIntHeader("total", total);
+		
+		return carrierMsgs;
+	}
+	
+	@RequestMapping(value = "/carriers/{code}", method = RequestMethod.GET)
+	public CarrierMsg getCarrierByCode(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable(value="code") String code) throws ObjectNotFoundException, ParvanServiceException {
+		
+		log.debug("Entering getCarrierByCode(userName={},code={})", userName, code);
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		CarrierVO vo = carrierService.findByCode(userInfo, code);
+		if (vo != null) {
+			return _toCarrierMsg(vo);
+		} else {
+			throw new ObjectNotFoundException("No carrier found with code : " + code);
+		}
+	}
+
+	private CarrierMsg _toCarrierMsg(CarrierVO vo) {
+		CarrierMsg msg = new CarrierMsg();
+		msg.setActive(vo.getActive());
+		msg.setCode(vo.getCode());
+		msg.setId(vo.getId());
+		msg.setName(vo.getName());
+		return msg;
+	}
+	
+	@RequestMapping(value = "/routes/evaluate/{category}", method = RequestMethod.GET)
+	public List<EvaluatedRouteMsg> evaluateRoutes(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable(value="category") RouteCategory category,
+			@RequestParam List<TransferNodeVO> nodes) throws ParvanServiceException {
+		
+		log.debug("Entering evaluateRoutes(userName={},category={},nodes={})", userName, category, nodes);
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		List<EvaluatedRouteVO> evaluateRoutes = routeService.evaluateRoutes(userInfo, nodes, category);
+		List<EvaluatedRouteMsg> msgs = null;
+		if (evaluateRoutes.size() > 0) {
+			msgs = new ArrayList<>(evaluateRoutes.size());
+			for (EvaluatedRouteVO evRoute : evaluateRoutes) {
+				msgs.add(_toEvaluatedRouteMsg(evRoute));
+			}
+		}
+		return msgs;
+	}
+
+	private EvaluatedRouteMsg _toEvaluatedRouteMsg(EvaluatedRouteVO vo) {
+		EvaluatedRouteMsg msg = new EvaluatedRouteMsg();
+		msg.setId(vo.getId());
+		msg.setCarrierRouteNumber(vo.getCarrierRouteNumber());
+		msg.setValid(vo.isValid());
+		msg.setActive(vo.getActive());
+		if (vo.getType() != null) {
+			msg.setType(RouteType.valueOf(vo.getType().toString()));
+		}
+		if (vo.getCategory() != null) {
+			msg.setCategory(com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RouteCategory.valueOf(vo.getCategory().toString()));
+		}
+		if (vo.getCarrier() != null) {
+			msg.setCarrier( _toCarrierMsg(vo.getCarrier()) );
+		}
+		if (vo.getFromNode() != null) {
+			msg.setFromNode( _toNodeMsg(vo.getFromNode()) ); 
+		}
+		if (vo.getToNode() != null) {
+			msg.setToNode( _toNodeMsg(vo.getToNode()) ); 
+		}
+		return msg;
+	}
+
+	private NodeMsg _toNodeMsg(NodeVO vo) {
+		NodeMsg msg = new NodeMsg();
+		msg.setId(vo.getId());
+		msg.setName(vo.getName());
+		msg.setCodeName(vo.getCodeName());
+		msg.setTags(vo.getTags());
+		msg.setActive(vo.getActive());
+		if (vo.getFreightType() != null) {
+			msg.setFreightType(com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.FreightNodeType.valueOf(vo.getFreightType().toString()));
+		}
+		if (vo.getZone() != null) {
+			msg.setZone(_toZoneMsg(vo.getZone()));
+		}
+		if (vo.getGeoEntity() != null) {
+			msg.setGeoEntity(_toGeoEntityMsg(vo.getGeoEntity()));
+		}
+		return msg;
+	}
+
+	private GeoEntityMsg _toGeoEntityMsg(GeoEntityVO vo) {
+		GeoEntityMsg msg = new GeoEntityMsg();
+		msg.setId(vo.getId());
+		msg.setCode(vo.getCode());
+		msg.setShortCode(vo.getShortCode());
+		msg.setNameEn(vo.getNameEn());
+		if (vo.getType() != null) {
+			msg.setType(_toGeoTypeMsg(vo.getType()));
+		}
+		return msg;
+	}
+
+	private GeoTypeMsg _toGeoTypeMsg(GeoTypeVO vo) {
+		GeoTypeMsg msg = new GeoTypeMsg();
+		msg.setId(vo.getId());
+		msg.setCode(vo.getCode());
+		msg.setNameEn(vo.getNameEn());
+		return msg;
+	}
+
+	private ZoneMsg _toZoneMsg(ZoneVO vo) {
+		ZoneMsg msg = new ZoneMsg();
+		msg.setId(vo.getId());
+		msg.setName(vo.getName());
+		msg.setCodeName(vo.getCodeName());
+		msg.setActive(vo.getActive());
+		return msg;
+	}
+}

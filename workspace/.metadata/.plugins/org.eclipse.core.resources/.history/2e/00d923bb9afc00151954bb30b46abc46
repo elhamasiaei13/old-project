@@ -1,0 +1,232 @@
+package com.parvanpajooh.issuemanager.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.common.CurrentContext;
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.issuemanager.common.exceptions.ErrorCode;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.issuemanager.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.issuemanager.dao.GroupDao;
+import com.parvanpajooh.issuemanager.model.Group;
+import com.parvanpajooh.issuemanager.model.vo.GroupVO;
+import com.parvanpajooh.issuemanager.service.GroupLocalService;
+
+/**
+ * 
+ * @author ali
+ * @author mehrdad
+ * 
+ */
+@Stateless
+public class GroupLocalServiceImpl extends GenericLocalServiceImpl<Group, Long>
+		implements GroupLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory
+			.getLogger(GroupLocalServiceImpl.class);
+
+	public GroupDao groupDao;
+
+	@Inject
+	public void setGroupDao(GroupDao groupDao) {
+		this.dao = groupDao;
+		this.groupDao = groupDao;
+	}
+
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo)
+			throws ParvanServiceException {
+		log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		GroupVO groupVO = (GroupVO) baseVO;
+
+		try {
+			
+			String name = groupVO.getName();
+			if (Validator.isNull(name)) {
+				log.debug("name is empty.");
+				throw new ParvanRecoverableException(ErrorCode.GROUP__NAME_IS_EMPTY);
+			}
+
+			Group group = null;
+
+			if (Validator.isNull(groupVO.getId())) {
+				group = new Group();
+				group.fromVO(groupVO);
+			} else {
+				group = groupDao.get(groupVO.getId());
+				group.fromVO(groupVO);
+			}
+
+			// save entity
+			group = save(group, userInfo);
+
+			groupVO = (GroupVO) group.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while saving object.", e);
+		}
+
+		return groupVO;
+	}
+
+	@Override
+	public List<GroupVO> loadGroups() throws ParvanServiceException {
+		log.info("Entering loadGroups()");
+
+		List<GroupVO> result = null;
+
+		try {
+			List<Group> members = groupDao.findAll();
+			result = convertToTree(members);
+		} catch (Exception e) {
+			log.error("error occurred while loading groups", e);
+			throw new ParvanUnrecoverableException(
+					"error occurred while loading groups", e);
+		}
+
+		return result;
+	}
+
+	private boolean hasAccess(GroupVO GroupVO) {
+
+		// get current userInfo
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+
+		Set<String> userRoles = userInfo.getRoleNames();
+
+		boolean hasAccess = false;
+
+		// List<String> thisGroupRoles = GroupVO.getRoles();
+		// if (Validator.isNotNull(thisGroupRoles)) {
+		// for (String role : thisGroupRoles) {
+		// if (userRoles.contains(role)) {
+		// hasAccess = true;
+		// break;
+		// }
+		// }
+		// } else {
+		// hasAccess = true;
+		// }
+
+		return hasAccess;
+	}
+
+	/**
+	 * 
+	 * @param members
+	 * @return
+	 */
+	private List<GroupVO> convertToTree(List<Group> members) {
+
+		List<GroupVO> result = new ArrayList<GroupVO>();
+		Map<Long, GroupVO> map = new HashMap<Long, GroupVO>();
+
+		Iterator<Group> iterator = members.iterator();
+		while (iterator.hasNext()) {
+			Group thisGroup = iterator.next();
+			// if (thisGroup.getId() == null) {
+			GroupVO memberVO = thisGroup.toVOLite();
+
+			// check permission
+			if (true/* hasAccess(memberVO) */) {
+				// GroupVO.setChildren(new ArrayList<GroupVO>());
+				result.add(memberVO);
+			}
+
+			map.put(thisGroup.getId(), memberVO);
+			iterator.remove();
+			// } else {
+			// // GroupVO parentGroupVO =
+			// // map.get(thisGroup.getParent().getId());
+			//
+			// GroupVO memberVO = thisGroup.toVOLite();
+			// map.put(thisGroup.getId(), memberVO);
+			// iterator.remove();
+			// }
+
+		}
+
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param sample
+	 * @param parent
+	 * @return
+	 */
+	private boolean _isParentValid(Group sample, Group parent) {
+		if (sample.equals(parent)) {
+			return false;
+		}
+
+		// Group parentOfParent = parent.getParent();
+		//
+		// if (Validator.isNotNull(parentOfParent)) {
+		// if (!_isParentValid(sample, parentOfParent)) {
+		// return false;
+		// }
+		// }
+
+		return true;
+	}
+
+	/*@Override
+	public void saveGroup(Group member) throws ParvanServiceException, ParvanDaoException {
+
+		groupDao.saveGroup(member);
+	}
+
+	@Override
+	public void removeGroup(Long id) throws ParvanServiceException,
+			ParvanDaoException {
+		groupDao.deleteGroup(id);
+	}
+
+	@Override
+	public void editGroup(Group member) throws ParvanServiceException,
+			ParvanDaoException {
+		groupDao.editGroup(member);
+	}*/
+
+	@Override
+	public GroupVO loadGroup(Long id) throws ParvanServiceException {
+		log.info("Entering loadGroup()");
+
+		GroupVO result = null;
+
+		try {
+
+			Group member = groupDao.findById(id);
+			result = member.toVO();
+
+		} catch (Exception e) {
+			log.error("error occurred while loading member", e);
+			throw new ParvanUnrecoverableException(
+					"error occurred while loading member", e);
+		}
+		return result;
+	}
+}

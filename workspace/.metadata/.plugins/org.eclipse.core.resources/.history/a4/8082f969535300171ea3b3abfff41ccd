@@ -1,0 +1,65 @@
+package com.parvanpajooh.complaintmanagement.domain.service.impl;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseDto;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.service.impl.GenericDomainServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.complaintmanagement.domain.model.ComplaintCategory;
+import com.parvanpajooh.complaintmanagement.domain.model.dto.ComplaintCategoryDto;
+import com.parvanpajooh.complaintmanagement.domain.repository.ComplaintCategoryRepository;
+import com.parvanpajooh.complaintmanagement.domain.service.ComplaintCategoryDomainService;
+
+public class ComplaintCategoryDomainServiceImpl extends GenericDomainServiceImpl<ComplaintCategory, Long>
+		implements ComplaintCategoryDomainService {
+
+	static final Logger log = LoggerFactory.getLogger(ComplaintCategoryDomainServiceImpl.class);
+
+	private ComplaintCategoryRepository compliantCategoryRepository;
+
+	@Inject
+	public void setPackingTypeRepository(ComplaintCategoryRepository compliantCategoryRepository) {
+		this.repository = compliantCategoryRepository;
+		this.compliantCategoryRepository = compliantCategoryRepository;
+	}
+
+	@Override
+	public BaseDto save(BaseDto baseDto) throws ParvanServiceException {
+
+		ComplaintCategoryDto categoryDto = (ComplaintCategoryDto) baseDto;
+
+		// validate
+		// if(Validator.isNull(categoryDto.x)) {
+		// throw new ParvanRecoverableException("categoryDto.x",
+		// ErrorCode.FIELD_IS_EMPTY);
+		// }
+
+		try {
+
+			// Edit
+			boolean isNew = (categoryDto.getId() == null);
+			ComplaintCategory complaintCategory = isNew ? new ComplaintCategory() : compliantCategoryRepository.get(baseDto.getId());
+			complaintCategory.fromDto(categoryDto);
+
+			if (categoryDto.getParentCategoryDto().getId() != null) {
+				ComplaintCategory parentCategory = compliantCategoryRepository.get(categoryDto.getParentCategoryDto().getId());
+				complaintCategory.setParentCategory(parentCategory);
+			}
+
+			complaintCategory = super.save(complaintCategory);
+			baseDto = complaintCategory.toDto();
+
+		} catch (ParvanDaoException e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving category.", e);
+		}
+
+		return baseDto;
+
+	}
+
+}

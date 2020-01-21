@@ -1,0 +1,273 @@
+package com.parvanpajooh.taskmanagement.application.impl;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.ddd.application.AbstractApplicationServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.taskmanagement.application.TaskApplicationService;
+import com.parvanpajooh.taskmanagement.domain.model.Task;
+import com.parvanpajooh.taskmanagement.domain.model.TaskCommand;
+import com.parvanpajooh.taskmanagement.domain.model.TaskDisplay;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroup;
+import com.parvanpajooh.taskmanagement.domain.model.criteria.TaskCriteria;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskAttachmentCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskChangeAssigneeCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskChangeStateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCommentCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCreateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskDisplayDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskRelationCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskUpdateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.UserDto;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType;
+import com.parvanpajooh.taskmanagement.domain.service.Idm2Service;
+import com.parvanpajooh.taskmanagement.domain.service.TaskGroupService;
+import com.parvanpajooh.taskmanagement.domain.service.TaskService;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class TaskApplicationServiceImpl extends AbstractApplicationServiceImpl implements TaskApplicationService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(TaskApplicationServiceImpl.class);
+
+	@Inject
+	private TaskService taskService;
+
+	@Inject
+	private Idm2Service idm2Service;
+
+	@Override
+	public TaskDto get(UserInfo userInfo, String taskId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering get( UserInfo={}, taskId={})", userInfo, taskId);
+
+		TaskDto taskDto = null;
+		Task task = null;
+		Set<Long> userIds = new HashSet<Long>();
+		List<UserDto> userDtoList = null;
+
+		try {
+
+			task = taskService.get(taskId);
+
+			if (Validator.isNotNull(task)) {
+				taskDto = task.toDto();
+			}
+
+			for (TaskCommandDto commandDto : taskDto.getTaskCommands()) {
+				if (Validator.equals(commandDto.getTaskCommandType(), TaskCommandType.ChangeAssignee)) {
+
+					TaskChangeAssigneeCommandDto changeAssigneeCommandDto = (TaskChangeAssigneeCommandDto) commandDto;
+					userIds.add(changeAssigneeCommandDto.getEmployeeIdFrom());
+					userIds.add(changeAssigneeCommandDto.getEmployeeIdTo());
+				}
+			}
+
+			// get users by ids
+			userDtoList = idm2Service.getUsersByIds(userIds);
+
+			for (TaskCommandDto commandDto : taskDto.getTaskCommands()) {
+				if (Validator.equals(commandDto.getTaskCommandType(), TaskCommandType.ChangeAssignee)) {
+
+					TaskChangeAssigneeCommandDto changeAssigneeCommandDto = (TaskChangeAssigneeCommandDto) commandDto;
+
+					for (UserDto user : userDtoList) {
+						if (Validator.equals(user.getId(), changeAssigneeCommandDto.getEmployeeIdFrom())) {
+							changeAssigneeCommandDto.setEmployeeFrom(user.getUserName());
+						}
+						if (Validator.equals(user.getId(), changeAssigneeCommandDto.getEmployeeIdTo())) {
+							changeAssigneeCommandDto.setEmployeeTo(user.getUserName());
+						}
+					}
+				}
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while get task.", e);
+		}
+
+		return taskDto;
+	}
+
+	@Override
+	public TaskDisplayDto getTaskDisplay(UserInfo userInfo, String taskId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getTaskDisplay( UserInfo={}, taskId={})", userInfo, taskId);
+		return taskService.getTaskDisplay(taskId);
+	}
+
+	@Override
+	public TaskDisplayDto getTaskDisplayByTaskKey(UserInfo userInfo, String taskKey) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getTaskDisplay( UserInfo={}, taskKey={})", userInfo, taskKey);
+		return taskService.getTaskDisplayByTaskKey(taskKey);
+	}
+
+	@Override
+	public List<TaskDisplayDto> findByTasks(UserInfo userInfo, List<String> tasks) throws ParvanServiceException {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	@Override
+	public List<TaskDisplayDto> findByCriteria(UserInfo userInfo, TaskCriteria criteria, int firstResult, int maxResults, SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanServiceException {
+
+		// LOG
+		log.debug("find pagination TaskDisplay by " + criteria);
+		return taskService.findByCriteria(criteria, firstResult, maxResults, sortDirection, sortCriterion);
+	}
+
+	@Override
+	public long countByCriteria(UserInfo userInfo, TaskCriteria criteria) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering countByCriteria(userInfo={} , criteria={})", userInfo, criteria);
+		return taskService.countByCriteria(criteria);
+	}
+
+	@Override
+	public TaskAttachmentCommandDto getTaskAttachmentCommandDto(UserInfo userInfo, Long id) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getTaskAttachmentCommandDto( UserInfo={}, id={})", userInfo, id);
+
+		TaskAttachmentCommandDto taskAttachmentCommandDto = null;
+		TaskCommand taskCommand = null;
+
+		try {
+
+			taskCommand = taskService.getTaskCommand(id);
+
+			taskAttachmentCommandDto = (TaskAttachmentCommandDto) taskCommand.toDto();
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getTaskDisplay.", e);
+		}
+
+		return taskAttachmentCommandDto;
+	}
+
+	@Override
+	public TaskCreateCommandDto getCreateCommandDto(UserInfo userInfo, String id) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getCreateCommandDto( UserInfo={}, id={})", userInfo, id);
+
+		TaskCommand taskCommand = null;
+		TaskCreateCommandDto taskCreateCommandDto = null;
+
+		try {
+
+			// get create command
+			taskCommand = taskService.getTaskCommands(id, TaskCommandType.Create).get(0);
+
+			taskCreateCommandDto = (TaskCreateCommandDto) taskCommand.toDto();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getCreateCommandDto.", e);
+		}
+
+		return taskCreateCommandDto;
+	}
+
+	@Override
+	public void deleteTask(UserInfo userInfo, String id) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering deleteTask( UserInfo={}, id={})", userInfo, id);
+		taskService.deleteTask(id);
+
+	}
+
+	@Override
+	public void createTask(UserInfo userInfo, TaskCreateCommandDto taskCreateCommandDto) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering createTask( UserInfo={}, taskCreateCommandDto={})", userInfo, taskCreateCommandDto);
+		taskService.createTask(taskCreateCommandDto);
+	}
+
+	@Override
+	public void updateTask(UserInfo userInfo, TaskUpdateCommandDto taskUpdateCommandDto, String taskId) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering updateTask( UserInfo={}, taskDisplayDto={},taskId={},remarks={})", userInfo, taskUpdateCommandDto, taskId);
+		taskService.updateTask(taskUpdateCommandDto, taskId);
+	}
+
+	@Override
+	public void changeTaskAssignee(UserInfo userInfo, TaskChangeAssigneeCommandDto taskChangeAssigneeCommandDto, String taskId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering changeTaskAssignee( UserInfo={}, taskChangeAssigneeCommandDto={},taskId={})", userInfo, taskChangeAssigneeCommandDto, taskId);
+		taskService.changeTaskAssignee(taskChangeAssigneeCommandDto, taskId);
+	}
+
+	@Override
+	public void changeTaskState(UserInfo userInfo, TaskChangeStateCommandDto taskChangeStateCommandDto, String taskId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering changeTaskState( UserInfo={}, taskChangeStateCommandDto={},taskId={})", userInfo, taskChangeStateCommandDto, taskId);
+		taskService.changeTaskState(taskChangeStateCommandDto, taskId);
+	}
+
+	@Override
+	public void addComment(UserInfo userInfo, TaskCommentCommandDto taskCommentCommandDto, String taskId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering addComment( UserInfo={}, taskCommentCommandDto={},taskId={})", userInfo, taskCommentCommandDto, taskId);
+		taskService.addComment(taskCommentCommandDto, taskId);
+	}
+
+	@Override
+	public void addRelation(UserInfo userInfo, TaskRelationCommandDto taskRelationCommandDto, String taskId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering addRelation( UserInfo={}, taskRelationCommandDto={},taskId={})", userInfo, taskRelationCommandDto, taskId);
+		taskService.addRelation(taskRelationCommandDto, taskId);
+	}
+
+	@Override
+	public void addAttachment(UserInfo userInfo, TaskAttachmentCommandDto taskAttachmentCommandDto, String taskId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering addAttachment( UserInfo={}, taskAttachmentCommandDto={},taskId={})", userInfo, taskAttachmentCommandDto, taskId);
+		taskService.addAttachment(taskAttachmentCommandDto, taskId);
+	}
+
+	@Override
+	public TaskUpdateCommandDto getLastUpdateRecord(UserInfo userInfo, String taskKey) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering updateTask( UserInfo={}, taskKey={})", userInfo, taskKey);
+		return taskService.getLastUpdateRecord(taskKey);
+	}
+}

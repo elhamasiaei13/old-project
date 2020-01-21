@@ -1,0 +1,105 @@
+package com.parvanpajooh.sample.model.vo;
+
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.parvanpajooh.common.vo.BaseVO;
+
+@XmlRootElement
+public class SampleVO extends BaseVO {
+
+	private static final long serialVersionUID = -5971686629027277987L;
+
+	private Long ID;
+	private String TITLE;
+	private String TITLE_EN;
+	private String USER_NAME;
+	private String PASSWORD;
+	private String FIRST_NAME;
+	private String LAST_NAME;
+	private boolean active;
+	
+	
+
+	public Long getId() {
+		return ID;
+	}
+
+	public void setId(Long id) {
+		this.ID = id;
+	}
+
+	public String getTitle() {
+		return TITLE;
+	}
+
+	public void setTitle(String title) {
+		this.TITLE = title;
+	}
+
+	public Long getID() {
+		return ID;
+	}
+
+	public void setID(Long iD) {
+		ID = iD;
+	}
+
+	public String getTITLE() {
+		return TITLE;
+	}
+
+	public void setTITLE(String tITLE) {
+		TITLE = tITLE;
+	}
+
+	public String getTITLE_EN() {
+		return TITLE_EN;
+	}
+
+	public void setTITLE_EN(String tITLE_EN) {
+		TITLE_EN = tITLE_EN;
+	}
+
+	public String getUSER_NAME() {
+		return USER_NAME;
+	}
+
+	public void setUSER_NAME(String uSER_NAME) {
+		USER_NAME = uSER_NAME;
+	}
+
+	public String getPASSWORD() {
+		return PASSWORD;
+	}
+
+	public void setPASSWORD(String pASSWORD) {
+		PASSWORD = pASSWORD;
+	}
+
+	public String getFIRST_NAME() {
+		return FIRST_NAME;
+	}
+
+	public void setFIRST_NAME(String fIRST_NAME) {
+		FIRST_NAME = fIRST_NAME;
+	}
+
+	public String getLAST_NAME() {
+		return LAST_NAME;
+	}
+
+	public void setLAST_NAME(String lAST_NAME) {
+		LAST_NAME = lAST_NAME;
+	}
+	
+	public boolean getactive() {
+		return active;
+	}
+
+	public void setactive(boolean active) {
+		this.active = active;
+	}
+}

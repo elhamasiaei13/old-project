@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>ShowMembers</title>
+</head>
+
+<body>
+	<section class="content" layout:fragment="content">
+		<h2 th:text="#{members_list}"></h2>
+		<br></br>
+		<table>
+			<tr>
+				<th th:text="#{table_column_id}"></th>
+				<th th:text="#{table_column_firstname}"></th>
+				<th th:text="#{table_column_lastname}"></th>
+				<th th:text="#{username}"></th>
+				<th th:text="#{password}"></th>
+			</tr>
+
+				<tr th:each="member,rowStat : *{allMembers}">
+
+					<td style="padding: 0 15px 0 15px;" th:text="${member.id}"></td>
+					<td style="padding: 0 15px 0 15px;" th:text="${member.firstName}"></td>
+					<td style="padding: 0 15px 0 15px;" th:text="${member.lastName}"></td>
+					<td style="padding: 0 15px 0 15px;" th:text="${member.username}"></td>
+					<td style="padding: 0 15px 0 15px;" th:text="${member.password}"></td>
+					<td style="padding: 0 15px 0 15px;">
+						<img th:src="@{/resources/images/delete(2).png}" th:onclick="${'deleteMember(' + member.id + ')'}"></img>
+					</td>
+
+					<td style="padding: 0 15px 0 15px;">
+						<img th:src="@{/resources/images/tool.png}" th:onclick="@{'document.location.href=\'/issuemanager-web/editMember/' + ${allMembers[__${rowStat.index}__].id} + '\''}"></img>
+					</td>
+				</tr>
+			
+		</table>
+		
+		<br></br> 
+		<br></br>
+
+		<button th:onclick="@{'document.location.href=\'/issuemanager-web/addMember/'} + '\''" th:text="#{btn_add}"></button>
+
+		<form th:action="@{/removeMember}" method="post" id="deleteForm">
+			<input name="id" type="hidden" id="deleteMemberId" />
+		</form>
+
+		<script>
+		function deleteMember(id){
+			if(confirm('Are you sure you want to delete this item?')){
+				
+				$('#deleteMemberId').val(id);
+				$('#deleteForm').submit();
+			}
+		}
+		</script>
+	</section>
+</body>
+</html>

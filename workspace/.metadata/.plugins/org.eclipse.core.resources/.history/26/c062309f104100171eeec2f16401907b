@@ -1,0 +1,61 @@
+package com.parvanpajooh.agentmanagement.service.impl;
+
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.agentmanagement.model.vo.CityInfoVO;
+import com.parvanpajooh.agentmanagement.service.GeoManagementLocalService;
+import com.parvanpajooh.agentmanagement.service.adapter.GeoManagementServiceAdapter;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class GeoManagementLocalServiceImpl implements GeoManagementLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(GeoManagementLocalServiceImpl.class);
+	
+	@Inject
+	private GeoManagementServiceAdapter geoManagementServiceAdapter;
+
+	@Override
+	public List<CityInfoVO> findCitiesByNameOrShortCode(String term, int firstResult, int maxResults, String sortDirection, String sortCriterion) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findCityByNameOrShortCode(term={})", term);
+		List<CityInfoVO> voList = null;
+
+		try {
+			
+			voList = rateAndRouteServiceAdapter.findCitiesByNameOrShortCode(term, firstResult, maxResults, sortDirection, sortCriterion);
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findCityByNameOrShortCode", e);
+		}
+
+		// LOG
+		log.debug("Leaving findCityByNameOrShortCode(): ret={}", (voList != null) ? voList.size() : "NULL");
+		return voList;
+	}
+
+	@Override
+	public CityInfoVO getCityByShortCode(String shortCode) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering getCityByShortCode(shortCode={})", shortCode);
+		
+		return rateAndRouteServiceAdapter.getCityByShortCode(shortCode);		
+	}
+
+}

@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kb-project>
+ <depends-on-projects>
+  <project name="workflow-ejb"/>
+  <project name="common-platform-springmvc"/>
+  <project name="common-client-library"/>
+  <project name="theme"/>
+  <project name="common-platform-ejb"/>
+  <project name="common"/>
+  <project name="shipment-ejb"/>
+  <project name="ecourier-ejb"/>
+  <project name="common-crosscutting-ejb"/>
+ </depends-on-projects>
+ <used-by-projects/>
+ <paths>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.core.contenttype/3.4.200.v20130326-1255/org.eclipse.core.contenttype-3.4.200.v20130326-1255.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/bouncycastle/bcmail-jdk14/1.38/bcmail-jdk14-1.38.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/ant/ant-launcher/1.7.1/ant-launcher-1.7.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/ch/qos/logback/logback-classic/1.0.13/logback-classic-1.0.13.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/thymeleaf/thymeleaf-spring4/2.1.4.RELEASE/thymeleaf-spring4-2.1.4.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.datatools.connectivity.sqm.core/1.2.8.v201401230755/org.eclipse.datatools.connectivity.sqm.core-1.2.8.v201401230755.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-aop/4.1.6.RELEASE/spring-aop-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/squareup/retrofit2/converter-gson/2.2.0/converter-gson-2.2.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/cloudfoundry/identity/cloudfoundry-identity-scim/2.3.1/cloudfoundry-identity-scim-2.3.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.core.runtime/3.9.0.v20130326-1255/org.eclipse.core.runtime-3.9.0.v20130326-1255.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.core.filesystem/1.4.0.v20130514-1240/org.eclipse.core.filesystem-1.4.0.v20130514-1240.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.mozilla.javascript/1.7.2/org.mozilla.javascript-1.7.2.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/google/guava/guava/21.0/guava-21.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.datatools.connectivity.oda.profile/3.2.9.v201403131814/org.eclipse.datatools.connectivity.oda.profile-3.2.9.v201403131814.jar"/>
+  <path value="/home/dev-03/.m2/repository/net/sf/barcode4j/barcode4j/2.1/barcode4j-2.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/squareup/retrofit2/retrofit/2.1.1-SNAPSHOT/retrofit-2.1.1-SNAPSHOT.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/unboundid/product/scim/scim-sdk/1.6.0/scim-sdk-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.core.resources/3.9.1.v20140825-1431/org.eclipse.core.resources-3.9.1.v20140825-1431.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.equinox.preferences/3.5.100.v20130422-1538/org.eclipse.equinox.preferences-3.5.100.v20130422-1538.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.emf.ecore/2.10.1.v20140901-1043/org.eclipse.emf.ecore-2.10.1.v20140901-1043.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.5.4/jackson-datatype-jsr310-2.5.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.1.4/jackson-annotations-2.1.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.emf/2.6.0.v20140901-1055/org.eclipse.emf-2.6.0.v20140901-1055.jar"/>
+  <path value="/home/dev-03/.m2/repository/net/sf/jasperreports/jasperreports/6.1.0/jasperreports-6.1.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.5.4/jackson-datatype-jdk8-2.5.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.w3c.dom.svg/1.1.0/org.w3c.dom.svg-1.1.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-lang/commons-lang/1.0/commons-lang-1.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/avalon-framework/avalon-framework-impl/4.2.0/avalon-framework-impl-4.2.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/github/dandelion/datatables-thymeleaf/1.1.0/datatables-thymeleaf-1.1.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.xml.resolver/1.2.0/org.apache.xml.resolver-1.2.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.datatools.connectivity/1.2.11.v201401230755/org.eclipse.datatools.connectivity-1.2.11.v201401230755.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/bouncycastle/bctsp-jdk14/1.38/bctsp-jdk14-1.38.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/classmate/1.1.0/classmate-1.1.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/github/dandelion/datatables-spring3/1.1.0/datatables-spring3-1.1.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/junit/junit/4.12/junit-4.12.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/Tidy/1/Tidy-1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-web/4.1.6.RELEASE/spring-web-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.batik.css/1.6.0/org.apache.batik.css-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/poi/poi-ooxml-schemas/3.9/poi-ooxml-schemas-3.9.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.xerces/2.9.0/org.apache.xerces-2.9.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/jfree/jcommon/1.0.15/jcommon-1.0.15.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/olap4j/olap4j/0.9.7.309-JS-3/olap4j-0.9.7.309-JS-3.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/squareup/okio/okio/1.11.0/okio-1.11.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/github/virtuald/curvesapi/1.03/curvesapi-1.03.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/jboss/logging/jboss-logging/3.3.0.Final/jboss-logging-3.3.0.Final.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/squareup/okhttp3/logging-interceptor/3.6.0/logging-interceptor-3.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.batik.parser/1.6.0/org.apache.batik.parser-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/solr/solr-solrj/5.4.0/solr-solrj-5.4.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-jdbc/4.1.6.RELEASE/spring-jdbc-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/joda-time/joda-time/2.7/joda-time-2.7.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/slf4j/jcl-over-slf4j/1.7.7/jcl-over-slf4j-1.7.7.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/ant/ant/1.7.1/ant-1.7.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.emf.ecore.xmi/2.10.1.v20140901-1043/org.eclipse.emf.ecore.xmi-2.10.1.v20140901-1043.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.equinox.app/1.3.100.v20130327-1442/org.eclipse.equinox.app-1.3.100.v20130327-1442.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/codehaus/castor/castor-xml/1.3.3/castor-xml-1.3.3.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/bouncycastle/bcprov-jdk15/1.45/bcprov-jdk15-1.45.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.osgi/3.10.1.v20140909-1633/org.eclipse.osgi-3.10.1.v20140909-1633.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.emf.ecore.change/2.10.0.v20140901-1043/org.eclipse.emf.ecore.change-2.10.0.v20140901-1043.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.1.4/jackson-databind-2.1.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/security/oauth/spring-security-oauth2/2.0.7.RELEASE/spring-security-oauth2-2.0.7.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.datatools.connectivity.oda.consumer/3.2.6.v201305170644/org.eclipse.datatools.connectivity.oda.consumer-3.2.6.v201305170644.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.batik.util/1.6.0/org.apache.batik.util-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/taglibs/standard/1.1.2/standard-1.1.2.jar">
+   <libraries>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/c-1_0-rt.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/c-1_0.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/c.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/fmt-1_0-rt.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/fmt-1_0.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/fmt.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/fn.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/permittedTaglibs.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/scriptfree.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/sql-1_0-rt.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/sql-1_0.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/sql.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/x-1_0-rt.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/x-1_0.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-standard-1.1.2.jar/META-INF/x.tld" project="common-platform-springmvc"/>
+    </library>
+   </libraries>
+  </path>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.datatools.connectivity.oda.design/3.3.6.v201212070447/org.eclipse.datatools.connectivity.oda.design-3.3.6.v201212070447.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.core.jobs/3.6.0.v20140424-0053/org.eclipse.core.jobs-3.6.0.v20140424-0053.jar"/>
+  <path value="/home/dev-03/.m2/repository/xml-apis/xml-apis/1.3.02/xml-apis-1.3.02.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/yaml/snakeyaml/1.12/snakeyaml-1.12.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/google/zxing/core/1.7/core-1.7.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.batik.transcoder/1.6.0/org.apache.batik.transcoder-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/nz/net/ultraq/web/thymeleaf/thymeleaf-layout-dialect/1.2.1/thymeleaf-layout-dialect-1.2.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/security/spring-security-jwt/1.0.3.RELEASE/spring-security-jwt-1.0.3.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-webmvc/4.1.6.RELEASE/spring-webmvc-4.1.6.RELEASE.jar">
+   <libraries>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-spring-webmvc-4.1.6.RELEASE.jar/META-INF/spring-form.tld" project="common-platform-springmvc"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-spring-webmvc-4.1.6.RELEASE.jar/META-INF/spring.tld" project="common-platform-springmvc"/>
+    </library>
+   </libraries>
+  </path>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.osgi.services/3.3.100.v20130513-1956/org.eclipse.osgi.services-3.3.100.v20130513-1956.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.batik.xml/1.6.0/org.apache.batik.xml-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-expression/4.1.6.RELEASE/spring-expression-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-cli/commons-cli/1.0/commons-cli-1.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-codec/commons-codec/1.6/commons-codec-1.6.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-context-support/4.1.6.RELEASE/spring-context-support-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.equinox.registry/3.5.400.v20140428-1507/org.eclipse.equinox.registry-3.5.400.v20140428-1507.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/noggit/noggit/0.6/noggit-0.6.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/poi/poi-ooxml/3.14/poi-ooxml-3.14.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/milyn/flute/1.3/flute-1.3.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/thymeleaf/extras/thymeleaf-extras-springsecurity4/2.1.2.RELEASE/thymeleaf-extras-springsecurity4-2.1.2.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-beanutils/commons-beanutils/1.9.2/commons-beanutils-1.9.2.jar"/>
+  <path value="/home/dev-03/.m2/repository/ch/qos/logback/logback-core/1.0.13/logback-core-1.0.13.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/cloudfoundry/identity/cloudfoundry-identity-common/2.3.1/cloudfoundry-identity-common-2.3.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/ognl/ognl/3.0.8/ognl-3.0.8.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-context/4.1.6.RELEASE/spring-context-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.9.13/jackson-mapper-asl-1.9.13.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.47/bcprov-jdk15on-1.47.jar"/>
+  <path value="/home/dev-03/.m2/repository/net/sourceforge/barbecue/barbecue/1.5-beta1/barbecue-1.5-beta1.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.1.4/jackson-core-2.1.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/hibernate/javax/persistence/hibernate-jpa-2.1-api/1.0.0.Final/hibernate-jpa-2.1-api-1.0.0.Final.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-tx/4.1.6.RELEASE/spring-tx-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/codehaus/woodstox/stax2-api/3.1.4/stax2-api-3.1.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/poi/poi/3.9/poi-3.9.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.batik.dom.svg/1.6.0/org.apache.batik.dom.svg-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/javax.xml.stream/1.0.1.v201004272200/javax.xml.stream-1.0.1.v201004272200.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/unbescape/unbescape/1.1.0.RELEASE/unbescape-1.1.0.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/javax/javaee-api/6.0/javaee-api-6.0.jar">
+   <libraries>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/c-1_0-rt.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/c-1_0.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/c.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/fmt-1_0-rt.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/fmt-1_0.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/fmt.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/fn.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/html_basic.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/jsf_core.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/mojarra_ext.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/permittedTaglibs.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/scriptfree.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/sql-1_0-rt.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/sql-1_0.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/sql.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/x-1_0-rt.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/x-1_0.tld" project="common-client-library"/>
+    </library>
+    <library class="tld">
+     <id class="model-object"
+      path="FileSystems/lib-javaee-api-6.0.jar/META-INF/x.tld" project="common-client-library"/>
+    </library>
+   </libraries>
+  </path>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.batik.svggen/1.6.0/org.apache.batik.svggen-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/bouncycastle/bcprov-jdk14/1.38/bcprov-jdk14-1.38.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.batik.dom/1.6.0/org.apache.batik.dom-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/jdt/core/compiler/ecj/4.3.1/ecj-4.3.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-io/commons-io/2.4/commons-io-2.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/edu/vt/middleware/vt-crypt/2.1.4/vt-crypt-2.1.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.commons.codec/1.3.0/org.apache.commons.codec-1.3.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-jexl/commons-jexl/1.1/commons-jexl-1.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/github/dandelion/dandelion-thymeleaf/1.1.1/dandelion-thymeleaf-1.1.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/zookeeper/zookeeper/3.4.6/zookeeper-3.4.6.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/codehaus/woodstox/woodstox-core-asl/4.4.1/woodstox-core-asl-4.4.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/jboss/spec/javax/websocket/jboss-websocket-api_1.1_spec/1.1.0.Final/jboss-websocket-api_1.1_spec-1.1.0.Final.jar"/>
+  <path value="/home/dev-03/.m2/repository/javax/enterprise/cdi-api/1.2/cdi-api-1.2.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/lowagie/itext/2.1.7/itext-2.1.7.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.w3c.css.sac/1.3.0/org.w3c.css.sac-1.3.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/squareup/okhttp3/okhttp/3.6.0/okhttp-3.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/jfree/jfreechart/1.0.12/jfreechart-1.0.12.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/json/json/20160212/json-20160212.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.emf.common/2.10.1.v20140901-1043/org.eclipse.emf.common-2.10.1.v20140901-1043.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.batik.bridge/1.6.0/org.apache.batik.bridge-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-beans/4.1.6.RELEASE/spring-beans-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/squareup/retrofit2/converter-jackson/2.1.1-SNAPSHOT/converter-jackson-2.1.1-SNAPSHOT.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/github/dandelion/datatables-core/1.1.0/datatables-core-1.1.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/httpcomponents/httpclient/4.3.3/httpclient-4.3.3.jar"/>
+  <path value="/home/dev-03/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.equinox.common/3.6.200.v20130402-1505/org.eclipse.equinox.common-3.6.200.v20130402-1505.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.batik.util.gui/1.6.0/org.apache.batik.util.gui-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/perf4j/perf4j/0.9.16/perf4j-0.9.16.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-fileupload/commons-fileupload/1.3.1/commons-fileupload-1.3.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.datatools.connectivity.oda/3.4.3.v201405301249/org.eclipse.datatools.connectivity.oda-3.4.3.v201405301249.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.9.13/jackson-core-asl-1.9.13.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/httpcomponents/httpmime/4.4.1/httpmime-4.4.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/xmlbeans/xmlbeans/2.3.0/xmlbeans-2.3.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/security/spring-security-web/3.2.6.RELEASE/spring-security-web-3.2.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/bouncycastle/bcpkix-jdk15on/1.47/bcpkix-jdk15on-1.47.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.update.configurator/3.3.200.v20130326-1319/org.eclipse.update.configurator-3.3.200.v20130326-1319.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.birt.runtime/4.4.1/org.eclipse.birt.runtime-4.4.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/edu/vt/middleware/vt-dictionary/3.0/vt-dictionary-3.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.5.4/jackson-module-parameter-names-2.5.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/codehaus/castor/castor-core/1.3.3/castor-core-1.3.3.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/googlecode/flyway/flyway-core/2.3.1/flyway-core-2.3.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/security/spring-security-config/4.0.0.RELEASE/spring-security-config-4.0.0.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/poi/poi-scratchpad/3.14/poi-scratchpad-3.14.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.batik.ext.awt/1.6.0/org.apache.batik.ext.awt-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/unboundid/components/json/1.0.0/json-1.0.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/aspectj/aspectjrt/1.5.4/aspectjrt-1.5.4.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/spring-core/4.1.6.RELEASE/spring-core-4.1.6.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.batik.pdf/1.6.0/org.apache.batik.pdf-1.6.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-digester/commons-digester/2.1/commons-digester-2.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/javax/validation/validation-api/1.1.0.Final/validation-api-1.1.0.Final.jar"/>
+  <path value="/home/dev-03/.m2/repository/stax/stax/1.2.0/stax-1.2.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/ganyo/gcm-server/1.0.2/gcm-server-1.0.2.jar"/>
+  <path value="/home/dev-03/.m2/repository/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/google/code/gson/gson/2.8.0/gson-2.8.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/cglib/cglib-nodep/2.2.2/cglib-nodep-2.2.2.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/commons/commons-lang3/3.1/commons-lang3-3.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.core.expressions/3.4.500.v20130515-1343/org.eclipse.core.expressions-3.4.500.v20130515-1343.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/ibm/icu/icu4j/53.1-CUSTOM/icu4j-53.1-CUSTOM.jar"/>
+  <path value="/home/dev-03/.m2/repository/com/github/dandelion/dandelion-core/1.1.1/dandelion-core-1.1.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.apache.xml.serializer/2.7.1/org.apache.xml.serializer-2.7.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/apache/httpcomponents/httpcore/4.4.1/httpcore-4.4.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/springframework/security/spring-security-core/4.0.0.RELEASE/spring-security-core-4.0.0.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/slf4j/slf4j-log4j12/1.7.7/slf4j-log4j12-1.7.7.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/org.eclipse.datatools.connectivity.oda.flatfile/3.1.8.v201403010906/org.eclipse.datatools.connectivity.oda.flatfile-3.1.8.v201403010906.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/eclipse/birt/runtime/3_7_1/org.w3c.dom.smil/1.0.0/org.w3c.dom.smil-1.0.0.jar"/>
+  <path value="/home/dev-03/.m2/repository/edu/vt/middleware/vt-password/3.1.1/vt-password-3.1.1.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/thymeleaf/thymeleaf/2.1.4.RELEASE/thymeleaf-2.1.4.RELEASE.jar"/>
+  <path value="/home/dev-03/.m2/repository/org/hibernate/hibernate-validator/5.2.3.Final/hibernate-validator-5.2.3.Final.jar"/>
+ </paths>
+ <validation>
+  <el/>
+ </validation>
+ <aliases/>
+ <includes/>
+ <uris/>
+</kb-project>

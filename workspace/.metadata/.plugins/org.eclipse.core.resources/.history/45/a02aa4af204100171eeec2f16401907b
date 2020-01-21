@@ -1,0 +1,94 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.geomanagement.model.criteria;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.common.BaseMsg;
+
+/**
+ * @author Mohammad
+ *
+ */
+public class OptionalServiceCriteriaMsg extends BaseMsg {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -9093981629026002197L;
+	
+	private String code;
+	
+	private String nameFa;
+	
+	private String nameEn;
+	
+	private String allNames;
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the nameFa
+	 */
+	public String getNameFa() {
+		return nameFa;
+	}
+
+	/**
+	 * @param nameFa the nameFa to set
+	 */
+	public void setNameFa(String nameFa) {
+		this.nameFa = nameFa;
+	}
+
+	/**
+	 * @return the nameEn
+	 */
+	public String getNameEn() {
+		return nameEn;
+	}
+
+	/**
+	 * @param nameEn the nameEn to set
+	 */
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
+	}
+
+	/**
+	 * @return the allNames
+	 */
+	public String getAllNames() {
+		return allNames;
+	}
+
+	/**
+	 * @param allNames the allNames to set
+	 */
+	public void setAllNames(String allNames) {
+		this.allNames = allNames;
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("code", code)
+			.add("nameFa", nameFa)
+			.add("nameEn", nameEn)
+			.add("allNames", allNames)
+			.toString();
+	}
+	
+}

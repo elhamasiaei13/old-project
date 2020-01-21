@@ -1,0 +1,32 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.complaintmanagement.model;
+
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.complaintmanagement.domain.model.dto.ComplaintCategoryDto;
+
+/**
+ * @author dev-03
+ *
+ */
+public class ComplaintCategoryMsg extends BaseMsg {
+
+	private static final long serialVersionUID = 3658162831820553422L;
+	
+	private Long id;
+
+	private String code;
+
+	private String nameFa;
+
+	private String nameEn;
+
+	private Integer version;
+
+	private boolean active;
+
+	private String description;
+
+	private ComplaintCategoryMsg parentCategory;
+}

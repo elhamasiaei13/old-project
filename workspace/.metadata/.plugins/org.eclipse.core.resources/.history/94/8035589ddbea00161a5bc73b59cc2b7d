@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+
+<head>
+<title>Edit Voucher</title>
+
+<style>
+.select-device-modal label {
+	margin-bottom: 0px;
+}
+
+.select-device-modal input {
+	width: auto;
+	height: 28px;
+}
+
+.select-device-modal .form-control {
+	width: auto;
+}
+
+.select-device-modal table.dataTable td {
+	padding: 1px 10px;
+}
+
+.select-device-modal .dataTables_filter label {
+	margin-bottom: 5px;
+}
+</style>
+</head>
+
+<body th:with="rightMenu='admin', subRightMenu='addvoucher'">
+
+	<section layout:fragment="top-header" class="fixed-header">
+		<div class="ui-header-image pull-left">
+			<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/accounting-web/resources/images/document.png" th:src="@{/resources/images/document.png}" style="width: 48px; height: 48px;" />
+		</div>
+		<div class="ui-header-title">
+			<div class="split-left">
+				<h3>
+					<small>Edit</small>
+				</h3>
+				<h3>Voucher</h3>
+			</div>
+		</div>
+	</section>
+	<!-- Main content -->
+	<!-- BODY -->
+	<section class="content" layout:fragment="content">
+
+		<form class="form-horizontal" method="post" id="sum">
+			<div class="box">
+				<div class="row" style="margin-top: 30px">
+					<div class="row">
+						<div class="col-lg-12">
+
+							<div class="form-group required">
+								<label class="col-sm-2 control-label" for="referenceId" th:text="#{voucher.issueDate}">تاریخ صدور </label>
+
+								<div class="col-sm-7">
+									<input type="text" class="form-control datePicker" name="issueDate" th:value="${dtp}" style="width: 300px"/>
+								</div>
+							</div>
+
+							<input th:field="*{voucher.id}" th:value="${voucher.id}" hidden="hidden" />
+							<input th:field="*{voucher.version}" th:value="${voucher.version}" hidden="hidden" />
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="referenceId" th:text="#{voucher.referenceId}">شناسه مرجع</label>
+
+								<div class="col-sm-7">
+									<input name="referenceId" th:placeholder="#{voucher.referenceId}" class="form-control" th:field="*{voucher.referenceId}" style="width: 300px"/>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="referenceId" th:text="#{voucher.description}">توضیح سند</label>
+								<div class="col-sm-7">
+									<textarea class="form-control" rows="3" th:placeholder="#{voucher.description}" name="description" th:field="*{voucher.description}" style="width: 300px"></textarea>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-12">
+
+							<fieldset>
+								<!-- SANAD -->
+								<div class="col-md-12" style="margin-top: 30px;">
+
+									<div class="panel panel-default">
+										<div class="panel-heading" th:text="#{voucher.voucherRows}">ردیف‌های سند</div>
+										<div class="panel-body">
+											<!-- SANAD-ROWS -->
+											<div id="sanadRows" class="row minPadding">
+												<!-- SANAD-ROWs-HEADER -->
+												<div class="row newRow minPadding">
+													<div class="col-md-8 ">
+														<div class="col-md-3 required">
+															<div class="form-group required">
+																<label class="control-label" th:text="#{account}">حساب‌ها</label>
+															</div>
+														</div>
+														<div class="col-md-2 required">
+															<div class="form-group">
+																<label class="control-label" th:text="#{voucher.referenceId}">شناسه مرجع</label>
+															</div>
+														</div>
+														<div class="col-md-7 required">
+															<div class="form-group">
+																<label class="control-label" th:text="#{voucher.description}">شرح</label>
+															</div>
+														</div>
+													</div>
+													<div class="col-md-4 ">
+														<div class="col-md-5 required">
+															<div class="form-group required">
+																<label class="control-label" th:text="#{voucherRow.debit}">بدهکار</label>
+															</div>
+														</div>
+
+														<div class="col-md-5 required">
+															<div class="form-group required">
+																<label class="control-label" th:text="#{voucherRow.credit}">بستانکار</label>
+															</div>
+														</div>
+														<div class="col-md-2">&nbsp;</div>
+													</div>
+												</div>
+
+												<!-- SANAD-ROWs-Row1 -->
+												<div class="row newRow minPadding" th:each="row, stat : ${voucher.voucherRow}">
+													<div class="col-md-8 ">
+														<input th:field="*{voucher.voucherRow[__${stat.index}__].id}" th:value="${voucher.voucherRow[__${stat.index}__].id}" hidden="hidden" />
+														<input th:field="*{voucher.voucherRow[__${stat.index}__].version}" th:value="${voucher.voucherRow[__${stat.index}__].version}" hidden="hidden" />
+														<div class="col-md-3">
+															<select th:field="*{voucher.voucherRow[__${stat.index}__].account.id}" class="form-control">
+																<option value=""></option>
+																<option th:each="f : ${accountVOs}" th:value="${f.id}" th:text="${f.name}" th:attr="selected=${f.id == voucher.voucherRow[__${stat.index}__].account.id ? 'true' : 'false'}"></option>
+															</select>
+														</div>
+														<div class="col-md-2">
+															<input th:placeholder="#{voucherRow.referenceId}" th:field="*{voucher.voucherRow[__${stat.index}__].referenceId}" class="form-control " type="text" />
+														</div>
+														<div class="col-md-7">
+															<input th:placeholder="#{voucherRow.description}" th:field="*{voucher.voucherRow[__${stat.index}__].description}" class="form-control" type="text" />
+														</div>
+													</div>
+													<div class="col-md-4 ">
+														<div class="col-md-5">
+															<input th:placeholder="#{voucherRow.debit}" th:field="*{voucher.voucherRow[__${stat.index}__].debit}" class="form-control bedehkar money" type="text" maxlength="31" autocomplete="off" />
+														</div>
+
+														<div class="col-md-5">
+															<input th:placeholder="#{voucherRow.credit}" th:field="*{voucher.voucherRow[__${stat.index}__].credit}" class="form-control  bestankar money" type="text" maxlength="31"
+																autocomplete="off" />
+														</div>
+														<div class="col-md-2">&nbsp;</div>
+													</div>
+												</div>
+
+												<!-- SANAD-ROWs-Row2 -->
+												<div class="row minPadding">
+													<div class="col-md-8 ">
+														<div class="col-md-3">
+															<select name="voucherRow[10].account.id" class="form-control">
+																<option value=""></option>
+																<option th:each="f : ${accountVOs}" th:value="${f.id}" th:text="${f.name}"></option>
+															</select>
+														</div>
+														<div class="col-md-2">
+															<input th:placeholder="#{voucherRow.referenceId}" name="voucherRow[10].referenceId" class="form-control" type="text" />
+														</div>
+														<div class="col-md-7">
+															<input th:placeholder="#{voucherRow.description}" name="voucherRow[10].description" class="form-control" type="text" />
+														</div>
+													</div>
+
+													<div class="col-md-4 ">
+														<div class="col-md-5">
+															<input th:placeholder="#{voucherRow.debit}" name="voucherRow[10].debit" class="form-control bedehkar money" type="text" maxlength="31" autocomplete="off" />
+														</div>
+
+														<div class="col-md-5">
+															<input th:placeholder="#{voucherRow.credit}" name="voucherRow[10].credit" class="form-control  bestankar money" type="text" maxlength="31" autocomplete="off" />
+														</div>
+														<div class="col-md-2">
+															<a href="#" class="btn btn-success" id="cloneButton1">
+																<span class="glyphicon glyphicon-plus"></span>
+															</a>
+														</div>
+													</div>
+												</div>
+
+												<!-- SANAD-ROWs-RowTemplate -->
+												<div class="row minPadding" id="test1" style="display: none;">
+													<div class="col-md-8 ">
+														<div class="col-md-3">
+															<select class="form-control">
+																<option value=""></option>
+																<option th:each="f : ${accountVOs}" th:value="${f.id}" th:text="${f.name}"></option>
+															</select>
+														</div>
+														<div class="col-md-2">
+															<input th:placeholder="#{voucherRow.referenceId}" class="form-control" type="text" />
+														</div>
+														<div class="col-md-7">
+															<input th:placeholder="#{voucherRow.description}" class="form-control" type="text" />
+														</div>
+													</div>
+													<div class="col-md-4 ">
+														<div class="col-md-5">
+															<input th:placeholder="#{voucherRow.debit}" class="form-control bedehkar money" type="text" maxlength="31" autocomplete="off" />
+														</div>
+														<div class="col-md-5">
+															<input th:placeholder="#{voucherRow.credit}" class="form-control  bestankar money" type="text" maxlength="31" autocomplete="off" />
+														</div>
+														<div class="col-md-2 newbotton">
+															<a href="#" class="btn btn-danger btn-xs" class-data="remove" onclick="removeRow(this);">
+																<span class="glyphicon glyphicon-remove"></span>
+															</a>
+														</div>
+													</div>
+												</div>
+												<div id="test2">
+													<div class="row newRow minPadding" id="voucherRow[11]" style="display: block">
+														<div class="col-md-8 ">
+															<div class="col-md-3">
+																<select name="voucherRow[11].account.id" class="form-control">
+																	<option value=""></option>
+																	<option th:each="f : ${accountVOs}" th:value="${f.id}" th:text="${f.name}"></option>
+																</select>
+															</div>
+															<div class="col-md-2">
+																<input th:placeholder="#{voucherRow.referenceId}" name="voucherRow[11].referenceId" class="form-control " type="text" />
+															</div>
+															<div class="col-md-7">
+																<input th:placeholder="#{voucherRow.description}" class="form-control" name="voucherRow[11].description" type="text" />
+															</div>
+														</div>
+
+														<div class="col-md-4 ">
+															<div class="col-md-5">
+																<input th:placeholder="#{voucherRow.debit}" name="voucherRow[11].debit" class="form-control bedehkar money" type="text" maxlength="31" autocomplete="off" />
+															</div>
+
+															<div class="col-md-5">
+																<input th:placeholder="#{voucherRow.credit}" name="voucherRow[11].credit" class="form-control bestankar money" type="text" maxlength="31" autocomplete="off" />
+															</div>
+															<div class="col-md-2 newbotton">
+																<a href="#" class="btn btn-danger btn-xs" class-data="remove" onclick="removeRow(this);">
+																	<span class="glyphicon glyphicon-remove"></span>
+																</a>
+															</div>
+														</div>
+													</div>
+												</div>
+
+												<!-- SANAD-ROWs- -->
+												<div class="row minPadding">
+													<div class="col-md-8 ">
+														<div class="col-md-5">&nbsp;</div>
+
+														<div class="col-md-7">&nbsp;</div>
+													</div>
+
+													<div class="col-md-4 ">
+														<div class="col-md-5">
+															<input type="text" class="form-control" readonly="readonly" th:placeholder="#{voucherRow.sumOfDebit}" id="bedehkar_sum" />
+														</div>
+
+														<div class="col-md-5">
+															<input type="text" class="form-control" readonly="readonly" th:placeholder="#{voucherRow.sumOfCredit}" id="bestankar_sum" />
+														</div>
+														<div class="col-md-2">&nbsp;</div>
+													</div>
+												</div>
+											</div>
+											<!-- SANAD-ROWs -->
+										</div>
+										<!-- SANAD -->
+									</div>
+								</div>
+							</fieldset>
+						</div>
+					</div>
+				</div>
+
+				<p id="error" style="color: red" dir="rtl"></p>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="modifyVoucherBtn">Save</button>
+				</div>
+
+			</div>
+		</form>
+
+		<th:block layout:fragment="javascripts">
+			<script th:inline="javascript">
+			            jQuery(document).ready(function() {
+			                $('#modifyVoucherBtn').click(function() {
+			                    if (validateForm()) {
+			                        var $btn = $(this);
+			                        $('#sum').find('.callout').text('').addClass('hide');
+			                        $.post('/accounting-web/voucher/save', $('#sum').serialize()).done(function(data) {
+			                            if (data.status == 'success') {
+			                                try {
+			                                    createVoucherAfterSaveSuccess()
+			                                } catch (error) {}
+			                                showTopleftGrowl('success', 'Modify', 'Modify Successful');
+			                                window.open("/accounting-web/voucher", "_self");
+			
+			
+			                            } else if (data.status == 'ValidationException') {
+			                                $('#sum').find('.callout').text(data.invalidField + ' invalid-value').removeClass('hide');
+			                            } else if (data.status == 'ErrorCode') {
+			                                $('#sum').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+			                            } else {
+			                                console.debug(data.status);
+			                                $('#sum').find('.callout').text((data.message ? data.message : '??delete.failed_fa_IR??')).removeClass('hide');
+			                            }
+			                            $btn.attr('disabled', false);
+			                        }).fail(function(jqXHR, textStatus, errorThrown) {
+			                            failAjax(jqXHR, textStatus, errorThrown, 'modifyVoucherBtn')
+			                        });
+			                        return false;
+			                    }
+			                });
+			
+			
+			                $('.datepicker').datetimepicker({
+			                    format: 'YYYY-MM-DD',
+			                    useCurrent: false
+			                });
+			
+			                var $form = $('#sum'),
+			                    $summands1 = $form.find('.bestankar'),
+			                    $sumDisplay1 = $('#bestankar_sum');
+			                $summands = $form.find('.bedehkar'),
+			                    $sumDisplay = $('#bedehkar_sum');
+			
+			                var sum = 0;
+			                $summands.each(function() {
+			                    var value = Number($(this).val());
+			                    if (!isNaN(value)) sum += value;
+			
+			                });
+			
+			                $sumDisplay.val(sum);
+			
+			                var sum1 = 0;
+			                $summands1.each(function() {
+			                    var value = Number($(this).val());
+			                    if (!isNaN(value)) sum1 += value;
+			
+			                });
+			
+			                $sumDisplay1.val(sum1);
+			
+			            });
+			
+			            function fiscalYearSelected() {
+			
+			                var choose = "انتخاب کنید";
+			                var e = document.getElementById("fiscalYearId").value;
+			                if (e != choose) {
+			                    $('#fiscalYearId').val(e);
+			                } else {
+			                    $('#fiscalYearId').val(null);
+			                }
+			            }
+			
+			            //<![CDATA[
+			
+			
+			            function removeRow(elm) {
+			                $(elm).parent().parent().parent().remove();
+			            }
+			
+			            var i = 3;
+			
+			
+			            $("#cloneButton1").click(function() {
+			
+			
+			                var referenceNodes = document.getElementById("test1").getElementsByTagName("input");
+			                var referenceSelect = document.getElementById("test1").getElementsByTagName("select");
+			
+			                referenceSelect[0].name = "voucherRow['" + i + "'].account.id";
+			
+			                // loop the cells.
+			                var cells = ["referenceId", "description", "debit", "credit"];
+			                for (var j = 0; j < cells.length; j++) {
+			                    var cell = cells[j];
+			
+			
+			                    // set the name property.
+			                    referenceNodes[j].name = "voucherRow['" + i + "']." + cell;
+			
+			                }
+			
+			                $('#test1').clone().attr('id', 'voucherRow[' + (++i) + ']').attr('class', 'row newRow minPadding').attr('style', 'display:block').appendTo("#test2");
+			
+			                $summands = $form.find('.bedehkar');
+			                $summands1 = $form.find('.bestankar');
+			            });
+			
+			
+			
+			            var $form = $('#sum'),
+			                $summands = $form.find('.bedehkar'),
+			                $sumDisplay = $('#bedehkar_sum');
+			
+			            $form.delegate('.bedehkar', 'keyup', function() {
+			                var sum = 0;
+			                $summands.each(function() {
+			                    var value = Number($(this).val());
+			                    if (!isNaN(value)) sum += value;
+			                });
+			
+			                $sumDisplay.val(sum);
+			            });
+			
+			
+			            var $form = $('#sum'),
+			                $summands1 = $form.find('.bestankar'),
+			                $sumDisplay1 = $('#bestankar_sum');
+			
+			            $form.delegate('.bestankar', 'keyup', function() {
+			                var sum1 = 0;
+			                $summands1.each(function() {
+			                    var value = Number($(this).val());
+			                    if (!isNaN(value)) sum1 += value;
+			
+			                });
+			
+			                $sumDisplay1.val(sum1);
+			            });
+			
+			            function validateForm() {
+			                var bedehkar_sum = $("#bedehkar_sum").val();
+			                var bestankar_sum = $("#bestankar_sum").val();
+			
+			                if (bestankar_sum != bedehkar_sum) {
+			                    document.getElementById("error").innerHTML = 'جمع کل بستانکار و بدهکار برابر نیست';
+			                    return false;
+			                } else if ((bestankar_sum == "" || bestankar_sum == 0) && (bestankar_sum == "" || bestankar_sum == 0)) {
+			
+			                    document.getElementById("error").innerHTML = 'جمع کل بستانکار و جمع کل بدهکار نمی تواند صفر باشد';
+			                    return false;
+			
+			                } else {
+			                    return true;
+			                }
+			            }
+			            //]]>
+        			</script>
+		</th:block>
+	</section>
+</body>
+
+</html>

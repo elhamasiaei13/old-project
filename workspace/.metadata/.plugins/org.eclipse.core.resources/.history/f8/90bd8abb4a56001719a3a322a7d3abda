@@ -1,0 +1,135 @@
+package com.parvanpajooh.transportationmanagement2.service.impl;
+
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericServiceImpl;
+import com.parvanpajooh.transportationmanagement2.model.TransportationSchedule;
+import com.parvanpajooh.transportationmanagement2.model.criteria.TransportationScheduleCriteria;
+import com.parvanpajooh.transportationmanagement2.model.vo.BulkEditTransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.GenerateTransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.TransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement2.service.TransportationScheduleLocalService;
+import com.parvanpajooh.transportationmanagement2.service.TransportationScheduleService;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+@Stateless
+public class TransportationScheduleServiceImpl extends GenericServiceImpl<TransportationSchedule, Long> implements TransportationScheduleService {
+    /**
+     * Log variable for all child classes. 
+     */
+	static final Logger log = LoggerFactory.getLogger( TransportationScheduleServiceImpl.class);
+    
+	private TransportationScheduleLocalService transportationScheduleLocalService;
+    
+    @Inject
+    public void setTransportationScheduleLocalService(TransportationScheduleLocalService transportationScheduleLocalService) {
+        this.localService = transportationScheduleLocalService;
+        this.transportationScheduleLocalService = transportationScheduleLocalService;
+    }
+    
+    @Override
+    public void generateTransportationSchedules(UserInfo ecUserInfo, GenerateTransportationScheduleVO generateTransportationScheduleVO) throws ParvanServiceException {
+    	log.debug("Entering generateTransportationSchedules(userInfo={}, generateTransportationScheduleVO={})", ecUserInfo, generateTransportationScheduleVO);
+    	try {
+    		transportationScheduleLocalService.generateTransportationSchedules(generateTransportationScheduleVO);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			log.error("Error occurred while change TransportationSchedule.", e);
+			throw new ParvanUnrecoverableException("Error occurred while change TransportationSchedule.", e);
+		}
+    	log.debug("Leaving generateTransportationSchedules(userInfo={}, generateTransportationScheduleVO={})", ecUserInfo, generateTransportationScheduleVO);
+    }
+
+	@Override
+	public TransportationScheduleVO preBulkEdit(UserInfo ecUserInfo, TransportationScheduleCriteria transportationScheduleCriteria)
+			throws ParvanServiceException {
+		log.debug("Entering preBulkEdit(userInfo={}, transportationScheduleCriteria={})", ecUserInfo, transportationScheduleCriteria);
+		
+		TransportationScheduleVO transportationScheduleVO = null; 
+		
+    	try {
+    		transportationScheduleVO = transportationScheduleLocalService.preBulkEdit(transportationScheduleCriteria);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			log.error("Error occurred while change TransportationSchedule.", e);
+			throw new ParvanUnrecoverableException("Error occurred while pre Bulk Edit.", e);
+		}
+    	log.debug("Leaving preBulkEdit(userInfo={}, transportationScheduleCriteria={})", ecUserInfo, transportationScheduleCriteria);
+    	
+    	return transportationScheduleVO;
+	}
+
+	@Override
+	public void bulkEdit(UserInfo ecUserInfo,
+			TransportationScheduleCriteria transportationScheduleCriteria,
+			BulkEditTransportationScheduleVO bulkEditTransportationScheduleVO)
+			throws ParvanServiceException {
+		log.debug("Entering bulkEdit(userInfo={}, transportationScheduleCriteria={}, bulkEditTransportationScheduleVO={})", ecUserInfo, transportationScheduleCriteria, bulkEditTransportationScheduleVO);
+    	try {
+    		transportationScheduleLocalService.bulkEdit(transportationScheduleCriteria, bulkEditTransportationScheduleVO, ecUserInfo);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			log.error("Error occurred while change TransportationSchedule.", e);
+			throw new ParvanUnrecoverableException("Error occurred while change TransportationSchedule.", e);
+		}
+    	log.debug("Leaving bulkEdit(userInfo={}, transportationScheduleCriteria={}, bulkEditTransportationScheduleVO={})", ecUserInfo, transportationScheduleCriteria, bulkEditTransportationScheduleVO);
+	}
+
+	@Override
+	public TransportationScheduleVO findTransportationSchedule(UserInfo userInfo, TransportationScheduleCriteria criteria) throws ParvanServiceException {
+		log.debug("Entering findTransportationSchedule(userInfo={}, criteria={})", userInfo, criteria);
+    	
+		TransportationScheduleVO schedule ;
+		try {
+    		
+    		schedule = transportationScheduleLocalService.findTransportationSchedule(userInfo,criteria);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			log.error("Error occurred while find TransportationSchedule.", e);
+			throw new ParvanUnrecoverableException("Error occurred while find TransportationSchedule.", e);
+		}
+    	log.debug("Leaving findTransportationSchedule(userInfo={}, criteria={})", userInfo, criteria);
+
+		return schedule;
+	}
+
+	@Override
+	public List<TransportationScheduleVO> findDepartureFromNodeInNextHoures(UserInfo userInfo, String fromNodeCode, int hours)
+			throws ParvanServiceException {
+		log.debug("Entering findByFromNode(userInfo={}, fromNodeCode={}, hours={})", userInfo, fromNodeCode, hours);
+		return transportationScheduleLocalService.findDepartureFromNodeInNextHoures(fromNodeCode, hours);
+
+	}
+
+	@Override
+	public List<TransportationScheduleVO> findByToNode(UserInfo userInfo, String toNodeCode, int hours)
+			throws ParvanServiceException {
+		log.debug("Entering findByToNode(userInfo={}, toNodeCode={}, hours={})", userInfo, toNodeCode, hours);
+		return transportationScheduleLocalService.findArraivalToNodeInNextHoures(toNodeCode, hours);
+	}
+}

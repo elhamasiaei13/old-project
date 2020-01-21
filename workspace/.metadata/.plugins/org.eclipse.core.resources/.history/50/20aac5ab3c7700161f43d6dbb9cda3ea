@@ -1,0 +1,18 @@
+package com.parvanpajooh.agentmanagement.common;
+
+import java.util.Map;
+
+import com.parvanpajooh.idm.IdmProtos;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+public interface AccountingService {
+	
+	
+	@GET("v1/scopes")
+	public Call<IdmProtos.ObjectAccessScopeList> loadScopes(@Query("userName") String userName, @Query("ip") String ip);
+	
+}

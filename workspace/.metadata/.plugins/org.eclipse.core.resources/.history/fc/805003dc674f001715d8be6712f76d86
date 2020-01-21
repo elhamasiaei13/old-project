@@ -1,0 +1,190 @@
+package com.parvanpajooh.waybillmanagement.domain.repository.jpa;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseCriteria;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.repository.jpa.GenericRepositoryJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.util.StringUtil;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.waybillmanagement.domain.model.Waybill;
+import com.parvanpajooh.waybillmanagement.domain.model.Waybill_;
+import com.parvanpajooh.waybillmanagement.domain.model.criteria.WaybillCriteria;
+import com.parvanpajooh.waybillmanagement.domain.repository.WaybillRepository;
+
+/**
+ * 
+ * @author MO
+ *
+ */
+public class WaybillRepositoryJpa extends GenericRepositoryJpa<Waybill, Long> implements WaybillRepository {
+	
+	public static final Logger log = LoggerFactory.getLogger(WaybillRepositoryJpa.class);
+
+	@PersistenceContext(unitName = PERSISTENCE_UNIT_NAME)
+	private EntityManager entityManager;
+
+    public WaybillRepositoryJpa() {
+    	super(Waybill.class);
+    }
+
+	@Override
+	public Waybill get(String waybillNumber) throws ParvanDaoException {
+		WaybillCriteria criteria = new WaybillCriteria();
+		criteria.setNumber(waybillNumber);
+		List<Waybill> waybills = super.findByCriteria(criteria);
+		if (waybills != null && !waybills.isEmpty()) {
+			return waybills.get(0);
+		} else {
+			throw new ParvanDaoException(waybillNumber, ErrorCode.OBJECT_NOT_FOUND);
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel,
+			Root<Waybill> root, Map<String, Join> joins) throws ParvanException {
+		WaybillCriteria criteria = (WaybillCriteria) cri;
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+		
+		String waybillNumber = criteria.getNumber();
+		if (Validator.isNotNull(waybillNumber)) {
+			Predicate predicate = builder.equal(root.<String> get(Waybill_.number), waybillNumber);
+			predicateList.add(predicate);
+		}
+		
+		basePredicate(cri, builder, root, predicateList);
+		
+		return predicateList;
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public PageList<Waybill> findByCriteria(WaybillCriteria criteria, int page, int size, String sortCriterion,
+			SortDirectionEnum sortDirection) throws ParvanDaoException {
+
+		PageList<Waybill> pageList = null;
+
+		try {
+
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			EntityType<Waybill> Waybill_ = metamodel.entity(Waybill.class);
+			
+			// ------------------------------------------------------------
+			// Select
+			// ------------------------------------------------------------
+			CriteriaQuery<Waybill> cq = builder.createQuery(Waybill.class);
+			Root<Waybill> root = cq.from(Waybill_);
+			cq.distinct(true);
+
+			Map<String, Join> joins = new HashMap<String, Join>();
+
+			List<Predicate> predicateList = buildPredicateList(criteria, builder, metamodel, root, joins);
+
+			if (predicateList.size() == 1) {
+				cq.where(predicateList.get(0));
+
+			} else if (predicateList.size() > 1) {
+				cq.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+
+			if (sortCriterion != null) {
+				String[] joinSort = StringUtil.split(sortCriterion, StringPool.PERIOD);
+
+				if (joinSort.length > 1) {
+					Join join = null;
+
+					if (joinSort.length > 2) {
+
+						for (int i = 0; i < joinSort.length - 1; i++) {
+							join = joins.get(joinSort[i]);
+
+							if (join == null) {
+								if (i == 0) {
+									join = root.join(joinSort[i], JoinType.LEFT);
+								}
+							}
+						}
+					} else {
+						join = joins.get(joinSort[0]);
+
+						if (join == null) {
+							join = root.join(joinSort[0], JoinType.LEFT);
+						}
+					}
+
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						cq.orderBy(builder.asc(join.get(joinSort[joinSort.length - 1])));
+					} else if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						cq.orderBy(builder.desc(join.get(joinSort[joinSort.length - 1])));
+					}
+
+				} else {
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						cq.orderBy(builder.asc(root.get(sortCriterion)));
+					} else if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						cq.orderBy(builder.desc(root.get(sortCriterion)));
+					}
+				}
+
+			}
+
+			int firstResult = page * size;
+			TypedQuery<Waybill> selectQuery = getEntityManager().createQuery(cq);
+			selectQuery.setFirstResult(firstResult);
+			selectQuery.setMaxResults(size);
+
+			List<Waybill> elements = selectQuery.getResultList();
+
+			// ------------------------------------------------------------
+			// Count
+			// ------------------------------------------------------------
+			int total = super.countByCriteria(criteria);
+
+			pageList = new PageList<>(elements, total);
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting paged-list of records by criteria.", e);
+		}
+		return pageList;
+	}
+
+	@Override
+	public void deleteByNumber(String waybillNumber) throws ParvanDaoException {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaDelete<Waybill> delete = cb.createCriteriaDelete(Waybill.class);
+        Root<Waybill> root = delete.from(Waybill.class);
+        delete.where(cb.equal(root.<String> get(Waybill_.number), waybillNumber));
+        Query q = entityManager.createQuery(delete);
+        int rowsDeleted = q.executeUpdate();
+        log.debug("{} number of waybills deleted", rowsDeleted);
+	}
+
+}

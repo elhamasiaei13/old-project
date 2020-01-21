@@ -1,0 +1,63 @@
+package com.parvanpajooh.transportationmanagement.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.transportationmanagement.model.vo.CarrierVO;
+import com.parvanpajooh.transportationmanagement.service.CarrierManagementLocalService;
+import com.parvanpajooh.transportationmanagement.service.adapter.CarrierManagementServiceAdapter;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class CarrierManagementLocalServiceImpl implements CarrierManagementLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(CarrierManagementLocalServiceImpl.class);
+
+	@Inject
+	private CarrierManagementServiceAdapter carrierManagementServiceAdapter;
+
+	@Override
+	public PageList<CarrierVO> findCarriers(String term, int page, int size) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findCarriers(term={},page={},size={})", term,page,size);
+		PageList<CarrierVO> carriers = null;
+		
+		try {
+			carriers = carrierManagementServiceAdapter.findCarriers(term, page, size);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findCarriers", e);
+		}
+
+		return carriers;
+	}
+
+	@Override
+	public CarrierVO findCarrierByCode(String carrierCode) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findCarrierByCode(carrierCode={})", carrierCode);
+		CarrierVO carrier = null;
+
+		try {
+			carrier = carrierManagementServiceAdapter.findCarrierByCode(carrierCode);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findCarrierByCode", e);
+		}
+
+		return carrier;
+	}
+	
+}

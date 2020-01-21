@@ -1,0 +1,58 @@
+package com.parvanpajooh.siteservices.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.config.Config;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+import com.parvanpajooh.siteservices.service.JobManagementLocalService;
+import com.parvanpajooh.siteservices.service.adapter.JobManagementServiceAdapter;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class JobManagementLocalServiceImpl implements JobManagementLocalService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(JobManagementLocalServiceImpl.class);
+
+	@Inject
+	private JobManagementServiceAdapter jobManagementServiceAdapter;
+
+	@Override
+	public void sendEmail(PersonVO personVO) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering sendEmail(personVO={})", personVO);
+		try {
+
+			String organizationIdStr = Config.getProperty("siteservices.defaultOrganizationId");
+			if (Validator.isNotNull(organizationIdStr)) {
+				Long organizationId = Long.parseLong(organizationIdStr);
+				personVO.setOrganizationId(organizationId);
+			} else {
+				throw new ParvanRecoverableException("organization", ErrorCode.FIELD_IS_EMPTY);
+			}
+
+			personVO = jobManagementServiceAdapter.sendEmail(personVO);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while createPerson", e);
+		}
+	}
+}

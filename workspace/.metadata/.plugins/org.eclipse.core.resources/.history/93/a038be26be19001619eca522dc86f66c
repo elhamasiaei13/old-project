@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>AddGroup</title>
+</head>
+
+<body background="bgimage.jpg">
+	<section class="content" layout:fragment="content">
+
+
+		
+	</section>
+</body>
+</html>

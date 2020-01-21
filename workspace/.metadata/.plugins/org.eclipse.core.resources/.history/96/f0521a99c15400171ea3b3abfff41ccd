@@ -1,0 +1,51 @@
+package com.parvanpajooh.client.transportationmanagement2;
+
+import java.util.List;
+
+import com.parvanpajooh.client.common.GenericRestClient;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.common.RestClientConstants;
+import com.parvanpajooh.client.transportationmanagement2.model.TransportationScheduleMsg;
+import com.parvanpajooh.client.transportationmanagement2.service.TransportationManagement2Api;
+import com.parvanpajooh.commons.config.Config;
+
+import retrofit2.Call;
+
+/**
+ * @author sasan
+ */
+
+public class TransportationManagement2ApiRestClient extends GenericRestClient<TransportationManagement2Api> {
+
+	private static final String ENDPOINT_PATH = "/transportationmanagement2-rest/v1/";
+
+	private TransportationManagement2Api transportationManagementApi;
+
+	public TransportationManagement2ApiRestClient() {
+		super(
+				Config.getProperty("transportationmanagement2.rest.endpoint.protocol", RestClientConstants.ENDPOINT_DEF_PROTOCOL__HTTP),
+				Config.getProperty("transportationmanagement2.rest.endpoint.host", RestClientConstants.ENDPOINT_DEF_HOST__LOCALHOST),
+				Config.getProperty("transportationmanagement2.rest.endpoint.port", RestClientConstants.ENDPOINT_DEF_PORT__80), 
+				ENDPOINT_PATH,
+				Config.getLongProperty("transportationmanagement2.rest.endpoint.timeout", RestClientConstants.TIMEOUT));
+		
+		transportationManagementApi = super.createRestClient();
+	}
+	
+	public TransportationScheduleMsg findTransportationSchedule(String carrierCode, String routeNumber, String strUtcDepartureDateInUtc) throws ParvanClientException {
+		Call<TransportationScheduleMsg> call = transportationManagementApi.findTransportationSchedule(carrierCode, routeNumber, strUtcDepartureDateInUtc);
+		return executeCall(call);
+	}
+	
+	public List<TransportationScheduleMsg> findByFromNodeCodeAndDepartureDate(String fromNodeCode, String departureDateInOriginLocalStr) throws ParvanClientException {
+		Call<List<TransportationScheduleMsg>> call = transportationManagementApi.findByFromNode(fromNodeCode, departureDateInOriginLocalStr);
+		return executeCall(call);
+	}
+	
+	public List<TransportationScheduleMsg> findByToNodeCodeAndArrivalDate(String toNodeCode, String arrivalDateInDestinationLocalStr) throws ParvanClientException {
+		Call<List<TransportationScheduleMsg>> call = transportationManagementApi.findByToNode(toNodeCode, arrivalDateInDestinationLocalStr);
+		return executeCall(call);
+	}
+	
+}

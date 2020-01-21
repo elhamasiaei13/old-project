@@ -1,0 +1,81 @@
+package com.parvanpajooh.agentmanagement.service.impl;
+
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.agentmanagement.model.vo.CityInfoVO;
+import com.parvanpajooh.agentmanagement.model.vo.NodeVO;
+import com.parvanpajooh.agentmanagement.service.RateAndRouteLocalService;
+import com.parvanpajooh.agentmanagement.service.adapter.RateAndRouteServiceAdapter;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.FreightNodeType;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class RateAndRouteLocalServiceImpl implements RateAndRouteLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(RateAndRouteLocalServiceImpl.class);
+	
+	@Inject
+	private RateAndRouteServiceAdapter rateAndRouteServiceAdapter;
+
+	@Override
+	public List<NodeVO> findNodesBy(String term, String cityShortCode, int firstResult, int maxResults, String sortDirection, String sortCriterion)
+			throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering findNodesBy(term={} , cityShortCode={})", term, cityShortCode);
+		List<NodeVO> voList = null;
+
+		try {
+
+			voList = rateAndRouteServiceAdapter.findNodesBy(term, cityShortCode, firstResult, maxResults, sortDirection, sortCriterion);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findNodesBy", e);
+		}
+
+		// LOG
+		log.debug("Leaving findNodesBy(): ret={}", (voList != null) ? voList.size() : "NULL");
+		return voList;	
+	}
+	
+	@Override
+	public List<NodeVO> findHubNodesBy(String term, String cityShortCode, int firstResult, int maxResults, String sortDirection, String sortCriterion)
+			throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering findNodesBy(term={} , cityShortCode={})", term, cityShortCode);
+		List<NodeVO> voList = null;
+
+		try {
+			voList = rateAndRouteServiceAdapter.findNodesBy(FreightNodeType.HUB, term, cityShortCode, firstResult, maxResults, sortDirection, sortCriterion);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findNodesBy", e);
+		}
+		return voList;	
+	}
+
+	@Override
+	public NodeVO getNode(Long id) throws ParvanServiceException {
+		return rateAndRouteServiceAdapter.getNode(id);
+	}
+
+	@Override
+	public NodeVO getNodeForInit(Long id) throws ParvanServiceException {
+		return rateAndRouteServiceAdapter.getNodeForInit(id);
+	}
+}

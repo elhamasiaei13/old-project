@@ -1,0 +1,13 @@
+package com.parvanpajooh.transportationmanagement.service.adapter;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.transportationmanagement.model.vo.VehicleVO;
+
+public interface LogesticManagementServiceAdapter {
+
+	public PageList<VehicleVO> findVehicles(String term, int page, int size) throws ParvanUnrecoverableException;
+
+	public VehicleVO getVehicle(Long id) throws ParvanUnrecoverableException;
+
+}

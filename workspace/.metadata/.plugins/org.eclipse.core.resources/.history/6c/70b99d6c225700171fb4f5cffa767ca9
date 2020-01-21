@@ -1,0 +1,29 @@
+package com.parvanpajooh.siteservices.model.vo;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.personmanagement.model.PersonManagementEnums;
+import com.parvanpajooh.client.personmanagement.model.PersonMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.siteservices.model.enums.Gender;
+import com.parvanpajooh.siteservices.model.enums.PersonType;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+public class VisitorVO extends BaseVO {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6829088593973278548L;
+	
+
+}

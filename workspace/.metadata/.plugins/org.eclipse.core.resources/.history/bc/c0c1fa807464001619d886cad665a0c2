@@ -1,0 +1,122 @@
+package com.parvanpajooh.identitymanagement2.mvc;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.parvanpajooh.common.util.ParamUtil;
+import com.parvanpajooh.commons.platform.ejb.service.GenericService;
+import com.parvanpajooh.identitymanagement2.model.User;
+import com.parvanpajooh.identitymanagement2.model.criteria.UserCriteria;
+import com.parvanpajooh.identitymanagement2.model.vo.UserVO;
+import com.parvanpajooh.identitymanagement2.mvc.base.Idm2AbstractController;
+import com.parvanpajooh.identitymanagement2.service.RoleService;
+import com.parvanpajooh.identitymanagement2.service.UserService;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+@Controller
+@RequestMapping("/user")
+public class UserController extends Idm2AbstractController<User, UserVO, UserCriteria> {
+
+	@EJB(mappedName = "java:global/identitymanagement2-ear/identitymanagement2-ejb/UserServiceImpl")
+	private UserService userService;
+
+	@EJB(mappedName = "java:global/identitymanagement2-ear/identitymanagement2-ejb/RoleServiceImpl")
+	private RoleService roleService;
+
+	@Override
+	protected GenericService<User, Long> getService() {
+		return userService;
+	}
+
+	@Override
+	protected String getName() {
+		return "users";
+	}
+
+	/**
+	 * 
+	 * @param userVO
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/saveRoles", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> saveRoles(Long id, HttpServletRequest request) {
+		log.debug("Entering save(id={})", id);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		long[] roleIds = ParamUtil.getLongValues(request, "roles.id");
+
+		try {
+			userService.changeRoles(getUserInfo(request), id, roleIds);
+
+			result.put("status", "success");
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @param password
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/{id}/resetPassword", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> resetPassword(@PathVariable Long id, String password, HttpServletRequest request) {
+
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			userService.resetPassword(getUserInfo(request), id, password);
+
+			result.put("status", "success");
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param newPassword
+	 * @param confirmNewPassword
+	 * @param currentPassword
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/profile", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> changePassword(String newPassword, String confirmNewPassword, String password, HttpServletRequest request) {
+
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			userService.changePass(getUserInfo(request), newPassword, confirmNewPassword, password);
+
+			result.put("status", "success");
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		return result;
+	}
+}

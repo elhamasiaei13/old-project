@@ -1,0 +1,135 @@
+package com.parvanpajooh.accounting.model.vo;
+
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.parvanpajooh.common.vo.BaseVO;
+
+@XmlRootElement
+public class VoucherVO extends BaseVO {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5971686629027277987L;
+
+	private Long id;
+
+	private String referenceId;
+
+	private LocalDateTime issueDate;
+
+	private List<VoucherRowVO> voucherRow;
+	
+	private FiscalYearVO fiscalYear;
+	
+	private boolean active;
+	
+	private String description;
+	
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the referenceId
+	 */
+	public String getReferenceId() {
+		return referenceId;
+	}
+
+	/**
+	 * @param referenceId the referenceId to set
+	 */
+	public void setReferenceId(String referenceId) {
+		this.referenceId = referenceId;
+	}
+
+	
+	/**
+	 * @return the issueDate
+	 */
+	public LocalDateTime getIssueDate() {
+		return issueDate;
+	}
+
+	/**
+	 * @param issueDate the issueDate to set
+	 */
+	public void setIssueDate(LocalDateTime issueDate) {
+		this.issueDate = issueDate;
+	}
+
+	/**
+	 * @return the voucherRow
+	 */
+	public List<VoucherRowVO> getVoucherRow() {
+		return voucherRow;
+	}
+
+	/**
+	 * @param voucherRow the voucherRow to set
+	 */
+	public void setVoucherRow(List<VoucherRowVO> voucherRow) {
+		this.voucherRow = voucherRow;
+	}
+	
+	/**
+	 * @return the fiscalYear
+	 */
+	public FiscalYearVO getFiscalYear() {
+		return fiscalYear;
+	}
+
+	/**
+	 * @param fiscalYear the fiscalYear to set
+	 */
+	public void setFiscalYear(FiscalYearVO fiscalYear) {
+		this.fiscalYear = fiscalYear;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	
+
+}

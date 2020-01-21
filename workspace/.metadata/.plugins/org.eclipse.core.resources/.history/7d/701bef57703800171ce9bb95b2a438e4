@@ -1,0 +1,16 @@
+package com.parvanpajooh.transportationmanagement2.dao;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.dao.GenericDao;
+import com.parvanpajooh.transportationmanagement.model.TransportationSchedule;
+import com.parvanpajooh.transportationmanagement.model.criteria.TransportationScheduleCriteria;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+public interface TransportationScheduleDao extends GenericDao<TransportationSchedule, Long> {
+
+	public int countOfTransportationNumber(TransportationScheduleCriteria criteria) throws ParvanDaoException;
+}

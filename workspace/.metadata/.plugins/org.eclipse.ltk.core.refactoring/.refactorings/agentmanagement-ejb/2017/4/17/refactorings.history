@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;parentGeneralAgentVO&apos; in &apos;com.parvanpajooh.agentmanagement.model.vo.GeneralAgentVO.clone()&apos; to &apos;parents&apos;&#x0A;- Original project: &apos;agentmanagement-ejb&apos;&#x0A;- Original element: &apos;com.parvanpajooh.agentmanagement.model.vo.GeneralAgentVO.clone().parentGeneralAgentVO&apos;&#x0A;- Renamed element: &apos;parentGeneralAgentVO&apos;&#x0A;- Update references to refactored element" description="Rename local variable &apos;parentGeneralAgentVO&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src\/main\/java&lt;com.parvanpajooh.agentmanagement.model.vo{GeneralAgentVO.java[GeneralAgentVO~clone@parentGeneralAgentVO!6121!6175!6136!6155!QGeneralAgentVO;!0!false" name="parents" references="true" stamp="1493284870608" version="1.0"/>
+</session>

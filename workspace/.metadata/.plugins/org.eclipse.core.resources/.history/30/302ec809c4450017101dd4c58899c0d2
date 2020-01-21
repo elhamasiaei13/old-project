@@ -1,0 +1,1083 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.dao.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Selection;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+
+import org.hibernate.Hibernate;
+
+import com.google.common.base.Stopwatch;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.StringUtil;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.commons.util.threads.ProcessingStatus;
+import com.parvanpajooh.shipment.dao.ManifestDao;
+import com.parvanpajooh.shipment.model.Courier;
+import com.parvanpajooh.shipment.model.Courier_;
+import com.parvanpajooh.shipment.model.Gunny;
+import com.parvanpajooh.shipment.model.Gunny_;
+import com.parvanpajooh.shipment.model.Manifest;
+import com.parvanpajooh.shipment.model.Manifest_;
+import com.parvanpajooh.shipment.model.PackingItem;
+import com.parvanpajooh.shipment.model.PackingItemState;
+import com.parvanpajooh.shipment.model.PackingItemState_;
+import com.parvanpajooh.shipment.model.PackingItem_;
+import com.parvanpajooh.shipment.model.Shipment;
+import com.parvanpajooh.shipment.model.criteria.ManifestCriteria;
+import com.parvanpajooh.shipment.model.enums.ManifestState;
+import com.parvanpajooh.shipment.model.enums.ManifestType;
+import com.parvanpajooh.shipment.model.vo.GunnyVO;
+import com.parvanpajooh.shipment.model.vo.PackingItemStateVO;
+
+/**
+ * @author MO
+ * @author ali
+ *
+ */
+public class ManifestDaoJpa extends GenericDaoJpa<Manifest, Long> implements ManifestDao {
+
+	public ManifestDaoJpa() {
+		super(Manifest.class);
+	}
+	
+	/**
+     * Entity manager, injected by Spring using @PersistenceContext annotation on setEntityManager()
+     */
+    @PersistenceContext(unitName=PERSISTENCE_UNIT_NAME)
+    private EntityManager entityManager;
+	
+	@Override
+	public List<Manifest> findFullByCriteria(
+			BaseCriteria cri, 
+			int firstResult, 
+			int maxResults,
+			SortDirectionEnum sortDirection,
+            String sortCriterion) throws ParvanDaoException {
+		
+		Stopwatch stopwatch = Stopwatch.createStarted();
+		
+		//LOG
+    	log.debug("Entering findByCriteria(TIME_MANIFEST-DAO={}, cri={} , firstResult={} , maxResults={} , sortDirection={} , sortCriterion={})",
+    			stopwatch, 
+    			cri,
+    			firstResult,
+    			maxResults,
+    			sortDirection,
+    			sortCriterion);
+    	
+		List<Manifest> list = null;
+    	try {
+
+    		// make criteria-builder
+    		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+    		
+    		// make criteria
+    		CriteriaQuery<Manifest> criteria = builder.createQuery( Manifest.class );
+    		Metamodel metamodel = getEntityManager().getMetamodel();
+    		EntityType<Manifest> Manifest_ = metamodel.entity( Manifest.class);
+    		Root<Manifest> root = criteria.from( Manifest_);
+    		criteria.distinct(true);
+    		
+    		Map<String, Join> joins = new HashMap<String, Join>();
+    		
+    		List<Predicate> predicateList = buildPredicateList(
+    				cri, 
+    				builder, 
+    				metamodel, 
+    				root,
+    				joins);
+    		
+    		if (predicateList.size() == 1) {
+        		criteria.where( predicateList.get(0));
+        		
+            } else if (predicateList.size() > 1) {
+            	criteria.where( builder.and( predicateList.toArray( new Predicate[ predicateList.size()])));
+            }
+    		
+    		if (sortCriterion != null) {
+				
+				String[] joinSort = StringUtil.split(sortCriterion, StringPool.PERIOD);
+				
+				if(joinSort.length > 1){
+					Join join = null;
+					
+					if(joinSort.length > 2){
+						
+						for (int i = 0; i < joinSort.length - 1; i++) {
+							join = joins.get(joinSort[i]);
+							
+							if(join == null){
+								if(i == 0)
+									join = root.join(joinSort[i], JoinType.LEFT);
+							}
+						}
+					}
+					else {
+						join = joins.get(joinSort[0]);
+						
+						if(join == null){
+							join = root.join(joinSort[0], JoinType.LEFT);
+						}
+					}
+					
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						criteria.orderBy(builder.asc(join.get(joinSort[joinSort.length - 1])));
+					}
+					
+					if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						criteria.orderBy(builder.desc(join.get(joinSort[joinSort.length - 1])));
+					}
+					
+				} else {
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						criteria.orderBy(builder.asc(root.get(sortCriterion)));
+					}
+					
+					if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						criteria.orderBy(builder.desc(root.get(sortCriterion)));
+					}
+				}
+				
+			}
+
+    		// make query
+    		TypedQuery<Manifest> q = getEntityManager().createQuery( criteria );
+    		q.setFirstResult( firstResult);
+            q.setMaxResults( maxResults);
+    		q.setHint("org.hibernate.cacheable", true);
+            q.setHint("org.hibernate.cacheMode", "NORMAL");
+            
+            // execute query
+            list = q.getResultList();
+            
+            
+            ///////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////
+    		_manifestGroupBy(cri);
+
+		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while getting paged-list of records by criteria.", e);
+		}
+
+    	//LOG
+    	log.debug("Leaving findByCriteria(): TIME_MANIFEST-DAO={}, count={}", stopwatch, (list != null)? list.size() : "NULL");
+    	
+        return list;
+	}
+	
+    /*private void _manifestGroupBy(BaseCriteria cri) {
+    	//LOG
+		log.debug("Entering getManifestSummary");
+    		
+		// initialize
+		EntityManager em = getEntityManager();
+		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+
+		// make criteria
+		CriteriaQuery<Tuple> cq = builder.createQuery(Tuple.class);
+		
+		Root<Manifest> manifest = cq.from(Manifest.class);
+		Join<Gunny, Shipment> shipment = manifest.join(Manifest_.gunnies).join(Gunny_.shipments);
+		
+		Path<Long> idPath = manifest.get(Manifest_.id);
+		Path<Boolean> activePath = manifest.get( Manifest_.active );
+		Selection<Long> shipmentCountSel = builder.count(shipment.<Long>get(Shipment_.id)).alias("shipmentCount");
+		Selection<Double> totalChargeableWeightSel = builder.sum(shipment.<Double>get(Shipment_.totalChargeableWeight)).alias("totalChargeableWeight");
+		Selection<Double> totalGrossWeightSel = builder.sum(shipment.<Double>get(Shipment_.totalGrossWeight)).alias("totalGrossWeight");
+		Selection<Double> totalDeclaredValueSel = builder.sum(shipment.<Double>get(Shipment_.totalDeclaredValue)).alias("totalDeclaredValue");
+		Selection<Integer> totalPiecesSel = builder.sum(shipment.<Integer>get(Shipment_.totalPieces)).alias("totalPieces");
+		Selection<Double> totalAmountSel = builder.sum(shipment.<Double>get(Shipment_.totalAmount)).alias("totalAmount");
+		
+		cq.multiselect( 
+				idPath, 
+				activePath, 
+				shipmentCountSel, 
+				totalChargeableWeightSel, 
+				totalGrossWeightSel, 
+				totalDeclaredValueSel,
+				totalPiecesSel,
+				totalAmountSel);
+		
+		cq.where(builder.lt(manifest.get(Manifest_.id), 1500));
+		
+		cq.groupBy(manifest.get(Manifest_.id));
+		
+		cq.orderBy(builder.asc(manifest.get(Manifest_.id)));
+		
+		List<Tuple> tuples = em.createQuery( cq ).getResultList();
+		
+		for (Tuple thisTuple : tuples) {
+			System.out.println(
+					thisTuple.get( idPath ) + "\t" + 
+					thisTuple.get( activePath ) + "\t" +
+					thisTuple.get( shipmentCountSel ) + "\t" +
+					thisTuple.get( totalChargeableWeightSel ) + "\t" + 
+					thisTuple.get( totalGrossWeightSel ) + "\t" + 
+					thisTuple.get( totalDeclaredValueSel ) + "\t" + 
+					thisTuple.get( totalPiecesSel ) + "\t" + 
+					thisTuple.get( totalAmountSel ));
+			System.out.println();
+		}
+		
+	}*/
+	
+	private void _manifestGroupBy(BaseCriteria cri) {
+    	//LOG
+		log.debug("Entering getManifestSummary");
+    		
+		// initialize
+		EntityManager em = getEntityManager();
+		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+
+		// make criteria
+		CriteriaQuery<Tuple> cq = builder.createQuery(Tuple.class);
+		
+		Root<Manifest> manifest = cq.from(Manifest.class);
+		Join<Gunny, PackingItem> packintItems = manifest.join(Manifest_.gunnies).join(Gunny_.packingItems);
+		
+		Path<Long> idPath = manifest.get(Manifest_.id);
+		Path<Boolean> activePath = manifest.get( Manifest_.active );
+		Selection<Long> packingItemCountSel = builder.count(packintItems.<Long>get(PackingItem_.id)).alias("packingItemCount");
+		//Selection<Double> totalChargeableWeightSel = builder.sum(packintItems.<Double>get(Shipment_.totalChargeableWeight)).alias("totalChargeableWeight");
+		//Selection<Double> totalGrossWeightSel = builder.sum(packintItems.<Double>get(Shipment_.totalGrossWeight)).alias("totalGrossWeight");
+		//Selection<Double> totalDeclaredValueSel = builder.sum(packintItems.<Double>get(Shipment_.totalDeclaredValue)).alias("totalDeclaredValue");
+		//Selection<Integer> totalPiecesSel = builder.sum(packintItems.<Integer>get(Shipment_.totalPieces)).alias("totalPieces");
+		//Selection<Double> totalAmountSel = builder.sum(packintItems.<Double>get(Shipment_.totalAmount)).alias("totalAmount");
+		//Selection<Double> sumFreightSel = builder.sum(priceItem.<Double>get(PriceItem_.value)).alias("sumFreight");
+		
+		/*cq.multiselect( 
+				idPath, 
+				activePath, 
+				shipmentCountSel, 
+				totalChargeableWeightSel, 
+				totalGrossWeightSel, 
+				totalDeclaredValueSel,
+				totalPiecesSel,
+				totalAmountSel);*/
+		
+		cq.where(builder.lt(manifest.get(Manifest_.id), 1500));
+		
+		cq.groupBy(manifest.get(Manifest_.id));
+		
+		cq.orderBy(builder.asc(manifest.get(Manifest_.id)));
+		
+		//List<Tuple> tuples = em.createQuery( cq ).getResultList();
+	}
+
+	@Override
+	public Manifest getFullManifest(Long id) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering getFullManifest( id={})", id);
+
+		Manifest manifest = null;
+
+		try {
+			// get record
+			manifest = this.entityManager.find(Manifest.class, id);
+
+			// check
+			if (manifest == null) {
+				throw new ObjectNotFoundException();
+			}
+
+			Hibernate.initialize(manifest.getGunnies());
+			for (Gunny gunny : manifest.getGunnies()) {
+				Hibernate.initialize(gunny);
+				Hibernate.initialize(gunny.getPackingItems());
+			}
+			
+
+		} catch (ObjectNotFoundException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException(
+					"Error occurred while getting records by its ID.", e);
+		}
+
+		// LOG
+		log.debug("Leaving getFullManifest(): {}", manifest);
+
+		return manifest;
+	}
+	
+	@Override
+	public Gunny findGunnyByBarcode(Long manifestId, String barcode) throws ParvanDaoException {
+		//LOG
+    	log.debug("Entering findGunnyByBarcode( manifestId={}, barcode={})", manifestId, barcode);
+    	
+    	
+    	try {
+    		// make query
+    		String strQry = "select gunny from Manifest obj join obj.gunnies as gunny where gunny.barcode = ? and obj.id = ?";
+    		TypedQuery<Gunny> q = getEntityManager().createQuery(strQry, Gunny.class);
+    		
+    		q.setParameter(1, barcode);
+    		q.setParameter(2, manifestId);
+    		
+    		List<Gunny> gunnies = q.getResultList();
+    		
+    		Gunny gunny = null;
+    		if(gunnies != null && gunnies.size() > 0){
+    			gunny = gunnies.get(0);
+
+    			Hibernate.initialize(gunny.getPackingItems());
+    		}
+    		
+    		return gunny;
+		
+    	} catch (Exception e) {
+    		throw new ParvanDaoException("Error occurred while finding Gunny with barcode: " + barcode);
+		}
+
+	}
+	
+	@Override
+	public List<Shipment> findShipments(ManifestCriteria cri) throws ParvanDaoException {
+		//LOG
+		log.debug("Entering findShipments( ManifestCriteria={})", cri);
+		
+		
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+	
+			// make criteria
+			CriteriaQuery<Shipment> criteria = builder.createQuery(Shipment.class);
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			Root<Manifest> root = criteria.from(Manifest.class);
+			
+			Map<String, Join> joins = new HashMap<String, Join>();
+	
+			List<Predicate> predicateList = buildPredicateList(cri, builder, metamodel, root, joins);
+			
+			Join gunnyJoin = joins.get("gunnies");
+			Join shipmentJoin = joins.get("shipments");
+			if(gunnyJoin == null){
+				gunnyJoin = root.join("gunnies");
+				
+				shipmentJoin = gunnyJoin.join("shipments");
+			}
+
+			//Expression<Long> projection = builder.count(join.get("id"));
+			criteria.select(shipmentJoin);
+	
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+	
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+	
+			// make query
+			TypedQuery<Shipment> q = getEntityManager().createQuery(criteria);
+	
+			// execute query
+			return q.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while findShipments", e);
+		}
+		
+	}
+	
+	@Override
+	public Long countPackingItems(ManifestCriteria cri) throws ParvanDaoException {
+		log.debug("Entering countPackingItems (ManifestCriteria={})", cri);
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+			
+			// make criteria
+			CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			Root<Manifest> root = criteria.from(Manifest.class);
+			
+			Map<String, Join> joins = new HashMap<String, Join>();
+			
+			List<Predicate> predicateList = buildPredicateList(cri, builder, metamodel, root, joins);
+			
+			Join join = joins.get("gunnies");
+			if(join == null){
+				join = root.join("gunnies");
+				join = join.join("packingItems");
+			}
+			
+			Expression<Long> projection = builder.count(join.get("id"));
+			criteria.select(projection);
+			
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+				
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+			
+			// make query
+			TypedQuery<Long> q = getEntityManager().createQuery(criteria);
+			
+			// execute query
+			List<Long> countList = q.getResultList();
+			
+			return countList.get(0);
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while countPackingItems", e);
+		}
+	}
+	
+	@Override
+	public List<Tuple> countManifestPerTypeAndState(Set<Long> agentIds, boolean isOriginAgent, LocalDateTime fromDateTime, LocalDateTime toDateTime, List<ManifestState> currentState, List<ManifestState> notCurrentState) throws ParvanDaoException {
+		//LOG
+		log.debug("Entering countManifestPerTypeAndState( agentIds={}, isOriginAgent={}, fromDateTime={}, toDateTime={}, currentState={}, notCurrentState={})", agentIds, isOriginAgent, fromDateTime, toDateTime, currentState, notCurrentState);
+		
+		// make criteria-builder
+		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+		
+		// make criteria
+		CriteriaQuery<Tuple> criteria = builder.createQuery(Tuple.class);
+		Root<Manifest> root = criteria.from(Manifest.class);
+		
+		criteria.multiselect(builder.count(root.get(Manifest_.id)), root.get(Manifest_.type), root.get(Manifest_.state));
+		criteria.groupBy(root.get(Manifest_.type), root.get(Manifest_.state));
+		
+		criteria.orderBy(builder.asc(root.get(Manifest_.createDate)));
+		
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+		
+		//--------------------------------------------------------------------------
+		// Not Current State
+		//--------------------------------------------------------------------------
+		if (Validator.isNotNull(notCurrentState)) {
+			List<Predicate> andPredicates = new ArrayList<Predicate>();
+			
+			for (ManifestState thisState : notCurrentState) {
+				Predicate predicate = builder.notEqual(root.<ManifestState> get(Manifest_.state), thisState);
+				andPredicates.add(predicate);
+			}
+			
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		//--------------------------------------------------------------------------
+		// Current State
+		//--------------------------------------------------------------------------
+		if (Validator.isNotNull(currentState)) {
+			List<Predicate> orPredicates = new ArrayList<Predicate>();
+			
+			for (ManifestState thisState : currentState) {
+				Predicate predicate = builder.equal(root.<ManifestState> get(Manifest_.state), thisState);
+				orPredicates.add(predicate);
+			}
+			
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+
+		//--------------------------------------------------------------------------
+		// Origin or Destination Agent
+		//--------------------------------------------------------------------------
+		if(Validator.isNotNull(agentIds)){
+			List<Predicate> issueAgentPredicates = new ArrayList<Predicate>();
+			if(isOriginAgent){
+				for (Long agentId : agentIds) {
+					Predicate predicate = builder.equal(root.<Long>get(Manifest_.originAgentId), agentId);
+					issueAgentPredicates.add(predicate);
+				}
+			} else {
+				for (Long agentId : agentIds) {
+					Predicate predicate = builder.equal(root.<Long>get(Manifest_.destinationAgentId), agentId);
+					issueAgentPredicates.add(predicate);
+				}
+			}
+			
+			Predicate orPredicate = builder.or(issueAgentPredicates.toArray(new Predicate[issueAgentPredicates.size()]));
+			predicateList.add(orPredicate);
+		}
+		
+		//----------------------------------------------------------------
+		// active
+		//----------------------------------------------------------------
+		predicateList.add(builder.equal(root.<Boolean> get(Manifest_.active), Boolean.TRUE));
+		
+		//----------------------------------------------------------------
+		// Shipping Date
+		//----------------------------------------------------------------
+		if (Validator.isNotNull(fromDateTime) || Validator.isNotNull(toDateTime)) {
+			
+			if(Validator.isNotNull(fromDateTime)){
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Manifest_.createDate), fromDateTime);
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(toDateTime)){
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Manifest_.createDate), toDateTime);
+				predicateList.add(predicate);
+			}
+			
+		}
+		
+		if (predicateList.size() == 1) {
+			criteria.where(predicateList.get(0));
+			
+		} else if (predicateList.size() > 1) {
+			criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+		}
+		
+		// make query
+		TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);
+		
+		return q.getResultList();
+	}
+
+	@Override
+	protected List<Predicate> buildPredicateList(
+			BaseCriteria cri, 
+			CriteriaBuilder builder, 
+			Metamodel metamodel, 
+			Root<Manifest> root,
+			Map<String, Join> joins) throws ParvanException {
+
+		//LOG
+    	log.debug("Entering buildPredicateList( ... )");
+    	
+    	ManifestCriteria manifestCriteria = ( ManifestCriteria) cri;
+    	
+    	List<Predicate> predicateList = new ArrayList<>();
+    	
+    	Long manifestId = manifestCriteria.getManifestId();
+    	ManifestType[] type = manifestCriteria.getType();
+    	ManifestState[] state = manifestCriteria.getState();
+    	
+    	String flightNumber = manifestCriteria.getFlightNumber();
+    	String description = manifestCriteria.getDescription();
+    	LocalDateTime expecteDepartureDateTimeFrom = manifestCriteria.getExpecteDepartureFrom();
+    	LocalDateTime expecteDepartureDateTimeTo = manifestCriteria.getExpecteDepartureTo();
+    	LocalDateTime expectedArrivalDateTimeFrom = manifestCriteria.getExpectedArrivalFrom();
+    	LocalDateTime expectedArrivalDateTimeTo = manifestCriteria.getExpectedArrivalTo();
+    	
+    	
+    	Boolean active = manifestCriteria.getActive();
+    	String originCityShortCode = manifestCriteria.getOriginCityShortCode();
+    	String destinationCityShortCode = manifestCriteria.getDestinationCityShortCode();
+    	ProcessingStatus[] indexProcessingStatus = manifestCriteria.getIndexProcessingStatus();
+    	LocalDateTime indexProcessingDateTimeFrom = manifestCriteria.getIndexProcessingDateFrom();
+    	LocalDateTime indexProcessingDateTimeTo = manifestCriteria.getIndexProcessingDateTo();
+    	
+    	if(Validator.isNotNull( manifestId )){
+    		Predicate predicate = builder.equal(root.<Long>get("id"), manifestId);
+    		predicateList.add(predicate);
+    	}
+    	
+    	//----------------------------------------------------------------
+		// Master waybill number
+		//----------------------------------------------------------------
+    	String masterWaybillNumber = manifestCriteria.getMasterWaybillNumber();
+    	if(Validator.isNotNull( masterWaybillNumber )){
+    		Predicate predicate = builder.equal(root.<String>get(Manifest_.masterWaybillNumber), masterWaybillNumber);
+    		predicateList.add(predicate);
+    	}
+    	
+    	/******** From **************/
+		String masterWaybillNumberFrom = manifestCriteria.getMasterWaybillNumberFrom();
+		if (Validator.isNotNull(masterWaybillNumberFrom)) {
+			Predicate fromPredicate = builder.greaterThanOrEqualTo(root.<String>get(Manifest_.masterWaybillNumber), masterWaybillNumberFrom);
+			predicateList.add(fromPredicate);
+		}
+		/******** To **************/
+		String masterWaybillNumberTo = manifestCriteria.getMasterWaybillNumberTo();
+		if (Validator.isNotNull(masterWaybillNumberTo)) {
+			Predicate toPredicate = builder.lessThanOrEqualTo(root.<String>get(Manifest_.masterWaybillNumber), masterWaybillNumberTo);
+			predicateList.add(toPredicate);
+		}
+    	
+    	if(Validator.isNotNull( flightNumber )){
+    		Predicate predicate = builder.equal(root.<String>get(Manifest_.flightNumber), flightNumber);
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull( description )){
+    		Predicate predicate = builder.like(root.<String>get(Manifest_.description), "%" + description + "%");
+    		predicateList.add(predicate);
+    	}
+    	
+    	// active
+    	if(Validator.isNotNull( active )){
+    		Predicate predicate = builder.equal(root.<Boolean>get(Manifest_.active), active);
+    		predicateList.add(predicate);
+    	}
+    	
+    	//----------------------------------------------------------------
+		// Create Date
+		//----------------------------------------------------------------
+    	LocalDateTime createDateTimeFrom = manifestCriteria.getCreateDateFrom();
+    	LocalDateTime createDateTimeTo   = manifestCriteria.getCreateDateTo();
+		if (Validator.isNotNull(createDateTimeFrom) || Validator.isNotNull(createDateTimeTo)) {
+			
+			if(Validator.isNotNull(createDateTimeFrom)){
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Manifest_.createDate), createDateTimeFrom);
+	    		predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(createDateTimeTo)){
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Manifest_.createDate), createDateTimeTo);
+				predicateList.add(predicate);
+			}
+			
+		}
+		
+		//----------------------------------------------------------------
+		// Update Date
+		//----------------------------------------------------------------
+		LocalDateTime updateDateTimeFrom = manifestCriteria.getUpdateDateFrom();
+		LocalDateTime updateDateTimeTo   = manifestCriteria.getUpdateDateTo();
+		if (Validator.isNotNull(updateDateTimeFrom) || Validator.isNotNull(updateDateTimeTo)) {
+			
+			if(Validator.isNotNull(updateDateTimeFrom)){
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Manifest_.updateDate), updateDateTimeFrom);
+	    		predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(updateDateTimeTo)){
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Manifest_.updateDate), updateDateTimeTo);
+				predicateList.add(predicate);
+			}
+		}
+    	
+    	if(Validator.isNotNull( expecteDepartureDateTimeFrom )){
+    		Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime>get(Manifest_.expectedDeparture), expecteDepartureDateTimeFrom);
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull( expecteDepartureDateTimeTo )){
+    		Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime>get(Manifest_.expectedDeparture), expecteDepartureDateTimeTo);
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull( expectedArrivalDateTimeFrom )){
+    		Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime>get(Manifest_.expectedArrival), expectedArrivalDateTimeFrom);
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull( expectedArrivalDateTimeTo )){
+    		Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime>get(Manifest_.expectedArrival), expectedArrivalDateTimeTo);
+    		predicateList.add(predicate);
+    	}
+    	
+    	if( Validator.isNotNull(type) ) {
+    		
+    		List<Predicate> orPredicate = new ArrayList<>();
+    		
+    		for( ManifestType thisType : type ) {
+    			orPredicate.add(builder.equal(root.<ManifestType>get(Manifest_.type), thisType));
+    		}
+    		
+    		Predicate predicate = builder.or(orPredicate.toArray(new Predicate[orPredicate.size()]));
+			predicateList.add(predicate);
+    		
+    	}
+    	
+    	if( Validator.isNotNull(state) ) {
+    		
+    		List<Predicate> orPredicate = new ArrayList<>();
+    		
+    		for( ManifestState thisState : state ) {
+    			orPredicate.add(builder.equal(root.<ManifestState>get(Manifest_.state), thisState));
+    		}
+    		
+    		Predicate predicate = builder.or(orPredicate.toArray(new Predicate[orPredicate.size()]));
+    		predicateList.add(predicate);
+    		
+    	}
+    	
+    	Set<PackingItemStateVO> packingItemStates = manifestCriteria.getPackingItemStates();
+    	Set<PackingItemStateVO> notPackingItemStates = manifestCriteria.getNotPackingItemStates();
+    	String waybillNumberFrom = manifestCriteria.getWaybillNumberFrom();
+    	String waybillNumberTo = manifestCriteria.getWaybillNumberTo();
+    	GunnyVO gunny = manifestCriteria.getGunny();
+    	String waybillNumber = manifestCriteria.getWaybillNumber();
+    	String partNumber = manifestCriteria.getPartNumber();
+    	
+    	if (Validator.isNotNull( gunny ) || 
+    			Validator.isNotNull(waybillNumber) || 
+    			Validator.isNotNull(packingItemStates) || 
+    			Validator.isNotNull(notPackingItemStates) || 
+    			Validator.isNotNull(partNumber) ) {
+    		
+    		Join<Manifest, Gunny> gunnyJoin = root.join(Manifest_.gunnies);
+    		
+    		joins.put("gunnies", gunnyJoin);
+    		
+    		if (Validator.isNotNull(gunny)) {
+    			if(Validator.isNotNull( gunny.getId() )){
+    				Predicate predicate = builder.equal(gunnyJoin.<Long>get(Gunny_.id), gunny.getId());
+    				predicateList.add(predicate);
+    			}
+    			
+    			if(Validator.isNotNull( gunny.getBarcode() )){
+    				Predicate predicate = builder.equal(gunnyJoin.<String>get(Gunny_.barcode), gunny.getBarcode());
+    				predicateList.add(predicate);
+    			}
+    			
+    			if(Validator.isNotNull( manifestCriteria.getGunnyNumberFrom() )){
+    				Predicate predicate = builder.greaterThanOrEqualTo(gunnyJoin.<String>get(Gunny_.barcode), manifestCriteria.getGunnyNumberFrom());
+    				predicateList.add(predicate);
+    			}
+    			if(Validator.isNotNull( manifestCriteria.getGunnyNumberTo() )){
+    				Predicate predicate = builder.lessThanOrEqualTo(gunnyJoin.<String>get(Gunny_.barcode), manifestCriteria.getGunnyNumberTo());
+    				predicateList.add(predicate);
+    			}
+    		}
+    		
+    		if (Validator.isNotNull(partNumber) ||
+			   Validator.isNotNull(waybillNumber) || 
+			   Validator.isNotNull(packingItemStates) || 
+			   Validator.isNotNull(notPackingItemStates) ||
+			   Validator.isNotNull(waybillNumberFrom) ||
+			   Validator.isNotNull(waybillNumberTo)) {
+    			
+    			Join<Gunny, PackingItem> packingItemJoin = gunnyJoin.join(Gunny_.packingItems);
+    			
+    			joins.put("packingItems", packingItemJoin);
+    			
+    			//----------------------------------------------------------------
+    			// Part Number
+    			//----------------------------------------------------------------
+    			if (Validator.isNotNull(partNumber)) {
+    				Predicate predicate = builder.equal(packingItemJoin.<String>get(PackingItem_.partNumber), partNumber);
+    				predicateList.add(predicate);
+    			}
+    			
+    			//----------------------------------------------------------------
+    			// Waybill Number
+    			//----------------------------------------------------------------
+    			if(Validator.isNotNull(waybillNumber)){
+	    			Predicate predicate = builder.equal(packingItemJoin.<String>get(PackingItem_.waybillNumber), waybillNumber);
+					predicateList.add(predicate);
+    			}
+    			/******** From **************/
+    			if (Validator.isNotNull(waybillNumberFrom)) {
+    				Predicate fromPredicate = builder.greaterThanOrEqualTo(packingItemJoin.<String>get(PackingItem_.waybillNumber), waybillNumberFrom);
+    				predicateList.add(fromPredicate);
+    			}
+    			/******** To **************/
+    			if (Validator.isNotNull(waybillNumberTo)) {
+    				Predicate toPredicate = builder.lessThanOrEqualTo(packingItemJoin.<String>get(PackingItem_.waybillNumber), waybillNumberTo);
+    				predicateList.add(toPredicate);
+    			}
+				
+				if (Validator.isNotNull(packingItemStates)) {
+					
+					List<Predicate> orPredicates = new ArrayList<>();
+					
+					for (PackingItemStateVO thisState : packingItemStates) {
+						
+						Join<PackingItem, PackingItemState> packingItemStateJoin = packingItemJoin.join(PackingItem_.currentState);
+		    			
+		    			joins.put("currentState", packingItemStateJoin);
+						
+						Predicate predicate = builder.equal(packingItemStateJoin.<String>get(PackingItemState_.code), thisState.getCode());
+						orPredicates.add(predicate);
+					}
+					
+					Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+					predicateList.add(predicate);
+				}
+				
+				if (Validator.isNotNull(notPackingItemStates)) {
+					
+					List<Predicate> andPredicates = new ArrayList<>();
+					
+					for (PackingItemStateVO thisState : notPackingItemStates) {
+						Join<PackingItem, PackingItemState> pakcingItemStateJoin = packingItemJoin.join(PackingItem_.currentState);
+		    			
+		    			joins.put("currentState", pakcingItemStateJoin);
+						
+						Predicate predicate = builder.notEqual(pakcingItemStateJoin.<String>get(PackingItemState_.code), thisState.getCode());
+						andPredicates.add(predicate);
+					}
+					
+					Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+					predicateList.add(predicate);
+				}
+    		}
+    		
+    	}
+    	// ---------------------------------------------------
+		// Assigned Courier
+		// ---------------------------------------------------
+    	Long assignedCourierUserId = manifestCriteria.getAssignedCourierUserId();
+    	Long assignedCourierId = manifestCriteria.getAssignedCourierId();
+    	if (Validator.isNotNull(assignedCourierId) || Validator.isNotNull(assignedCourierUserId)) {
+			Join<Manifest, Courier> courierJoin = root.join(Manifest_.courier);
+			
+			joins.put("courier", courierJoin);
+			
+			if(Validator.isNotNull(assignedCourierId)){
+				Predicate predicate = builder.equal(courierJoin.<Long>get(Courier_.id), assignedCourierId);
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(assignedCourierUserId)){
+				Predicate predicate = builder.equal(courierJoin.<Long>get(Courier_.userId), assignedCourierUserId);
+				predicateList.add(predicate);
+			}
+		}
+    	
+    	List<Predicate> agentPredicates = new ArrayList<>();
+    	Set<Long> originAgentChildrenIds = manifestCriteria.getOriginAgentChildrenIds();
+    	Set<Long> destinationAgentChildrenIds = manifestCriteria.getDestinationAgentChildrenIds();
+		boolean agentOrSearch = manifestCriteria.isAgentOrSearch();
+		boolean agentAndSearch = manifestCriteria.isAgentAndSearch();
+    	// ---------------------------------------------------
+		// Origin Agent
+		// ---------------------------------------------------
+    	Long originAgentId = manifestCriteria.getOriginAgentId();
+    	if(Validator.isNotNull(originAgentId)){
+    		List<Predicate> originAgentPredicates = new ArrayList<>();
+    		
+			if(Validator.isNotNull( originAgentId )){
+				Predicate predicate = builder.equal(root.<Long>get(Manifest_.originAgentId), originAgentId);
+				originAgentPredicates.add(predicate);
+			}
+			
+			if (Validator.isNotNull(originAgentChildrenIds)) {
+				for (Long childId : originAgentChildrenIds) {
+					Predicate predicate = builder.equal(root.<Long>get(Manifest_.originAgentId), childId);
+					originAgentPredicates.add(predicate);
+				}
+				
+				Predicate orPredicate = builder.or(originAgentPredicates.toArray(new Predicate[originAgentPredicates.size()]));
+				agentPredicates.add(orPredicate);
+			} else {
+				agentPredicates.addAll(originAgentPredicates);
+			}
+			
+    	}
+    	
+    	// ---------------------------------------------------
+    	// Destination Agent
+    	// ---------------------------------------------------    	
+    	Long destinationAgentId = manifestCriteria.getDestinationAgentId();
+    	if(Validator.isNotNull(destinationAgentId)){
+    		List<Predicate> destinationAgentPredicates = new ArrayList<>();
+    		
+			if(Validator.isNotNull( destinationAgentId )){
+				Predicate predicate = builder.equal(root.<Long>get(Manifest_.destinationAgentId), destinationAgentId);
+				destinationAgentPredicates.add(predicate);
+			}
+
+			if (Validator.isNotNull(destinationAgentChildrenIds)) {
+				for (Long childId : destinationAgentChildrenIds) {
+					Predicate predicate = builder.equal(root.<Long>get(Manifest_.destinationAgentId), childId);
+					destinationAgentPredicates.add(predicate);
+				}
+				
+				Predicate orPredicate = builder.or(destinationAgentPredicates.toArray(new Predicate[destinationAgentPredicates.size()]));
+				agentPredicates.add(orPredicate);
+			} else {
+				agentPredicates.addAll(destinationAgentPredicates);
+			}
+    	}
+    	
+		if (agentOrSearch) {
+			Predicate orPredicate = builder.or(agentPredicates.toArray(new Predicate[agentPredicates.size()]));
+			predicateList.add(orPredicate);
+		} else if (agentAndSearch) {
+			Predicate andPredicate = builder.and(agentPredicates.toArray(new Predicate[agentPredicates.size()]));
+			predicateList.add(andPredicate);
+		} else {
+			predicateList.addAll(agentPredicates);
+		}
+		
+		// ---------------------------------------------------
+		// Carrier ID
+		// ---------------------------------------------------
+		Long carrierId = manifestCriteria.getCarrierId();
+    	if(Validator.isNotNull(carrierId)){
+    		Predicate predicate = builder.equal(root.<Long>get(Manifest_.carrierId), carrierId);
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(originCityShortCode)){
+    		Predicate predicate = builder.equal(root.<String>get(Manifest_.originCityShortCode), originCityShortCode);
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull(destinationCityShortCode)){
+    		Predicate predicate = builder.equal(root.<String>get(Manifest_.destinationCityShortCode), destinationCityShortCode);
+    		predicateList.add(predicate);
+    	}
+    	
+
+    	// ---------------------------------------------------
+    	// indexProcessingStatus
+    	// ---------------------------------------------------
+    	if( Validator.isNotNull(indexProcessingStatus) ) {
+    		
+    		List<Predicate> orPredicate = new ArrayList<>();
+    		
+    		for( ProcessingStatus thisIndexProcessingStatus : indexProcessingStatus ) {
+    			orPredicate.add(builder.equal(root.<ProcessingStatus>get(Manifest_.indexProcessingStatus), thisIndexProcessingStatus));
+    		}
+    		
+    		Predicate predicate = builder.or(orPredicate.toArray(new Predicate[orPredicate.size()]));
+    		predicateList.add(predicate);
+    		
+    	}
+    	
+    	// ---------------------------------------------------
+    	// indexProcessingDateFrom
+    	// ---------------------------------------------------
+    	if(Validator.isNotNull( indexProcessingDateTimeFrom )){
+    		Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime>get(Manifest_.indexProcessingDate), indexProcessingDateTimeFrom);
+    		predicateList.add(predicate);
+    	}
+    	
+    	// ---------------------------------------------------
+    	// indexProcessingDateFrom
+    	// ---------------------------------------------------
+    	if(Validator.isNotNull( indexProcessingDateTimeTo )){
+    		Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime>get(Manifest_.indexProcessingDate), indexProcessingDateTimeTo);
+    		predicateList.add(predicate);
+    	}
+    	
+    	/* if(Validator.isNotNull(origin)){
+    		Join<Manifest, Node> join = root.join("origin", JoinType.LEFT);
+    		
+    		joins.put("origin", join);
+    		
+    		if(Validator.isNotNull( origin.getId() )){
+				Predicate predicate = builder.equal(join.<Long>get("id), origin.getId());
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull( origin.getName() )){
+				Predicate predicate = builder.equal(join.<String>get("name), origin.getName());
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull( origin.getFreightType() )){
+				Predicate predicate = builder.equal(join.<EcFreightNodeType>get("freightType), origin.getFreightType());
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull( origin.getActive() )){
+				Predicate predicate = builder.equal(join.<Boolean>get("active), origin.getActive());
+				predicateList.add(predicate);
+			}
+    	}
+    	
+    	if(Validator.isNotNull(destination)){
+    		Join<Manifest, Node> join = root.join("destination, JoinType.LEFT);
+    		
+    		joins.put("destination", join);
+    		
+    		if(Validator.isNotNull( destination.getId() )){
+    			Predicate predicate = builder.equal(join.<Long>get("id), destination.getId());
+    			predicateList.add(predicate);
+    		}
+    		
+    		if(Validator.isNotNull( destination.getName() )){
+    			Predicate predicate = builder.equal(join.<String>get("name), destination.getName());
+    			predicateList.add(predicate);
+    		}
+    		
+    		if(Validator.isNotNull( destination.getFreightType() )){
+    			Predicate predicate = builder.equal(join.<EcFreightNodeType>get("freightType), destination.getFreightType());
+    			predicateList.add(predicate);
+    		}
+    		
+    		if(Validator.isNotNull( destination.getActive() )){
+    			Predicate predicate = builder.equal(join.<Boolean>get("active), destination.getActive());
+    			predicateList.add(predicate);
+    		}
+    	}*/
+    	
+    	basePredicate((BaseCriteria) manifestCriteria, builder, root, predicateList);
+		
+		//LOG
+    	log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+    	
+    	 return predicateList;
+	}
+
+	@Override
+	public List<PackingItem> findPackingItems(ManifestCriteria criteria) throws ParvanDaoException {
+		log.debug("Entering findPackingItems(ManifestCriteria={})", criteria);
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+	
+			// make criteria
+			CriteriaQuery<PackingItem> piCriteria = builder.createQuery(PackingItem.class);
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			Root<Manifest> root = piCriteria.from(Manifest.class);
+			
+			Map<String, Join> joins = new HashMap<>();
+	
+			List<Predicate> predicateList = buildPredicateList(criteria, builder, metamodel, root, joins);
+			
+			String piJoinKey = "packingItems";
+			String gunnyJoinKey = "gunnies";
+			
+			Join gunnyJoin = joins.get(gunnyJoinKey);
+			Join packingItemJoin = joins.get(piJoinKey);
+			if(gunnyJoin == null){
+				gunnyJoin = root.join(gunnyJoinKey);
+				packingItemJoin = gunnyJoin.join(piJoinKey);
+			}
+
+			piCriteria.select(packingItemJoin);
+	
+			if (predicateList.size() == 1) {
+				piCriteria.where(predicateList.get(0));
+	
+			} else if (predicateList.size() > 1) {
+				piCriteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+	
+			// make query
+			TypedQuery<PackingItem> q = getEntityManager().createQuery(piCriteria);
+	
+			// execute query
+			return q.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while findPackingItems", e);
+		}
+	}
+}

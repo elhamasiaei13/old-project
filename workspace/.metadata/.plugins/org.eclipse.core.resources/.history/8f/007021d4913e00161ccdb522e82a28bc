@@ -1,0 +1,25 @@
+package com.parvanpajooh.accounting.model;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import javax.annotation.Generated;
+import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.StaticMetamodel;
+
+@Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
+@StaticMetamodel(VoucherRow.class)
+public abstract class VoucherRow_ extends com.parvanpajooh.ecourier.model.BaseModel_ {
+
+	public static volatile SingularAttribute<VoucherRow, Voucher> voucher;
+	public static volatile SingularAttribute<VoucherRow, String> description;
+	public static volatile SingularAttribute<VoucherRow, Date> journalDate;
+	public static volatile SingularAttribute<VoucherRow, Boolean> active;
+	public static volatile SingularAttribute<VoucherRow, Long> id;
+	public static volatile SingularAttribute<VoucherRow, BigDecimal> debit;
+	public static volatile SingularAttribute<VoucherRow, BigDecimal> credit;
+	public static volatile SingularAttribute<VoucherRow, Integer> version;
+	public static volatile SingularAttribute<VoucherRow, String> referenceId;
+	public static volatile SingularAttribute<VoucherRow, Account> account;
+
+}
+

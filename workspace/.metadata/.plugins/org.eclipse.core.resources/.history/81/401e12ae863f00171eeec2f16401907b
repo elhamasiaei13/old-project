@@ -1,0 +1,83 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.service.adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.rateandroute.RateAndRouteApiRestClient;
+import com.parvanpajooh.client.rateandroute.model.CityInfoMsg;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.siteservices.model.vo.CityInfoVO;
+
+/**
+ * @author MO
+ *
+ */
+@Stateless
+public class RateAndRouteAdapterImpl implements GeoManagementAdapter {
+
+	RateAndRouteApiRestClient rateAndRouteRestClient = new RateAndRouteApiRestClient();
+	
+	@Override
+	public CityInfoVO getCityByShortCode(String shortCode) throws ParvanServiceException {
+		CityInfoVO returnValue = null;
+		try {
+			CityInfoMsg result = rateAndRouteRestClient.getCityByShortCode(shortCode);
+			returnValue = _toCityInfoVO(result);
+		} catch (ParvanClientException e) {
+			throw new ParvanUnrecoverableException(e.getMessage());
+		}
+		return returnValue;
+	}
+	
+	@Override
+	public PageList<CityInfoVO> findCityByNameOrShortCode(String term, int start, int length,
+			SortDirectionEnum sortDirection, String sortCriterion) throws ParvanServiceException {
+		
+		PageList<CityInfoVO> returnValue = null;
+		try {
+			String strSortDirection = null;
+			if (sortDirection != null) {
+				strSortDirection = sortDirection.toString();
+			}
+			PageList<CityInfoMsg> result = rateAndRouteRestClient.findCitiesByNameOrShortCode(null,term, start, length,
+					strSortDirection, sortCriterion);
+			if (result != null) {
+				List<CityInfoMsg> elements = result.getElements();
+				if (elements != null) {
+					List<CityInfoVO> voList = new ArrayList<>(elements.size());
+					for (CityInfoMsg msg : elements) {
+						CityInfoVO vo = _toCityInfoVO(msg);
+						voList.add(vo);
+					}
+					returnValue = new PageList<>(voList, result.getTotal());
+				}
+			}
+		} catch (ParvanClientException e) {
+			throw new ParvanUnrecoverableException(e.getMessage());
+		}
+		return returnValue;
+	}
+	
+	private CityInfoVO _toCityInfoVO(CityInfoMsg msg) {
+		CityInfoVO vo = new CityInfoVO();
+		vo.setShortCode(msg.getShortCode());
+		vo.setNameEn(msg.getNameEn());
+		vo.setNameFa(msg.getNameFa());
+		vo.setCountryShortCode(msg.getCountryShortCode());
+		vo.setCountryNameEn(msg.getCountryNameEn());
+		vo.setCountryNameFa(msg.getCountryNameFa());
+		vo.setProvinceShortCode(msg.getProvinceShortCode());
+		vo.setProvinceNameEn(msg.getProvinceNameEn());
+		vo.setProvinceNameFa(msg.getProvinceNameFa());
+		return vo;
+	}
+}

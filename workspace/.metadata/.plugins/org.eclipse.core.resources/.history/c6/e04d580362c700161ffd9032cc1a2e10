@@ -1,0 +1,591 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.rateandroute.model.enums;
+
+/**
+ * @author MO
+ *
+ */
+public final class RateAndRouteEnums {
+	
+	/**
+	 * 
+	 * @author mehrdad
+	 *
+	 */
+	public enum FreightNodeType{
+		COLLECT_DISTRIBUTE ("Collect/Distribute"),
+		DEPO ("Depo"),
+		HUB ("Hub");
+		
+		private String nodeType;
+		
+		private FreightNodeType(String type) {
+			nodeType = type;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static FreightNodeType fromString(String text) {
+			if (text != null) {
+				for (FreightNodeType val : FreightNodeType.values()) {
+					if (text.equalsIgnoreCase(val.nodeType)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return nodeType;
+	    }
+	}
+	
+	/**
+	 * 
+	 * @author mehrdad
+	 *
+	 */
+	public enum DiscountEvalInvalidResolutionType{
+		INVALID_DISCOUNT_CODE ("InvalidDiscountCode"),
+		INVALID_DISCOUNT_CODE_FOR_AGENT ("InvalidDiscountCodeForAgent"),
+		CANCELLED ("CANCELLED"),
+		DISCOUNT_CODE_IS_NOT_FOR_SELECTED_PRODUCT("DiscountCodeIsNotForSellectedProduct"),
+		DISCOUNT_NEEDS_WAYBILLNUMBER("DiscountNeedsWaybillnumber"),
+		INVALID_WAYBILLNUMBER("invalidWaybillnumber"),
+		INVALID_WEIGHT("invalidWeight");
+		
+		private String status;
+		
+		private DiscountEvalInvalidResolutionType(String status) {
+			this.status = status;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static DiscountEvalInvalidResolutionType fromString(String text) {
+			if (text != null) {
+				for (DiscountEvalInvalidResolutionType val : DiscountEvalInvalidResolutionType.values()) {
+					if (text.equalsIgnoreCase(val.status)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return status;
+	    }
+	}
+	
+	/**
+	 * @author mehrdad
+	 *
+	 */
+	public enum DiscountEvalResultType{
+		VALID ("Valid"),
+		INVALID ("Invalid");
+		
+		private String status;
+		
+		private DiscountEvalResultType(String status) {
+			this.status = status;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static DiscountEvalResultType fromString(String text) {
+			if (text != null) {
+				for (DiscountEvalResultType val : DiscountEvalResultType.values()) {
+					if (text.equalsIgnoreCase(val.status)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return status;
+	    }
+	}
+	
+	/**
+	 * @author mehrdad
+	 *
+	 */
+	public enum DiscountStatus{
+		NEW ("NEW"),
+		CANCELLED ("CANCELLED");
+		
+		private String status;
+		
+		private DiscountStatus(String status) {
+			this.status = status;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static DiscountStatus fromString(String text) {
+			if (text != null) {
+				for (DiscountStatus val : DiscountStatus.values()) {
+					if (text.equalsIgnoreCase(val.status)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return status;
+	    }
+	}
+	
+	/**
+	 * 
+	 * @author mehrdad
+	 *
+	 */
+	public enum DiscountType {
+		MOA("MOA"),
+		FOC("FOC"),
+		ASA("ASA");
+		
+		private String discountType;
+		
+		private DiscountType(String discountType) {
+			this.discountType = discountType;
+		}
+		
+		public String getDiscountType() {
+			return discountType;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static DiscountType fromString(String text) {
+			if (text != null) {
+				for (DiscountType val : DiscountType.values()) {
+					if (text.equalsIgnoreCase(val.discountType)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return discountType;
+	    }
+	}
+	
+	/**
+	 * 
+	 * @author mehrdad
+	 *
+	 */
+	public enum ProductStatus{
+		DRAFT ("DRAFT"),
+		DEPRECATED ("DEPRECATED"),
+		PUBLISHED ("PUBLISHED");
+		
+		private String status;
+		
+		private ProductStatus(String status) {
+			this.status = status;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static ProductStatus fromString(String text) {
+			if (text != null) {
+				for (ProductStatus val : ProductStatus.values()) {
+					if (text.equalsIgnoreCase(val.status)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return status;
+	    }
+	}
+	
+	/**
+	 * 
+	 * @author mehrdad
+	 *
+	 */
+	public enum RateCalculationType {
+
+		/**
+		 * when a new rate is needed. For example when user change 'weight' field in (shipment/cargo)form.
+		 */
+		NEW ("new"), 
+		
+		/**
+		 * when user edit one of editable PriceItems. For example when user edit current value of 'packaging' priceItem.
+		 */
+		EDIT ("edit"); 
+		
+		private String rateCalculationType;
+		
+		private RateCalculationType(String rateCalculationType ) {
+			this.rateCalculationType = rateCalculationType;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static RateCalculationType fromString(String text) {
+			if (text != null) {
+				for (RateCalculationType val : RateCalculationType.values()) {
+					if (text.equalsIgnoreCase(val.rateCalculationType)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return rateCalculationType;
+	    }
+	}
+	
+	/**
+	 * @author mehrdad
+	 *
+	 */
+	public enum RateDisplayType{
+		FORM ("Form"),
+		PRINT ("Print"),
+		FORM_AND_PRINT ("Form and Print"),
+		NONE ("None");
+		
+		private String value;
+		
+		private RateDisplayType(String type) {
+			value = type;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static RateDisplayType fromString(String text) {
+			if (text != null) {
+				for (RateDisplayType val : RateDisplayType.values()) {
+					if (text.equalsIgnoreCase(val.value)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return value;
+	    }
+	}
+	
+	/**
+	 * @author mehrdad
+	 *
+	 */
+	public enum RateDueType{
+		CARRIER ("Carrier"),
+		COURIER ("Courier"),
+		AGENT ("Agent");
+		
+		private String value;
+		
+		private RateDueType(String type) {
+			value = type;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static RateDueType fromString(String text) {
+			if (text != null) {
+				for (RateDueType val : RateDueType.values()) {
+					if (text.equalsIgnoreCase(val.value)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return value;
+	    }
+	}
+	
+	/**
+	 * @author mehrdad
+	 *
+	 */
+	public enum RateRuleOwnerType{
+		GLOBAL("Global"),
+		ZONE("Zone"),
+		NODE("Node"),
+		ROUTE("Route");
+		
+		private String value;
+		
+		private RateRuleOwnerType(String value) {
+			this.value = value;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static RateRuleOwnerType fromString(String text) {
+			if (text != null) {
+				for (RateRuleOwnerType val : RateRuleOwnerType.values()) {
+					if (text.equalsIgnoreCase(val.value)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return value;
+	    }
+	}
+	
+	/**
+	 * 
+	 * @author mehrdad
+	 *
+	 */
+	public enum RouteCategory {
+		ACTUAL("ACTUAL"),
+		RATE("RATE");
+		
+		private String value;
+		
+		private RouteCategory(String value) {
+			this.value = value;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static RouteCategory fromString(String text) {
+			if (text != null) {
+				for (RouteCategory val : RouteCategory.values()) {
+					if (text.equalsIgnoreCase(val.value)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return value;
+	    }
+	}
+	
+	/**
+	 * @author mehrdad
+	 *
+	 */
+	public enum RouteType {
+		UrbanRoad("UrbanRoad"),
+		SubUrbanRoad("SubUrbanRoad"),
+		InterCityRoad("InterCityRoad"),
+		Airway ("Airway"),
+		Railroad("Railroad");
+		
+		private String routeType;
+		
+		private RouteType(String type) {
+			routeType = type;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static RouteType fromString(String text) {
+			if (text != null) {
+				for (RouteType val : RouteType.values()) {
+					if (text.equalsIgnoreCase(val.routeType)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return routeType;
+	    }
+	}
+	
+	/**
+	 * @author mehrdad
+	 *
+	 */
+	public enum RuleActionType {
+		SCRIPT("script"),
+		FIXED_NUMERIC_VALUE("fixedNumericValue")
+		;
+		
+		private String value;
+		
+		private RuleActionType(String value) {
+			this.value = value;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static RuleActionType fromString(String text) {
+			if (text != null) {
+				for (RuleActionType val : RuleActionType.values()) {
+					if (text.equalsIgnoreCase(val.value)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return value;
+	    }
+	}
+	
+	/**
+	 * @author mehrdad
+	 *
+	 */
+	public enum RuleConditionType {
+		SCRIPT("script");
+		
+		private String value;
+		
+		private RuleConditionType(String value) {
+			this.value = value;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static RuleConditionType fromString(String text) {
+			if (text != null) {
+				for (RuleConditionType val : RuleConditionType.values()) {
+					if (text.equalsIgnoreCase(val.value)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+		
+		@Override
+	    public String toString() {
+	        return value;
+	    }
+	}
+	
+	/**
+	 * 
+	 * @author mehrdad
+	 *
+	 */
+	public enum TransferNodeType {
+		
+		COLLECTION("Collection"),
+		ORIGIN_HUB("OriginHub"),
+		VIA("Via"),
+		DESTINATION_HUB("DestinationHub"), 
+		DISTRIBUTION("Distribution");
+
+		private String transferNodeType;
+
+		private TransferNodeType(String transferNodeType) {
+			this.transferNodeType = transferNodeType;
+		}
+		
+		/**
+		 * 
+		 * @param text
+		 * @return
+		 */
+		public static TransferNodeType fromString(String text) {
+			if (text != null) {
+				for (TransferNodeType val : TransferNodeType.values()) {
+					if (text.equalsIgnoreCase(val.transferNodeType)) {
+						return val;
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+	    public String toString() {
+	        return transferNodeType;
+	    }
+	}
+
+}

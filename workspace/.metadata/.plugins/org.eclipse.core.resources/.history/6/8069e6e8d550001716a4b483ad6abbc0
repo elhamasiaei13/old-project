@@ -1,0 +1,32 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.complaintmanagement.service;
+
+import java.util.List;
+
+import com.parvanpajooh.client.agentmanagement.model.GeneralAgentMsg;
+import com.parvanpajooh.client.complaintmanagement.model.ComplaintMsg;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+/**
+ * @author MO
+ *
+ */
+public interface ComplaintManagementApi {
+	
+	
+	@GET("v1/complaints")
+	public Call<List<ComplaintMsg>> findComplaintsBy(
+			@Query(value = "term") String term,
+			@Query(value = "page") Integer page,
+			@Query(value = "size") Integer size);
+
+	@GET("v1/complaints/{id}")
+	public Call<ComplaintMsg> getComplaint(
+			@Path("id") Long id);
+}

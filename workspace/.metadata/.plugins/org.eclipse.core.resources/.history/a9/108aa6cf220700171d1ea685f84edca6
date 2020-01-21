@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>Task Details</title>
+
+<style>
+.select-device-modal label {
+	margin-bottom: 0px;
+}
+
+.select-device-modal input {
+	width: auto;
+	height: 28px;
+}
+
+.select-device-modal .form-control {
+	width: auto;
+}
+
+.select-device-modal table.dataTable td {
+	padding: 1px 10px;
+}
+
+.select-device-modal .dataTables_filter label {
+	margin-bottom: 5px;
+}
+
+.text-right {
+	text-align: right;
+	direction: rtl;
+}
+.dl-horizontal dt {
+    float: right;
+}
+</style>
+</head>
+
+<body th:with="rightMenu='taskDetails'">
+	<section layout:fragment="top-header" class="fixed-header">
+
+		<div class="ui-header-image pull-left">
+			<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/stock2-web/resources/images/stack.png" th:src="@{/resources/images/stack.png}" style="width: 48px; height: 48px;" />
+		</div>
+		<div class="ui-header-title" style="padding-bottom: 0">
+			<div class="row">
+				<div class="split-left">
+					<h3>
+						<small th:text="${taskDto.taskDisplay.taskKey}"></small>
+					</h3>
+					<h3 th:text="${taskDto.taskDisplay.taskSubject}"></h3>
+				</div>
+				<div class="split-right" style="padding-bottom: 10px">
+					<a th:href="@{'/tasks/update/view/'+${taskDto.taskDisplay.taskKey}}" class="btn btn-primary btn-sm">
+						<i class="fa fa-pencil">&nbsp;&nbsp;</i>
+						<span th:text="#{task.edit}"> ویرایش </span>
+					</a>
+					<a th:onclick="'deleteTask(\'' + ${taskDto.taskDisplay.taskId} + '\')'" href="javascript:;" class="btn btn-danger btn-sm">
+						<i class="fa fa-times">&nbsp;&nbsp;</i>
+						<span th:text="#{task.delete}"> حذف</span>
+					</a>
+					<a th:href="@{'/tasks/comment/'+${taskDto.taskDisplay.taskKey}}" class="btn btn-warning btn-sm">
+						<i class="fa fa-comments-o">&nbsp;&nbsp;</i>
+						<span th:text="#{task.addComment}"> افزودن یادداشت</span>
+					</a>
+					<a th:href="@{'/tasks/changeassignee/'+${taskDto.taskDisplay.taskKey}}" class="btn bg-purple btn-sm">
+						<i class="fa fa-exchange">&nbsp;&nbsp;</i>
+						<span th:text="#{task.changeAssignee}"> تغییر انتساب </span>
+					</a>
+					<a th:href="@{'/tasks/changestate/'+${taskDto.taskDisplay.taskKey}}" class="btn btn-success btn-sm">
+						<i class="fa fa-exchange">&nbsp;&nbsp;</i>
+						<span th:text="#{task.changeState}"> تغییر وضعیت </span>
+					</a>
+					<a th:href="@{'/tasks/attachments/'+${taskDto.taskDisplay.taskKey}}" class="btn btn-info btn-sm">
+						<i class="fa fa-paperclip">&nbsp;&nbsp;</i>
+						<span th:text="#{task.addAttachment}"> افزودن پیوست</span>
+					</a>
+					<a th:href="@{'/tasks/relation/'+${taskDto.taskDisplay.taskKey}}" class="btn bg-maroon btn-sm">
+						<i class="fa fa-link">&nbsp;&nbsp;</i>
+						<span th:text="#{task.addRelation}"> افزودن رابطه</span>
+					</a>
+				</div>
+			</div>
+		</div>
+
+	</section>
+
+	<!-- Main content -->
+	<!-- BODY -->
+	<section class="content" layout:fragment="content">
+
+		<div class="modal fade" id="deleteTaskModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h4 class="modal-title" th:text="#{taskCreateCommand.delete}">حذف اطلاعات کار</h4>
+					</div>
+					<div class="modal-body">
+						<div class="modal-form-content">
+							<form class="form-horizontal" role="form" id="deleteTaskForm" method="post" action="/taskmanagement-web/taskmanagement-web/tasks/del">
+								<div class="callout callout-danger hide">
+									<h4></h4>
+								</div>
+								<input type="hidden" name="id" />
+								<input type="hidden" name="version" />
+								<p class="confirm-title" th:text="#{taskCreateCommand.delete.confirm}">آیا از حذف این کار اطمینان دارید؟</p>
+							</form>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" id="deleteTaskBtn" th:text="#{button.delete}">Delete</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="box box-default">
+			<div class="box-header">
+				<h3 class="box-title" th:text="#{task.history}">تاریخچه کار</h3>
+			</div>
+			<div class="box-body" style="display: block;">
+
+				<div class="row">
+					<div class="col-md-9">
+
+						<div class="row" th:if="${!#strings.isEmpty(taskDto.taskDisplay.createTaskRemarks)}">
+							<ul class="list-group ">
+								<li class="list-group-item text-right" id="remarks" text:lineseparator="*{taskDto.taskDisplay.createTaskRemarks}" name="remarks" placeholder="شرح" />
+							</ul>
+						</div>
+						<div class="row">
+							<div id="content" class="nav-tabs-custom">
+								<ul class="nav nav-tabs">
+
+									<li class="active">
+										<a href="#all" data-toggle="tab" hidden="true" th:text="#{task.allActions}"> مجموع فعالیت‌ها </a>
+									</li>
+
+									<li>
+										<a href="#commentTask" data-toggle="tab">
+											<span class="fa fa-comments-o" aria-hidden="true" th:text="#{task.commentHistory}">تاریخچه یادداشت</span>
+										</a>
+									</li>
+
+									<li>
+										<a href="#commentsChangeAssignTo" data-toggle="tab">
+											<span class="fa fa-exchange" aria-hidden="true" th:text="#{task.ChangeAssigneeHistory}">تاریخچه تغییر انتساب</span>
+										</a>
+									</li>
+
+									<li>
+										<a href="#commentsChangeStatus" data-toggle="tab">
+											<span class="fa fa-exchange" aria-hidden="true" th:text="#{task.ChangeStateHistory}">تاریخچه تغییر وضعیت</span>
+										</a>
+									</li>
+
+									<li>
+										<a href="#attachmentsHistory" data-toggle="tab">
+											<span class="fa fa-paperclip" aria-hidden="true" th:text="#{task.AttachmentHistory}">تاریخچه پیوست‌</span>
+										</a>
+									</li>
+
+									<li>
+										<a href="#relationHistory" data-toggle="tab">
+											<span class="fa fa-link" aria-hidden="true" th:text="#{task.relationHistory}">تاریخچه رابطه</span>
+										</a>
+									</li>
+									<li>
+										<a href="#updateHistory" data-toggle="tab">
+											<span class="fa fa-pencil" aria-hidden="true" th:text="#{task.updateHistory}">تاریخچه ویرایش</span>
+										</a>
+									</li>
+								</ul>
+
+								<div id="my-tab-content" class="tab-content">
+
+									<div class="tab-pane active" id="all">
+										<ul class="timeline">
+											<div th:remove="tag" th:each="row : ${taskDto.taskCommands}">
+												<li th:if="${row.taskCommandType == T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType).ChangeAssignee}">
+													<i class="fa fa-exchange bg-purple"></i>
+													<div class="timeline-item">
+														<span class="time">
+															<i class="fa fa-clock-o"></i>
+															<i class="timeago" th:title="${row.localDateTime}" />
+														</span>
+
+														<h3 class="timeline-header">
+															<a href="#" th:text="${row.userName}"></a>
+															<small>&nbsp;&nbsp;تغییر انتساب داد&nbsp;&nbsp;</small>
+														</h3>
+
+														<div class="timeline-body">
+															<div class="col-md-1">از:</div>
+															<div class="col-md-4">
+																<div class="row">
+																	<div class="col-md-2">
+																		<img class="img-rounded" th:if="${row.userIdFrom != null}" th:src="@{'/image/'+${row.userIdFrom}}" width="20" height="20" />
+																	</div>
+																	<div class="col-md-10">
+																		<del th:if="${row.userFrom != null}" th:text="${row.userFrom}"></del>
+																	</div>
+																</div>
+															</div>
+															<div class="col-md-2">&nbsp;</div>
+															<div class="col-md-1">به:</div>
+															<div class="col-md-4">
+																<div class="row">
+																	<div class="col-md-2">
+																		<img class="img-rounded" th:if="${row.userIdTo != null}" th:src="@{'/image/'+${row.userIdTo}}" width="20" height="20" />
+																	</div>
+																	<div class="col-md-10">
+																		<strong th:if="${row.userTo != null }" th:text="${row.userTo}"></strong>
+																	</div>
+																</div>
+															</div>
+														</div>
+
+														<div class="timeline-footer text-right">
+															<i data-toggle="dropdown" text:lineseparator="${row.remarks}" />
+														</div>
+													</div>
+
+												</li>
+												<li th:if="${row.taskCommandType == T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType).Comment}">
+													<i class="fa fa-comments bg-yellow"></i>
+
+													<div class="timeline-item">
+														<span class="time">
+															<i class="fa fa-clock-o"></i>
+															<i class="timeago" th:title="${row.localDateTime}" />
+														</span>
+
+														<h3 class="timeline-header">
+															<a href="#" th:text="${row.userName}"></a>
+															<small>&nbsp;&nbsp;یادداشت گذاشت&nbsp;&nbsp;</small>
+														</h3>
+
+														<div class="timeline-body"></div>
+
+														<div class="timeline-footer text-right">
+															<i th:if="${row.remarks != null}" text:lineseparator="${row.remarks}" />
+														</div>
+													</div>
+												</li>
+
+												<li th:if="${row.taskCommandType == T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType).Update}">
+													<i class="fa fa-pencil bg-blue"></i>
+
+													<div class="timeline-item">
+														<span class="time">
+															<i class="fa fa-clock-o"></i>
+															<i class="timeago" th:title="${row.localDateTime}" />
+														</span>
+
+														<h3 class="timeline-header">
+															<a href="#" th:text="${row.userName}"></a>
+															<small>&nbsp;&nbsp;ویرایش کرد&nbsp;&nbsp;</small>
+														</h3>
+
+														<div class="timeline-body">
+															<dl class="dl-horizontal">
+																<dt th:text="#{taskUpdateCommand.group}">گروه</dt>
+																<dd th:text="${row.groupId}" class="text-right"></dd>
+																<dt th:text="#{taskUpdateCommand.summary}">خلاصه</dt>
+																<dd th:text="${row.summary}" class="text-right"></dd>
+																<dt th:text="#{taskUpdateCommand.taskType}">نوع</dt>
+																<dd th:text="${row.taskType}" class="text-right"></dd>
+																<dt th:text="#{taskUpdateCommand.priority}" >اولویت</dt>
+																<dd th:text="${row.priority}" class="text-right"></dd>
+																<dt th:text="#{taskUpdateCommand.dueDate}">تاریخ سررسید</dt>
+																<dd th:text="${row.dueDate}" class="text-right"></dd>
+																<dt th:text="#{taskUpdateCommand.remarks}">شرح</dt>
+																<dd th:text="${row.remarks}" class="text-right"></dd>
+															</dl>
+														</div>
+													</div>
+												</li>
+
+												<li th:if="${row.taskCommandType == T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType).ChangeState}">
+													<i class="fa fa-exchange bg-green"></i>
+													<div class="timeline-item">
+														<span class="time">
+															<i class="fa fa-clock-o"></i>
+															<i class="timeago" th:title="${row.localDateTime}" />
+														</span>
+
+														<h3 class="timeline-header">
+															<a href="#" th:text="${row.userName}"></a>
+															<small>&nbsp;&nbsp;تغییر وضعیت داد&nbsp;&nbsp;</small>
+														</h3>
+
+														<div class="timeline-body text-right">
+														<div class="timeline-body">
+															<dl class="dl-horizontal">
+																<dt th:text="#{taskChangeStateCommand.from}">از</dt>
+																<dd th:text="${row.groupId}" class="text-right"></dd>
+																<dt th:text="#{taskChangeStateCommand.to}">به</dt>
+																<dd th:text="${row.summary}" class="text-right"></dd>
+																
+																
+															<div class="row">
+																<div class="col-md-1" th:text>از:</div>
+																<div class="col-md-2">
+																	<del class="text-lowercase" th:if="${row.oldState != null}" th:text="${row.oldState}"></del>
+																</div>
+																<div class="col-md-1">به:</div>
+																<div class="col-md-2">
+																	<strong class="text-lowercase" th:if="${row.newState != null}" th:text="${row.newState}"></strong>
+																</div>
+															</div>
+														</div>
+
+														<div class="timeline-footer text-right">
+															<i th:if="${row.remarks != null}" text:lineseparator="${row.remarks}" />
+														</div>
+													</div>
+												</li>
+
+												<li th:if="${row.taskCommandType == T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType).Attachment}">
+													<i class="fa fa-paperclip bg-aqua"></i>
+													<div class="timeline-item">
+														<span class="time">
+															<i class="fa fa-clock-o"></i>
+															<i class="timeago" th:title="${row.localDateTime}" />
+														</span>
+
+														<h3 class="timeline-header">
+															<a href="#" th:text="${row.userName}"></a>
+															<small>&nbsp;&nbsp;پیوست اضافه کرد&nbsp;&nbsp;</small>
+														</h3>
+
+														<div class="timeline-body">
+															<a target="_blank" th:if="${row.name != null}" th:text="${row.name}" th:href="@{'~/taskmanagement-web/tasks/attachments/download/'+${row.id}}" />
+														</div>
+
+														<div class="timeline-footer text-right">
+															<i th:if="${row.remarks != null}" text:lineseparator="${row.remarks}" />
+														</div>
+													</div>
+												</li>
+
+												<li th:if="${row.taskCommandType == T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType).Relation}">
+													<i class="fa fa-link bg-maroon"></i>
+													<div class="timeline-item">
+														<span class="time">
+															<i class="fa fa-clock-o"></i>
+															<i class="timeago" th:title="${row.localDateTime}" />
+														</span>
+
+														<h3 class="timeline-header">
+															<a href="#" th:text="${row.userName}"></a>
+															<small>&nbsp;&nbsp;رابطه اضافه کرد &nbsp;&nbsp;</small>
+														</h3>
+
+														<div class="timeline-body">
+															<div class="row">
+																<div class="col-md-4">
+																	<div class="pull-right" th:text="${row.taskSubjectFrom}"></div>
+																</div>
+																<div class="col-md-3">
+																	<div class="pull-right" th:text="${row.type}" />
+
+																</div>
+																<div class="col-md-4">
+
+																	<div class="pull-right" th:text="${row.taskSubjectTo}"></div>
+																</div>
+															</div>
+														</div>
+
+														<div class="timeline-footer text-right">
+															<i th:if="${row.remarks != null}" text:lineseparator="${row.remarks}" />
+														</div>
+													</div>
+												</li>
+											</div>
+										</ul>
+									</div>
+
+									<div class="tab-pane" id="commentTask">
+										<ul class="timeline">
+											<div th:remove="tag" th:each="row : ${taskDto.taskCommands}">
+
+												<li th:if="${row.taskCommandType == T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType).Comment}">
+													<i class="fa fa-comments bg-yellow"></i>
+
+													<div class="timeline-item">
+														<span class="time">
+															<i class="fa fa-clock-o"></i>
+															<i class="timeago" th:title="${row.localDateTime}" />
+														</span>
+
+														<h3 class="timeline-header">
+															<a href="#" th:text="${row.userName}"></a>
+															<small>&nbsp;&nbsp;یادداشت گذاشت&nbsp;&nbsp;</small>
+														</h3>
+
+														<div class="timeline-body"></div>
+
+														<div class="timeline-footer text-right">
+															<i th:if="${row.remarks != null}" text:lineseparator="${row.remarks}" />
+														</div>
+													</div>
+												</li>
+											</div>
+										</ul>
+									</div>
+
+									<div class="tab-pane" id="updateHistory">
+										<ul class="timeline">
+											<div th:remove="tag" th:each="row : ${taskDto.taskCommands}">
+
+												<li th:if="${row.taskCommandType == T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType).Update}">
+													<i class="fa fa-pencil bg-blue"></i>
+													<div class="timeline-item">
+														<span class="time">
+															<i class="fa fa-clock-o"></i>
+															<i class="timeago" th:title="${row.localDateTime}" />
+														</span>
+														<h3 class="timeline-header">
+															<a href="#" th:text="${row.userName}"></a>
+															<small>&nbsp;&nbsp;ویرایش کرد&nbsp;&nbsp;</small>
+														</h3>
+														<div class="timeline-body">
+															<dl class="dl-horizontal text-right" >
+																<dt th:text="#{taskUpdateCommand.group}">گروه</dt>
+																<dd th:text="${row.groupId}"></dd>
+																<dt th:text="#{taskUpdateCommand.summary}">خلاصه</dt>
+																<dd th:text="${row.summary}" class="text-right"></dd>
+																<dt th:text="#{taskUpdateCommand.taskType}">نوع</dt>
+																<dd th:text="${row.taskType}"></dd>
+																<dt th:text="#{taskUpdateCommand.priority}">اولویت</dt>
+																<dd th:text="${row.priority}"></dd>
+																<dt th:text="#{taskUpdateCommand.dueDate}">تاریخ سررسید</dt>
+																<dd th:text="${row.dueDate}"></dd>
+																<dt th:text="#{taskUpdateCommand.remarks}">شرح</dt>
+																<dd th:text="${row.remarks}" class="text-right"></dd>
+															</dl>
+														</div>
+													</div>
+												</li>
+											</div>
+										</ul>
+									</div>
+
+									<div class="tab-pane" id="commentsChangeAssignTo">
+										<ul class="timeline">
+											<div th:remove="tag" th:each="row : ${taskDto.taskCommands}">
+												<li th:if="${row.taskCommandType == T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType).ChangeAssignee}">
+													<i class="fa fa-exchange bg-purple"></i>
+													<div class="timeline-item">
+														<span class="time">
+															<i class="fa fa-clock-o"></i>
+															<i class="timeago" th:title="${row.localDateTime}" />
+														</span>
+
+														<h3 class="timeline-header">
+															<a href="#" th:text="${row.userName}"></a>
+															<small>&nbsp;&nbsp;تغییر انتساب داد&nbsp;&nbsp;</small>
+														</h3>
+
+														<div class="timeline-body">
+															<div class="col-md-1">
+																<div class="pull-left">از:</div>
+															</div>
+															<div class="col-md-4">
+																<div class="row">
+																	<div class="col-md-2">
+																		<img class="img-rounded" th:if="${row.userIdFrom != null}" th:src="@{'/image/'+${row.userIdFrom}}" width="20" height="20" />
+																	</div>
+																	<div class="col-md-10">
+																		<del th:if="${row.userFrom != null}" th:text="${row.userFrom}"></del>
+																	</div>
+																</div>
+															</div>
+															<div class="col-md-2">&nbsp;</div>
+															<div class="col-md-1">
+																<div class="pull-left">به:</div>
+															</div>
+															<div class="col-md-4">
+																<div class="row">
+																	<div class="col-md-2">
+																		<img class="img-rounded" th:if="${row.userIdTo != null}" th:src="@{'/image/'+${row.userIdTo}}" width="20" height="20" />
+																	</div>
+																	<div class="col-md-10">
+																		<strong th:if="${row.userTo != null }" th:text="${row.userTo}"></strong>
+																	</div>
+																</div>
+															</div>
+
+														</div>
+
+														<div class="timeline-footer text-right">
+															<i data-toggle="dropdown" text:lineseparator="${row.remarks}" />
+														</div>
+													</div>
+												</li>
+											</div>
+										</ul>
+									</div>
+
+
+									<div class="tab-pane" id="commentsChangeStatus">
+										<ul class="timeline">
+											<div th:remove="tag" th:each="row : ${taskDto.taskCommands}">
+
+
+												<li th:if="${row.taskCommandType == T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType).ChangeState}">
+													<i class="fa fa-exchange bg-green"></i>
+													<div class="timeline-item">
+														<span class="time">
+															<i class="fa fa-clock-o"></i>
+															<i class="timeago" th:title="${row.localDateTime}" />
+														</span>
+
+														<h3 class="timeline-header">
+															<a href="#" th:text="${row.userName}"></a>
+															<small>&nbsp;&nbsp;تغییر وضعیت داد&nbsp;&nbsp;</small>
+														</h3>
+
+														<div class="timeline-body">
+															<div class="row">
+																<div class="col-md-1">
+																	<div class="pull-left">از:</div>
+																</div>
+																<div class="col-md-2">
+																	<del class="text-lowercase" th:if="${row.oldState != null}" th:text="${row.oldState}"></del>
+																</div>
+																<div class="col-md-1">
+																	<div class="pull-left">به:</div>
+																</div>
+																<div class="col-md-2">
+																	<strong class="text-lowercase" th:if="${row.newState != null}" th:text="${row.newState}"></strong>
+																</div>
+															</div>
+														</div>
+
+														<div class="timeline-footer text-right">
+															<i th:if="${row.remarks != null}" text:lineseparator="${row.remarks}" />
+														</div>
+													</div>
+												</li>
+											</div>
+										</ul>
+									</div>
+
+
+									<div class="tab-pane" id="attachmentsHistory">
+										<ul class="timeline">
+											<div th:remove="tag" th:each="row : ${taskDto.taskCommands}">
+												<li th:if="${row.taskCommandType == T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType).Attachment}">
+													<i class="fa fa-paperclip bg-aqua"></i>
+													<div class="timeline-item">
+														<span class="time">
+															<i class="fa fa-clock-o"></i>
+															<i class="timeago" th:title="${row.localDateTime}" />
+														</span>
+
+														<h3 class="timeline-header">
+															<a href="#" th:text="${row.userName}"></a>
+															<small>&nbsp;&nbsp;پیوست اضافه کرد&nbsp;&nbsp;</small>
+														</h3>
+
+														<div class="timeline-body">
+															<a target="_blank" th:if="${row.name != null}" th:text="${row.name}" th:href="@{'~/taskmanagement-web/tasks/attachments/download/'+${row.id}}" />
+														</div>
+
+														<div class="timeline-footer text-right">
+															<i th:if="${row.remarks != null}" text:lineseparator="${row.remarks}" />
+														</div>
+													</div>
+												</li>
+											</div>
+										</ul>
+									</div>
+
+									<div class="tab-pane" id="relationHistory">
+										<ul class="timeline">
+											<div th:remove="tag" th:each="row : ${taskDto.taskCommands}">
+												<li th:if="${row.taskCommandType == T(com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType).Relation}">
+													<i class="fa fa-link bg-maroon"></i>
+													<div class="timeline-item">
+														<span class="time">
+															<i class="fa fa-clock-o"></i>
+															<i class="timeago" th:title="${row.localDateTime}" />
+														</span>
+
+														<h3 class="timeline-header">
+															<a href="#" th:text="${row.userName}"></a>
+															<small>&nbsp;&nbsp;رابطه اضافه کرد &nbsp;&nbsp;</small>
+														</h3>
+
+														<div class="timeline-body">
+															<div class="row">
+																<div class="col-md-4">
+																	<div class="pull-right" th:text="${row.taskSubjectFrom}"></div>
+																</div>
+																<div class="col-md-3">
+																	<div class="pull-right" th:text="${row.type}" />
+
+																</div>
+																<div class="col-md-4">
+
+																	<div class="pull-right" th:text="${row.taskSubjectTo}"></div>
+																</div>
+															</div>
+														</div>
+
+														<div class="timeline-footer text-right">
+															<i th:if="${row.remarks != null}" text:lineseparator="${row.remarks}" />
+														</div>
+													</div>
+												</li>
+											</div>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-3">
+						<div class="box box-primary">
+							<div class="box-header with-border">
+								<div class="box-title text-center" th:text="*{taskDto.taskDisplay.currentState}"></div>
+							</div>
+							<div class="box-body">
+								<div class="row">
+									<label class="col-sm-6 control-label" th:text="#{taskDisplay.taskGroup}">گروه</label>
+									<div class="col-sm-6">
+										<span th:if="${taskDto.taskDisplay != null}" th:text="${taskDto.taskDisplay.taskGroup}" />
+									</div>
+								</div>
+								<div class="row">
+									<label th:text="#{taskDisplay.createUser}" class="col-sm-6 control-label"></label>
+
+									<div class="col-sm-2">
+										<img class="img-rounded" th:src="@{'/image/'+*{createUserId}}" width="20" height="20" />
+									</div>
+									<div class="col-sm-4">
+										<span th:if="${taskDto.taskDisplay.createUser != null}" th:text="${taskDto.taskDisplay.createUser}" />
+									</div>
+								</div>
+								<div class="row">
+									<label th:text="#{taskDisplay.updateUser}" class="col-sm-6 control-label"></label>
+
+									<div class="col-sm-2">
+										<img class="img-rounded" th:src="@{'/image/'+*{updateUserId}}" width="20" height="20" />
+									</div>
+									<div class="col-sm-4">
+										<span th:if="${taskDto.taskDisplay.updateUser != null}" th:text="${taskDto.taskDisplay.updateUser}" />
+									</div>
+								</div>
+								<div class="row">
+									<label th:text="#{taskDisplay.currentAssigneeUserId}" class="col-sm-6 control-label"></label>
+									<div class="col-sm-2" th:if="*{taskDto.taskDisplay.currentAssigneeUserId != null}">
+										<img class="img-rounded" th:src="@{'/image/'+*{taskDto.taskDisplay.currentAssigneeUserId}}" width="20" height="20" />
+									</div>
+									<div class="col-sm-4">
+										<span th:if="${taskDto.taskDisplay.currentAssigneeUserName != null}" th:text="${taskDto.taskDisplay.currentAssigneeUserName}" />
+									</div>
+								</div>
+
+								<div class="row">
+									<label th:text="#{taskDisplay.currentState}" class="col-sm-6 control-label"></label>
+									<div class="col-sm-6">
+										<span th:if="${taskDto.taskDisplay.currentState != null}" th:text="${taskDto.taskDisplay.currentState}" />
+									</div>
+								</div>
+
+								<div class="row">
+									<label th:text="#{taskDisplay.createDateTime}" class="col-sm-6 control-label"></label>
+									<div class="col-sm-6">
+										<input style="box-shadow: none; border: none;" th:if="${taskDto.taskDisplay.createDateTime != null}" parvan:inputDate="${taskDto.taskDisplay.createDateTime}" readonly="true" />
+									</div>
+								</div>
+
+								<div class="row">
+									<label th:text="#{taskDisplay.updateDateTime}" class="col-sm-6 control-label"></label>
+									<div class="col-sm-6">
+										<input style="box-shadow: none; border: none;" th:if="${taskDto.taskDisplay.updateDateTime != null}" parvan:inputDate="${taskDto.taskDisplay.updateDateTime}" />
+									</div>
+								</div>
+
+								<div class="row">
+									<label th:text="#{taskDisplay.dueDate}" class="col-sm-6 control-label"></label>
+									<input class="col-sm-6" style="box-shadow: none; border: none;" th:if="${taskDto.taskDisplay.dueDate != null}" parvan:inputDate="${taskDto.taskDisplay.dueDate}" />
+								</div>
+								<div class="row">
+									<label class="col-sm-6 control-label" th:text="#{taskDisplay.priority}">اولویت:</label>
+									<div class="col-sm-6">
+										<span th:if="${taskDto.taskDisplay.priority != null}" th:text="${taskDto.taskDisplay.priority}" />
+									</div>
+								</div>
+								<!-- <div class="row">
+								<label class="col-sm-4 control-label">رای‌ها:</label>
+
+								<div class="col-sm-1">
+									<div class="dropdown">
+										<a class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true" href="#">
+											<span class="badge" th:text="${voteSize}"></span>
+										</a>
+										<ul class="dropdown-menu">
+											<li th:each="voter : ${voters}">
+												<a th:text="${voter.member.firstName}+' '+${voter.member.lastName}"></a>
+											</li>
+										</ul>
+									</div>
+								</div>
+
+								<div class="col-sm-6">
+									<div class="btn-group">
+
+										<a class="btn btn-danger btn-sm" th:href="@{'/task/'+${id}+'/vote'}" type="submit" th:attr="disabled=${voteVO == null ? 'true' : 'false'}">
+											حذف
+											<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+										</a>
+
+										<a class="btn btn-success btn-sm" th:href="@{'/task/'+${id}+'/vote'}" type="submit" title="حذف" th:attr="disabled=${voteVO == null ? 'false' : 'true'}">
+											افزودن
+											<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+										</a>
+
+									</div>
+								</div>
+							</div> -->
+								<!-- <div class="row">&nbsp;</div> -->
+
+								<!-- <div class="row">
+								<label class="col-sm-4 control-label">مشاهده کننده ها:</label>
+
+								<div class="col-sm-1">
+									<div class="dropdown">
+										<a class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true" href="#">
+											<span class="badge" th:text="${watchSize}"></span>
+										</a>
+										<ul class="dropdown-menu">
+											<li th:each="watcher : ${watchers}">
+												<a th:text="${watcher.member.firstName}+' '+${watcher.member.lastName}"></a>
+											</li>
+										</ul>
+									</div>
+								</div>
+								<div class="col-sm-6">
+									<div class="btn-group">
+
+										<a class="btn btn-danger btn-sm" th:href="@{'/task/'+${id}+'/watch'}" type="submit" th:attr="disabled=${watchVO == null ? 'true' : 'false'}">
+											حذف
+											<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+										</a>
+
+										<a class="btn btn-success btn-sm" th:href="@{'/task/'+${id}+'/watch'}" type="submit" th:attr="disabled=${watchVO == null ? 'false' : 'true'}">
+											افزودن
+											<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+										</a>
+
+									</div>
+								</div>
+							</div> -->
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<th:block layout:fragment="javascripts">
+		<script th:inline="javascript">
+			
+            function getTaskGroupExtraParams(aoData) {
+            	return {
+		    	    "data" : function(data){
+				    	customPush(data, 'name', $('#nameFilter').val());
+		    	    }
+		    	};
+            }
+
+            function deleteTask(id) {
+            	$('#deleteTaskForm').find('.callout').text('').addClass('hide');
+            	$('#deleteTaskModal').find('input[name="id"]').val(id);
+            	$('#deleteTaskModal').modal({ backdrop: 'static', keyboard: true });
+            	$('#deleteTaskModal').modal('show');
+            }
+
+            jQuery(document).ready(function(){
+            	$('#deleteTaskBtn').click(function(){
+            		var $btn = $(this);
+            		$('#deleteTaskForm').find('.callout').text('').addClass('hide');
+            		var id = $('#deleteTaskForm').find('input[name=id]').val()
+            		$btn.attr('disabled', true);
+            		$.post('/taskmanagement-web/tasks/del/' + id, $('#deleteTaskForm').serialize()).done(function(data) {
+            			if(data.status == 'success') {
+            				showTopleftGrowl('success', 'Delete', 'Delete Successful');
+            				window.open("/taskmanagement-web/tasks", "_self");
+            				oTable_TaskDisplayTable.ajax.reload();
+            				$('#deleteTaskModal').modal('hide');
+            			} else if(data.status == 'ValidationException'){
+            				$('#deleteTaskForm').find('.callout').text(data.invalidField + ' invalid-value').removeClass('hide');
+            			} else if(data.status == 'ErrorCode'){
+            				if(data.errorMessage){
+            					$('#deleteTaskForm').find('.callout').text(data.errorMessage).removeClass('hide');
+            				} else {
+            					$('#deleteTaskForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+            				}
+            			} else {
+            				console.debug(data.status);
+            				$('#deleteTaskForm').find('.callout').text((data.message ? data.message : 'delete.failed')).removeClass('hide');
+            			}
+            			$btn.attr('disabled', false);
+            		}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'deleteTaskBtn')});
+            		return false;
+            	});
+            });
+			 
+            //<![CDATA[
+
+            (function timeAgo(selector) {
+
+                var templates = {
+                    prefix: "",
+                    suffix: " ago",
+                    seconds: "less than a minute",
+                    minute: "about a minute",
+                    minutes: "%d minutes",
+                    hour: "about an hour",
+                    hours: "about %d hours",
+                    day: "a day",
+                    days: "%d days",
+                    month: "about a month",
+                    months: "%d months",
+                    year: "about a year",
+                    years: "%d years"
+                };
+                var template = function(t, n) {
+                    return templates[t] && templates[t].replace(/%d/i, Math.abs(Math.round(n)));
+                };
+
+                var timer = function(time) {
+                    if (!time)
+                        return;
+                    time = time.replace(/\.\d+/, ""); // remove milliseconds
+                    time = time.replace(/-/, "/").replace(/-/, "/");
+                    time = time.replace(/T/, " ").replace(/Z/, " UTC");
+                    time = time.replace(/([\+\-]\d\d)\:?(\d\d)/, " $1$2"); // -04:00 -> -0400
+                    time = new Date(time * 1000 || time);
+
+                    var now = new Date();
+                    var seconds = ((now.getTime() - time) * .001) >> 0;
+                    var minutes = seconds / 60;
+                    var hours = minutes / 60;
+                    var days = hours / 24;
+                    var years = days / 365;
+
+                    return templates.prefix + (
+                        seconds < 45 && template('seconds', seconds) ||
+                        seconds < 90 && template('minute', 1) ||
+                        minutes < 45 && template('minutes', minutes) ||
+                        minutes < 90 && template('hour', 1) ||
+                        hours < 24 && template('hours', hours) ||
+                        hours < 42 && template('day', 1) ||
+                        days < 30 && template('days', days) ||
+                        days < 45 && template('month', 1) ||
+                        days < 365 && template('months', days / 30) ||
+                        years < 1.5 && template('year', 1) ||
+                        template('years', years)
+                    ) + templates.suffix;
+                };
+
+                var elements = document.getElementsByClassName('timeago');
+                for (var i in elements) {
+                    var $this = elements[i];
+                    if (typeof $this === 'object') {
+                        $this.innerHTML = timer($this.getAttribute('title') || $this.getAttribute('localDateTime'));
+                    }
+                }
+                // update time every minute
+                setTimeout(timeAgo, 60000);
+
+            })();
+            //]]>
+			</script>
+	</th:block>
+</body>
+</html>
+

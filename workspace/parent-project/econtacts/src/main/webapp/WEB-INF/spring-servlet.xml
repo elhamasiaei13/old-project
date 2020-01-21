@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/mvc
+                           http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+                           http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context-3.0.xsd
+                           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+    
+    
+  <!-- **************************************************************** -->
+  <!--  RESOURCE FOLDERS CONFIGURATION                                  -->
+  <!--  Dispatcher configuration for serving static resources           -->
+  <!-- **************************************************************** -->
+  <mvc:resources location="/img/" mapping="/img/**" />
+  <mvc:resources location="/css/" mapping="/css/**" />
+    
+
+  <!-- **************************************************************** -->
+  <!--  SPRING ANNOTATION PROCESSING                                    -->
+  <!-- **************************************************************** -->
+  <mvc:annotation-driven />
+  <context:component-scan base-package="org.thymeleaf.econtacts.web" />
+ 
+  
+  
+
+
+  <!-- **************************************************************** -->
+  <!--  MESSAGE EXTERNALIZATION/INTERNATIONALIZATION                    -->
+  <!--  Standard Spring MessageSource implementation                    -->
+  <!-- **************************************************************** -->
+  <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+    <property name="basename" value="Messages" />
+  </bean>
+
+
+  <!-- **************************************************************** -->
+  <!--  THYMELEAF-SPECIFIC ARTIFACTS                                    -->
+  <!--  TemplateResolver <- TemplateEngine <- ViewResolver              -->
+  <!-- **************************************************************** -->
+
+  <bean id="templateResolver"
+        class="org.thymeleaf.templateresolver.ServletContextTemplateResolver">
+    <property name="prefix" value="/WEB-INF/templates/" />
+    <property name="suffix" value=".html" />
+    <property name="templateMode" value="HTML5" />
+    <!-- Template cache is true by default. Set to false if you want -->
+    <!-- templates to be automatically updated when modified.        -->
+    <property name="cacheable" value="true" />
+  </bean>
+    
+  <bean id="templateEngine"
+        class="org.thymeleaf.spring3.SpringTemplateEngine">
+    <property name="templateResolver" ref="templateResolver" />
+    </bean>
+   
+  <bean class="org.thymeleaf.spring3.view.ThymeleafViewResolver">
+    <property name="templateEngine" ref="templateEngine" />
+  </bean>    
+ 
+ <!-- **************************************************************** -->
+  <!-- DATA SOURCE AND TRANSACTION MANAGER FOR DATABASE                    -->
+  <!--  Beans for Hibernate Datasource configuration                   -->
+  <!-- **************************************************************** -->
+ <bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+		p:location="/WEB-INF/jdbc.properties" />
+
+	<bean id="dataSource"
+		class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+		p:driverClassName="${jdbc.driverClassName}"
+		p:url="${jdbc.databaseurl}" p:username="${jdbc.username}"
+		p:password="${jdbc.password}" />
+
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation">
+			<value>classpath:hibernate.cfg.xml</value>
+		</property>
+		<property name="configurationClass">
+			<value>org.hibernate.cfg.AnnotationConfiguration</value>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">${jdbc.dialect}</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">create</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+		<tx:annotation-driven />
+</beans>
+
+

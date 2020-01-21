@@ -1,0 +1,8 @@
+package com.parvanpajooh.siteservices.service;
+
+import com.parvanpajooh.commons.platform.ejb.service.GenericLocalService;
+import com.parvanpajooh.siteservices.model.RecoveryCode;
+
+public interface RecoveryCodeLocalService extends GenericLocalService<RecoveryCode, Long>{
+
+}

@@ -1,0 +1,426 @@
+package com.parvanpajooh.commons.platform.ejb.model;
+
+import java.util.Properties;
+import java.util.Set;
+
+public class UserInfoWrapper {
+	
+	public static final String USER_ID = "userId";
+	public static final String USER_UUID = "userUuid";
+	public static final String USER_NAME = "userName";
+	public static final String USER_ROLE_NAMES = "userRoleNames";
+	public static final String USER_FIRST_NAME = "userFirstName";
+	public static final String USER_LAST_NAME = "userLastName";
+	public static final String USER_TENANT_ID = "tenantId";
+	public static final String USER_LOCALE = "userLocale";
+	public static final String USER_ZONE_ID = "userZoneId";
+	public static final String USER_CALENDAR = "userCalendar";
+	public static final String AGENT_ID = "agentId";
+	public static final String AGENT_NAME = "agentName";
+	public static final String AGENT_NODE_ID = "agentNodeId";
+	public static final String AGENT_NODE_CODE_ = "agentNodeCode";
+	public static final String AGENT_NODE_NAME = "agentNodeName";
+	public static final String AGENT_CITY_SHORT_CODE = "agentCityShortCode";
+	public static final String AGENT_CITY_NAME = "agentCityName";
+	public static final String AGENT_HUB_NODE_ID = "agentHubNodeId";
+	public static final String AGENT_HUB_NODE_CODE = "agentHubNodeCode";
+	public static final String AGENT_HUB_NODE_NAME = "agentHubNodeName";
+	public static final String AGENT_ALL_SUBAGENT_IDS = "agentAllSubAgentIds";
+	public static final String AGENT_ALLOWED_ORG_ID = "agentAllowedOrgId";
+	public static final String EMPLOYEE_ID = "employeeId";
+	public static final String EMPLOYEE_ACCOUNT_NUMBER = "employeeAccountNumber";
+	public static final String EMPLOYEE_GROUPS = "employeeGroups";
+	public static final String IS_COURIER = "isCourier";
+	public static final String IS_AGENT = "isAgent";
+	
+	private UserInfo userInfo;
+	
+	/**
+	 * 
+	 * @param userInfo
+	 */
+	public UserInfoWrapper(UserInfo userInfo) {
+		this.userInfo = userInfo;
+	}
+	
+	/**
+	 * @return the userInfo
+	 */
+	public UserInfo getUserInfo() {
+		return this.userInfo;
+	}
+
+	/**
+	 * @return the userId
+	 */
+	public Long getUserId() {
+		return this.userInfo.getUserId();
+	}
+
+	/**
+	 * @return the userName
+	 */
+	public String getUserName() {
+		return this.userInfo.getUserName();
+	}
+
+	/**
+	 * @return the ip
+	 */
+	public String getIp() {
+		return this.userInfo.getIp();
+	}
+
+	/**
+	 * @return the context
+	 */
+	public String getContext() {
+		return this.userInfo.getContext();
+	}
+
+	/**
+	 * @return the firstName
+	 */
+	public String getFirstName() {
+		return this.userInfo.getFirstName();
+	}
+
+	/**
+	 * @return the lastName
+	 */
+	public String getLastName() {
+		return this.userInfo.getLastName();
+	}
+
+	/**
+	 * @return the roleNames
+	 */
+	public Set<String> getRoleNames() {
+		return this.userInfo.getRoleNames();
+	}
+
+	/**
+	 * @return the tenantId
+	 */
+	public String getTenantId() {
+		return this.userInfo.getTenantId();
+	}
+
+	/**
+	 * @return the properties
+	 */
+	public Properties getProperties() {
+		return this.userInfo.getProperties();
+	}
+
+	/**
+	 * @return the locale
+	 */
+	public String getLocale() {
+		return this.userInfo.getLocale();
+	}
+
+	/**
+	 * @return the zoneId
+	 */
+	public String getZoneId() {
+		return this.userInfo.getZoneId();
+	}
+
+
+	/**
+	 * @return the calendar
+	 */
+	public String getCalendar() {
+		return this.userInfo.getCalendar();
+	}
+
+	/**
+	 * @return the impersonatedBy
+	 */
+	public String getImpersonatedBy() {
+		return this.userInfo.getImpersonatedBy();
+	}
+
+	/**
+	 * @return the sessionId
+	 */
+	public String getSessionId() {
+		return this.userInfo.getSessionId();
+	}
+
+
+	/**
+	 * @return the requestId
+	 */
+	public String getRequestId() {
+		return this.userInfo.getRequestId();
+	}
+
+	/**
+	 * @return the requestServletPath
+	 */
+	public String getRequestServletPath() {
+		return this.userInfo.getRequestServletPath();
+	}
+
+	/**
+	 * @return the requestPathInfo
+	 */
+	public String getRequestPathInfo() {
+		return this.userInfo.getRequestPathInfo();
+	}
+
+	/**
+	 * @return the agentId
+	 */
+	public Long getAgentId() {
+		Object obj = this.userInfo.getProperties().get(AGENT_ID);
+		if (obj != null) {
+			return (Long) obj;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * @return the agentName
+	 */
+	public String getAgentName() {
+		Object obj = this.userInfo.getProperties().get(AGENT_NAME);
+		if (obj != null) {
+			return (String) obj;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * @return the agentNodeId
+	 */
+	public Long getAgentNodeId() {
+		Object obj = this.userInfo.getProperties().get(AGENT_NODE_ID);
+		if (obj != null) {
+			return (Long) obj;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * @return the agentNodeName
+	 */
+	public String getAgentNodeName() {
+		Object obj = this.userInfo.getProperties().get(AGENT_NODE_NAME);
+		if (obj != null) {
+			return (String) obj;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * @return the agentNodeCode
+	 */
+	public String getAgentNodeCode() {
+		Object obj = this.userInfo.getProperties().get(AGENT_NODE_CODE);
+		if (obj != null) {
+			return (String) obj;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * @return the agentCityShortCode
+	 */
+	public String getAgentCityShortCode() {
+		Object obj = this.userInfo.getProperties().get(AGENT_CITY_SHORT_CODE);
+		if (obj != null) {
+			return (String) obj;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * @return the agentCityName
+	 */
+	public String getAgentCityName() {
+		Object obj = this.userInfo.getProperties().get(AGENT_CITY_NAME);
+		if (obj != null) {
+			return (String) obj;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * @return the agentChildrenIds
+	 */
+	@Deprecated
+	@SuppressWarnings("unchecked")
+	public Set<Long> getAgentChildrenIds() {
+		Object obj = this.userInfo.getProperties().get(AGENT_ALL_SUBAGENT_IDS);
+		if (obj != null) {
+			return (Set<Long>) obj;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * 
+	 * @return the agentAllSubAgentIds
+	 */
+	@SuppressWarnings("unchecked")
+	public Set<Long> getAllSubAgentIds() {
+		Object obj = this.userInfo.getProperties().get(AGENT_ALL_SUBAGENT_IDS);
+		if (obj != null) {
+			return (Set<Long>) obj;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * @return the agentAllowedOrgId
+	 */
+	public Long getAgentAllowedOrgId() {
+		Object obj = this.userInfo.getProperties().get(AGENT_ALLOWED_ORG_ID);
+		if (obj != null) {
+			return (Long) obj;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * 
+	 * @return employeeId
+	 */
+	public Long getEmployeeId() {
+		Object obj = this.userInfo.getProperties().get(EMPLOYEE_ID);
+		if (obj != null) {
+			return (Long) obj;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * @return the employeeAccountNumber
+	 */
+	public String getEmployeeAccountNumber() {
+		Object obj = this.userInfo.getProperties().get(EMPLOYEE_ACCOUNT_NUMBER);
+		if (obj != null) {
+			return (String) obj;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * @return the employeeGroups
+	 */
+	public Set<Object> getEmployeeGroups() {
+		Object obj = this.userInfo.getProperties().get(EMPLOYEE_GROUPS);
+		if (obj != null) {
+			return (Set<Object>) obj;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * @return the agentHubNodeId
+	 */
+	public Long getAgentHubNodeId() {
+		Object obj = this.userInfo.getProperties().get(AGENT_HUB_NODE_ID);
+		if (obj != null) {
+			return (Long) obj;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * @return the agentHubNodeCode
+	 */
+	public String getAgentHubNodeCode() {
+		Object obj = this.userInfo.getProperties().get(AGENT_HUB_NODE_CODE);
+		if (obj != null) {
+			return (String) obj;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * @return the agentHubNodeName
+	 */
+	public String getAgentHubNodeName() {
+		Object obj = this.userInfo.getProperties().get(AGENT_HUB_NODE_NAME);
+		if (obj != null) {
+			return (String) obj;
+		} else {
+			return null;
+		}
+	}
+	
+	public boolean hasAdminPrivilege() {
+		Set<String> roles = userInfo.getRoleNames();
+		return roles.contains("ROLE_ADMIN") || roles.contains("ROLE_MANAGER");
+	}
+
+	/**
+	 * @return the isCourier
+	 */
+	public boolean isCourier() {
+		Set<Object> empGroups = getEmployeeGroups();
+		
+		for (Object thisEmpGroup : empGroups) {
+			String thisEmpGroupStr = thisEmpGroup.toString();
+			if("COURIER".equalsIgnoreCase(thisEmpGroupStr)) {
+				return true;
+			}
+		}
+		
+		return false;
+		
+		/*if (empGroups.contains(new String("COURIER"))) { 
+			System.out.println("COURIER: 1");
+		}
+		
+		if (empGroups.contains(new String("clerk"))) { 
+			System.out.println("CLERK: 1");
+		}
+		
+		if (empGroups != null && empGroups.contains("COURIER")) { //TODO
+			return true;
+		} else {
+			return false;
+		}*/
+	}
+
+	/**
+	 * @return the isAgent
+	 */
+	@Deprecated
+	public boolean isAgent() {
+		for (String role : userInfo.getRoleNames()) {
+			if (role.equals("ROLE_AGENT")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/*private Long agentId;
+	private Set<Long> agentChildrenIds;
+	private Set<Long> personOrgIds;
+	private Object agentVO;
+	private Long agentHubNodeId
+	private boolean isCourier;
+	private boolean isAgent;*/
+}

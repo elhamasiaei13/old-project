@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;IdmService.java&apos; to &apos;agentmanagement-ejb/src/main/java/com.parvanpajooh.agentmanagement.common&apos;&#x0A;- Original project: &apos;common-platform-ejb&apos;&#x0A;- Destination element: &apos;agentmanagement-ejb/src/main/java/com.parvanpajooh.agentmanagement.common&apos;&#x0A;- Original element: &apos;com.parvanpajooh.commons.platform.ejb.util.permission.IdmService.java&apos;" description="Copy compilation unit" destination="=agentmanagement-ejb/src\/main\/java&lt;com.parvanpajooh.agentmanagement.common" element1="/src\/main\/java&lt;com.parvanpajooh.commons.platform.ejb.util.permission{IdmService.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1473583507917" units="1" version="1.0"/>
+</session>

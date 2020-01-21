@@ -1,0 +1,847 @@
+html, body
+{
+    height: 100%;
+}
+@font-face {
+    font-family: 'BYagut';
+    src: url('webfonts/BYagut.eot?#') format('eot'),  /* IE6–8 */
+    url('webfonts/BYagut.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+    url('webfonts/BYagut.ttf') format('truetype');  /* Saf3—5, Chrome4+, FF3.5, Opera 10+ */
+}
+
+@font-face {
+    font-family: 'BBaran';
+    src: url('webfonts/BBaran.eot?#') format('eot'),  /* IE6–8 */
+    url('webfonts/BBaran.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+    url('webfonts/BBaran.ttf') format('truetype');  /* Saf3—5, Chrome4+, FF3.5, Opera 10+ */
+}
+
+@font-face {
+    font-family: 'BFerdosi';
+    src: url('webfonts/BFerdosi.eot?#') format('eot'),  /* IE6–8 */
+    url('webfonts/BFerdosi.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+    url('webfonts/BFerdosi.ttf') format('truetype');  /* Saf3—5, Chrome4+, FF3.5, Opera 10+ */
+}
+
+@font-face {
+    font-family: 'BJalal';
+    src: url('webfonts/BJalal.eot?#') format('eot'),  /* IE6–8 */
+    url('webfonts/BJalal.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+    url('webfonts/BJalal.ttf') format('truetype');  /* Saf3—5, Chrome4+, FF3.5, Opera 10+ */
+}
+
+@font-face {
+    font-family: 'BRoya';
+    src: url('webfonts/BRoya.eot?#') format('eot'),  /* IE6–8 */
+    url('webfonts/BRoya.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+    url('webfonts/BRoya.ttf') format('truetype');  /* Saf3—5, Chrome4+, FF3.5, Opera 10+ */
+}
+
+@font-face {
+    font-family: 'BKoodakBold';
+    src: url('webfonts/BKoodakBold.eot?#') format('eot'),  /* IE6–8 */
+    url('webfonts/BKoodakBold.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+    url('webfonts/BKoodakBold.ttf') format('truetype');  /* Saf3—5, Chrome4+, FF3.5, Opera 10+ */
+}
+
+@font-face {
+    font-family: 'BCompset';
+    src: url('webfonts/BCompset.eot?#') format('eot'),  /* IE6–8 */
+    url('webfonts/BCompset.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+    url('webfonts/BCompset.ttf') format('truetype');  /* Saf3—5, Chrome4+, FF3.5, Opera 10+ */
+}
+@font-face {
+    font-family: 'BBadr';
+    src: url('webfonts/BBadr.eot?#') format('eot'),  /* IE6–8 */
+    url('webfonts/BBadr.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+    url('webfonts/BBadr.ttf') format('truetype');  /* Saf3—5, Chrome4+, FF3.5, Opera 10+ */
+}
+
+@font-face {
+    font-family: 'BYekan';
+    src: url('webfonts/BYekan.eot?#') format('eot'),  /* IE6–8 */
+    url('webfonts/BYekan.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+    url('webfonts/BYekan.ttf') format('truetype');  /* Saf3—5, Chrome4+, FF3.5, Opera 10+ */
+}
+
+
+
+body {
+    font-size:13px;
+    font-family:tahoma;
+    color:#222;
+    padding:0px;
+    margin:0px;
+/*
+    background: url(./images/bg_main.gif) repeat-x;
+*/
+    /*padding-top:30px;*/
+}
+
+a {
+    color:#555;    
+}
+
+.side_menu {
+    direction:rtl;
+    text-align:right;
+    padding:10px;
+    font-family: tahoma;
+    background-color: #e8e8e8;
+    height: 100%;
+    
+}
+
+.tbl_menu td {
+    font-size:13px;
+    direction:rtl;
+    text-align:left;
+    padding:0px 5px 5px 10px;
+    font-family: tahoma;
+    height: 100%;
+    background-color:#E2E4E7 ;
+}
+
+.side_menu_link_divider {
+    border-bottom:#999 dashed 1px;
+    margin:4px 0px 4px 0px;
+}
+
+.side_menu_link_divider_admin {
+    border-bottom:#f30 dashed 1px;
+    margin:4px 0px 4px 0px;
+}
+
+.side_menu_link {
+    color:#333;
+    font-size:13px;
+    margin-bottom:1px;
+}
+
+.side_menu_link a {
+    color:#333;
+    font-size:13px;
+    text-decoration:none;
+}
+
+.page_header {
+    direction:rtl;
+    text-align:center;
+    font-weight:500;
+    padding:4px 0px 0px 0px;
+    background:url(./images/title_bar.jpg) repeat-x;
+    height:30px;
+    margin:0px 5px 0px 5px;
+    /*background-color: #799998;*/
+    color: #ffffff;
+    font-family: tahoma;
+    font-size: 18px;
+    border-bottom: darkorchid;
+
+}
+
+.page_content {
+    margin:0px 5px 20px 5px;
+    direction:rtl;
+    text-align:right;
+}
+
+.tbl_entry_from {
+    margin:2px 0px 0px 0px;
+    direction:rtl;
+}
+
+.tbl_entry_form_title {
+    font-size:13px;
+
+    color: #1d402f;
+    padding:2px 5px 2px 5px;
+    font-weight:100;
+    text-align:left;
+    direction:rtl;
+    border-bottom:#bcc9c5 solid 1px;
+    border-left: #bcc9c5 solid 1px;
+    border-right: #053e47 solid 2px;
+    font-family: tahoma;
+    vertical-align: middle;
+    line-height: 5px;
+    display:table-cell;
+    padding-top: 5px;
+}
+.tbl_entry_form_title tbody tr:nth-child(even) { /*(even) or (2n 0)*/
+    background: #A4D1FF;
+}
+
+.tbl_entry_form_title tr:nth-child(odd) {background: #d4e9e6}
+
+.tbl_entry_search_form_title {
+    font-size:15px;
+    color: #524939;
+    background: #ebeddb;
+    padding:2px 5px 2px 5px;
+    font-weight:500;
+    text-align:left;
+    direction:rtl;
+    border-bottom:#ddd solid 1px;
+    border-left:#ddd solid 1px;
+    border-right: #685336 solid 2px;
+    font-family:  BKoodakBold, BRoya, BBaran,tahoma;
+
+}
+
+.tbl_entry_form_title_nb {
+    font-size:14px;
+    color:#630;
+    background:#f5f5f5;
+    padding:2px 5px 2px 5px;
+    font-weight:bold;
+    text-align:left;
+    direction:rtl;
+    border-bottom:#ddd solid 1px;
+    border-left:#ddd solid 1px;
+    border-right:#efefef solid 2px;
+}
+
+.tbl_entry_form_input {
+    font-size:13px;
+    font-weight:normal;
+    font-family:tahoma;
+    color:#333;
+    background: #e7f6ee;
+    padding:2px 2px 2px 5px;
+    border-bottom:#bcc9c5 solid 1px;
+    border-left:#bcc9c5 solid 1px;
+}
+.tbl_entry_search_form_input {
+    font-size:13px;
+    font-weight:normal;
+    font-family:tahoma;
+    color:#333;
+    background: #ebeddb;
+    padding:2px 2px 2px 5px;
+    border-bottom:#ddd solid 1px;
+    border-left:#fff solid 1px;
+}
+
+
+.entry_form_input {
+    border: rgba(66, 81, 77, 0.74) solid 1px;
+    font-size:13px;
+    font-family:tahoma;
+    font-weight:normal;
+    color: #18221f;
+    height: 22px;
+    vertical-align: middle;
+}
+
+.select_entry_form_input {
+    border:#c9c9c9 solid 1px;
+    font-size:13px;
+    font-family:times new roman;
+    font-weight:normal;
+    color:#555;
+    background:#fafafa;
+}
+
+.entry_form_submit_search {
+    border:none;
+    background:url(./images/search-btn.jpg);
+    width:43px;
+    height:18px;
+    margin:5px 0px 0px 2px;
+}
+
+.entry_form_submit_register {
+    border:none;
+    background:url(./images/register-btn.jpg);
+    width:43px;
+    height:18px;
+    margin:5px 0px 0px 2px;
+}
+
+
+.entry_form_submit_update {
+    border:none;
+    background:url(./images/beroozresaniE.jpg);
+    width:63px;
+    height:18px;
+    margin:5px 0px 0px 2px;
+}
+
+.entry_form_submit_send {
+    border:none;
+    background:url(./images/send-btn.jpg);
+    width:43px;
+    height:18px;
+    margin:5px 0px 0px 2px;
+}
+
+.entry_form_submit_edit {
+    border:none;
+    background:url(./images/edit-btn.jpg);
+    width:43px;
+    height:18px;
+    margin-top:2px;
+}
+
+.entry_form_submit_delete {
+    border:none;
+    background:url(./images/delete-btn.jpg);
+   width:100px;
+    height:34px;
+    margin-top:2px;
+}
+
+.entry_form_submit_add {
+    border:none;
+    background:url(./images/add-btn.jpg);
+    width:43px;
+    height:18px;
+    margin-top:2px;
+}
+
+.entry_form_submit_taeed {
+    border:none;
+    background:url(./images/taeedE.jpg);
+    width:53px;
+    height:18px;
+    margin-top:2px;
+}
+
+.entry_form_submit_cancel {
+    border:none;
+    background:url(./images/cancel-btn.jpg);
+    width:43px;
+    height:18px;
+    margin-top:2px;
+}
+
+.list_delete {
+    border:none;
+    background:url(./images/delete.bmp);
+    width:16px;
+    height:18px;
+    cursor:pointer;
+}
+
+.norma_smalll_gray_text {
+    color: #054c55;
+    font-size:12px;
+    font-family: tahoma;
+}
+
+.search_hints {
+    color: #49423d;
+    font-size:12px;
+    font-family: tahoma;
+}
+
+.tbl_page_bar_container {
+    font-size:12px;
+}
+
+.tbl_page_bar_container td {
+    font-size:12px;
+}
+
+.tbl_object_status {
+    font-size:12px;
+    margin-bottom:20px;
+    width:500px;
+}
+
+.tbl_object_status_title {
+    font-size:12px;
+    background:#ccc;
+    color:#fff;
+    font-weight:bold;
+    direction:rtl;
+    text-align:right;
+    padding:0px 2px 2px 5px;
+    border-left:#fff solid 1px;
+}
+
+.tbl_object_status_row {
+    font-size:12px;
+    border-bottom:#bbb solid 1px;
+    border-left:#fff solid 1px;
+    padding:2px;
+}
+
+.tbl_list {
+    font-size:13px;
+    margin-bottom:20px;
+}
+
+
+.tbl_list_title_first_page {
+    font-size:14px;
+    color:#333;
+    font-weight:bold;
+    direction:rtl;
+    text-align:right;
+    padding:0px 2px 2px 5px;
+    border-left:#fff solid 1px;
+    border-bottom:#ccc solid 2px;
+    border-top:#ccc solid 2px;
+}
+
+
+.tbl_list_title {
+    font-family: BYekan;
+    font-size:13px;
+    background: #356765;
+    color: #FAFAD2;
+    direction:rtl;
+    text-align:center;
+    padding:0px 2px 2px 5px;
+    border-left:#fff solid 1px;
+}
+
+.tbl_list_row {
+    font-size:12px;
+    border-bottom:#bbb solid 1px;
+    border-left:#fff solid 1px;
+    padding:2px;
+    font-family: tahoma;
+    color: rgba(25, 39, 63, 0.90);
+}
+
+.tbl_list_row_pad_left {
+    font-size:13px;
+    border-bottom:#bbb solid 1px;
+    border-left:#fff solid 1px;
+    padding:2px;
+    padding-left:10px;
+}
+
+.tbl_list_row_normal {
+    background:#fff;
+}
+
+.tbl_list_row_over {
+    background:#eee;
+}
+
+.list_page_add_link {
+    font-size:12px;
+    margin-top:5px;
+}
+
+.entry_form_textarea {
+    border:#aaa solid 1px;
+    font-size:13px;
+    font-weight:normal;
+    color:#222;
+}
+
+.show_errors {
+    margin-top:10px;
+    font-size:12px;
+    color:red;
+}
+
+.select_box {
+    font-size:13px;
+    font-family:tahoma;
+    font-weight:normal;
+    border: #696969 solid 1px;
+
+
+
+}
+
+.record_count {
+    color:#aaa;
+}
+
+.page_internal_title {
+    color: #d3310e;
+    font-size:14px;
+    font-weight:normal;
+    font-family: tahoma ;
+}
+
+.related_page {
+    font-size:12px;
+    border-right:#f60 2px solid;
+    margin:2px 10px 0px 0px;
+    padding:0px 5px 10px 0px;
+    line-height:20px;
+}
+
+.other_pages {
+    font-size:12px;
+    border-right: #7b2999 solid 2px;
+    margin:2px 10px 0px 0px;
+    padding:0px 5px 10px 0px;
+    line-height:20px;
+}
+
+.related_info {
+    font-size:12px;
+    border-right:#06c 2px solid;
+    margin:2px 10px 0px 0px;
+    padding:0px 5px 10px 0px;
+    line-height:20px;
+}
+
+.related_info_title {
+    border-bottom:#9cf dotted 1px;
+    padding:0px;
+    margin-bottom:2px;
+}
+
+.footer {
+    margin:0px 0px 10px 10px;
+    text-align:center;
+    font-size:12px;
+    color:#aaa;
+}
+
+.show_transaction_form_tbl {
+    border:#ccc solid 2px;
+    padding:5px;
+    font-size:13px;
+}
+
+.show_transaction_form_88_tbl {
+    border:#ccc solid 2px;
+    padding:5px;
+    font-size:13px;
+    width:850px;
+}
+
+.tbl_list_transaction_form_title {
+    color:#222;
+    font-weight:bold;
+    border-bottom:#555 solid 1px;
+}
+
+.tbl_entry_change_status_from {
+    padding:5px;
+    font-size:13px;
+    width:480px;
+}
+
+.page_internal_change_status_title {
+    color:#444;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.normal_page_text {
+    color:#444;
+    font-size:13px;
+    font-weight:normal;
+    direction:rtl;
+}
+
+.multiple_select{
+    border:#c9c9c9 solid 1px;
+    font-size:13px;
+    font-family:times new roman;
+    font-weight:normal;
+    color:#555;
+    background:#fafafa;
+
+    width:180px;
+    height:100px;
+}
+
+.multiple_select_small{
+    border:#c9c9c9 solid 1px;
+    font-size:13px;
+    font-family:times new roman;
+    font-weight:normal;
+    color:#555;
+    background:#fafafa;
+    width:130px;
+    height:70px;
+}
+
+.internla_tbl_entry_form_input {
+    font-size:13px;
+    font-weight:normal;
+    font-family:times new roman;
+}
+
+.closed_task{
+    background-color:#eee;
+    color:#aaa;
+}
+
+.norma_smalll_text {
+    color:#000;
+    font-size:12px;
+}
+
+.norma_titr_gray_text{
+    font-weight:bold;
+    font-family:times new roman;
+    color:#999;
+    font-size:14px;
+}
+
+.internla_tbl_entry_form_input td{
+    padding-left:20px;
+}
+
+.select_entry_form_input_small {
+    border:#c9c9c9 solid 1px;
+    font-size:11px;
+    font-family:times new roman;
+    font-weight:normal;
+    color:#555;
+    background:#fafafa;
+}
+
+.entry_form_submit_task {
+    border:none;
+    height:18px;
+    margin-top:2px;
+    font-family:tahoma, arial,serif;
+    font-size:14px;
+    font-weight:bold;
+    width:53px;
+}
+
+.form_input_en {
+    border:#999 solid 1px;
+}
+
+.form_submit_en {
+    border: #054c55 solid 1px;
+    font-size:12px;
+    font-family:tahoma, arial;
+
+}
+
+.login_table {
+    margin-top:30px;
+    margin-bottom:10px;
+    border: #095554 solid 1px;
+    font-family:tahoma, arial;
+    font-size:14px;
+}
+
+.login_header {
+    background: #356765;
+    color:#FAFAD2;
+    font-family: BJalal;
+    font-size:20px;
+    padding:6px;
+    font-weight:normal;
+}
+
+.show_success_msg {
+    margin-top:10px;
+    font-size:12px;
+    color:green;
+}
+
+
+.first_page_menu_title{
+    color:#444;
+    font-size:13px;
+    font-weight:bold;
+    width:100%;
+    border-bottom:1px dashed #999;
+}
+
+.keyboard {
+    background:url(./images/kbd_bg.gif) right no-repeat;
+    height:135px;
+    position:absolute;
+    margin-top:7px;
+    display:none;
+}
+
+pre {
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    width: 99%;   /* remove horizontal scroll-bar when viewing in IE7 */
+    font-family: tahoma, time new roman, arial;
+    font-size:12px;
+}
+
+.entry_form_submit_reply {
+    border:none;
+    background:url(./images/reply-btn.jpg);
+    width:44px;
+    height:18px;
+    margin-top:2px;
+}
+
+.callendar_day_of_week {
+    font-size:16px;
+    font-weight:bold;
+    color:#333;
+}
+
+.callendar_date {
+    font-size:12px;
+    font-weight:normal;
+    color:#999;
+}
+
+.calendar_td_day {
+    padding:5px;
+    border:#aaa solid 1px;
+    width:100px;
+    background:#efefef;
+}
+
+.calendar_td_task {
+    font-size:12px;
+    padding:5px;
+    border:#888 solid 1px;
+    width:635px;
+}
+
+.week_change_td a {
+    text-decoration:none;
+}
+
+.week_change_td {
+}
+
+.month_name {
+    font-size:15px;
+    font-weight:bold;
+    color:red;
+}
+
+.add_calendar a {
+    text-decoration:none;
+    color:red;
+    font-size:12px;
+    direction:ltr;
+}
+
+.task_tbl_list_title {
+    font-size:14px;
+    background:#BC8F8F;
+    color:#fff;
+    font-weight:bold;
+    direction:rtl;
+    text-align:right;
+    padding:0px 2px 2px 5px;
+}
+.task_tbl_list_row {
+    font-size:13px;
+    padding:2px;
+}
+.task_table{
+    border:1px solid #ccc;
+}
+
+.task_index{
+    padding-bottom:3px;
+    background-color:#8B0000;
+    color:#FFD700;
+    border-left:1px solid #F4A460;
+    border-right:1px solid #F4A460;
+}
+
+.tbl_list_title_center {
+    font-size:14px;
+    background:#f60;
+    color:#fff;
+    font-weight:bold;
+    direction:rtl;
+    text-align:center;
+    padding:0px 2px 2px 5px;
+    border-left:#fff solid 1px;
+}
+
+.show_transaction_form_document_tbl {
+    border:#cccccc solid 2px;
+    padding:5px;
+    font-size:13px;
+    width:550px;
+}
+
+
+.tbl_entry_change_status_document_from {
+    padding:5px;
+    font-size:13px;
+    width:520px;
+}
+
+.tbl_list_title_link {
+    font-size:14px;
+    color:#fff;
+    font-weight:11;
+    direction:rtl;
+    text-decoration:none;
+}
+
+.entry_form_input_please_wait {
+    font-family : tahoma , arial;
+    border:none;
+    font-size:14px;
+    color:green;
+    font-weight:bold;
+    visibility:hidden;
+}
+
+.list_search_page {
+    font-size:12px;
+    border-right:#c60 2px solid;
+    margin:2px 10px 0px 0px;
+    padding:0px 5px 10px 0px;
+    line-height:20px;
+}
+
+.title_note {
+    margin-top:10px;
+    font-size:12px;
+    color:blue;
+}
+
+.entry_form_submit_register_red {
+    border:none;
+    background:url(./images/register-btn-red.jpg);
+    width:43px;
+    height:18px;
+    margin:5px 0px 0px 2px;
+}
+
+.service_sales_current_status {
+    font-weight:bold;
+    color:#0033cc;
+    background-color:#cccccc;
+    padding: 2px 5px 2px 5px;
+}
+
+.screen_header_msg {
+    color:red;
+    font-weight:bold;
+    text-align:right;
+    direction:rtl;
+    font-size:14px;
+    padding:0px 10px 5px 0px;
+}
+
+.show_special_sales_form_tbl {
+    border:#ccc solid 2px;
+    padding:5px;
+    font-size:13px;
+    width:500px;
+}
+
+.show_special_sales_form_document_tbl {
+    border:#ccc solid 2px;
+    padding:5px;
+    font-size:13px;
+}
+
+.tbl_list_special_sales_form_title {
+    color:#222;
+    font-weight:bold;
+    border-bottom:#555 solid 1px;
+}
+

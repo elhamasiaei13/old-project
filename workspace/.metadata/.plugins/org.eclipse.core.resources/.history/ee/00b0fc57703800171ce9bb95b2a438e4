@@ -1,0 +1,47 @@
+package com.parvanpajooh.transportationmanagement.service;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.service.GenericLocalService;
+import com.parvanpajooh.transportationmanagement.model.TransportationSchedule;
+import com.parvanpajooh.transportationmanagement.model.criteria.TransportationScheduleCriteria;
+import com.parvanpajooh.transportationmanagement.model.vo.BulkEditTransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement.model.vo.GenerateTransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement.model.vo.TransportationScheduleVO;
+
+
+/**
+ * 
+ * @author ali
+ *
+ */
+public interface TransportationScheduleLocalService extends GenericLocalService<TransportationSchedule, Long> {
+	
+	/**
+	 * 
+	 * @param generateTransportationScheduleVO
+	 * @throws ParvanServiceException
+	 */
+	public void generateTransportationSchedules(GenerateTransportationScheduleVO generateTransportationScheduleVO) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param transportationScheduleCriteria
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public TransportationScheduleVO preBulkEdit(TransportationScheduleCriteria transportationScheduleCriteria) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param transportationScheduleCriteria
+	 * @param bulkEditTransportationScheduleVO
+	 * @param userInfo
+	 * @throws ParvanServiceException
+	 */
+	void bulkEdit(
+			TransportationScheduleCriteria transportationScheduleCriteria,
+			BulkEditTransportationScheduleVO bulkEditTransportationScheduleVO, UserInfo ecUserInfo)
+			throws ParvanServiceException;
+
+}

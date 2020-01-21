@@ -1,0 +1,31 @@
+// See README.txt for information and build instructions.
+//
+// Note: START and END tags are used in comments to define sections used in
+// tutorials.  They are not part of the syntax for Protocol Buffers.
+//
+// To get an in-depth walkthrough of this file and the related examples, see:
+// https://developers.google.com/protocol-buffers/docs/tutorials
+
+// [START declaration]
+syntax = "proto3";
+package accounting;
+// [END declaration]
+
+// [START java_declaration]
+option java_package = "com.parvanpajooh.accounting";
+option java_outer_classname = "AccountingProtos";
+// [END java_declaration]
+
+// [START messages]
+message Account {
+  int64 id = 1;
+  string accountNumber = 2;
+  string name = 3;
+  string description = 4;
+}
+
+
+message AccountList {
+    repeated Account accounts = 1;
+}
+// [END messages]

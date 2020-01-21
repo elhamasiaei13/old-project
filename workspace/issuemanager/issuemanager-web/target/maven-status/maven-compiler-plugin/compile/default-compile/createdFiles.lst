@@ -1,0 +1,12 @@
+com/parvanpajooh/issuemanager/mvc/GroupController.class
+com/parvanpajooh/common/formatter/DateProperyEditor.class
+com/github/dandelion/datatables/thymeleaf/processor/el/ColumnFinalizerProcessor.class
+com/parvanpajooh/issuemanager/mvc/TaskController.class
+com/parvanpajooh/issuemanager/mvc/MemberController.class
+com/parvanpajooh/common/formatter/FormattingConverters.class
+com/parvanpajooh/issuemanager/mvc/LoginController.class
+com/parvanpajooh/issuemanager/mvc/GlobalController.class
+com/parvanpajooh/issuemanager/mvc/BaseController.class
+com/parvanpajooh/issuemanager/mvc/TaskAssignmentController.class
+com/parvanpajooh/issuemanager/mvc/MembershipController.class
+com/parvanpajooh/common/formatter/DateFormatter.class

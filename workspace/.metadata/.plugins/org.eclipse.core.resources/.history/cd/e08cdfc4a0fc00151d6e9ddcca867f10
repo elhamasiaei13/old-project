@@ -1,0 +1,105 @@
+package com.parvanpajooh.issuemanager.mvc;
+
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.issuemanager.model.Group;
+import com.parvanpajooh.issuemanager.model.vo.GroupVO;
+import com.parvanpajooh.issuemanager.service.GroupService;
+
+@Controller
+@RequestMapping("/")
+public class GroupController extends BaseController{
+
+	@EJB(mappedName = "java:global/issueManager-ear/issueManager-ejb/GroupServiceImpl")
+	private GroupService groupService;
+
+	@RequestMapping(value = "/showGroups", method = RequestMethod.GET)
+	public String showGroups(Model model) throws ParvanServiceException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+
+		List<GroupVO> list = groupService.loadGroups(userInfo);
+
+		model.addAttribute("allGroups", list);
+		return "showGroups";
+	}
+
+	@RequestMapping(value = "/addGroup", method = RequestMethod.GET)
+	public String showAddGroupPage(Model model) throws ParvanServiceException {
+		model.addAttribute("group", new Group());
+		return "addGroup";
+	}
+
+	@RequestMapping(value = "/addGroup/addGroup/save", method = { RequestMethod.POST,
+			RequestMethod.GET })
+	public String addGroup(@ModelAttribute GroupVO group, Model model)
+			throws ParvanServiceException, ParvanDaoException {
+		
+		
+		try {
+			UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+					"lastName", "ip", "context", 1L, null, null, null, null, true,
+					false);
+			
+			groupService.save(userInfo, group);
+			
+		} catch (ParvanServiceException e) {
+			e.printStackTrace();
+		}
+		
+		return "redirect:/showGroups";
+	}
+	
+	@RequestMapping(value = "/editGroup/{id}", method = RequestMethod.GET)
+	public String showEditPage(@PathVariable Long id,
+			final HttpServletRequest req, Model model)
+			throws ParvanServiceException, ParvanDaoException {
+	
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+		GroupVO group = groupService.loadGroup(userInfo, id);
+		model.addAttribute("group", group);
+		return "editGroup";
+	}
+
+	@RequestMapping(value = "/editGroup/save", method = { RequestMethod.POST,
+			RequestMethod.GET })
+	public String editMember(@ModelAttribute GroupVO group, Model model)
+			throws ParvanServiceException, ParvanDaoException {
+	
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+		groupService.save(userInfo, group);
+		return "redirect:/showGroups";
+	}
+	
+	@RequestMapping(value = "/removeGroup", method = RequestMethod.POST)
+	public String removeMember(final HttpServletRequest req)
+			throws ParvanServiceException, ParvanDaoException {
+		Long rowId = Long.valueOf(req.getParameter("id"));
+
+		
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+		groupService.delete(userInfo, rowId);
+		return "redirect:/showGroups";
+	}
+}

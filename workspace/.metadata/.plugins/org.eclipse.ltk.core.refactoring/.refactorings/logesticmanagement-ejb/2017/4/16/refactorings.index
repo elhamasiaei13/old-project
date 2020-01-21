@@ -1,0 +1,27 @@
+1492339921115	Rename type 'AgentManagementApplicationServiceImpl'
+1492339954266	Rename type 'AgentManagementApplicationService'
+1492340035686	Rename type 'GeneralAgentDto'
+1492340107629	Rename type 'AgentManagementLocalServiceImpl'
+1492340128515	Rename type 'AgentManagementLocalService'
+1492340224246	Rename type 'AgentManagementService'
+1492340235437	Rename type 'AgentManagementService'
+1492340239416	Rename type 'AgentManagementService1'
+1492340274409	Rename type 'AgentManagementServiceImpl'
+1492340284552	Rename type 'AgentManagementServiceImpl'
+1492340290552	Rename type 'AgentManagementServiceImpl1'
+1492340377836	Rename local variable 'generalAgentDtos'
+1492340385563	Rename local variable 'generalAgentDto'
+1492340443403	Rename local variable 'generalAgentDto'
+1492340512245	Rename field 'agentManagementService'
+1492347824231	Rename type 'UserDto'
+1492348095245	Rename type 'Idm2Service'
+1492348153813	Rename type 'Idm2ApplicationService'
+1492348182334	Rename type 'Idm2ServiceImpl'
+1492348208263	Rename type 'Idm2ApplicationServiceImpl'
+1492423887841	Rename local variable 'userDto'
+1492425203551	Rename local variable 'userDtoList'
+1492851884228	Copy compilation unit
+1492854177435	Copy compilation unit
+1492863649895	Copy compilation units
+1492863717912	Copy compilation units
+1492863832678	Copy compilation units

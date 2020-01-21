@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>AddTask</title>
+</head>
+
+<body>
+	<section class="content" layout:fragment="content">
+		<form action="#" class="form-inline" th:action="@{save}" method="post">
+			<div class="jumbotron">
+   		 		<h2>ایجاد کار جدید</h2>      
+  			</div>
+					
+			<label for="groups" th:text="#{groups_list}"></label>
+            <br></br>
+            <select id="groupId" name="group.id">
+            	 <option th:text="#{lookup_option}"></option>
+                 <option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.name}"></option>
+            </select>
+            <br></br>
+            <br></br>
+            <div class="form-group required">
+	            <div class="form-group">
+	            	<label th:text="#{lbl_subject}"></label>	            
+                </div>            	           
+            </div>
+            <br></br>
+            
+			<input type="text" name="subject" class="input-small" placeholder="Subject" th:field="*{task.subject}"/> <br></br>
+			
+			 <div class="form-group required">
+	            <div class="form-group">
+	            	<label th:text="#{lbl_description}"></label>	            
+                </div>            	    
+            </div>
+            <br></br>
+            
+			<input type="text" name="description" class="input-small" placeholder="Description" th:field="*{task.description}"/> <br></br> 
+			
+			<div class="form-group required">
+	            <div class="form-group">
+	            	<label th:text="#{lbl_duedate}"></label>	            
+                </div>            	       
+            </div>
+            <br></br>    
+            
+			<input type="text" name="dueDate" class="input-small" placeholder="Due Date" th:field="*{task.dueDate}"/> <br></br> 
+
+			<br></br> <br></br>
+			<button type="submit" class="btn btn-primary" th:text="#{btn_save}" th:onclick="${'groupSelected()'}"></button>
+			
+<!-- 			<a class="btn btn-default btn-sm"  th:onclick="${'groupSelected()'}" type="submit">
+	  			<i class="fa fa-floppy-o" aria-hidden="true" th:text="#{btn_save}"></i>
+	  		</a> -->
+			
+		</form>
+		<script>
+			function groupSelected(){
+
+				  	var choose =  "انتخاب کنید";
+					var e = document.getElementById("groupId").value;
+					if(e != choose){						
+						$('#groupId').val(e);
+					}
+					else{
+						$('#groupId').val(null);
+					}						
+			}
+		</script>
+	</section>
+</body>
+</html>

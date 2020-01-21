@@ -1,0 +1,173 @@
+package com.parvanpajooh.complaintmanagement.mvc;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.commons.platform.ejb.ddd.application.GenericApplicationService;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.complaintmanagement.application.ComplaintApplicationService;
+import com.parvanpajooh.complaintmanagement.domain.model.Complaint;
+import com.parvanpajooh.complaintmanagement.domain.model.criteria.ComplaintCriteria;
+import com.parvanpajooh.complaintmanagement.domain.model.dto.ComplaintDto;
+import com.parvanpajooh.complaintmanagement.domain.model.enums.Status;
+import com.parvanpajooh.complaintmanagement.mvc.base.ComplaintManagementAbstractController;
+
+@Controller
+@RequestMapping("/complaint")
+public class ComplaintController extends ComplaintManagementAbstractController<Complaint, ComplaintDto, ComplaintCriteria> {
+
+    @EJB(mappedName = "java:global/complaintmanagement-ear/complaintmanagement-ejb/ComplaintApplicationServiceImpl")
+    private ComplaintApplicationService complaintApplicationService;
+
+    @Override
+    protected String getName() {
+    	return "complaint";
+    }
+/*
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    public @ResponseBody Map<String, Object> get(@PathVariable Long id, HttpServletRequest request) {
+
+	// LOG
+	log.debug("Entering get(id={})", id);
+
+	Map<String, Object> result = new HashMap<String, Object>();
+	WaybillNumberGroupDto complaintmanagementNumberGroupDto = new WaybillNumberGroupDto();
+
+	try {
+	    UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+	    complaintmanagementNumberGroupDto = complaintApplicationService.getWaybillNumberGroup(userInfo, id);
+
+	    result.put("status", "success");
+	    result.put("result", complaintmanagementNumberGroupDto);
+
+	} catch (Exception e) {
+	    proccessException(e, result);
+	}
+
+	// LOG
+	log.debug("Leaving get():ret={}", complaintmanagementNumberGroupDto);
+	return result;
+    }
+
+    @RequestMapping(value = "/get", method = RequestMethod.GET)
+    public @ResponseBody BaseVO getEntity(Long id, HttpServletRequest request) {
+
+	// LOG
+	log.debug("Entering getEntity(id={})", id);
+
+	BaseVO baseVO = null;
+
+	try {
+	    UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+	    baseVO = complaintApplicationService.get(userInfo, id);
+
+	} catch (Exception e) {
+	    log.error("Error occurred while getEntity.", e);
+	}
+
+	// LOG
+	log.debug("Leaving getEntity():ret={}", baseVO);
+	return baseVO;
+    }
+
+    @RequestMapping(value = "/del/{id}", method = RequestMethod.POST)
+    public @ResponseBody Map<String, Object> delete(@PathVariable Long id, HttpServletRequest request) {
+
+	// LOG
+	log.debug("Entering delete(id={})", id);
+
+	Map<String, Object> result = new HashMap<String, Object>();
+
+	try {
+	    UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+	    complaintApplicationService.delete(userInfo, id);
+
+	    result.put("status", "success");
+
+	    request.getSession().removeAttribute(getName());
+
+	} catch (Exception e) {
+	    proccessException(e, result);
+	}
+
+	// LOG
+	log.debug("Leaving delete()");
+	return result;
+    }
+
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    public @ResponseBody Map<String, Object> save(WaybillNumberGroupDto complaintmanagementNumberGroupDto,
+	    HttpServletRequest request) {
+
+	// LOG
+	log.debug("Entering save(dto={})", complaintmanagementNumberGroupDto);
+
+	Map<String, Object> result = new HashMap<String, Object>();
+
+	try {
+	    UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+	    complaintmanagementNumberGroupDto = complaintApplicationService.save(userInfo, complaintmanagementNumberGroupDto);
+
+	    result.put("status", "success");
+	    result.put("result", complaintmanagementNumberGroupDto);
+
+	    request.getSession().removeAttribute(getName());
+
+	} catch (Exception e) {
+	    proccessException(e, result);
+	}
+
+	// LOG
+	log.debug("Leaving save()");
+	return result;
+    }
+*/
+    
+    /* (non-Javadoc)
+     * @see com.parvanpajooh.complaintmanagement.mvc.base.WaybillAbstractController#getService()
+     */
+    @Override
+    protected GenericApplicationService getService() {
+    	return complaintApplicationService;
+    }
+    
+    @Override
+    public Map<String, Object> save(ComplaintDto complainDto, HttpServletRequest request) {
+    	
+    	boolean isNew = (complainDto.getId() == null);
+    	if (isNew) {
+    		complainDto.setStatus(Status.NEW);
+    	}
+    	
+    	return super.save(complainDto, request);
+    }
+    
+    @Override
+    public DatatablesResponse<ComplaintDto> paging(@DatatablesParams DatatablesCriterias criterias, ComplaintCriteria criteria,
+    		HttpServletRequest request) {
+    	
+    	List<ColumnDef> sortedCols = criterias.getSortedColumnDefs();
+    	if (Validator.isNotNull(sortedCols)) {
+    		ColumnDef sortCol = sortedCols.get(0);
+    		String sortedColdName = sortCol.getName();
+    		if (sortedColdName.equals("fullName")) {
+    			sortCol.setName("firstName");
+    			sortedCols.set(0, sortCol);
+    		}
+    	}
+    	
+    	return super.paging(criterias, criteria, request);
+    }
+
+}

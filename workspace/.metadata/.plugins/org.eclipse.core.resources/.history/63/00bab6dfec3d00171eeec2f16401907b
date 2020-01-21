@@ -1,0 +1,88 @@
+package com.parvanpajooh.common.auth;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import com.parvanpajooh.client.agentmanagement.model.EmployeeMsg;
+import com.parvanpajooh.client.agentmanagement.model.GeneralAgentMsg;
+import com.parvanpajooh.client.identitymanagement2.model.RoleMsg;
+import com.parvanpajooh.client.identitymanagement2.model.UserMsg;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+
+public class UserDataCacheMapper {
+	
+	private UserMsg user;
+	private GeneralAgentMsg generalAgentMsg; 
+	private EmployeeMsg employeeMsg;
+	private Set<Long> allSubAgentIds;
+	
+	/**
+	 * 
+	 * @param user
+	 * @param generalAgentMsg
+	 * @param employeeMsg
+	 * @param allSubAgentIds
+	 */
+	public UserDataCacheMapper(
+			UserMsg user, 
+			GeneralAgentMsg generalAgentMsg, 
+			EmployeeMsg employeeMsg,
+			Set<Long> allSubAgentIds) {
+		
+		this.user = user;
+		this.generalAgentMsg = generalAgentMsg;
+		this.employeeMsg = employeeMsg;
+		this.allSubAgentIds = allSubAgentIds;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Map<String, Object> toMap() {
+		
+		// roleNames
+		Set<String> roleNames = new HashSet<String>();
+    	Set<RoleMsg> roles = user.getRoles();
+		if(roles != null){
+			for (RoleMsg role : roles) {
+				roleNames.add(role.getName());
+			}
+		}
+		
+		Map<String, Object> userDataCacheMap = new HashMap<>();
+		
+		userDataCacheMap.put(UserInfoWrapper.USER_ID, user.getId());
+		userDataCacheMap.put(UserInfoWrapper.USER_UUID, user.getUuid());
+		userDataCacheMap.put(UserInfoWrapper.USER_NAME, user.getUserName());
+		userDataCacheMap.put(UserInfoWrapper.USER_ROLE_NAMES, roleNames);
+		userDataCacheMap.put(UserInfoWrapper.USER_FIRST_NAME, user.getFirstName());
+		userDataCacheMap.put(UserInfoWrapper.USER_LAST_NAME, user.getLastName());
+		userDataCacheMap.put(UserInfoWrapper.USER_TENANT_ID, "");//????? user.get);
+		userDataCacheMap.put(UserInfoWrapper.USER_LOCALE, user.getLocale());
+		userDataCacheMap.put(UserInfoWrapper.USER_ZONE_ID, user.getZoneId());
+		userDataCacheMap.put(UserInfoWrapper.USER_CALENDAR, (user.getCalendar() != null) ? user.getCalendar().toString() : null);
+		
+		if (generalAgentMsg != null) {
+			userDataCacheMap.put(UserInfoWrapper.AGENT_ID, generalAgentMsg.getId());
+			userDataCacheMap.put(UserInfoWrapper.AGENT_NAME, generalAgentMsg.getName());
+			userDataCacheMap.put(UserInfoWrapper.AGENT_NODE_ID, generalAgentMsg.getNodeId());
+			userDataCacheMap.put(UserInfoWrapper.AGENT_NODE_CODE, generalAgentMsg.getNodeCode());
+			userDataCacheMap.put(UserInfoWrapper.AGENT_NODE_NAME, generalAgentMsg.getNodeName());
+			userDataCacheMap.put(UserInfoWrapper.AGENT_CITY_SHORT_CODE, generalAgentMsg.getCityShortCode());
+			//TODO userDataCacheMap.put(UserInfoWrapper.AGENT_CITY_NAME, generalAgentMsg.getCity); 
+			userDataCacheMap.put(UserInfoWrapper.AGENT_ALL_SUBAGENT_IDS, allSubAgentIds);
+			userDataCacheMap.put(UserInfoWrapper.AGENT_ALLOWED_ORG_ID, generalAgentMsg.getPersonOrganizationId());
+		}
+		
+		if (employeeMsg != null) {
+			userDataCacheMap.put(UserInfoWrapper.EMPLOYEE_ACCOUNT_NUMBER, employeeMsg.getAccountNumber());
+			userDataCacheMap.put(UserInfoWrapper.EMPLOYEE_ID, employeeMsg.getId());
+			userDataCacheMap.put(UserInfoWrapper.EMPLOYEE_GROUPS, employeeMsg.getGroups());
+		}
+		
+		return userDataCacheMap;
+	}
+}

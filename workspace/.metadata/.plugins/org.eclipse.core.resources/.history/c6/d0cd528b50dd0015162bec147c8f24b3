@@ -1,0 +1,19 @@
+package com.parvanpajooh.sample.dao;
+
+import com.parvanpajooh.ecourier.dao.GenericDao;
+import com.parvanpajooh.sample.model.Sample;
+
+/**
+ * 
+ * @author ali
+ * 
+ */
+public interface ContactDao extends GenericDao<Sample, Long> {
+
+	public void save(Contact contact);
+
+	public List<Contact> findAll();
+
+	public void deleteAll();
+
+}

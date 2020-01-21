@@ -1,0 +1,237 @@
+package com.parvanpajooh.transportationmanagement.model.vo;
+
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+
+@XmlRootElement
+public class GenerateTransportationScheduleVO extends BaseVO {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1969640010304599430L;
+
+	private String carrierRouteNumber;
+	
+	private String transportationNumber;
+	
+	private Long vehicleId;
+	
+	private Double totalWeight;
+	
+	private Double reservableWeight;
+	
+	private String uldInfo;
+	
+	private boolean scheduled;
+	
+	private String fromDateInUtc;
+	
+	private String toDateInUtc;
+
+	private String departureTimeInUtc;
+
+	private String arrivalTimeInUtc;
+	
+	private List<Integer> dayOfWeeks;
+	
+	private String remarks;
+
+	/**
+	 * @return the transportationNumber
+	 */
+	public String getTransportationNumber() {
+		return transportationNumber;
+	}
+
+	/**
+	 * @param transportationNumber the transportationNumber to set
+	 */
+	public void setTransportationNumber(String transportationNumber) {
+		this.transportationNumber = transportationNumber;
+	}
+
+	/**
+	 * @return the carrierRouteNumber
+	 */
+	public String getCarrierRouteNumber() {
+		return carrierRouteNumber;
+	}
+
+	/**
+	 * @param carrierRouteNumber the carrierRouteNumber to set
+	 */
+	public void setCarrierRouteNumber(String carrierRouteNumber) {
+		this.carrierRouteNumber = carrierRouteNumber;
+	}
+
+	/**
+	 * @return the vehicleId
+	 */
+	public Long getVehicleId() {
+		return vehicleId;
+	}
+
+	/**
+	 * @param vehicleId the vehicleId to set
+	 */
+	public void setVehicleId(Long vehicleId) {
+		this.vehicleId = vehicleId;
+	}
+
+	/**
+	 * @return the totalWeight
+	 */
+	public Double getTotalWeight() {
+		return totalWeight;
+	}
+
+	/**
+	 * @param totalWeight the totalWeight to set
+	 */
+	public void setTotalWeight(Double totalWeight) {
+		this.totalWeight = totalWeight;
+	}
+
+	/**
+	 * @return the reservableWeight
+	 */
+	public Double getReservableWeight() {
+		return reservableWeight;
+	}
+
+	/**
+	 * @param reservableWeight the reservableWeight to set
+	 */
+	public void setReservableWeight(Double reservableWeight) {
+		this.reservableWeight = reservableWeight;
+	}
+
+	/**
+	 * @return the uldInfo
+	 */
+	public String getUldInfo() {
+		return uldInfo;
+	}
+
+	/**
+	 * @param uldInfo the uldInfo to set
+	 */
+	public void setUldInfo(String uldInfo) {
+		this.uldInfo = uldInfo;
+	}
+
+	/**
+	 * @return the dayOfWeeks
+	 */
+	public List<Integer> getDayOfWeeks() {
+		return dayOfWeeks;
+	}
+
+	/**
+	 * @param dayOfWeeks the dayOfWeeks to set
+	 */
+	public void setDayOfWeeks(List<Integer> dayOfWeeks) {
+		this.dayOfWeeks = dayOfWeeks;
+	}
+
+	/**
+	 * @return the remarks
+	 */
+	public String getRemarks() {
+		return remarks;
+	}
+
+	/**
+	 * @param remarks the remarks to set
+	 */
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+	/**
+	 * @return the fromDateInUtc
+	 */
+	public String getFromDateInUtc() {
+		return fromDateInUtc;
+	}
+
+	/**
+	 * @param fromDateInUtc the fromDateInUtc to set
+	 */
+	public void setFromDateInUtc(String fromDateInUtc) {
+		this.fromDateInUtc = fromDateInUtc;
+	}
+
+	/**
+	 * @return the toDateInUtc
+	 */
+	public String getToDateInUtc() {
+		return toDateInUtc;
+	}
+
+	/**
+	 * @param toDateInUtc the toDateInUtc to set
+	 */
+	public void setToDateInUtc(String toDateInUtc) {
+		this.toDateInUtc = toDateInUtc;
+	}
+
+	/**
+	 * @return the departureTimeInUtc
+	 */
+	public String getDepartureTimeInUtc() {
+		return departureTimeInUtc;
+	}
+
+	/**
+	 * @param departureTimeInUtc the departureTimeInUtc to set
+	 */
+	public void setDepartureTimeInUtc(String departureTimeInUtc) {
+		this.departureTimeInUtc = departureTimeInUtc;
+	}
+
+	/**
+	 * @return the arrivalTimeInUtc
+	 */
+	public String getArrivalTimeInUtc() {
+		return arrivalTimeInUtc;
+	}
+
+	/**
+	 * @param arrivalTimeInUtc the arrivalTimeInUtc to set
+	 */
+	public void setArrivalTimeInUtc(String arrivalTimeInUtc) {
+		this.arrivalTimeInUtc = arrivalTimeInUtc;
+	}
+
+	/**
+	 * @return the scheduled
+	 */
+	public boolean isScheduled() {
+		return scheduled;
+	}
+
+	/**
+	 * @param scheduled the scheduled to set
+	 */
+	public void setScheduled(boolean scheduled) {
+		this.scheduled = scheduled;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "GenerateTransportationScheduleVO [carrierRouteNumber=" + carrierRouteNumber + ", transportationNumber=" + transportationNumber + ", vehicleId=" + vehicleId
+				+ ", totalWeight=" + totalWeight + ", reservableWeight=" + reservableWeight + ", uldInfo=" + uldInfo + ", scheduled=" + scheduled
+				+ ", fromDateInUtc=" + fromDateInUtc + ", toDateInUtc=" + toDateInUtc + ", departureTimeInUtc=" + departureTimeInUtc + ", arrivalTimeInUtc="
+				+ arrivalTimeInUtc + ", dayOfWeeks=" + dayOfWeeks + ", remarks=" + remarks + "]";
+	}
+}

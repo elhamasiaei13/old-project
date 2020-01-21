@@ -1,0 +1,53 @@
+package com.parvanpajooh.carriermanagement.application.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.ddd.application.impl.GenericApplicationServiceImpl;
+import com.parvanpajooh.carriermanagement.application.CarrierApplicationService;
+import com.parvanpajooh.carriermanagement.domain.model.Carrier;
+import com.parvanpajooh.carriermanagement.domain.service.CarrierDomainService;
+import com.parvanpajooh.carriermanagement.domain.service.impl.CarrierDomainServiceImpl;
+
+@Stateless
+public class CarrierApplicationServiceImpl extends GenericApplicationServiceImpl<Carrier, Long> implements CarrierApplicationService {
+	
+
+	static final Logger log = LoggerFactory.getLogger(CarrierDomainServiceImpl.class);
+	
+	private CarrierDomainService carrierDomainService;
+
+	@Inject
+	public void setCarrierDomainService(CarrierDomainService carrierDomainService) {
+		this.domainService = carrierDomainService;
+		this.carrierDomainService = carrierDomainService;
+	}
+
+	@Override
+	public CarrierDto getCarrierByCode(UserInfo userInfo, String carrierCode) throws ParvanServiceException{
+		
+		// LOG
+		log.trace("Entering getCarrierByCode( UserInfo={} ,carrierCode={})",userInfo, carrierCode);
+
+		CarrierDto carrierDto = null;
+		Carrier carrier = null;
+		try {
+			
+			carrier = carrierDomainService.getCarrierByCode(carrierCode);
+			if (Validator.isNotNull(carrier)) {
+				carrierDto = carrier.toDto();
+			}
+
+		} catch (Exception e) {
+			throw new ParvanServiceException("no carrier exist with carrierCode:" + carrierCode, e);
+		}
+
+		// LOG
+		log.trace("Leaving method findByAgentId()");
+
+		return carrierDto;
+	}
+}

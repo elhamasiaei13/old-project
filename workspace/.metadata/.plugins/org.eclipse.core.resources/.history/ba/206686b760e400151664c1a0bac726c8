@@ -1,0 +1,258 @@
+package com.parvanpajooh.sample.service.impl;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.common.CurrentContext;
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.enums.SortDirectionEnum;
+import com.parvanpajooh.common.exceptions.ErrorCode;
+import com.parvanpajooh.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.common.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.common.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.ecourier.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.sample.dao.MemberDao;
+import com.parvanpajooh.sample.model.Member;
+import com.parvanpajooh.sample.model.criteria.MemberCriteria;
+import com.parvanpajooh.sample.model.vo.MemberVO;
+import com.parvanpajooh.sample.service.MemberLocalService;
+
+/**
+ * 
+ * @author ali
+ * @author mehrdad
+ * 
+ */
+@Stateless
+public class MemberLocalServiceImpl extends
+		GenericLocalServiceImpl<Member, Long> implements MemberLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory
+			.getLogger(MemberLocalServiceImpl.class);
+
+	public MemberDao memberDao;
+
+	@Inject
+	public void setMemberDao(MemberDao memberDao) {
+		this.dao = memberDao;
+		this.memberDao = memberDao;
+	}
+
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo)
+			throws ParvanServiceException {
+		log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		MemberVO MemberVO = (MemberVO) baseVO;
+
+		try {
+
+			Member sample = null;
+
+			if (Validator.isNull(MemberVO.getId())) {
+				sample = new Member();
+				sample.fromVO(MemberVO);
+			} else {
+				sample = memberDao.get(MemberVO.getId());
+				sample.fromVO(MemberVO);
+			}
+
+			if (Validator.isNotNull(MemberVO.getParent())
+					&& Validator.isNotNull(MemberVO.getParent().getId())) {
+
+				Member parent = get(MemberVO.getParent().getId());
+
+				if (!_isParentValid(sample, parent)) {
+					throw new ParvanRecoverableException(
+							ErrorCode.INVALID_PARENT);
+				}
+
+				sample.setParent(parent);
+			} else {
+				sample.setParent(null);
+			}
+
+			// save entity
+			sample = save(sample, userInfo);
+
+			MemberVO = (MemberVO) sample.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while saving object.", e);
+		}
+
+		return MemberVO;
+	}
+
+	@Override
+	public void sort(Long[] ids) throws ParvanServiceException {
+		log.info("Entering sort(ids)");
+
+		try {
+			// get current userInfo
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+
+			for (int i = 0; i < ids.length; i++) {
+				// load sample
+				Member member = get(ids[i]);
+
+				// set index
+//				member.setIndexInParent(i);
+
+				// save sample
+				save(member, userInfo);
+			}
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while save sorted list.", e);
+		}
+	}
+
+	@Override
+	public List<MemberVO> loadSamples() throws ParvanServiceException {
+		log.info("Entering loadMembers()");
+
+		List<MemberVO> result = null;
+
+		try {
+			/*
+			 * MemberCriteria sampleCriteria = new MemberCriteria();
+			 * sampleCriteria.setActive(true);
+			 * 
+			 * List<Member> samples = findByCriteria(sampleCriteria, 0,
+			 * Integer.MAX_VALUE, SortDirectionEnum.Ascending, "indexInParent");
+			 */
+
+			List<Member> samples = memberDao.findAll();
+
+			result = convertToTree(samples);
+
+			/*
+			 * } catch (ParvanServiceException e) {
+			 * log.error("error occurred while loading samples", e); throw e;
+			 */
+		} catch (Exception e) {
+			log.error("error occurred while loading samples", e);
+			throw new ParvanUnrecoverableException(
+					"error occurred while loading samples", e);
+		}
+
+		return result;
+	}
+
+	private boolean hasAccess(MemberVO MemberVO) {
+
+		// get current userInfo
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+
+		Set<String> userRoles = userInfo.getRoleNames();
+
+		boolean hasAccess = false;
+
+		// List<String> thisMemberRoles = MemberVO.getRoles();
+		// if (Validator.isNotNull(thisMemberRoles)) {
+		// for (String role : thisMemberRoles) {
+		// if (userRoles.contains(role)) {
+		// hasAccess = true;
+		// break;
+		// }
+		// }
+		// } else {
+		// hasAccess = true;
+		// }
+
+		return hasAccess;
+	}
+
+	/**
+	 * 
+	 * @param samples
+	 * @return
+	 */
+	private List<MemberVO> convertToTree(List<Member> samples) {
+
+		List<MemberVO> result = new ArrayList<MemberVO>();
+		Map<Long, MemberVO> map = new HashMap<Long, MemberVO>();
+
+		Iterator<Member> iterator = samples.iterator();
+		while (iterator.hasNext()) {
+			Member thisMember = iterator.next();
+			if (thisMember.getId() == null) {
+				MemberVO memberVO = thisMember.toVOLite();
+
+				// check permission
+				if (hasAccess(memberVO)) {
+					// MemberVO.setChildren(new ArrayList<MemberVO>());
+					result.add(memberVO);
+				}
+
+				map.put(thisMember.getId(), memberVO);
+				iterator.remove();
+			} else {
+				// MemberVO parentMemberVO =
+				// map.get(thisMember.getParent().getId());
+
+				MemberVO memberVO = thisMember.toVOLite();
+				map.put(thisMember.getId(), memberVO);
+				iterator.remove();
+			}
+
+		}
+
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param sample
+	 * @param parent
+	 * @return
+	 */
+	private boolean _isParentValid(Member sample, Member parent) {
+		if (sample.equals(parent)) {
+			return false;
+		}
+
+//		Member parentOfParent = parent.getParent();
+//
+//		if (Validator.isNotNull(parentOfParent)) {
+//			if (!_isParentValid(sample, parentOfParent)) {
+//				return false;
+//			}
+//		}
+
+		return true;
+	}
+
+	@Override
+	public void saveMember(Member member) throws ParvanServiceException,
+			ParvanDaoException {
+
+		memberDao.saveMember(member);
+	}
+
+}

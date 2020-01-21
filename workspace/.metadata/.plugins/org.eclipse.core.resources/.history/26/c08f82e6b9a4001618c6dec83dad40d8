@@ -1,0 +1,155 @@
+package com.parvanpajooh.common.auth;
+
+import com.parvanpajooh.client.identitymanagement2.Identitymanagement2ApiRestClient;
+import com.parvanpajooh.client.identitymanagement2.model.PermissionResultMsg;
+import com.parvanpajooh.client.identitymanagement2.model.UserMsg;
+import com.parvanpajooh.commons.platform.ejb.util.permission.AccessControl;
+import com.parvanpajooh.commons.platform.ejb.util.permission.exception.PrincipalException;
+
+public class UserServiceAdapter implements AccessControl {
+
+	private Identitymanagement2ApiRestClient identitymanagement2ApiRestClient;
+
+	public UserServiceAdapter() {
+		this.identitymanagement2ApiRestClient = new Identitymanagement2ApiRestClient();
+	}
+
+	@Override
+	public void check( Long scopeId, String uri, String actionId) throws PrincipalException {
+		try {
+
+			PermissionResultMsg permissionResultMsg = identitymanagement2ApiRestClient.check(scopeId, uri, actionId);
+
+			if (permissionResultMsg.getStatus().equals("authorized")) {
+
+			} else {// denied or failed
+				throw new PrincipalException(scopeId, uri, actionId, permissionResultMsg.getMessage(), null);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new PrincipalException(scopeId, uri, actionId, e.getMessage(), null);
+		}
+	}
+
+	@Override
+	public boolean contains(Long scopeId, String uri, String actionId) {
+		try {
+
+			PermissionResultMsg permissionResultMsg = identitymanagement2ApiRestClient.check(scopeId, uri, actionId);
+
+			if (permissionResultMsg.getStatus().equals("authorized")) {
+				return true;
+			} else {// denied or failed
+				return false;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+
+	}
+
+	@Override
+	public Boolean isScopeBased(String uri, String actionId) {
+		try {
+
+			Boolean isScopeBased = identitymanagement2ApiRestClient.isScopeBased(uri, actionId);
+			
+			return isScopeBased;
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@Override
+	public boolean isResourceAvailable(String uri) {
+		try {
+
+			Boolean isResourceAvailable = identitymanagement2ApiRestClient.isResourceAvailable(uri);
+			
+			return isResourceAvailable;
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isResourceActionAvailable(String uri, String actionId) {
+		try {
+
+			Boolean isResourceActionAvailable = identitymanagement2ApiRestClient.isResourceActionAvailable(uri, actionId);
+			
+			return isResourceActionAvailable;
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	public UserVO loadUserByUsername(String username) {
+		UserVO returnValue = null;
+		try {
+
+			UserMsg result = identitymanagement2ApiRestClient.loadUserByUsername(username);
+//			returnValue = _toUserVO(result);
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return returnValue;
+	}
+//	
+//	private UserVO _toUserVO(UserMsg msg) {
+//		UserVO vo = new UserVO();
+//		vo.setId( msg.getId() );
+//		vo.setUserName( msg.getUserName() );
+//		vo.setFirstName( msg.getFirstName() );
+//		vo.setLastName( msg.getLastName() );
+//		vo.setDisplayName( msg.getDisplayName() );
+//		vo.setLocale( msg.getLocale() );
+//		vo.setZoneId( msg.getZoneId() );
+//		vo.setCalendar( msg.getCalendar().name() );
+//		vo.setEmail( msg.getEmail() );
+//		if (msg.getRoleMsgs() != null) {
+//			Set<RoleMsg> roleMsgs = msg.getRoleMsgs();
+//			Set<RoleVO> roleVOs = new HashSet<>(roleMsgs.size());
+//			for (RoleMsg roleMsg : roleMsgs) {
+//				roleVOs.add( _toRoleVO(roleMsg) );
+//			}
+//			vo.setRoles(roleVOs);
+//		}
+//		if (msg.getUserGroupMsg() != null) {
+//			vo.setUserGroup( _toUserGroupVO(msg.getUserGroupMsg()) );
+//		}
+//		return vo;
+//	}
+//	
+//
+//	private UserGroupVO _toUserGroupVO(UserGroupMsg msg) {
+//		UserGroupVO vo = new UserGroupVO();
+//		vo.setId( msg.getId() );
+//		vo.setName( msg.getName() );
+//		return vo;
+//	}
+//
+//	private RoleVO _toRoleVO(RoleMsg msg) {
+//		RoleVO vo = new RoleVO();
+//		vo.setId( msg.getId() );
+//		vo.setName( msg.getName() );
+//		vo.setType( msg.getType().name() );
+//		return vo;
+//	}
+
+}

@@ -1,0 +1,55 @@
+package com.parvanpajooh.issuemanager.service.impl;
+
+import java.time.LocalDateTime;
+import java.util.Timer;
+
+import javax.ejb.Lock;
+import javax.ejb.LockType;
+import javax.ejb.Schedule;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanServiceException;
+
+@Singleton
+@Lock(LockType.READ) // allows timers to execute in parallel
+@Startup
+public class TimingJob {
+	/**
+	 * Log variable for all child classes.
+	 */
+	private static final Logger log = LoggerFactory.getLogger(TimingJob.class);
+
+	private static boolean SEND_EMAIL__IS_RUNNING = false;
+
+
+	public TimingJob() {
+		log.debug("LostAndFound Job Created.");
+	}
+
+	@Schedule(minute = "*/30", hour = "*", info = "MANIFEST_INDEX", persistent = false)
+	public void sendEmail(Timer timer) {
+		log.debug("start running job indexManifest [{}]", LocalDateTime.now());
+
+		try {
+			if (SEND_EMAIL__IS_RUNNING) {
+				log.debug("ignoring timer due to currently running job. [{}]", timer.getInfo());
+
+			} else {
+				// run job
+				SEND_EMAIL__IS_RUNNING = true;
+				// call sendEmail here
+			}
+
+		} catch (ParvanServiceException e) {
+			log.error("Error while running index-manifest job", e);
+
+		} finally {
+			INDEX_MANIFEST__IS_RUNNING = false;
+		}
+
+	}
+}

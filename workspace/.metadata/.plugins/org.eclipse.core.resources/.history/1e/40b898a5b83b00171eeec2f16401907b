@@ -1,0 +1,19 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.service.adapter;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+
+/**
+ * @author dev-03
+ *
+ */
+public interface PersonManagementServiceAdapter {
+
+	public PersonVO createPerson(PersonVO personVO) throws ParvanServiceException;
+
+	public PersonVO getPerson(Long id) throws ParvanServiceException;
+	
+}

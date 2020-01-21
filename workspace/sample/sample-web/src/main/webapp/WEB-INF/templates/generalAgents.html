@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout" ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+    <title>Agent List</title>
+
+    <style>
+        .select-device-modal label {
+            margin-bottom: 0px;
+        }
+        
+        .select-device-modal input {
+            width: auto;
+            height: 28px;
+        }
+        
+        .select-device-modal .form-control {
+            width: auto;
+        }
+        
+        .select-device-modal table.dataTable td {
+            padding: 1px 10px;
+        }
+        
+        .select-device-modal .dataTables_filter label {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body th:with="rightMenu='generalAgents'">
+    <section layout:fragment="top-header" class="fixed-header">
+
+        <div class="ui-header-image pull-left">
+            <img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/agentmanagement-web/resources/images/lightbulb.png" th:src="@{/resources/images/lightbulb.png}" style="width: 48px; height: 48px;" />
+        </div>
+        <div class="ui-header-title">
+            <div class="split-left">
+                <h3>
+					<small>View</small>
+				</h3>
+                <h3>Agents</h3>
+            </div>
+            <div class="split-left">
+                <ol class="breadcrumb">
+                    <li><a href="/agentmanagement-web">Home</a></li>
+                    <li class="active">View Agents</li>
+                </ol>
+            </div>
+            <div class="split-right">
+                <a idm:authorize="com.parvanpajooh.agentmanagement.model.GeneralAgent" data-action="CREATE" data-toggle="modal" onclick="createGeneralAgent();" class="btn btn-success"> 
+                	<i class="fa fa-plus">&nbsp;&nbsp;</i>
+                	<span th:text="#{generalAgent.create}">جدید</span>
+                </a>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Main content -->
+    <!-- BODY -->
+    <section class="content" layout:fragment="content">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title" th:text="#{search}">جستجو</h3>
+                <div class="box-tools pull-right">
+                    <button title="" data-widget="collapse" class="btn btn-primary btn-xs">
+						<i class="fa fa-minus"></i>
+					</button>
+                </div>
+            </div>
+            <div class="box-body" style="display: block;">
+                <dy:form entity="GeneralAgent" form="search" type="search" />
+            </div>
+            <!-- /.box-body -->
+        </div>
+
+        <div class="box">
+            <div class="box-body table-responsive">
+                <dy:table entity="GeneralAgent" table="list" customSearch="true" customObjectActions="true"/>
+            </div>
+        </div>
+
+        <div class="modal fade" id="createGeneralAgentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" th:text="#{generalAgent.create}">ایجاد
+							نمایندگی</h4>
+                    </div>
+                    <div class="modal-body">
+                        <dy:form entity="GeneralAgent" form="create" type="create" />
+                    </div>
+                    <div class="modal-footer checkbox">
+                        <label class="create-another" for="createGeneralAgent-create-another"> <input
+							type="checkbox" id="createGeneralAgent-create-another"
+							value="true" /> <span th:remove="tag"
+							th:text="#{create-another}">Create another</span>
+						</label>
+
+                        <button type="button" class="btn btn-primary" id="createGeneralAgentBtn" th:text="#{button.save}">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modifyGeneralAgentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" th:text="#{generalAgent.modify}">ویرایش
+							اطلاعات</h4>
+                    </div>
+                    <div class="modal-body">
+                        <dy:form entity="GeneralAgent" form="modify" type="modify" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="modifyGeneralAgentBtn" th:text="#{button.save}">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteGeneralAgentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" th:text="#{generalAgent.delete}">حذف</h4>
+                    </div>
+                    <div class="modal-body">
+                        <dy:form entity="GeneralAgent" form="delete" type="delete" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="deleteGeneralAgentBtn" th:text="#{button.delete}">Delete</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </section>
+
+    <th:block layout:fragment="javascripts">
+
+        <script th:inline="javascript">
+            var titleModify = '<span class="label label-info"  th:remove="tag" th:text="#{generalAgent.update}">Update !</span>';
+            var titleDelete = '<span class="label label-info"  th:remove="tag" th:text="#{generalAgent.delete}">Delete !</span>';
+            var titleAddEmployee = '<span class="label label-info"  th:remove="tag" th:text="#{generalAgent.addEmployee}">Add Employee !</span>';
+            var titleAgentDetail = '<span class="label label-info"  th:remove="tag" th:text="#{generalAgent.viewEmployee}">View Employee !</span>';
+
+            /*<![CDATA[*/
+
+            function getGeneralAgentExtraParams(aoData) {
+                return {
+                    "data": function(data) {
+                        customPush(data, 'canonicalSearchName', $('#canonicalSearchNameFilter').val());
+                        customPush(data, 'iataCode', $('#iataCodeFilter').val());
+                        customPush(data, 'tel', $('#telFilter').val());
+                        customPush(data, 'address', $('#addressFilter').val());
+                        customPush(data, 'branch', $('#branchFilter').val());
+                        customPush(data, 'active', $('#activeFilter').val());
+                        customPush(data, 'nodeId', $('#nodeIdFilter').val());
+                        customPush(data, 'parent.id', $('#parentidFilter').val());
+                        customPush(data, 'currentAccountNumber', $('#currentAccountNumberFilter').val());
+                    }
+                };
+            }
+
+            function generalAgentRowActions(data, type, full) {
+
+                var d = '<div style="width: 120px;">';
+                d += '<a class="btn btn-xs btn-info" title="' + titleAgentDetail + '" href="/agentmanagement-web/generalAgent/' + full.id + '/detail"><i class="fa fa-eye"></i></a> ';
+                d += '<a class="btn btn-xs btn-primary" title="' + titleModify + '" onclick="modifyGeneralAgent(' + full.id + ')" href="javascript:;"><i class="fa fa-pencil"></i></a> ';
+                d += '<a class="btn btn-xs btn-danger" title="' + titleDelete + '" onclick="deleteGeneralAgent(' + full.id + ')" href="javascript:;"><i class="fa fa-times"></i></a> ';
+                d += '<a class="btn btn-xs btn-success" title="' + titleAddEmployee + '"  href="/agentmanagement-web/generalAgent/' + full.id + '/employees/add"><i class="fa fa-user-plus"></i></a>';
+                d += '</div>';
+                return d;
+            }
+
+            function doEmployeeSearch() {
+
+                oTable_employeeTable.fnReloadAjax();
+            }
+
+			function employeeGroupRender(entity, type, full){
+				return '<div class="text-center"><span class="label label-default">'+entity+'</span></div>';								
+			}
+            
+            /*]]>*/
+        </script>
+    </th:block>
+</body>
+
+</html>

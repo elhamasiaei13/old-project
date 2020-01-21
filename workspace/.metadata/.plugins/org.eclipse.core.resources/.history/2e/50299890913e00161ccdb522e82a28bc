@@ -1,0 +1,21 @@
+package com.parvanpajooh.accounting.model;
+
+import javax.annotation.Generated;
+import javax.persistence.metamodel.SetAttribute;
+import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.StaticMetamodel;
+
+@Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
+@StaticMetamodel(Voucher.class)
+public abstract class Voucher_ extends com.parvanpajooh.ecourier.model.BaseModel_ {
+
+	public static volatile SingularAttribute<Voucher, String> description;
+	public static volatile SetAttribute<Voucher, VoucherRow> voucherRow;
+	public static volatile SingularAttribute<Voucher, Boolean> active;
+	public static volatile SingularAttribute<Voucher, Long> id;
+	public static volatile SingularAttribute<Voucher, FiscalYear> fiscalYear;
+	public static volatile SingularAttribute<Voucher, Integer> version;
+	public static volatile SingularAttribute<Voucher, String> referenceId;
+
+}
+

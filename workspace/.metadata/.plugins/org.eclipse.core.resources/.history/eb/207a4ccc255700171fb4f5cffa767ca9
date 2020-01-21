@@ -1,0 +1,161 @@
+package com.parvanpajooh.siteservices.model.vo;
+
+import java.util.List;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.siteservices.model.enums.Destination;
+import com.parvanpajooh.siteservices.model.enums.Origin;
+
+
+/**
+ * @author dev-03
+ *
+ */
+public class VisitorVO extends BaseVO {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6829088593973278548L;
+	
+	private Long id;
+	
+	private String organizationName;
+	
+	private String agentName;
+	
+	private String agentPosition;
+	
+	private String phone;
+	
+	private String email;
+	
+	private String mobile;
+	
+	private String dailyCouriersAverage;
+	
+	private String couriersWeightAverage;
+	
+	private List<Destination> destinations;
+	
+	private List<Origin> origins;
+	
+	private boolean COD;
+	
+	private String remarks;
+	
+	private Integer version;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getOrganizationName() {
+		return organizationName;
+	}
+
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
+	}
+
+	public String getAgentName() {
+		return agentName;
+	}
+
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+
+	public String getAgentPosition() {
+		return agentPosition;
+	}
+
+	public void setAgentPosition(String agentPosition) {
+		this.agentPosition = agentPosition;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public String getDailyCouriersAverage() {
+		return dailyCouriersAverage;
+	}
+
+	public void setDailyCouriersAverage(String dailyCouriersAverage) {
+		this.dailyCouriersAverage = dailyCouriersAverage;
+	}
+
+	public String getCouriersWeightAverage() {
+		return couriersWeightAverage;
+	}
+
+	public void setCouriersWeightAverage(String couriersWeightAverage) {
+		this.couriersWeightAverage = couriersWeightAverage;
+	}
+
+	public List<Destination> getDestinations() {
+		return destinations;
+	}
+
+	public void setDestinations(List<Destination> destinations) {
+		this.destinations = destinations;
+	}
+
+	public List<Origin> getOrigins() {
+		return origins;
+	}
+
+	public void setOrigins(List<Origin> origins) {
+		this.origins = origins;
+	}
+
+	public boolean isCOD() {
+		return COD;
+	}
+
+	public void setCOD(boolean COD) {
+		this.COD = COD;
+	}
+
+	public String getRemarks() {
+		return remarks;
+	}
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+	
+}

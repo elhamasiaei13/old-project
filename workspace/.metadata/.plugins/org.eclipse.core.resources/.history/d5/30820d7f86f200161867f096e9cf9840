@@ -1,0 +1,19 @@
+package com.parvanpajooh.taskmanagement.domain.repository;
+
+import com.parvanpajooh.commons.platform.ejb.dao.GenericDao;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroup;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroupCounter;
+
+public interface TaskGroupCounterRepository extends GenericDao<TaskGroup, Long> {
+	
+	/**
+	 * 
+	 * @param taskGroupKey
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public TaskGroupCounter getTaskGroupCounterByTaskGroupKey(String taskGroupKey) throws ParvanDaoException;
+
+
+}

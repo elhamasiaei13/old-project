@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="layout">
+
+<head>
+    <title>AddVoucher</title>
+
+
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+
+            $(".js-example-basic-hide-search").select2({
+                minimumResultsForSearch: Infinity
+            });
+
+            $('.datepicker').datetimepicker({
+                format: 'YYYY-MM-DDThh:mmTZD',
+                useCurrent: false
+            });
+        });
+    </script>
+
+
+</head>
+
+<body>
+    <section class="content" layout:fragment="content">
+        <form class="form-horizontal" th:action="@{/voucher/save}" id="sum" onsubmit="return validateForm( )" method="post">
+            <div class="row" dir="rtl" style="margin-bottom: 30px">
+                <div class="col-lg-12">
+                    <h3 class="page-header">افزودن سند</h3>
+                </div>
+            </div>
+            <div class="row" dir="rtl">
+                <div class="row">
+                    <div class="col-lg-12" style="margin-top: 30px;">
+                        <fieldset>
+
+
+                            <!-- SANAD -->
+                            <div class="col-md-12">
+                                <div class="form-group required">
+                                    <div class="col-sm-1 "><label class="control-label">تاریخ صدور:</label></div>
+                                    <div class="col-sm-10 ">
+                                        <input class="form-control datepicker" placeholder="تاریخ صدور" type="text" th:field="*{voucher.issueDate}" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-1 control-label">شناسه مرجع:</label>
+                                    <div class="col-sm-10">
+                                        <input placeholder="شناسه مرجع" class="form-control" th:field="*{voucher.referenceId}" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-1">
+                                        <label class="control-label">توضیح سند:</label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" rows="3" placeholder="توضیح سند" th:field="*{voucher.description}"></textarea>
+                                    </div>
+                                </div>
+
+                                
+                                 <div class="panel panel-default" style="margin-top: 30px;">
+			                    <div class="panel-heading">ردیف‌های سند</div>
+			                    <div class="panel-body">
+
+                                <!-- SANAD-ROWS -->
+                                <div id="sanadRows" class="row minPadding">
+                                    <!-- SANAD-ROWs-HEADER -->
+                                    <div class="row newRow minPadding">
+                                        <div class="col-md-8 ">
+                                            <div class="col-md-3 required">
+                                            	<label class="control-label">حساب‌ها</label>
+                                            </div>
+                                            <div class="col-md-2 required"><label class="control-label">شناسه مرجع</label></div>
+                                            <div class="col-md-7 required"><label class="control-label">شرح</label></div>
+                                        </div>
+                                        <div class="col-md-4 ">
+                                            <div class="col-md-5 required"><label class="control-label">بدهکار</label></div>
+
+                                            <div class="col-md-5 required"><label class="control-label">بستانکار</label></div>
+                                            <div class="col-md-2">&nbsp;</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SANAD-ROWs-Row1 -->
+                                    <div class="row newRow minPadding">
+                                        <div class="col-md-8 ">
+                                            <div class="col-md-3">
+                                                <select name="voucherRow[0].account.id" class="form-control">
+												<option value=""> </option>
+												<option th:each="f : ${accountVOs}" th:value="${f.id}" th:text="${f.name}" ></option>
+									        </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input placeholder="شناسه مرجع" name="voucherRow[0].referenceId" class="form-control " type="text" />
+                                            </div>
+                                            <div class="col-md-7">
+                                                <input placeholder="شرح" class="form-control" name="voucherRow[0].description" type="text" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 ">
+                                            <div class="col-md-5">
+                                                <input placeholder="بدهکار" name="voucherRow[0].debit" class="form-control bedehkar money" type="text" maxlength="31" autocomplete="off" />
+                                            </div>
+
+                                            <div class="col-md-5">
+                                                <input placeholder="بستانکار" name="voucherRow[0].credit" class="form-control  bestankar money" type="text" maxlength="31" autocomplete="off" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SANAD-ROWs-Row2 -->
+                                    <div class="row minPadding">
+                                        <div class="col-md-8 ">
+                                            <div class="col-md-3">
+                                                <select name="voucherRow[1].account.id" class="form-control">
+												<option value=""> </option>
+												<option th:each="f : ${accountVOs}" th:value="${f.id}" th:text="${f.name}" ></option>
+									        </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input placeholder="شناسه مرجع" name="voucherRow[1].referenceId" class="form-control " type="text" />
+                                            </div>
+                                            <div class="col-md-7">
+                                                <input placeholder="شرح" class="form-control" name="voucherRow[1].description" type="text" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4 ">
+                                            <div class="col-md-5">
+                                                <input placeholder="بدهکار" name="voucherRow[1].debit" class="form-control bedehkar money" type="text" maxlength="31" autocomplete="off" />
+                                            </div>
+
+                                            <div class="col-md-5">
+                                                <input placeholder="بستانکار" name="voucherRow[1].credit" class="form-control  bestankar money " type="text" maxlength="31" autocomplete="off" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="#" class="btn btn-success" id="cloneButton1"><span class="glyphicon glyphicon-plus"></span></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SANAD-ROWs-RowTemplate -->
+                                    <div class="row minPadding" id="test1" style="display: none;">
+                                        <div class="col-md-8 ">
+                                            <div class="col-md-3">
+                                                <select class="form-control">
+														<option value=""></option>
+														<option th:each="f : ${accountVOs}" th:value="${f.id}"
+															th:text="${f.name}"></option>
+													</select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input placeholder="شناسه مرجع" class="form-control " type="text" />
+                                            </div>
+                                            <div class="col-md-7">
+                                                <input placeholder="شرح" class="form-control" type="text" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 ">
+                                            <div class="col-md-5">
+                                                <input placeholder="بدهکار" class="form-control bedehkar money" type="text" maxlength="31" autocomplete="off" />
+                                            </div>
+                                            <div class="col-md-5">
+                                                <input placeholder="بستانکار" class="form-control  bestankar money" type="text" maxlength="31" autocomplete="off" />
+                                            </div>
+                                            <div class="col-md-2 newbotton">
+                                                <a href="#" class="btn btn-danger btn-xs" class-data="remove" onclick="removeRow(this);"> <span class="glyphicon glyphicon-remove"></span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="test2">
+                                        <div class="row newRow minPadding" id="voucherRow[2]" style="display:block">
+                                            <div class="col-md-8 ">
+                                                <div class="col-md-3">
+                                                    <select name="voucherRow[2].account.id" class="form-control">
+														<option value=""> </option>
+														<option th:each="f : ${accountVOs}" th:value="${f.id}" th:text="${f.name}" ></option>
+										       		</select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <input placeholder="شناسه مرجع" name="voucherRow[2].referenceId" class="form-control " type="text" />
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <input placeholder="شرح" class="form-control" name="voucherRow[2].description" type="text" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 ">
+                                                <div class="col-md-5">
+                                                    <input placeholder="بدهکار" name="voucherRow[2].debit" class="form-control bedehkar money" type="text" maxlength="31" autocomplete="off" />
+                                                </div>
+
+                                                <div class="col-md-5">
+                                                    <input placeholder="بستانکار" name="voucherRow[2].credit" class="form-control bestankar money" type="text" maxlength="31" autocomplete="off" />
+                                                </div>
+                                                <div class="col-md-2 newbotton">
+                                                    <a href="#" class="btn btn-danger btn-xs" class-data="remove" onclick="removeRow(this);">
+                                                        <span class="glyphicon glyphicon-remove"></span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SANAD-ROWs- -->
+                                    <div class="row minPadding">
+                                        <div class="col-md-8 ">
+                                            <div class="col-md-5">&nbsp;</div>
+
+                                            <div class="col-md-7">&nbsp;</div>
+                                        </div>
+
+                                        <div class="col-md-4 ">
+                                            <div class="col-md-5">
+                                                <input type="text" class="form-control" readonly="readonly" placeholder="جمع کل بدهکار" id="bedehkar_sum" />
+                                            </div>
+
+                                            <div class="col-md-5">
+                                                <input type="text" class="form-control" readonly="readonly" placeholder="جمع کل بستانکار" id="bestankar_sum" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- SANAD-ROWs -->
+                            </div>
+                            <!-- SANAD -->
+                            </div>
+                            </div>
+
+                        </fieldset>
+
+
+
+                        <p id="error" style="color: red"></p>
+
+                        <div class="btn-group btn-group-justified" role="group" style="margin-top: 100px">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-default" type="submit">افزودن سند</button>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <a class="btn btn-default" th:href="@{/voucher/show}">بازگشت</a>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
+        <script type="text/javascript">
+            //<![CDATA[
+
+
+            function removeRow(elm) {
+                $(elm).parent().parent().parent().remove();
+            }
+
+            var i = 3;
+
+
+            $("#cloneButton1").click(function() {
+
+
+                var referenceNodes = document.getElementById("test1").getElementsByTagName("input");
+                var referenceSelect = document.getElementById("test1").getElementsByTagName("select");
+
+                referenceSelect[0].name = "voucherRow[" + i + "].account.id";
+
+                // loop the cells.
+                var cells = ["referenceId", "description", "debit", "credit"];
+                for (var j = 0; j < cells.length; j++) {
+                    var cell = cells[j];
+
+
+                    // set the name property.
+                    referenceNodes[j].name = "voucherRow[" + i + "]." + cell;
+
+                }
+
+                $("#test1").clone().attr('id', 'voucherRow[' + (i++) + ']').attr('class', 'row newRow minPadding').attr('style', 'display:block').appendTo("#test2");
+
+                $summands = $form.find('.bedehkar');
+                $summands1 = $form.find('.bestankar');
+            });
+
+
+
+            var $form = $('#sum'),
+                $summands = $form.find('.bedehkar'),
+                $sumDisplay = $('#bedehkar_sum');
+
+            $form.delegate('.bedehkar', 'keyup', function() {
+                var sum = 0;
+                $summands.each(function() {
+                    var value = Number($(this).val());
+                    if (!isNaN(value)) sum += value;
+
+                });
+
+                $sumDisplay.val(sum);
+            });
+
+
+            var $form = $('#sum'),
+                $summands1 = $form.find('.bestankar'),
+                $sumDisplay1 = $('#bestankar_sum');
+
+            $form.delegate('.bestankar', 'keyup', function() {
+                var sum1 = 0;
+                $summands1.each(function() {
+                    var value = Number($(this).val());
+                    if (!isNaN(value)) sum1 += value;
+
+                });
+
+                $sumDisplay1.val(sum1);
+            });
+
+            function validateForm() {
+                var bedehkar_sum = $("#bedehkar_sum").val();
+                var bestankar_sum = $("#bestankar_sum").val();
+
+                if (bestankar_sum != bedehkar_sum) {
+                    document.getElementById("error").innerHTML = 'جمع کل بستانکار و بدهکار برابر نیست';
+                    return false;
+                }
+                if ((bestankar_sum == "" || bestankar_sum == 0) && (bestankar_sum == "" || bestankar_sum == 0)) {
+
+                    document.getElementById("error").innerHTML = 'جمع کل بستانکار و جمع کل بدهکار نمی تواند صفر باشد';
+                    return false;
+                }
+              
+            }
+            //]]>
+        </script>
+    </section>
+</body>
+
+</html>

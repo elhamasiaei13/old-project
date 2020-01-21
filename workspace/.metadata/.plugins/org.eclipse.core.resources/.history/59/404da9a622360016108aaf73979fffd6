@@ -1,0 +1,358 @@
+package com.parvanpajooh.issuemanager.dao.jpa;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+import javax.validation.ConstraintViolationException;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hibernate.StaleObjectStateException;
+
+import com.parvanpajooh.common.CurrentContext;
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseCriteria;
+import com.parvanpajooh.ecourier.model.BaseModel;
+import com.parvanpajooh.issuemanager.common.exceptions.ObjectExistsException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanException;
+import com.parvanpajooh.issuemanager.dao.TaskDao;
+import com.parvanpajooh.issuemanager.model.Group;
+import com.parvanpajooh.issuemanager.model.Group_;
+import com.parvanpajooh.issuemanager.model.Member;
+import com.parvanpajooh.issuemanager.model.Member_;
+import com.parvanpajooh.issuemanager.model.Task;
+import com.parvanpajooh.issuemanager.model.TaskAttachment;
+import com.parvanpajooh.issuemanager.model.Task_;
+import com.parvanpajooh.issuemanager.model.criteria.TaskCriteria;
+import com.parvanpajooh.issuemanager.model.enums.TaskStatusEnum;
+import com.parvanpajooh.issuemanager.model.vo.GroupVO;
+import com.parvanpajooh.issuemanager.model.vo.MemberVO;
+
+/**
+ * 
+ * @author
+ * 
+ */
+@Stateless
+public class TaskDaoJpa extends GenericDaoJpa<Task, Long>implements TaskDao {
+
+	public TaskDaoJpa() {
+		super(Task.class);
+	}
+
+	/**
+	 * Entity manager, injected by Spring using @PersistenceContext annotation
+	 * on setEntityManager()
+	 */
+	@PersistenceContext(unitName = PERSISTENCE_UNIT_NAME)
+	private EntityManager entityManager;
+
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<Task> root, Map<String, Join> joins)
+			throws ParvanException {
+
+		// LOG
+		log.debug("Entering buildPredicateList( ... )");
+
+		TaskCriteria taskCriteria = (TaskCriteria) cri;
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		String subject = taskCriteria.getSubject();
+		Boolean active = taskCriteria.getActive();
+		MemberVO currentMember = taskCriteria.getCurrentMember();
+		Long creatMember = taskCriteria.getCreateUserId();
+		List<Long> groups = taskCriteria.getGroupIds();
+		GroupVO group = taskCriteria.getGroup();
+		TaskStatusEnum currentTaskStatus = taskCriteria.getCurrentTaskStatus();
+
+		// ----------------------------------------------------------------
+		// Due Date
+		// ----------------------------------------------------------------
+		Date dueDateFrom = taskCriteria.getDueDateFrom();
+		Date dueDateTo = taskCriteria.getDueDateTo();
+		if (Validator.isNotNull(dueDateFrom) || Validator.isNotNull(dueDateTo)) {
+
+			if (Validator.isNotNull(dueDateFrom)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(dueDateFrom);
+				cal.getTime();
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE, 0);
+				cal.set(Calendar.SECOND, 0);
+
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<Date> get(Task_.dueDate), cal.getTime());
+				predicateList.add(predicate);
+			}
+
+			if (Validator.isNotNull(dueDateTo)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(dueDateTo);
+				cal.set(Calendar.HOUR_OF_DAY, 23);
+				cal.set(Calendar.MINUTE, 59);
+				cal.set(Calendar.SECOND, 59);
+
+				Predicate predicate = builder.lessThanOrEqualTo(root.<Date> get(Task_.dueDate), cal.getTime());
+				predicateList.add(predicate);
+			}
+
+		}
+
+		// ----------------------------------------------------------------
+		// Create Date
+		// ----------------------------------------------------------------
+		Date createDateFrom = taskCriteria.getCreateDateFrom();
+		Date createDateTo = taskCriteria.getCreateDateTo();
+		if (Validator.isNotNull(createDateFrom) || Validator.isNotNull(createDateTo)) {
+
+			if (Validator.isNotNull(createDateFrom)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(createDateFrom);
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE, 0);
+				cal.set(Calendar.SECOND, 0);
+
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<Date> get(Task_.createDate), cal.getTime());
+				predicateList.add(predicate);
+			}
+
+			if (Validator.isNotNull(createDateTo)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(createDateTo);
+				cal.set(Calendar.HOUR_OF_DAY, 23);
+				cal.set(Calendar.MINUTE, 59);
+				cal.set(Calendar.SECOND, 59);
+
+				Predicate predicate = builder.lessThanOrEqualTo(root.<Date> get(Task_.createDate), cal.getTime());
+				predicateList.add(predicate);
+			}
+
+		}
+
+		// ----------------------------------------------------------------
+		// Update Date
+		// ----------------------------------------------------------------
+		Date updateDateFrom = taskCriteria.getUpdateDateFrom();
+		Date updateDateTo = taskCriteria.getUpdateDateTo();
+		if (Validator.isNotNull(updateDateFrom) || Validator.isNotNull(updateDateTo)) {
+
+			if (Validator.isNotNull(updateDateFrom)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(updateDateFrom);
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE, 0);
+				cal.set(Calendar.SECOND, 0);
+
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<Date> get(Task_.updateDate), cal.getTime());
+				predicateList.add(predicate);
+			}
+
+			if (Validator.isNotNull(updateDateTo)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(updateDateTo);
+				cal.set(Calendar.HOUR_OF_DAY, 23);
+				cal.set(Calendar.MINUTE, 59);
+				cal.set(Calendar.SECOND, 59);
+
+				Predicate predicate = builder.lessThanOrEqualTo(root.<Date> get(Task_.updateDate), cal.getTime());
+				predicateList.add(predicate);
+			}
+		}
+
+		// ----------------------------------------------------------------
+		// subject & description
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(subject)) {
+
+			Predicate predicate = builder.or(builder.like(root.<String> get(Task_.subject), "%" + subject + "%"),
+					builder.like(root.<String> get(Task_.description), "%" + subject + "%"));
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// active
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(active)) {
+			Predicate predicate = builder.equal(root.<Boolean> get(Task_.active), active);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// currentTaskStatus
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(currentTaskStatus)) {
+			Predicate predicate = builder.equal(root.<TaskStatusEnum> get(Task_.currentTaskStatus), currentTaskStatus);
+			predicateList.add(predicate);
+		}
+
+		// // ----------------------------------------------------------------
+		// // group
+		// // ----------------------------------------------------------------
+		// if (Validator.isNotNull(group) && Validator.isNotNull(group.getId()))
+		// {
+		//
+		// Join<Task, Group> groupJoin = root.join("group");
+		// if (Validator.isNotNull(group.getId())) {
+		//
+		// Predicate predicate = builder.equal(groupJoin.<Long> get(Group_.id),
+		// group.getId());
+		// predicateList.add(predicate);
+		// }
+		//
+		// }
+
+		// ----------------------------------------------------------------
+		// groups
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(groups)) {
+
+			List<Long> ids = new ArrayList<Long>();
+			Join<Task, Group> groupJoin = root.join("group");
+			Predicate[] preList = new ArrayList<Predicate>();
+
+			if (Validator.isNotNull(group) && Validator.isNotNull(group.getId())) {
+				for (Long item : groups) {
+
+					if (Validator.equals(group.getId(), item)) {
+						ids.add(group.getId());
+					}
+				}
+			} else {
+				ids = groups;
+			}
+
+			for (Long id : ids) {
+
+				Predicate predicate = builder.equal(groupJoin.<Long> get(Group_.id), id);				
+				preList.add(predicate);
+			}
+			predicateList.add(builder.or(preList));
+		}
+
+		// ----------------------------------------------------------------
+		// currentMember
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(currentMember) && Validator.isNotNull(currentMember.getId())) {
+
+			Join<Task, Member> memberJoin = root.join("currentMember");
+			if (Validator.isNotNull(currentMember.getId())) {
+
+				Predicate predicate = builder.equal(memberJoin.<Long> get(Member_.id), currentMember.getId());
+				predicateList.add(predicate);
+			}
+
+		}
+
+		// ----------------------------------------------------------------
+		// creatMember
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(creatMember)) {
+
+			Join<Task, Member> memberJoin = root.join("creatUserId");
+
+			Predicate predicate = builder.equal(memberJoin.<Long> get(Member_.id), creatMember);
+			predicateList.add(predicate);
+
+		}
+
+		/*
+		 * // ----------------------------------------------------------------
+		 * // member //
+		 * ---------------------------------------------------------------- if
+		 * (Validator.isNotNull(currentMember)){
+		 * 
+		 * 
+		 * // TaskStatusEnum taskStatusEnum = //
+		 * taskAssignment.getTaskStatusEnum();
+		 * 
+		 * // if (Validator.isNotNull(taskStatusEnum)) { // //
+		 * Join<TaskAssignment,TaskStatusEnum> taskStatusEnumJoin = //
+		 * taskAssignmentJoin.join("taskStatusEnum"); // // Predicate predicate
+		 * = builder.equal(taskStatusEnumJoin.<String> //
+		 * get(TaskStatusEnum_.name), taskStatusEnum.name()); // //
+		 * predicateList.add(predicate); // }
+		 * 
+		 * MemberVO member = currentMember;
+		 * 
+		 * if (Validator.isNotNull(member) &&
+		 * Validator.isNotNull(member.getId())) {
+		 * 
+		 * Join<TaskAssignment, Member> memberJoin = root.join("member");
+		 * Predicate predicate = builder.equal(memberJoin.<Long>
+		 * get(Member_.id), member.getId()); predicateList.add(predicate); } }
+		 */
+
+		basePredicate((BaseCriteria) taskCriteria, builder, root, predicateList);
+
+		// LOG
+		log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+
+	@Override
+	public Task saveTask(Task object, Long groupId) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering save( object={})", object);
+
+		Task entity = null;
+
+		try {
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+
+			BaseModel model = (BaseModel) object;
+			if (Validator.isNotNull(model.getTenantId()) && Validator.isNotNull(userInfo) && !model.getTenantId().equals(userInfo.getTenantId())) {
+				throw new ParvanDaoException("Error occurred while saving record. (mismatched tenantId)");
+			}
+
+			Query queryGroup = getEntityManager().createQuery("from Group where id=?");
+			queryGroup.setParameter(1, groupId);
+			List<Group> groupList = queryGroup.getResultList();
+			object.setGroup(groupList.get(0));
+
+			// save
+			entity = this.entityManager.merge(object);
+			this.entityManager.flush();
+
+		} catch (ConstraintViolationException e) {
+			throw e;
+
+		} catch (OptimisticLockException e) {
+			if (e.getCause() != null && e.getCause() instanceof StaleObjectStateException) {
+				throw (StaleObjectStateException) e.getCause();
+			}
+
+			throw e;
+
+		} catch (Exception e) {
+
+			Throwable cause = ExceptionUtils.getRootCause(e);
+
+			if (cause != null && cause.getMessage() != null && cause.getMessage().indexOf("_UNIQUE") > -1) {
+				throw new ObjectExistsException();
+			}
+
+			throw new ParvanDaoException("Error occurred while saving record.", e);
+		}
+
+		// LOG
+		log.debug("Leaving exists(): {}", entity);
+
+		return entity;
+	}
+}

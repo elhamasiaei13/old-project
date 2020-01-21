@@ -1,0 +1,906 @@
+package com.parvanpajooh.stock2.domain.service.Impl;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.stock2.domain.model.WaybillNumber;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberCommand;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberDisplay;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberGroup;
+import com.parvanpajooh.stock2.domain.model.criteria.WaybillNumberCriteria;
+import com.parvanpajooh.stock2.domain.model.criteria.WaybillNumberCriteria.AgentConditionType;
+import com.parvanpajooh.stock2.domain.model.dto.AssignToSubAgentCommandDto;
+import com.parvanpajooh.stock2.domain.model.dto.GeneralAgentDto;
+import com.parvanpajooh.stock2.domain.model.dto.ReturnToParentAgentCommandDto;
+import com.parvanpajooh.stock2.domain.model.dto.ReturnToStockCommandDto;
+import com.parvanpajooh.stock2.domain.model.dto.UseCommandDto;
+import com.parvanpajooh.stock2.domain.model.dto.ViewWaybillNumberChangeAssigneeCommandDto;
+import com.parvanpajooh.stock2.domain.model.dto.ViewWaybillNumberGenerateCommandDto;
+import com.parvanpajooh.stock2.domain.model.dto.VoidCommandDto;
+import com.parvanpajooh.stock2.domain.model.dto.WaybillNumberChangeAssigneeCommandDto;
+import com.parvanpajooh.stock2.domain.model.dto.WaybillNumberChangeStateCommandDto;
+import com.parvanpajooh.stock2.domain.model.dto.WaybillNumberCommandDto;
+import com.parvanpajooh.stock2.domain.model.dto.WaybillNumberDisplayDto;
+import com.parvanpajooh.stock2.domain.model.dto.WaybillNumberDto;
+import com.parvanpajooh.stock2.domain.model.dto.WaybillNumberGenerateCommandDto;
+import com.parvanpajooh.stock2.domain.model.dto.WaybillNumberPreviewDto;
+import com.parvanpajooh.stock2.domain.model.dto.WaybillNumberReportDto;
+import com.parvanpajooh.stock2.domain.model.dto.WaybillNumberUpdateCommandDto;
+import com.parvanpajooh.stock2.domain.model.enums.ManualValidationState;
+import com.parvanpajooh.stock2.domain.model.enums.WaybillNumberCommandType;
+import com.parvanpajooh.stock2.domain.model.enums.WaybillNumberState;
+import com.parvanpajooh.stock2.domain.model.enums.WaybillNumberType;
+import com.parvanpajooh.stock2.domain.repository.WaybillNumberGroupRepository;
+import com.parvanpajooh.stock2.domain.repository.WaybillNumberRepository;
+import com.parvanpajooh.stock2.domain.service.AgentManagementService;
+import com.parvanpajooh.stock2.domain.service.WaybillNumberService;
+
+/**
+ * @author dev-03
+ * @author mehrdad
+ * @author MO
+ */
+@Stateless
+public class WaybillNumberServiceImpl implements WaybillNumberService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(WaybillNumberServiceImpl.class);
+
+	@Inject
+	private WaybillNumberRepository waybillNumberRepository;
+	
+	@Inject
+	private WaybillNumberGroupRepository waybillNumberGroupRepository;
+	
+	@Inject
+	private  AgentManagementService agentManagementService;
+
+	@Override
+	public List<WaybillNumberDisplayDto> findByWaybillNumbers(List<String> waybillNumbers) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering findByWaybillNumbers( waybillNumbers={})", waybillNumbers);
+
+		List<WaybillNumberDisplay> list = null;
+		List<WaybillNumberDisplayDto> dtoList = null;
+
+		try {
+
+			// find by waybillNumbers
+			list = waybillNumberRepository.findWaybillNumberDisplaysByWaybillNumbers(waybillNumbers);
+
+			dtoList = new ArrayList<WaybillNumberDisplayDto>(list.size());
+			for (WaybillNumberDisplay waybillNumberDisplay : list) {
+				
+				WaybillNumberDisplayDto waybillNumberDisplayDto = waybillNumberDisplay.toDto();
+				dtoList.add(waybillNumberDisplayDto);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting paged-list of records by waybillNumbers:" + waybillNumbers, e);
+		}
+
+		// LOG
+		log.debug("Leaving method findByWaybillNumbers(): ret={}", (dtoList != null) ? dtoList.size() : "NULL");
+
+		return dtoList;
+	}
+
+	@Override
+	public List<WaybillNumberDisplayDto> findByCriteria(WaybillNumberCriteria criteria, int firstResult, int maxResults, SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering findByCriteria( criteria={}, firstResult={}, maxResults={}, sortDirection={}, sortCriterion={})", criteria, firstResult, maxResults,
+				sortDirection, sortCriterion);
+
+		List<WaybillNumberDisplay> list = null;
+		List<WaybillNumberDisplayDto> listDto = null;
+		
+		try {
+			// set filter by agent
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+			_setBasedOnCurrentUserFields(criteria, userInfo);
+
+			// find by criteria
+			list = waybillNumberRepository.findWaybillNumberDisplayByCriteria(criteria, firstResult, maxResults, sortDirection, sortCriterion);
+			
+			listDto = new ArrayList<WaybillNumberDisplayDto>(list.size());
+
+			// find agentNames by their ids
+			Map<Long, String> agentNames = _findAgentsName();
+
+			for (WaybillNumberDisplay waybillNumberDisplay : list) {
+
+				WaybillNumberDisplayDto waybillNumberDisplayDto = waybillNumberDisplay.toDto();
+
+				// set CurrentAssigneeAgentName and OwnerAgentName
+				if (Validator.isNotNull(agentNames) && (Validator.isNotNull(waybillNumberDisplay.getCurrentAssigneeAgentId())
+						|| Validator.isNotNull(waybillNumberDisplay.getOwnerAgentId()))) {
+
+					for (Map.Entry<Long, String> entry : agentNames.entrySet()) {
+
+						if (Validator.equals(waybillNumberDisplay.getCurrentAssigneeAgentId(), entry.getKey())) {
+							waybillNumberDisplayDto.setCurrentAssigneeAgentName(entry.getValue());
+						}
+
+						if (Validator.equals(waybillNumberDisplay.getOwnerAgentId(), entry.getKey())) {
+							waybillNumberDisplayDto.setOwnerAgentName(entry.getValue());
+						}
+					}
+				}
+
+				listDto.add(waybillNumberDisplayDto);
+			}
+
+			// LOG
+			log.debug("found {} from offset {}", (listDto != null) ? listDto.size() : "NULL", firstResult);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findByCriteria.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method findByCriteria(): ret={}", (listDto != null) ? listDto.size() : "NULL");
+
+		return listDto;
+	}
+	
+	@Override
+	public List<String> findWaybillNumbersByWaybillNumber(String waybillNumberFrom, String waybillNumberTo, int firstResult, int maxResults, SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findWaybillNumbersByWaybillNumber( waybillNumberFrom={},waybillNumberTo={}, firstResult={}, maxResults={}, sortDirection={}, sortCriterion={})", waybillNumberFrom ,waybillNumberTo, firstResult, maxResults,
+				sortDirection, sortCriterion);
+
+		List<WaybillNumber> list = null;
+		List<String> strList = null;
+
+		try {
+
+			// find by criteria
+			list = waybillNumberRepository.findWaybillNumbersByWaybillNumber(waybillNumberFrom, waybillNumberTo, firstResult, maxResults, sortDirection,
+					sortCriterion);
+
+			strList = new ArrayList<String>(list.size());
+			for (WaybillNumber waybillNumber : list) {
+				
+				strList.add(waybillNumber.getWaybillNumber());
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting paged-list of records by criteria.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method findWaybillNumbersByWaybillNumber(): ret={}", (strList != null) ? strList.size() : "NULL");
+
+		return strList;
+
+	}
+
+	@Override
+	public long countByCriteria(WaybillNumberCriteria criteria) throws ParvanServiceException {
+		long count = 0;
+		try {
+			count = waybillNumberRepository.countWaybillNumberDisplayByCriteria(criteria);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting count of records by criteria.", e);
+		}
+		return count;
+	}
+	
+	@Override
+	public long countWaybillNumberByWaybillNumber(String waybillNumberFrom, String waybillNumberTo) throws ParvanServiceException {
+		long count = 0;
+		try {
+			count = waybillNumberRepository.countWaybillNumberByWaybillNumber(waybillNumberFrom,waybillNumberTo);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting count of records by criteria.", e);
+		}
+		return count;
+	}
+
+	@Override
+	public boolean exists(String waybillNumber) throws ParvanServiceException {
+		WaybillNumberCriteria criteria = new WaybillNumberCriteria();
+		criteria.setWaybillNumber(waybillNumber);
+		return countByCriteria(criteria) > 0;
+	}
+
+	@Override
+	public WaybillNumberDto get(String waybillNumber) throws ParvanServiceException {
+		// TODO Auto-generated method stub
+		throw new RuntimeException("Not Implemented");
+	}
+
+	@Override
+	public void generateWaybillNumber(WaybillNumberGenerateCommandDto waybillNumberGenerateCommandDto) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering generateWaybillNumber( waybillNumberGenerateCommandDto={})", waybillNumberGenerateCommandDto);
+		List<WaybillNumberDisplayDto> waybillNumberDisplayDtoList = null;
+
+		try {
+			StopWatch stopWatch = new StopWatch();
+
+			stopWatch.start();
+
+			List<WaybillNumber> waybillNumbers = WaybillNumber.generateWaybillNumbers(waybillNumberGenerateCommandDto);
+
+			log.info("[{}] waybillNumber generated. @[{}]", waybillNumbers.size(), stopWatch.getTime());
+
+			List<String> generatedWaybillNumbers = new ArrayList<String>();
+			for (WaybillNumber waybillNumber : waybillNumbers) {
+				generatedWaybillNumbers.add(waybillNumber.getWaybillNumber());
+			}
+			
+			// check waybillNumbers existence
+			waybillNumberDisplayDtoList = findByWaybillNumbers(generatedWaybillNumbers);			
+			if (Validator.isNotNull(waybillNumberDisplayDtoList)) {
+				throw new ParvanRecoverableException("waybillNumber" , ErrorCode.DATA_DUPLICATE);
+			}
+			
+			// bulk save
+			for (WaybillNumber thisWaybillNumber : waybillNumbers) {
+
+				waybillNumberRepository.saveWaybillNumber(thisWaybillNumber);
+				log.debug("Time [{}]: waybillNumber [{}] saved.", stopWatch.getTime(), waybillNumbers.size());
+			}
+
+			stopWatch.stop();
+			log.info("[{}] waybillNumber saved. @[{}]", waybillNumbers.size(), stopWatch.getTime());
+
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while generating waybillNumbers.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method generateWaybillNumber(): waybillNumberGenerateCommandDto={}", waybillNumberGenerateCommandDto);
+
+	}
+
+	@Override
+	public WaybillNumberPreviewDto previewWaybillNumber(WaybillNumberGenerateCommandDto waybillNumberGenerateCommandDto) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering previewWaybillNumber(waybillNumberGenerateCommandDto={})", waybillNumberGenerateCommandDto);
+
+        List<WaybillNumberDisplayDto> waybillNumberDisplayDtoList = null;
+        WaybillNumberPreviewDto waybillNumberPreviewDto = new WaybillNumberPreviewDto();
+        List<String> firstWaybillNumbers = null;
+        List<String> lastWaybillNumbers = null;
+        int requiredCount = 10;
+
+		try {
+			List<WaybillNumber> waybillNumberList = WaybillNumber.generateWaybillNumbers(waybillNumberGenerateCommandDto);
+
+			List<String> generatedWaybillNumbers = new ArrayList<String>();
+			for (WaybillNumber waybillNumber : waybillNumberList) {
+				generatedWaybillNumbers.add(waybillNumber.getWaybillNumber());
+			}
+			
+			//get 10 first waybillNumbers
+			firstWaybillNumbers = new ArrayList<String>(generatedWaybillNumbers.subList(0, Math.min(generatedWaybillNumbers.size(), requiredCount)));
+			
+			//get 10 last waybillNumbers if exist
+			if (generatedWaybillNumbers.size() > requiredCount) {
+				lastWaybillNumbers = new ArrayList<String>(generatedWaybillNumbers
+						.subList(Math.max(generatedWaybillNumbers.size() - requiredCount, requiredCount), generatedWaybillNumbers.size()));
+			}
+
+			// check waybillNumbers existence
+			waybillNumberDisplayDtoList = findByWaybillNumbers(generatedWaybillNumbers);			
+			if (Validator.isNotNull(waybillNumberDisplayDtoList)) {
+				List<String> dubplicateWaybillNumbers = new ArrayList<String>();
+				for (WaybillNumberDisplayDto waybillNumberDisplayDto : waybillNumberDisplayDtoList) {
+					dubplicateWaybillNumbers.add(waybillNumberDisplayDto.getWaybillNumber());
+				}
+				waybillNumberPreviewDto.setDuplicateWaybillNumbers(dubplicateWaybillNumbers);
+			}
+			
+			waybillNumberPreviewDto.setCount(generatedWaybillNumbers.size());
+			waybillNumberPreviewDto.setFirstGeneratedWaybillNumbers(firstWaybillNumbers);
+			waybillNumberPreviewDto.setLastGeneratedWaybillNumbers(lastWaybillNumbers);
+			
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while preview waybillNumbers.", e);
+		}
+		return waybillNumberPreviewDto;
+	}
+
+	@Override
+	public void updateWaybillNumber(WaybillNumberUpdateCommandDto waybillNumberUpdateCommandDto) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering updateWaybillNumber( waybillNumberUpdateCommandDto={})", waybillNumberUpdateCommandDto);
+
+		try {			
+			// get criteria from Dto
+			WaybillNumberCriteria criteria = waybillNumberUpdateCommandDto.getWaybillNumberCriteria();
+			
+			_executeCommand(WaybillNumberCommandType.Update, waybillNumberUpdateCommandDto, criteria);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while updating waybillNumbers by criteria.", e);
+		}
+	}
+
+	@Override
+	public void changeWaybillNumberState(WaybillNumberChangeStateCommandDto waybillNumberChangeStateCommandDto)
+			throws ParvanServiceException {
+		// LOG
+		log.debug("Entering changeWaybillNumberState( waybillNumberChangeStateCommandDto={})", waybillNumberChangeStateCommandDto);
+
+		try {
+			// get criteria from Dto
+			WaybillNumberCriteria criteria = waybillNumberChangeStateCommandDto.getWaybillNumberCriteria();
+						
+			_executeCommand(WaybillNumberCommandType.ChangeState, waybillNumberChangeStateCommandDto, criteria);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(e);
+		}
+
+	}
+
+	@Override
+	public void changeWaybillNumberAssignee(WaybillNumberChangeAssigneeCommandDto waybillNumberChangeAssigneeCommandDto)
+			throws ParvanServiceException {
+		// LOG
+		log.debug("Entering changeWaybillNumberAssignee( waybillNumberChangeAssigneeCommandDto={})", waybillNumberChangeAssigneeCommandDto);
+
+		try {			
+			// get criteria from Dto
+			WaybillNumberCriteria criteria = waybillNumberChangeAssigneeCommandDto.getWaybillNumberCriteria();
+			
+			_executeCommand(WaybillNumberCommandType.ChangeAssignee, waybillNumberChangeAssigneeCommandDto, criteria);
+						
+		} catch (ParvanServiceException e) {
+				throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while changing assignee of waybillNumber(s) by its number.", e);
+		}
+
+	}
+
+	@Override
+	public void assignWaybillNumberToSubAgent(AssignToSubAgentCommandDto assignToSubAgentCommandDto)
+			throws ParvanServiceException {
+		// LOG
+		log.debug("Entering assignWaybillNumberToSubAgent( assignToSubAgentCommandDto={})", assignToSubAgentCommandDto);
+
+		try {			
+			// get criteria from Dto
+			WaybillNumberCriteria criteria = assignToSubAgentCommandDto.getWaybillNumberCriteria();
+			
+			_executeCommand(WaybillNumberCommandType.AssignToSubAgent, assignToSubAgentCommandDto, criteria);
+						
+		} catch (ParvanServiceException e) {
+				throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while assignWaybillNumberToSubAgent.", e);
+		}
+	}
+	
+	@Override
+	public void returnWaybillNumberToParentAgent(ReturnToParentAgentCommandDto returnToParentAgentCommandDto)
+			throws ParvanServiceException {
+		// LOG
+		log.debug("Entering returnWaybillNumberToParentAgent( returnToParentAgentCommandDto={})", returnToParentAgentCommandDto);
+
+		try {			
+			// get criteria from Dto
+			WaybillNumberCriteria criteria = returnToParentAgentCommandDto.getWaybillNumberCriteria();
+			
+			_executeCommand(WaybillNumberCommandType.ReturnToParentAgent, returnToParentAgentCommandDto, criteria);
+						
+		} catch (ParvanServiceException e) {
+				throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while returnWaybillNumberToParentAgent.", e);
+		}
+	}
+	
+	@Override
+	public ManualValidationState validateManualWaybillNumber(Long agentId, String waybillNumber) throws ParvanServiceException {
+		log.debug("Entering validateManualWaybillNumber(agentId={}, waybillNumber={})", agentId, waybillNumber);
+		if ( ! exists(waybillNumber) ) {
+			return ManualValidationState.NOT_EXIST;
+		}
+		WaybillNumberCriteria criteria = new WaybillNumberCriteria();
+		criteria.setCurrentAssigneeAgentIds( new Long[] { agentId } );
+		criteria.setWaybillNumber(waybillNumber);
+		List<WaybillNumberDisplayDto> waybillNumbers = findByCriteria(criteria, 0, 1, null, null);
+		if ( waybillNumbers.isEmpty() ) {
+			log.debug("validateManualWaybillNumber : no assigned waybillnumber found");
+			return ManualValidationState.NOT_ASSIGNED_TO_AGENT;
+		}
+		WaybillNumberDisplayDto waybillNumberDisplay = waybillNumbers.get(0);
+		log.debug("validateManualWaybillNumber : found waybillNumber [{}]", waybillNumberDisplay);
+		if ( waybillNumberDisplay.getWaybillNumberType() != WaybillNumberType.PRINT) {
+			log.debug("validateManualWaybillNumber : found waybillNumber not print");
+			return ManualValidationState.NOT_MANUAL;
+		}
+		if ( waybillNumberDisplay.getCurrentState() == WaybillNumberState.USED ) {
+			log.debug("validateManualWaybillNumber : found waybillNumber is used");
+			return ManualValidationState.USED;
+		}
+		if ( waybillNumberDisplay.getCurrentState() != WaybillNumberState.NEW ) {
+			log.debug("validateManualWaybillNumber : found waybillNumber not new");
+			return ManualValidationState.UNAVAILABALE;
+		}
+		return ManualValidationState.VALID;
+	}
+
+	@Override
+	public String getFirstAvailableDomesticWaybillNumber(Long agentId) throws ParvanServiceException {
+		log.debug("Entering getFirstAvailableDomesticWaybillNumber(agentId={})", agentId);
+		try {
+			return waybillNumberRepository.getFirstAvailableDomestic(agentId);
+		} catch (ParvanDaoException e) {
+			throw new ParvanRecoverableException(e);
+		}
+	}
+
+	@Override
+	public void useWaybillNumber(String waybillNumber, String eventId) throws ParvanServiceException {
+		log.debug("Entering useWaybillNumber(waybillNumber={}, eventId={})", waybillNumber, eventId);
+		try {
+
+			UseCommandDto useCommandDto = new UseCommandDto();
+			useCommandDto.setWaybillNumber(waybillNumber);
+			useCommandDto.setEventId(eventId);
+			WaybillNumber Wbn = waybillNumberRepository.getWaybillNumber(waybillNumber);
+			Wbn.useCommand(useCommandDto);
+			
+			waybillNumberRepository.saveWaybillNumber(Wbn);
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while changing state of waybillNumber to use.", e);
+		}
+	}
+
+	@Override
+	public void returnWaybillNumberToStock(String waybillNumber, String eventId) throws ParvanServiceException {
+		log.debug("Entering returnWaybillNumberToStock(waybillNumber={}, eventId={})", waybillNumber, eventId);
+		try {
+
+			ReturnToStockCommandDto returnToStockCommandDto = new ReturnToStockCommandDto();
+			returnToStockCommandDto.setWaybillNumber(waybillNumber);
+			returnToStockCommandDto.setEventId(eventId);
+			WaybillNumber Wbn = waybillNumberRepository.getWaybillNumber(waybillNumber);
+			Wbn.returnToStockCommand(returnToStockCommandDto);
+
+			waybillNumberRepository.saveWaybillNumber(Wbn);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while changing state of waybillNumber to returnToStock.", e);
+		}
+	}
+	
+	@Override
+	public void voidWaybillNumber(String waybillNumber, String eventId) throws ParvanServiceException {
+		log.debug("Entering voidWaybillNumber(waybillNumber={}, eventId={})", waybillNumber, eventId);
+		try {
+
+			VoidCommandDto voidCommandDto = new VoidCommandDto();
+
+			voidCommandDto.setWaybillNumber(waybillNumber);
+			voidCommandDto.setEventId(eventId);
+			WaybillNumber Wbn = waybillNumberRepository.getWaybillNumber(waybillNumber);
+			Wbn.voidCommand(voidCommandDto);
+
+			waybillNumberRepository.saveWaybillNumber(Wbn);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while changing state of waybillNumber to void.", e);
+		}
+	}
+	
+	@Override
+	public void updateWaybillNumberDisplay(String waybillNumberFrom,String waybillNumberTo) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering updateWaybillNumberDisplay( waybillNumberFrom={},waybillNumberTo={})", waybillNumberFrom,waybillNumberTo);
+
+		try {
+			
+			int totalWbnCount = (int) waybillNumberRepository.countWaybillNumberByWaybillNumber(waybillNumberFrom, waybillNumberTo);
+			int firstResult = 0;
+
+			List<WaybillNumber> waybillNumbers = waybillNumberRepository.findWaybillNumbersByWaybillNumber(waybillNumberFrom, waybillNumberTo, firstResult, totalWbnCount, null, null);
+
+			for (WaybillNumber thisWbn : waybillNumbers) {
+
+				waybillNumberRepository.updateWaybillNumberDisplay(thisWbn);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while updating waybillNumbers by criteria.", e);
+		}
+	}
+
+	@Override
+	public List<WaybillNumberCommandDto> findFullByWaybillNumber(String waybillNumber) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering findFullByWaybillNumber( waybillNumber={})", waybillNumber);
+		List<WaybillNumberCommandDto> waybillNumberCommandDtos = new ArrayList<WaybillNumberCommandDto>();
+		Map<Long,String> allSubAgentsName = _findAgentsName();
+
+		try {
+			
+			if (Validator.isNotNull(waybillNumber)){
+
+				WaybillNumber thisWbn = waybillNumberRepository.getWaybillNumber(waybillNumber);
+
+				Set<WaybillNumberCommand> allWbCommands = thisWbn.getWaybillNumberCommands();
+
+				List<WaybillNumberCommand> allSortedWbCommandsList = new ArrayList<WaybillNumberCommand>(allWbCommands);
+				Collections.sort(allSortedWbCommandsList, new Comparator<WaybillNumberCommand>() {
+					@Override
+					public int compare(WaybillNumberCommand cmd1, WaybillNumberCommand cmd2) {
+						return cmd1.getId().compareTo(cmd2.getId());
+					}
+				});
+				
+				for (WaybillNumberCommand command : allSortedWbCommandsList) {
+					WaybillNumberCommandDto commandDto = command.toDto();
+
+					switch (command.getWaybillNumberCommandType()) {
+					case Generate:
+						ViewWaybillNumberGenerateCommandDto viewGenerateCommandDto = command.getWaybillNumberGenerateCommand().toDto();
+						Long groupId = viewGenerateCommandDto.getWaybillNumberGroupId();
+						if (Validator.isNotNull(groupId)) {
+							WaybillNumberGroup waybillNumberGroup = waybillNumberGroupRepository.get(groupId);
+							viewGenerateCommandDto.setWaybillNumberGroupCode(waybillNumberGroup.getCode());
+						}
+						commandDto.setViewWaybillNumberGenerateCommand(viewGenerateCommandDto);
+						break;
+
+					case Update:
+						WaybillNumberUpdateCommandDto updateCommandDto = command.getWaybillNumberUpdateCommand().toDto();
+						commandDto.setWaybillNumberUpdateCommand(updateCommandDto);
+						break;
+
+					case ChangeAssignee:
+						ViewWaybillNumberChangeAssigneeCommandDto viewChangeAssigneeCommandDto = command.getWaybillNumberChangeAssigneeCommand().toDto();
+						for (Map.Entry<Long, String> entry : allSubAgentsName.entrySet()) {
+
+							if (Validator.equals(viewChangeAssigneeCommandDto.getNewAgentId(), entry.getKey())) {
+								viewChangeAssigneeCommandDto.setNewAgentName(entry.getValue());
+							}
+						}
+						commandDto.setViewWaybillNumberChangeAssigneeCommand(viewChangeAssigneeCommandDto);
+						break;
+						
+					case AssignToSubAgent:
+						ViewWaybillNumberChangeAssigneeCommandDto assignToSubAgentCommandDto = command.getAssignToSubAgentCommand().toDto();
+						for (Map.Entry<Long, String> entry : allSubAgentsName.entrySet()) {
+
+							if (Validator.equals(assignToSubAgentCommandDto.getNewAgentId(), entry.getKey())) {
+								assignToSubAgentCommandDto.setNewAgentName(entry.getValue());
+							}
+						}
+						commandDto.setViewWaybillNumberChangeAssigneeCommand(assignToSubAgentCommandDto);
+						break;
+						
+					case ReturnToParentAgent:
+						ViewWaybillNumberChangeAssigneeCommandDto returnToParentAgentCommandDto = command.getReturnToParentAgentCommand().toDto();
+						for (Map.Entry<Long, String> entry : allSubAgentsName.entrySet()) {
+
+							if (Validator.equals(returnToParentAgentCommandDto.getNewAgentId(), entry.getKey())) {
+								returnToParentAgentCommandDto.setNewAgentName(entry.getValue());
+							}
+						}
+						commandDto.setViewWaybillNumberChangeAssigneeCommand(returnToParentAgentCommandDto);
+						break;
+
+					case ChangeState:
+						WaybillNumberChangeStateCommandDto changeStateCommandDto = command.getWaybillNumberChangeStateCommand().toDto();
+						commandDto.setWaybillNumberChangeStateCommand(changeStateCommandDto);
+						break;
+
+					default:
+						break;
+					}
+
+					waybillNumberCommandDtos.add(commandDto);
+				}
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findFullByWaybillNumber.", e);
+		}
+		return waybillNumberCommandDtos;		
+	}
+	
+	@Override
+	public List<WaybillNumberReportDto> getReport(String term) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering getReport(term={})", term);
+
+        List<WaybillNumberReportDto> waybillNumberReportDtos = null; 		
+
+		try {
+			waybillNumberReportDtos = waybillNumberRepository.getReport(term);
+			
+			// find agentNames by their ids
+			Map<Long, String> agentNames = _findAgentsName();
+			
+			for (WaybillNumberReportDto reportDto : waybillNumberReportDtos) {
+
+				if (Validator.isNotNull(agentNames) && (Validator.isNotNull(reportDto.getCurrentAssigneeAgentId()))) {
+
+					for (Map.Entry<Long, String> entry : agentNames.entrySet()) {
+
+						if (Validator.equals(reportDto.getCurrentAssigneeAgentId(), entry.getKey())) {
+							reportDto.setCurrentAssigneeAgentName(entry.getValue());
+						}
+					}
+				}
+			}
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getReport by term:" + term, e);
+		}
+		return waybillNumberReportDtos;
+	}
+	
+	@Override
+	public WaybillNumberDisplayDto getWaybillNumberDisplay(String waybillNumber) throws ParvanUnrecoverableException {
+		
+		// LOG
+		log.debug("Entering getWaybillNumberDisplay( waybillNumber={})", waybillNumber);
+		WaybillNumberDisplayDto waybillNumberDisplayDto = new WaybillNumberDisplayDto();
+
+		try {
+
+			WaybillNumberDisplay waybillNumberDisplay = waybillNumberRepository.getWaybillNumberDisplay(waybillNumber);
+			
+			if(Validator.isNotNull(waybillNumberDisplay)){
+				waybillNumberDisplayDto = waybillNumberDisplay.toDto();
+			}
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting waybillNumberDisplay by waybillNumber.", e);
+		}
+		
+		return waybillNumberDisplayDto;
+	}
+	
+	/**
+	 * 
+	 * @param criteria
+	 * @param stock2UserInfo
+	 * @throws ParvanUnrecoverableException
+	 */
+	private void _setBasedOnCurrentUserFields(WaybillNumberCriteria criteria, UserInfo userInfo) throws ParvanUnrecoverableException {
+
+		AgentConditionType agentConditionType = AgentConditionType.OwnerOrAssignee;
+
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		Long uInfoAgentId = userInfoWrapper.getAgentId();
+		Set<Long> uInfoChildrenAgentIds = userInfoWrapper.getAgentChildrenIds();
+
+		Long[] givenCurrentAssigneeAgentIds = criteria.getCurrentAssigneeAgentIds();
+		Long[] givenOwnerAgentIds = criteria.getOwnerAgentIds();
+
+		Set<Long> finalCurrentAssigneeAgentIdsSet = null;
+		Set<Long> finalOwnerAgentIdsSet = null;
+
+		//
+		if (givenCurrentAssigneeAgentIds == null && givenOwnerAgentIds == null) {
+			agentConditionType = AgentConditionType.OwnerOrAssignee;
+
+			// CurrentAssigneeAgentIds
+			finalCurrentAssigneeAgentIdsSet = uInfoChildrenAgentIds;
+			if (finalCurrentAssigneeAgentIdsSet == null) {
+				finalCurrentAssigneeAgentIdsSet = new HashSet<Long>();
+			}
+			finalCurrentAssigneeAgentIdsSet.add(uInfoAgentId);
+
+			// OwnerAgentIds
+			finalOwnerAgentIdsSet = uInfoChildrenAgentIds;
+			if (finalOwnerAgentIdsSet == null) {
+				finalOwnerAgentIdsSet = new HashSet<Long>();
+			}
+			finalOwnerAgentIdsSet.add(uInfoAgentId);
+
+		} else {
+			agentConditionType = AgentConditionType.OwnerAndAssignee;
+
+			if (givenCurrentAssigneeAgentIds != null) {
+				// CurrentAssigneeAgentIds
+				finalCurrentAssigneeAgentIdsSet = new HashSet<Long>();
+				for (Long thisCAAgentId : givenCurrentAssigneeAgentIds) {
+					if (uInfoAgentId.equals(thisCAAgentId) || uInfoChildrenAgentIds.contains(thisCAAgentId)) {
+						finalCurrentAssigneeAgentIdsSet.add(thisCAAgentId);
+					}
+				}
+			}
+
+			if (givenOwnerAgentIds != null) {
+				// OwnerAgentIds
+				finalOwnerAgentIdsSet = new HashSet<Long>();
+				for (Long thisGivenOwnerAgentId : givenOwnerAgentIds) {
+					if (uInfoAgentId.equals(thisGivenOwnerAgentId) || uInfoChildrenAgentIds.contains(thisGivenOwnerAgentId)) {
+						finalOwnerAgentIdsSet.add(thisGivenOwnerAgentId);
+					}
+				}
+			}
+		}
+
+		// check again
+		if (finalCurrentAssigneeAgentIdsSet == null && finalOwnerAgentIdsSet == null) {
+			throw new ParvanUnrecoverableException("Invalid search criteria. finalCurrentAssigneeAgentIdsSet and finalOwnerAgentIdsSet are NULL!",
+					ErrorCode.ACCESS_DENIDE);
+		}
+
+		//
+		if (finalOwnerAgentIdsSet != null) {
+			criteria.setOwnerAgentIds(finalOwnerAgentIdsSet.toArray(new Long[0]));
+		}
+
+		if (finalCurrentAssigneeAgentIdsSet != null) {
+			criteria.setCurrentAssigneeAgentIds(finalCurrentAssigneeAgentIdsSet.toArray(new Long[0]));
+		}
+
+		criteria.setAgentConditionType(agentConditionType);
+	}
+
+	/**
+	 * 
+	 * @param waybillNumberCommandType
+	 * @param commandDtoObj
+	 * @param criteria
+	 * @throws Exception
+	 */
+	private void _executeCommand(WaybillNumberCommandType waybillNumberCommandType, Object commandDtoObj, WaybillNumberCriteria criteria) throws Exception {
+
+		StopWatch stopWatch = new StopWatch();
+
+		stopWatch.start();
+		
+
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+
+		long totalWbnDisplayCount = waybillNumberRepository.countWaybillNumberDisplayByCriteria(criteria);
+
+		log.debug("'Time=[{}]', 'totalShipmentCount=[{}]'", stopWatch, totalWbnDisplayCount);
+
+		int numberPerPage = 100;
+		long totalPageCount = (totalWbnDisplayCount + numberPerPage - 1) / numberPerPage;
+		int firstResult = 0;
+
+		long wbnDisplayCounter = 0;
+		for (int pageIndex = 0; pageIndex < totalPageCount; pageIndex++) {
+
+			log.debug("'Time=[{}]', 'wbnDisplay list - page[{}], from[{}]'", stopWatch, pageIndex, firstResult);
+
+			List<WaybillNumberDisplay> wbnDisplays = waybillNumberRepository.findWaybillNumberDisplayByCriteria(criteria, firstResult, numberPerPage,
+					SortDirectionEnum.Ascending, null);
+
+			for (WaybillNumberDisplay thisWbnDisplay : wbnDisplays) {
+				wbnDisplayCounter++;
+
+				String thisWbnStr = thisWbnDisplay.getWaybillNumber();
+
+				log.debug("'Time=[{}]', '[{}]th waybillNumber with number [{}]'", stopWatch, wbnDisplayCounter, thisWbnStr);
+
+				WaybillNumber thisWbn = waybillNumberRepository.getWaybillNumber(thisWbnStr);
+
+				switch (waybillNumberCommandType) {
+				case Update:
+					WaybillNumberUpdateCommandDto waybillNumberUpdateCommandDto = (WaybillNumberUpdateCommandDto) commandDtoObj;
+					thisWbn.updateCommand(waybillNumberUpdateCommandDto);
+					break;
+
+				case ChangeState:
+					WaybillNumberChangeStateCommandDto waybillNumberChangeStateCommandDto = (WaybillNumberChangeStateCommandDto) commandDtoObj;
+					thisWbn.changeStateCommand(waybillNumberChangeStateCommandDto);
+					break;
+
+				case ChangeAssignee:
+					WaybillNumberChangeAssigneeCommandDto waybillNumberChangeAssigneeCommandDto = (WaybillNumberChangeAssigneeCommandDto) commandDtoObj;
+					thisWbn.changeAssigneeCommand(waybillNumberChangeAssigneeCommandDto);
+					break;
+					
+				case AssignToSubAgent:
+					AssignToSubAgentCommandDto assignToSubAgentCommandDto = (AssignToSubAgentCommandDto) commandDtoObj;
+					thisWbn.assignToSubAgentCommand(assignToSubAgentCommandDto);
+					break;
+					
+				case ReturnToParentAgent:
+					ReturnToParentAgentCommandDto returnToParentAgentCommandDto = (ReturnToParentAgentCommandDto) commandDtoObj;
+					GeneralAgentDto generalAgentDto = agentManagementService.getAgent(userInfoWrapper.getAgentId());
+					Long parentAgentId = null;
+					if(Validator.isNotNull(generalAgentDto.getParentId())){
+						parentAgentId = generalAgentDto.getParentId();						
+					}
+					else{
+						parentAgentId = generalAgentDto.getId();
+					}
+					returnToParentAgentCommandDto.setParentAgentId(parentAgentId);
+					thisWbn.returnToParentAgentCommand(returnToParentAgentCommandDto);
+					break;
+
+				default:
+					break;
+				}
+
+				waybillNumberRepository.saveWaybillNumber(thisWbn);
+
+				log.info("@[{}]", stopWatch.getTime());
+			}
+
+			// set offset of next page
+			firstResult = firstResult + numberPerPage;
+		}
+
+		stopWatch.stop();
+		log.info("All commands executed @[{}]", wbnDisplayCounter, stopWatch.getTime());
+
+	}
+
+	private Set<Long> _getAllSubAgentIds() throws ParvanServiceException {
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		Set<Long> allSubAgentIds = userInfoWrapper.getAllSubAgentIds();
+		return allSubAgentIds;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	private Map<Long,String> _getAllSubAgentNames(Set<Long> allSubAgentIds) throws ParvanServiceException{
+
+		log.debug("allSubAgentIds: [{}]", allSubAgentIds);
+		if (allSubAgentIds != null && !allSubAgentIds.isEmpty()) {
+			return agentManagementService.getAgentNamesByIds(allSubAgentIds.toArray(new Long[allSubAgentIds.size()]));
+		}
+		return null;
+	}
+
+}

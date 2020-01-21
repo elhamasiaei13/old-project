@@ -1,0 +1,2347 @@
+{"entity":[
+    {
+        "name": "Person",
+        "actions": [                   
+                    {"name": "delete", "url": "/personmanagement-web/person/del", "enabled": true, "type": "object"},
+                    {"name": "batchUpdate", "url": "/personmanagement-web/person/update", "enabled": false, "type": "batch"},
+                    {"name": "batchDelete", "url": "/personmanagement-web/person/delall", "enabled": false, "type": "batch"},
+                    {"name": "view", "url": "/personmanagement-web/person/", "enabled": false, "type": "object"},
+                    {"name": "paging", "url": "/person/paging", "enabled": true, "type": "table"}
+                    ],
+                    "fields": [
+                               {
+                                   "name": "id",
+                                   "dataType": "long",
+                                   "order": 0,
+                                   "inputType": "hidden",
+                                   "title": "id",
+                                   "hint": "id",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": true,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "version",
+                                   "dataType": "long",
+                                   "order": 0,
+                                   "inputType": "hidden",
+                                   "title": "",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "createDate",
+                                   "dataType": "date",
+                                   "order": 0,
+                                   "inputType": "hidden",
+                                   "title": "createDate",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "updateDate",
+                                   "dataType": "date",
+                                   "order": 0,
+                                   "size": 130,
+                                   "inputType": "hidden",
+                                   "title": "updateDate",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "uuid",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.uuid",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "appId",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.appId",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "appWideUniqueId",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.appWideUniqueId",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "type",
+                                   "dataType": "string",
+                                   "order": 1,
+                                   "inputType": "select2",
+                                   "title": "person.type",
+                                   "hint": "person.type",
+                                   "help": "",
+                                   "placeholder": "",
+                                   "defaultValue": "",
+                                   "values": {"sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"value": "REAL", "text": "حقیقی"},{"value": "LEGAL", "text": "حقوقی"}] },
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": "",
+                                   "data": [],
+                                   "validators":[],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "gender",
+                                   "dataType": "string",
+                                   "order": 1,
+                                   "size": 0,
+                                   "inputType": "select2",
+                                   "title": "person.gender",
+                                   "hint": "person.gender",
+                                   "help": "",
+                                   "placeholder": "",
+                                   "defaultValue": "",
+                                   "values": {"sourceType": "inline", 
+                                   				"data": [
+                                   					{"text": "&nbsp;", "value": ""},
+                                   					{"value": "MALE", "textKey": "gender.male"},
+                                   					{"value": "FEMALE", "textKey": "gender.female"},
+                                   					{"value": "OTHER", "textKey": "gender.other"}
+                               					] },
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": "",
+                                   "data": [],
+                                   "validators":[],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "prefix",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "select2",
+                                   "title": "person.prefix",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "prefixLocal",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "select2",
+                                   "title": "person.prefixLocal",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "prefixEn",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "select2",
+                                   "title": "person.prefixEn",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "fullName",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.fullName",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "fullNameLocal",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.fullNameLocal",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "fullNameEn",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.fullNameEn",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "firstName",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 300,
+                                   "inputType": "text",
+                                   "title": "person.firstName",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "firstNameLocal",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.firstNameLocal",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "firstNameEn",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.firstNameEn",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "lastName",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 300,
+                                   "inputType": "text",
+                                   "title": "person.lastName",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "lastNameLocal",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.lastNameLocal",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "lastNameEn",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.lastNameEn",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "middleName",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.middleName",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "middleNameLocal",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.middleNameLocal",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "middleNameEn",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.middleNameEn",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "suffix",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.suffix",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "suffixLocal",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.suffixLocal",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "suffixEn",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.suffixEn",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "nickName",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.nickName",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "nickNameLocal",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.nickNameLocal",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "nickNameEn",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "text",
+                                   "title": "person.nickNameEn",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "nationalId",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 300,
+                                   "inputType": "text",
+                                   "title": "person.nationalId",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [{"name":"notempty", "attr": [{"messageKey": "error-required"}]}, {"name":"nationalId", "attr": [{"messageKey": "error-nationalId"}]}],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "economicCode",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "person.economicCode",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "issueId",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "person.issueId",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "issueLocation",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "person.issueLocation",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "issueDate",
+                                   "dataType": "date",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "person.issueDate",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "datePicker",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "primaryContactInfo.id",
+                                   "dataType": "long",
+                                   "order": 0,
+                                   "inputType": "hidden",
+                                   "title": "",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": true,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "primaryContactInfo.tel",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "contactInfo.tel",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "primaryContactInfo.fax",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "contactInfo.fax",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "primaryContactInfo.mobile",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "contactInfo.mobile",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "primaryContactInfo.email",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "contactInfo.email",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "direction:ltr;text-align:left;",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators":[{"name":"emailaddress", "attr": [{"messageKey": "error-emailaddress"}]}],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "primaryContactInfo.countryCode",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "contactInfo.country",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "primaryContactInfo.provinceCode",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "contactInfo.province",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "primaryContactInfo.cityCode",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "select2",
+                                   "title": "contactInfo.city",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {
+                                        "sourceType": "url",
+                                        "id": "function(obj) { return obj.shortCode; }", 
+                                        "url": "/personmanagement-web/person/cities", 
+                                        "allowClear": true, 
+                                        "placeholder": "choose", 
+                                        "exteraParam" : [
+                                            "'columns[1][data]': 'id'",
+                                            "start: (page - 1) * 20",
+                                            "length: 20",
+                                            "'order[1][column]': 1",
+                                            "'order[1][dir]': 'asc'",
+                                            "term: term"
+                                        ],
+                                        "formatResult": "geoEntityFormat",
+                                        "formatSelection": "geoEntityFormat",
+                                        "initSelection" : "geoEntityInitSelection"
+                                    },
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "primaryContactInfo.postalCode",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "contactInfo.postalCode",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "primaryContactInfo.address",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "contactInfo.address",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "primaryContactInfo.contactPersonName",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "contactInfo.contactPersonName",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "primaryContactInfo.contactPersonNationalId",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "text",
+                                   "title": "contactInfo.contactPersonNationalId",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [{"name":"nationalId", "attr": [{"messageKey": "error-nationalId"}]}],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "organization.id",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "inputType": "select2",
+                                   "title": "organization",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {
+                                        "sourceType": "url",
+                                        "id": "function(obj) { return obj.id; }", 
+                                        "url": "/personmanagement-web/person/organizations", 
+                                        "allowClear": true, 
+                                        "placeholder": "choose", 
+                                        "exteraParam" : [
+                                            "'columns[1][data]': 'id'",
+                                            "start: (page - 1) * 20",
+                                            "length: 20",
+                                            "'order[1][column]': 1",
+                                            "'order[1][dir]': 'asc'",
+                                            "term: term"
+                                        ],
+                                        "formatResult": "function(aaData){return aaData.nameEn;}",
+                                        "formatSelection": "function(aaData){return aaData.nameEn;}",
+                                        "initSelection" : "organizationInitSelection"
+                                    },
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "remarks",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "textarea",
+                                   "title": "person.remarks",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "active",
+                                   "dataType": "boolean",
+                                   "order": 3,
+                                   "size": 0,
+                                   "inputType": "checkbox",
+                                   "title": "person.active",
+                                   "hint": "person.active",
+                                   "help": "",
+                                   "placeholder": "",
+                                   "defaultValue": "",
+                                   "values": {"sourceType": "inline", "data": [{"value": "true"}] },
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": "",
+                                   "data": [],
+                                   "validators":[],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+						        {
+						          "name": "objectAccessScopeId",
+						          "dataType": "long",
+						          "order": 9,
+						          "size": 0,
+						          "inputType": "select2",
+						          "title": "objectAccessScope",
+						          "hint": "objectAccessScope",
+						          "help": "",
+						          "placeholder": "",
+						          "defaultValue": "",
+						          "values": {
+						            "firstRow": {
+						              "text": "&nbsp;",
+						              "value": ""
+						            },
+						            "sourceType": "session",
+						            "key": "objectAccessScopes",
+						            "dataType": "list",
+						            "converter": "com.parvanpajooh.dialects.converter.DefaultConverter",
+						            "converterTitleField" : "name",
+						            "converterValueField" : "id"
+						          },
+						          "style": "",
+						          "cssClass": "",
+						          "sortable": true,
+						          "isId": "",
+						          "data": [],
+						          "validators": [
+						            {
+						              "name": "notempty",
+						              "attr": [
+						                {
+						                  "messageKey": "error-required"
+						                }
+						              ]
+						            }
+						          ],
+						          "mask": "",
+						          "enabled": false
+						        }
+                               ],
+                               "forms": [
+                                         {
+                                             "name": "search",
+                                             "type": "search",
+                                             "fields": [
+                                                        {
+                                                            "name": "firstName",
+                                                            "validators":[],
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "lastName",
+                                                            "validators":[],
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "nationalId",
+                                                            "validators":[],
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "primaryContactInfo.cityCode",
+                                                            "size": 300,
+                                                            "validators":[],
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "active",
+							                    			"inputType": "select2",
+							                                "size": 100,
+							                                "values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"textKey": "yes", "value": "true"},{"textKey": "no", "value": "false"}] },
+							                                "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "type",
+							                    			"inputType": "select2",
+							                    			"size": 300,
+							                                "enabled": true
+                                                        }
+                                                        ]
+                                         },
+                                         {
+                                             "name": "delete",
+                                             "type": "delete",
+                                             "fields": [
+                                                        {
+                                                            "name": "id",
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "version",
+                                                            "enabled": true
+                                                        }
+                                                        ]
+                                         }
+                                         ],
+                                         "data-tables": [
+                                                         {
+                                                             "name": "list",
+                                                             "fields": [
+                                                                        {
+				                                                            "name": "id",
+				                                                            "enabled": true
+				                                                        },
+                                                                        {
+				                                                            "name": "type",
+				                                                            "renderFunction": "typeRender",
+				                                                            "enabled": true
+				                                                        },
+				                                                        {
+				                                                            "name": "fullName",
+                                                                            "renderFunction": "fullNameRender",
+				                                                            "enabled": true
+				                                                        },
+				                                                        {
+				                                                            "name": "primaryContactInfo.countryCode",
+                                                                            "renderFunction": "contactCountryRender",
+				                                                            "enabled": true
+				                                                        },
+				                                                        {
+				                                                            "name": "primaryContactInfo.provinceCode",
+                                                                            "renderFunction": "contactProvinceRender",
+				                                                            "enabled": true
+				                                                        },
+				                                                        {
+				                                                            "name": "primaryContactInfo.cityCode",
+                                                                            "renderFunction": "contactCityRender",
+				                                                            "enabled": true
+				                                                        },
+                                                                        {
+                                                                            "name": "active",
+                                                                            "renderFunction": "booleanRender",
+                                                                            "enabled": true
+                                                                        },
+                                                                        {
+                                                                            "name": "createDate",
+                                                                            "enabled": true
+                                                                        },
+                                                                        {
+                                                                            "name": "updateDate",
+                                                                            "enabled": true
+                                                                        },
+															            {
+															              "name": "objectAccessScopeId",
+															              "renderFunction": "scopeRender",
+															              "enabled": true
+															            },
+															            {
+															              "name": "organization.id",
+															              "renderFunction": "organizationNameRender",
+															              "enabled": true
+															            }
+                                                                        ]
+                                                         }
+                                                         ]
+    },
+    {
+        "name": "Relation",
+        "actions": [
+                    {"name": "createTo", "url": "/personmanagement-web/person/relation/save", "enabled": true, "type": "object"},
+                    {"name": "createFrom", "url": "/personmanagement-web/person/relation/save", "enabled": true, "type": "object"},
+                    {"name": "modifyTo", "url": "/personmanagement-web/person/relation/save", "enabled": true, "type": "object"},
+                    {"name": "modifyFrom", "url": "/personmanagement-web/person/relation/save", "enabled": true, "type": "object"},
+                    {"name": "view", "url": "/personmanagement-web/person/relation/", "enabled": false, "type": "object"},
+                    {"name": "delete", "url": "/personmanagement-web/person/relation/del", "enabled": true, "type": "object"}
+                    ],
+                    "fields": [
+                               {
+                                   "name": "id",
+                                   "dataType": "long",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "hidden",
+                                   "title": "",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": true,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "version",
+                                   "dataType": "long",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "hidden",
+                                   "title": "",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "createDate",
+                                   "dataType": "date",
+                                   "order": 0,
+                                   "size": 130,
+                                   "inputType": "hidden",
+                                   "title": "createDate",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "updateDate",
+                                   "dataType": "date",
+                                   "order": 0,
+                                   "size": 130,
+                                   "inputType": "hidden",
+                                   "title": "updateDate",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "type",
+                                   "dataType": "string",
+                                   "order": 1,
+                                   "size": 150,
+                                   "inputType": "select2",
+                                   "title": "person.type",
+                                   "hint": "person.type",
+                                   "help": "",
+                                   "placeholder": "",
+                                   "defaultValue": "",
+                                   "values": {"sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"value": "BROKER", "text": "Broker"},{"value": "BRANCH", "text": "Branch"}] },
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": "",
+                                   "data": [],
+                                   "validators":[],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "fromPerson.id",
+                                   "dataType": "long",
+                                   "order": 0,
+                                   "size": 300,
+                                   "inputType": "select2",
+                                   "title": "relation.fromPerson",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {
+                                        "sourceType": "url",
+                                        "id": "function(obj) { return obj.id; }", 
+                                        "url": "/personmanagement-web/person/paging", 
+                                        "allowClear": true, 
+                                        "placeholder": "choose", 
+                                        "exteraParam" : [
+                                            "'columns[1][data]': 'id'",
+                                            "start: (page - 1) * 20",
+                                            "length: 20",
+                                            "'order[1][column]': 1",
+                                            "'order[1][dir]': 'asc'",
+                                            "allNames: term"
+                                        ],
+                                        "ajaxResult": "ajaxResult",
+                                        "formatResult": "personFormat",
+                                        "formatSelection": "personFormat",
+                                        "initSelection" : "personInitSelection"
+                                    },
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "toPerson.id",
+                                   "dataType": "long",
+                                   "order": 0,
+                                   "size": 300,
+                                   "inputType": "select2",
+                                   "title": "relation.toPerson",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {
+                                        "sourceType": "url",
+                                        "id": "function(obj) { return obj.id; }", 
+                                        "url": "/personmanagement-web/person/paging", 
+                                        "allowClear": true, 
+                                        "placeholder": "choose", 
+                                        "exteraParam" : [
+                                            "'columns[1][data]': 'id'",
+                                            "start: (page - 1) * 20",
+                                            "length: 20",
+                                            "'order[1][column]': 1",
+                                            "'order[1][dir]': 'asc'",
+                                            "allNames: term"
+                                        ],
+                                        "ajaxResult": "ajaxResult",
+                                        "formatResult": "personFormat",
+                                        "formatSelection": "personFormat",
+                                        "initSelection" : "personInitSelection"
+                                    },
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "validFrom",
+                                   "dataType": "date",
+                                   "order": 0,
+                                   "size": 100,
+                                   "inputType": "text",
+                                   "title": "relation.validFrom",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "persianDatePicker",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "validTo",
+                                   "dataType": "date",
+                                   "order": 0,
+                                   "size": 100,
+                                   "inputType": "text",
+                                   "title": "relation.validTo",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "persianDatePicker",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "description",
+                                   "dataType": "string",
+                                   "order": 0,
+                                   "size": 0,
+                                   "inputType": "textarea",
+                                   "title": "relation.description",
+                                   "hint": "",
+                                   "help": "",
+                                   "defaultValue": "",
+                                   "placeholder": "",
+                                   "values": {},
+                                   "data": [],
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": false,
+                                   "validators": [],
+                                   "mask": "",
+                                   "enabled": false
+                               },
+                               {
+                                   "name": "active",
+                                   "dataType": "boolean",
+                                   "order": 3,
+                                   "size": 80,
+                                   "inputType": "checkbox",
+                                   "title": "relation.active",
+                                   "hint": "relation.active",
+                                   "help": "",
+                                   "placeholder": "",
+                                   "defaultValue": "",
+                                   "values": {"sourceType": "inline", "data": [{"value": "true"}] },
+                                   "style": "",
+                                   "cssClass": "",
+                                   "sortable": true,
+                                   "isId": "",
+                                   "data": [],
+                                   "validators":[],
+                                   "mask": "",
+                                   "enabled": false
+                               }
+                               ],
+                               "forms": [
+                                         {
+                                             "name": "createTo",
+                                             "type": "create",
+                                             "fields": [
+                                                        {
+                                                            "name": "type",
+                                   							"order": 1,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "fromPerson.id",
+                                                            "inputType": "hidden",
+						                                    "validators": [],
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "toPerson.id",
+                                   							"order": 2,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "validFrom",
+                                   							"order": 4,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "validTo",
+                                   							"order": 5,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "description",
+                                   							"order": 6,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "active",
+                                   							"order": 7,
+                                                            "enabled": true
+                                                        }
+                                                        ]
+                                         },
+                                         {
+                                             "name": "modifyTo",
+                                             "type": "modify",
+                                             "fields": [
+                                                        {
+                                                            "name": "id",
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "type",
+                                   							"order": 1,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "toPerson.id",
+                                   							"order": 2,
+                                   							"disabled": true,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "validFrom",
+                                   							"order": 3,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "validTo",
+                                   							"order": 4,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "description",
+                                   							"order": 5,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "active",
+                                   							"order": 6,
+                                                            "enabled": true
+                                                        }
+                                                        ]
+                                         },
+                                         {
+                                             "name": "createFrom",
+                                             "type": "create",
+                                             "fields": [
+                                             			{
+                                                            "name": "type",
+                                   							"order": 1,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "fromPerson.id",
+                                   							"order": 2,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "toPerson.id",
+                                                            "inputType": "hidden",
+						                                    "validators": [],
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "validFrom",
+                                   							"order": 4,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "validTo",
+                                   							"order": 5,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "description",
+                                   							"order": 6,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "active",
+                                   							"order": 7,
+                                                            "enabled": true
+                                                        }
+                                                        ]
+                                         },
+                                         {
+                                             "name": "modifyFrom",
+                                             "type": "modify",
+                                             "fields": [
+                                                        {
+                                                            "name": "id",
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "type",
+                                   							"order": 1,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "fromPerson.id",
+                                   							"order": 2,
+                                   							"disabled": true,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "validFrom",
+                                   							"order": 3,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "validTo",
+                                   							"order": 4,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "description",
+                                   							"order": 5,
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "active",
+                                   							"order": 6,
+                                                            "enabled": true
+                                                        }
+                                                        ]
+                                         },
+                                         {
+                                             "name": "delete",
+                                             "type": "delete",
+                                             "fields": [
+                                                        {
+                                                            "name": "id",
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "name": "version",
+                                                            "enabled": true
+                                                        }
+                                                        ]
+                                         }
+                                         ],
+                                         "data-tables": []
+    },
+    {
+                  "name":"Complaint",
+                  "actions":[
+                        {
+                              "name":"create",
+                              "url":"/complaintmanagement-web/complaint/save",
+                              "enabled":true,
+                              "type":"object"
+                        },
+                        {
+                              "name":"modify",
+                              "url":"/complaintmanagement-web/complaint/save",
+                              "enabled":true,
+                              "type":"object"
+                        },
+                        {
+                              "name":"result",
+                              "url":"/complaintmanagement-web/complaint/save",
+                              "enabled":true,
+                              "type":"object"
+                        },
+                        {
+                              "name":"delete",
+                              "url":"/complaintmanagement-web/complaint/del",
+                              "enabled":true,
+                              "type":"object"
+                        },
+                        {
+                              "name":"view",
+                              "url":"/complaintmanagement-web/complaint/",
+                              "enabled":false,
+                              "type":"object"
+                        },
+                        {
+                              "name":"paging",
+                              "url":"/complaint/paging",
+                              "enabled":true,
+                              "type":"table"
+                        }
+                  ],
+                  "fields":[
+                        {
+                              "name":"id",
+                              "dataType":"long",
+                              "order":0,
+                              "size":0,
+                              "inputType":"hidden",
+                              "title":"complaint.id",
+                              "hint":"",
+                              "help":"",
+                              "defaultValue":"",
+                              "placeholder":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":true,
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"categoryDto.id",
+                              "dataType":"long",
+                              "order":1,
+                              "size":0,
+                              "inputType":"select2",
+                              "title":"complaintCategory",
+                              "hint":"",
+                              "help":"",
+                              "defaultValue":"",
+                              "values":{
+                                    "sourceType":"url",
+                                    "id":"function(obj) {return obj.id}",
+                                    "url":"/complaintmanagement-web/complaintCategory/paging",
+                                    "allowClear":true,
+                                    "placeholder":"choose",
+                                    "exteraParam":[
+                                          "'columns[1][data]': 'id'",
+                                          "start: (page - 1) * 20",
+                                          "length: 20",
+                                          "'order[1][column]': 1",
+                                          "'order[1][dir]': 'asc'",
+                                          "term: term"
+                                    ],
+                                    "formatResult":"function(aaData){return aaData.code;}",
+                                    "formatSelection":"function(aaData){return aaData.code}",
+                                    "initSelectionUrl":"/complaintmanagement-web/complaintCategory/get",
+                                    "initSelectionExteraParam":[
+                                          "id: id"
+                                    ]
+                              },
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":"",
+                              "validators":[
+                                    {
+                                          "name":"notempty",
+                                          "attr":[
+                                                {
+                                                      "messageKey":"error-required"
+                                                }
+                                          ]
+                                    }
+                              ],
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"userName",
+                              "dataType":"string",
+                              "order":1,
+                              "size":200,
+                              "inputType":"text",
+                              "title":"complaint.userName",
+                              "hint":"",
+                              "help":"",
+                              "placeholder":"",
+                              "defaultValue":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":"",
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"userUuid",
+                              "dataType":"string",
+                              "order":2,
+                              "size":200,
+                              "inputType":"text",
+                              "title":"complaint.userUuid",
+                              "hint":"",
+                              "help":"",
+                              "placeholder":"",
+                              "defaultValue":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":"",
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"firstName",
+                              "dataType":"string",
+                              "order":3,
+                              "size":200,
+                              "inputType":"text",
+                              "title":"complaint.firstName",
+                              "hint":"",
+                              "help":"",
+                              "placeholder":"",
+                              "defaultValue":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":"",
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"lastName",
+                              "dataType":"string",
+                              "order":4,
+                              "size":200,
+                              "inputType":"text",
+                              "title":"complaint.lastName",
+                              "hint":"",
+                              "help":"",
+                              "placeholder":"",
+                              "defaultValue":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":"",
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"fullName",
+                              "dataType":"string",
+                              "order":3,
+                              "size":200,
+                              "inputType":"text",
+                              "title":"complaint.fullName",
+                              "hint":"",
+                              "help":"",
+                              "placeholder":"",
+                              "defaultValue":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":"",
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"email",
+                              "dataType":"string",
+                              "order":5,
+                              "size":200,
+                              "inputType":"text",
+                              "title":"complaint.email",
+                              "hint":"",
+                              "help":"",
+                              "placeholder":"",
+                              "defaultValue":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":false,
+                              "isId":"",
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"tel",
+                              "dataType":"string",
+                              "order":6,
+                              "size":200,
+                              "inputType":"text",
+                              "title":"complaint.tel",
+                              "hint":"",
+                              "help":"",
+                              "placeholder":"",
+                              "defaultValue":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":"",
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"subject",
+                              "dataType":"string",
+                              "order":7,
+                              "size":300,
+                              "inputType":"text",
+                              "title":"complaint.subject",
+                              "hint":"",
+                              "help":"",
+                              "placeholder":"",
+                              "defaultValue":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":"",
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"description",
+                              "dataType":"string",
+                              "order":8,
+                              "size":200,
+                              "inputType":"textarea",
+                              "title":"complaint.description",
+                              "hint":"",
+                              "help":"",
+                              "placeholder":"",
+                              "defaultValue":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":"",
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"status",
+                              "dataType":"string",
+                              "order":9,
+                              "size":0,
+                              "inputType":"select",
+                              "title":"complaint.status",
+                              "hint":"",
+                              "help":"",
+                              "defaultValue":"NEW",
+                              "values":{
+                                    "sourceType":"inline",
+                                    "placeholder":"choose",
+                                    "data":[
+                                          {
+                                                "text":"new",
+                                                "value":"NEW"
+                                          },
+                                          {
+                                                "text":"closed",
+                                                "value":"CLOSED"
+                                          }
+                                    ]
+                              },
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":"",
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"createDate",
+                              "dataType":"date",
+                              "order":10,
+                              "size":200,
+                              "inputType":"hidden",
+                              "title":"createDate",
+                              "hint":"",
+                              "help":"",
+                              "defaultValue":"",
+                              "placeholder":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":false,
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"updateDate",
+                              "dataType":"date",
+                              "order":11,
+                              "size":200,
+                              "inputType":"hidden",
+                              "title":"updateDate",
+                              "hint":"",
+                              "help":"",
+                              "defaultValue":"",
+                              "placeholder":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":false,
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"attachment",
+                              "dataType":"string",
+                              "order":12,
+                              "size":200,
+                              "inputType":"text",
+                              "title":"complaint.attachment",
+                              "hint":"",
+                              "help":"",
+                              "placeholder":"",
+                              "defaultValue":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":"",
+                              "mask":"",
+                              "enabled":false
+                        },
+                        {
+                              "name":"result",
+                              "dataType":"string",
+                              "order":13,
+                              "size":200,
+                              "inputType":"textarea",
+                              "title":"complaint.result",
+                              "hint":"",
+                              "help":"",
+                              "placeholder":"",
+                              "defaultValue":"",
+                              "style":"",
+                              "cssClass":"",
+                              "sortable":true,
+                              "isId":"",
+                              "mask":"",
+                              "enabled":false
+                        }
+                  ],
+                  "forms":[
+                        {
+                              "name":"search",
+                              "type":"search",
+                              "fields":[
+                                    {
+                                          "name":"firstName",
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"lastName",
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"subject",
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"userName",
+                                          "enabled":true
+                                    }
+                              ]
+                        },
+                        {
+                              "name":"modify",
+                              "type":"modify",
+                              "fields":[
+                                    {
+                                          "name":"id",
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"categoryDto.id",
+                                          "order":1,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"firstName",
+                                          "order":3,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"lastName",
+                                          "order":4,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"email",
+                                          "order":5,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"tel",
+                                          "order":6,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"subject",
+                                          "order":7,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"status",
+                                          "order":8,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"description",
+                                          "order":9,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"attachment",
+                                          "order":10,
+                                          "enabled":true
+                                    }
+                              ]
+                        },
+                        {
+                              "name":"result",
+                              "type":"modify",
+                              "fields":[
+                                    {
+                                          "name":"id",
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"categoryDto.id",
+                                          "order":1,
+                                          "readonly":true,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"firstName",
+                                          "order":3,
+                                          "readonly":true,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"lastName",
+                                          "order":4,
+                                          "readonly":true,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"email",
+                                          "order":5,
+                                          "readonly":true,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"tel",
+                                          "order":6,
+                                          "readonly":true,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"subject",
+                                          "order":7,
+                                          "readonly":true,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"description",
+                                          "order":9,
+                                          "readonly":true,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"attachment",
+                                          "order":10,
+                                          "readonly":true,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"result",
+                                          "order":11,
+                                          "enabled":true
+                                    }
+                              ]
+                        },
+                        {
+                              "name":"delete",
+                              "type":"delete",
+                              "fields":[
+                                    {
+                                          "name":"id",
+                                          "enabled":true
+                                    }
+                              ]
+                        },
+                        {
+                              "name":"create",
+                              "type":"create",
+                              "fields":[
+                                    {
+                                          "name":"categoryDto.id",
+                                          "order":1,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"email",
+                                          "order":5,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"tel",
+                                          "order":6,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"subject",
+                                          "order":7,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"description",
+                                          "order":9,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"attachment",
+                                          "order":10,
+                                          "enabled":true
+                                    }
+                              ]
+                        }
+                  ],
+                  "data-tables":[
+                        {
+                              "name":"list",
+                              "fields":[
+                                    {
+                                          "name":"id",
+                                          "order":1,
+                                          "enabled":false
+                                    },
+                                    {
+                                          "name":"status",
+                                          "order":2,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"userName",
+                                          "order":3,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"fullName",
+                                          "order":4,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"tel",
+                                          "order":5,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"email",
+                                          "order":6,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"subject",
+                                          "order":7,
+                                          "enabled":true
+                                    }
+                              ]
+                        },
+                        {
+                              "name":"paging",
+                              "fields":[
+                                    {
+                                          "name":"id",
+                                          "order":1,
+                                          "enabled":false
+                                    },
+                                    {
+                                          "name":"status",
+                                          "order":2,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"userName",
+                                          "order":3,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"fullName",
+                                          "order":4,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"tel",
+                                          "order":5,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"email",
+                                          "order":6,
+                                          "enabled":true
+                                    },
+                                    {
+                                          "name":"subject",
+                                          "order":7,
+                                          "enabled":true
+                                    }
+                              ]
+                        }
+                  ]
+            }
+    ]
+}

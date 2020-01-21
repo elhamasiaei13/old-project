@@ -1,0 +1,173 @@
+package com.parvanpajooh.siteservices.model.vo;
+
+import java.time.LocalDateTime;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.siteservices.model.enums.PasswordRecoveryMethod;
+
+
+/**
+ * @author dev-03
+ *
+ */
+public class RecoveryCodeVO extends BaseVO{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8362209251091263844L;
+
+	private Long id;
+	
+	private Long userId;
+	
+	private String userName;
+	
+	private String email;
+	
+	private String mobile;
+	
+	private PasswordRecoveryMethod passwordRecoveryMethod;
+	
+	private String code;
+	
+	private LocalDateTime expireDate;
+	
+	private Integer version;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the userId
+	 */
+	public Long getUserId() {
+		return userId;
+	}
+
+	/**
+	 * @param userId the userId to set
+	 */
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	/**
+	 * @return the userName
+	 */
+	public String getUserName() {
+		return userName;
+	}
+
+	/**
+	 * @param userName the userName to set
+	 */
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	/**
+	 * @return the mobile
+	 */
+	public String getMobile() {
+		return mobile;
+	}
+
+	/**
+	 * @param mobile the mobile to set
+	 */
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	/**
+	 * @return the requestMethod
+	 */
+	public String getRequestMethod() {
+		return requestMethod;
+	}
+
+	/**
+	 * @param requestMethod the requestMethod to set
+	 */
+	public void setRequestMethod(String requestMethod) {
+		this.requestMethod = requestMethod;
+	}
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the expireDate
+	 */
+	public LocalDateTime getExpireDate() {
+		return expireDate;
+	}
+
+	/**
+	 * @param expireDate the expireDate to set
+	 */
+	public void setExpireDate(LocalDateTime expireDate) {
+		this.expireDate = expireDate;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "RecoveryCodeVO [id=" + id + ", userId=" + userId + ", userName=" + userName + ", email=" + email + ", mobile=" + mobile + ", requestMethod="
+				+ requestMethod + ", code=" + code + ", expireDate=" + expireDate + ", version=" + version + "]";
+	}
+
+}

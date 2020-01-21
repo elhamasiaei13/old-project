@@ -1,0 +1,41 @@
+
+<ul xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:idm="http://www.parvanpajooh/thymeleaf/idm"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" layout:fragment="menu" class="nav sidebar-menu">
+
+	<li idm:authorize="com.parvanpajooh.stock2.domain.model.WaybillNumber" data-action="WB__VIEW_LIST" th:title="#{waybillNumberGenerateCommand}" th:class="${rightMenu == '' || rightMenu == 'waybillNumbers' ? 'active' : ''}">
+		<a th:href="@{'/waybillNumber'}">
+			<i class="fa fa-stack-exchange"></i>
+			<span th:text="#{waybillNumberGenerateCommand}">شماره‌های بارنامه</span>
+		</a>
+	</li>
+
+	<li idm:authorize="com.parvanpajooh.stock2.domain.model.WaybillNumber" data-action="WB__VIEW_LIST" th:title="#{waybillNumberGroup}" th:class="${rightMenu == '' || rightMenu == 'waybillNumberGroups' ? 'active' : ''}">
+		<a th:href="@{'/waybillNumberGroup'}">
+			<i class="fa fa-object-group"></i>
+			<span th:text="#{waybillNumberGroup}">گروه‌های شماره‌های بارنامه</span>
+		</a>
+	</li>
+			
+	<li idm:authorize="com.parvanpajooh.stock2.domain.model.WaybillNumber" data-action="WB__VIEW" th:title="#{waybillNumber.view}" th:class="${rightMenu == '' || rightMenu == 'waybillnumber-detail' ? 'active' : ''}">
+		<a th:href="@{'/waybillNumber/detail'}">
+			<i class="fa fa-eye"></i>
+			<span th:text="#{waybillNumber.view}">مشاهده یک بارنامه</span>
+		</a>
+	</li>
+
+	<li idm:authorize="com.parvanpajooh.stock2.domain.model.WaybillNumber" data-action="WB__VIEW_LIST" th:title="#{waybillNumber.report}" th:class="${rightMenu == '' || rightMenu == 'waybillnumber-report' ? 'active' : ''}">
+		<a th:href="@{'/waybillNumber/report'}">
+			<i class="fa fa-bar-chart"></i>
+			<span th:text="#{waybillNumber.report}">گزارش</span>
+		</a>
+	</li>
+
+	<li idm:authorize="com.parvanpajooh.stock2.domain.model.WaybillNumber" data-action="WB__UPDATE" th:title="#{updateWaybillNumberDisplays}" th:class="${rightMenu == '' || rightMenu == 'updatewaybillnumberdisplays' ? 'active' : ''}">
+		<a th:href="@{'/waybillNumber/waybillnumbers'}">
+			<i class="fa fa-refresh"></i>
+			<span th:text="#{updateWaybillNumberDisplays}">به‌روز رسانی نمایش بارنامه</span>
+		</a>
+	</li>
+
+</ul>
+

@@ -1,0 +1,21 @@
+1476610647915	Delete elements
+1476610715746	Rename type 'AgentManagementServiceAdapter'
+1476610806032	Rename type 'AgentManagementServiceAdapterRest'
+1476958888106	Rename local variable 'issueDateStr'
+1476958896681	Rename local variable 'issueDateLdt'
+1477144054784	Rename type 'AccTransactionRowDto'
+1477144065301	Rename type 'VoucherMsg'
+1477144080286	Rename type 'AccTransactionDto'
+1477146719749	Rename local variable 'accTransactionRowDtos'
+1477146750444	Rename local variable 'accTransactionDto'
+1477146782573	Rename local variable 'voucherRowMsg'
+1477146961729	Delete element
+1477146980532	Rename type 'VoucherVO'
+1477147075951	Delete element
+1477147167280	Delete element
+1477147179127	Rename type 'VoucherRowVO'
+1477147456646	Copy compilation units
+1477147727964	Copy compilation unit
+1477147754346	Copy compilation unit
+1477148471663	Rename local variable 'accTransactionRowDto'
+1477148483812	Rename local variable 'voucherRowMsgDto'

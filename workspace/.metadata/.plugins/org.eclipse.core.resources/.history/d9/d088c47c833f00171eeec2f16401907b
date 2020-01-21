@@ -1,0 +1,169 @@
+package com.parvanpajooh.client.geomanagement.model;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RouteCategory;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RouteType;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+
+/**
+ * @author mohammad
+ *
+ */
+public class RouteMsg extends BaseMsg {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1304277576944253813L;
+	
+	private Long id;
+	
+	private RateAndRouteEnums.RouteType type;
+	
+	private RouteCategory category;
+	
+	private String carrierRouteNumber;
+	
+	private Boolean active;
+	
+    private NodeMsg toNode;
+	
+	private NodeMsg fromNode;
+	
+	private CarrierMsg carrier;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public RouteType getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(RouteType type) {
+		this.type = type;
+	}
+	
+	/**
+	 * @return the category
+	 */
+	public RouteCategory getCategory() {
+		return category;
+	}
+
+	/**
+	 * @param category the category to set
+	 */
+	public void setCategory(RouteCategory category) {
+		this.category = category;
+	}
+
+	/**
+	 * @return the toNode
+	 */
+	public NodeMsg getToNode() {
+		return toNode;
+	}
+
+	/**
+	 * @param toNode the toNode to set
+	 */
+	public void setToNode(NodeMsg toNode) {
+		this.toNode = toNode;
+	}
+
+	/**
+	 * @return the fromNode
+	 */
+	public NodeMsg getFromNode() {
+		return fromNode;
+	}
+
+	/**
+	 * @param fromNode the fromNode to set
+	 */
+	public void setFromNode(NodeMsg fromNode) {
+		this.fromNode = fromNode;
+	}
+
+	/**
+	 * @return the carrierRouteNumber
+	 */
+	public String getCarrierRouteNumber() {
+		return carrierRouteNumber;
+	}
+
+	/**
+	 * @param carrierRouteNumber the carrierRouteNumber to set
+	 */
+	public void setCarrierRouteNumber(String carrierRouteNumber) {
+		this.carrierRouteNumber = carrierRouteNumber;
+	}
+
+	/**
+	 * @return the carrier
+	 */
+	public CarrierMsg getCarrier() {
+		return carrier;
+	}
+
+	/**
+	 * @param carrier the carrier to set
+	 */
+	public void setCarrier(CarrierMsg carrier) {
+		this.carrier = carrier;
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("id", getId())
+			.add("type", type)
+			.add("carrierRouteNumber", carrierRouteNumber)
+			.add("active", active)
+			.add("toNode", toNode)
+			.add("fromNode", fromNode)
+			.add("carrier", carrier)
+			.toString();
+	}
+
+
+
+}

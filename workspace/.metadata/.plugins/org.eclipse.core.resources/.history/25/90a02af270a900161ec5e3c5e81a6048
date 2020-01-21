@@ -1,0 +1,100 @@
+package com.parvanpajooh.stock2.domain.adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.agentmanagement.AgentManagementApiRestClient;
+import com.parvanpajooh.client.agentmanagement.model.EmployeeMsg;
+import com.parvanpajooh.client.agentmanagement.model.GeneralAgentMsg;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.stock2.domain.model.dto.EmployeeDto;
+import com.parvanpajooh.stock2.domain.model.dto.GeneralAgentDto;
+
+@Stateless
+public class AgentManagementServiceAdapterRest implements AgentManagementServiceAdapter {
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	private AgentManagementApiRestClient agentmanagementApiRestClient;
+
+	public AgentManagementServiceAdapterRest() {
+
+		this.agentmanagementApiRestClient = new AgentManagementApiRestClient();
+	}
+
+	@Override
+	public List<GeneralAgentDto> getAllSubAgentsByParentId(Long parentAgentId) throws ParvanUnrecoverableException {
+		
+		List<GeneralAgentDto> generalAgentDtos = null;
+		GeneralAgentDto generalAgentDto = null;
+		
+		try {
+			PageList<GeneralAgentMsg> generalAgentMsgs = agentmanagementApiRestClient.getAllSubAgentsByParentId(parentAgentId);
+			
+			
+			Long[] ids = {8,9,11};
+			PageList<GeneralAgentMsg> msg = agentmanagementApiRestClient.getAgentsByIds(ids);
+			
+			
+			generalAgentDtos = new ArrayList<GeneralAgentDto>();
+			
+			for (GeneralAgentMsg generalAgentMsg : generalAgentMsgs.getElements()) {
+				
+				generalAgentDto = new GeneralAgentDto();
+				generalAgentDto.fromMsg(generalAgentMsg);
+				generalAgentDtos.add(generalAgentDto);
+			}
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting agents by its parentId: " + parentAgentId, e);
+		}
+		
+		return generalAgentDtos;
+	}
+
+	@Override
+	public EmployeeDto findEmployeeByUsername(String employeeUserName) throws ParvanUnrecoverableException {
+		
+		EmployeeMsg employeeMsg = null;
+		EmployeeDto employeeDto = null;
+		
+		try {
+			
+			employeeMsg = agentmanagementApiRestClient.findEmployeeByUsername(employeeUserName);
+			employeeDto = new EmployeeDto();
+			employeeDto.fromMsg(employeeMsg);
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while finding employee by its username:" + employeeUserName, e);
+		}
+		
+		return employeeDto;
+	}
+
+	@Override
+	public Map<Long, String> getAgentNamesByIds(Long[] ids) throws ParvanUnrecoverableException {
+		
+		log.debug("Entering getAgentNamesByIds(ids={})", ids);
+		Map<Long, String> agents = null;
+		
+		try {
+			
+			agents = agentmanagementApiRestClient.getAgentNamesByIds(ids);
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while finding agentNames by ids:" + ids, e);
+		}
+		
+		log.debug("Leaving getAgentNamesByIds(): ret={}", (agents != null) ? agents.size() : "Null");
+		
+		return agents;
+	}
+
+}

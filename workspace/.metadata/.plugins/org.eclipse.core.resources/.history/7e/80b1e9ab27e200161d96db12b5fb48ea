@@ -1,0 +1,903 @@
+package com.parvanpajooh.stock2.domain.repository.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.util.StringUtil;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.stock2.domain.model.ReturnToStockCommand;
+import com.parvanpajooh.stock2.domain.model.UseCommand;
+import com.parvanpajooh.stock2.domain.model.VoidCommand;
+import com.parvanpajooh.stock2.domain.model.WaybillNumber;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberChangeAssigneeCommand;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberChangeStateCommand;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberCommand;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberDisplay;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberDisplay_;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberGenerateCommand;
+import com.parvanpajooh.stock2.domain.model.WaybillNumberUpdateCommand;
+import com.parvanpajooh.stock2.domain.model.WaybillNumber_;
+import com.parvanpajooh.stock2.domain.model.criteria.WaybillNumberChangedEventCriteria;
+import com.parvanpajooh.stock2.domain.model.criteria.WaybillNumberCriteria;
+import com.parvanpajooh.stock2.domain.model.criteria.WaybillNumberCriteria.AgentConditionType;
+import com.parvanpajooh.stock2.domain.model.enums.WaybillNumberCommandType;
+import com.parvanpajooh.stock2.domain.model.enums.WaybillNumberFormat;
+import com.parvanpajooh.stock2.domain.model.enums.WaybillNumberState;
+import com.parvanpajooh.stock2.domain.model.enums.WaybillNumberType;
+import com.parvanpajooh.stock2.domain.repository.WaybillNumberRepository;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class WaybillNumberRepositoryJpa implements WaybillNumberRepository {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(WaybillNumberRepositoryJpa.class);
+
+	@PersistenceContext(unitName = "ApplicationEntityManager")
+	private EntityManager entityManager;
+
+	@Override
+	public List<WaybillNumberDisplay> findWaybillNumberDisplayByIds(List<String> waybillNumbers) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	@Override
+	public List<WaybillNumberDisplay> findWaybillNumberDisplayByCriteria(WaybillNumberCriteria cri, int firstResult, int maxResults,
+			SortDirectionEnum sortDirection, String sortCriterion) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering findWaybillNumberDisplayByCriteria( cri={})", cri);
+
+		List<WaybillNumberDisplay> list = null;
+
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+
+			// make criteria
+			CriteriaQuery<WaybillNumberDisplay> criteria = builder.createQuery(WaybillNumberDisplay.class);
+			Metamodel metamodel = this.entityManager.getMetamodel();
+			EntityType<WaybillNumberDisplay> WaybillNumberDisplay_ = metamodel.entity(WaybillNumberDisplay.class);
+			Root<WaybillNumberDisplay> root = criteria.from(WaybillNumberDisplay_);
+			criteria.distinct(true);
+
+			@SuppressWarnings("rawtypes")
+			Map<String, Join> joins = new HashMap<String, Join>();
+
+			List<Predicate> predicateList = buildPredicateList(cri, builder, metamodel, root, joins);
+
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+
+			if (sortCriterion != null) {
+
+				String[] joinSort = StringUtil.split(sortCriterion, StringPool.PERIOD);
+
+				if (joinSort.length > 1) {
+					Join join = null;
+
+					if (joinSort.length > 2) {
+
+						for (int i = 0; i < joinSort.length - 1; i++) {
+							join = joins.get(joinSort[i]);
+
+							if (join == null) {
+								if (i == 0)
+									join = root.join(joinSort[i], JoinType.LEFT);
+								else
+									join = join.join(joinSort[i], JoinType.LEFT);
+							}
+						}
+					} else {
+						join = joins.get(joinSort[0]);
+
+						if (join == null) {
+							join = root.join(joinSort[0], JoinType.LEFT);
+						}
+					}
+
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						criteria.orderBy(builder.asc(join.get(joinSort[joinSort.length - 1])));
+					}
+
+					if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						criteria.orderBy(builder.desc(join.get(joinSort[joinSort.length - 1])));
+					}
+
+				} else {
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						criteria.orderBy(builder.asc(root.get(sortCriterion)));
+					}
+
+					if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						criteria.orderBy(builder.desc(root.get(sortCriterion)));
+					}
+				}
+
+			}
+
+			// make query
+			TypedQuery<WaybillNumberDisplay> q = this.entityManager.createQuery(criteria);
+			q.setFirstResult(firstResult);
+			q.setMaxResults(maxResults);
+
+			// execute query
+			list = q.getResultList();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting list of records by criteria.", e);
+		}
+
+		// LOG
+		log.debug("Leaving findWaybillNumberDisplayByCriteria(): {}", (list != null) ? list.size() : "NULL");
+
+		return list;
+
+	}
+
+	@Override
+	public List<WaybillNumber> findWaybillNumbersByWaybillNumber(String waybillNumberFrom,String waybillNumberTo, int firstResult, int maxResults,
+			SortDirectionEnum sortDirection, String sortCriterion) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering findWaybillNumberByCriteria( waybillNumberFrom={},waybillNumberTo={})", waybillNumberFrom,waybillNumberTo);
+
+		List<WaybillNumber> list = null;
+
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+
+			// make criteria
+			CriteriaQuery<WaybillNumber> criteria = builder.createQuery(WaybillNumber.class);
+			Metamodel metamodel = this.entityManager.getMetamodel();
+			EntityType<WaybillNumber> WaybillNumberMM_ = metamodel.entity(WaybillNumber.class);
+			Root<WaybillNumber> root = criteria.from(WaybillNumberMM_);
+			criteria.distinct(true);
+
+			// build predicate list
+			List<Predicate> predicateList = new ArrayList<Predicate>();
+
+			// ----------------------------------------------------------------
+			// WaybillNumber
+			// ----------------------------------------------------------------
+			if (Validator.isNotNull(waybillNumberFrom) || Validator.isNotNull(waybillNumberTo)) {
+
+				if (Validator.isNotNull(waybillNumberFrom)) {
+
+					Predicate predicate = builder.greaterThanOrEqualTo(root.<String> get(WaybillNumber_.waybillNumber), waybillNumberFrom);
+					predicateList.add(predicate);
+
+				}
+
+				if (Validator.isNotNull(waybillNumberTo)) {
+
+					Predicate predicate = builder.lessThanOrEqualTo(root.<String> get(WaybillNumber_.waybillNumber), waybillNumberTo);
+					predicateList.add(predicate);
+				}
+			}
+
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+
+			// make query
+			TypedQuery<WaybillNumber> q = this.entityManager.createQuery(criteria);
+			q.setFirstResult(firstResult);
+			q.setMaxResults(maxResults);
+
+			// execute query
+			list = q.getResultList();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting list of records by criteria.", e);
+		}
+
+		// LOG
+		log.debug("Leaving findWaybillNumberDisplayByCriteria(): {}", (list != null) ? list.size() : "NULL");
+
+		return list;
+
+	}
+
+	/**
+	 * 
+	 * @param cri
+	 * @param builder
+	 * @param metamodel
+	 * @param root
+	 * @param joins
+	 * @return
+	 */
+	protected List<Predicate> buildPredicateList(WaybillNumberCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<WaybillNumberDisplay> root,
+			@SuppressWarnings("rawtypes") Map<String, Join> joins) {
+
+		// LOG
+		log.trace("Entering buildPredicateList( ... )");
+
+		WaybillNumberCriteria waybillNumberCriteria = cri;
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		String waybillNumberFrom = waybillNumberCriteria.getWaybillNumberFrom();
+		String waybillNumberTo = waybillNumberCriteria.getWaybillNumberTo();
+		String waybillNumber = waybillNumberCriteria.getWaybillNumber();
+		LocalDateTime generateDateTimeFrom = waybillNumberCriteria.getGenerateDateTimeFrom();
+		LocalDateTime generateDateTimeTo = waybillNumberCriteria.getGenerateDateTimeTo();
+		LocalDateTime updateDateTimeFrom = waybillNumberCriteria.getLastUpdateDateTimeFrom();
+		LocalDateTime updateDateTimeTo = waybillNumberCriteria.getLastUpdateDateTimeTo();
+		Boolean domestic = waybillNumberCriteria.getDomestic();
+		WaybillNumberFormat format = WaybillNumberFormat.fromValue(waybillNumberCriteria.getFormat());
+		WaybillNumberType[] waybillNumberType = waybillNumberCriteria.getWaybillNumberTypes();
+		Long[] ownerAgentIds = waybillNumberCriteria.getOwnerAgentIds();
+		Long[] currentAssigneeAgentIds = waybillNumberCriteria.getCurrentAssigneeAgentIds();
+		AgentConditionType agentConditionType = waybillNumberCriteria.getAgentConditionType();
+		Boolean hasAgent = waybillNumberCriteria.getHasAgent();
+		WaybillNumberState[] currentState = waybillNumberCriteria.getCurrentStates();
+
+		// ----------------------------------------------------------------
+		// WaybillNumber
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(waybillNumberFrom) || Validator.isNotNull(waybillNumberTo)) {
+
+			if (Validator.isNotNull(waybillNumberFrom)) {
+
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<String> get(WaybillNumberDisplay_.waybillNumber), waybillNumberFrom);
+				predicateList.add(predicate);
+
+			}
+
+			if (Validator.isNotNull(waybillNumberTo)) {
+
+				Predicate predicate = builder.lessThanOrEqualTo(root.<String> get(WaybillNumberDisplay_.waybillNumber), waybillNumberTo);
+				predicateList.add(predicate);
+			}
+		} else if ( Validator.isNotNull(waybillNumber) ) {
+			Predicate predicate = builder.equal(root.<String> get(WaybillNumberDisplay_.waybillNumber), waybillNumber);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Generate DateTime
+		// ----------------------------------------------------------------
+
+		if (Validator.isNotNull(generateDateTimeFrom) || Validator.isNotNull(generateDateTimeTo)) {
+
+			if (Validator.isNotNull(generateDateTimeFrom)) {
+				generateDateTimeFrom = generateDateTimeFrom.withNano(0); // TODO
+																			// temporary
+																			// solution
+																			// due
+																			// to
+																			// ECD-1068
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(WaybillNumberDisplay_.generateDateTime), generateDateTimeFrom);
+				predicateList.add(predicate);
+
+			}
+
+			if (Validator.isNotNull(generateDateTimeTo)) {
+				generateDateTimeTo = generateDateTimeTo.withSecond(59); // TODO
+																		// temporary
+																		// solution
+																		// due
+																		// to
+																		// ECD-1068
+				generateDateTimeTo = generateDateTimeTo.withNano(999999999); // TODO
+																				// temporary
+																				// solution
+																				// due
+																				// to
+																				// ECD-1068
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(WaybillNumberDisplay_.generateDateTime), generateDateTimeTo);
+				predicateList.add(predicate);
+			}
+		}
+
+		// ----------------------------------------------------------------
+		// Update DateTime
+		// ----------------------------------------------------------------
+
+		if (Validator.isNotNull(updateDateTimeFrom) || Validator.isNotNull(updateDateTimeTo)) {
+
+			if (Validator.isNotNull(updateDateTimeFrom)) {
+				generateDateTimeFrom = generateDateTimeFrom.withNano(0); // TODO
+																			// temporary
+																			// solution
+																			// due
+																			// to
+																			// ECD-1068
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(WaybillNumberDisplay_.lastUpdateDateTime), updateDateTimeFrom);
+				predicateList.add(predicate);
+
+			}
+
+			if (Validator.isNotNull(updateDateTimeTo)) {
+				generateDateTimeTo = generateDateTimeTo.withSecond(59); // TODO
+																		// temporary
+																		// solution
+																		// due
+																		// to
+																		// ECD-1068
+				generateDateTimeTo = generateDateTimeTo.withNano(999999999); // TODO
+																				// temporary
+																				// solution
+																				// due
+																				// to
+																				// ECD-1068
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(WaybillNumberDisplay_.lastUpdateDateTime), updateDateTimeTo);
+				predicateList.add(predicate);
+			}
+		}
+
+		// ----------------------------------------------------------------
+		// currentState
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(currentState)) {
+			
+			if(Arrays.asList(currentState).contains("Undefiend"))
+			{
+				predicateList.add(root.<WaybillNumberState> get(WaybillNumberDisplay_.currentState).isNull());
+				Arrays.asList(currentState).remove("UNDEFIEND");
+			}
+			predicateList.add(root.<WaybillNumberState> get(WaybillNumberDisplay_.currentState).in(Arrays.asList(currentState)));
+
+		}
+
+		// ----------------------------------------------------------------
+		// OwnerAgentIds
+		// ----------------------------------------------------------------
+		if (agentConditionType == null) {
+			agentConditionType = AgentConditionType.OwnerAndAssignee;
+		}
+
+		// ----------------------------------------------------------------
+		// OwnerAgentIds AND/OR CurrentAssigneeAgentIds
+		// ----------------------------------------------------------------
+		Predicate ownerAgentPredicate = null;
+		Predicate currentAssigneeAgentPredicate = null;
+
+		// OwnerAgentIds
+		if (Validator.isNotNull(ownerAgentIds)) {
+			ownerAgentPredicate = root.<Long> get(WaybillNumberDisplay_.ownerAgentId).in(Arrays.asList(ownerAgentIds));
+		}
+
+		// CurrentAssigneeAgentIds
+		if (Validator.isNotNull(currentAssigneeAgentIds)) {
+			currentAssigneeAgentPredicate = root.<Long> get(WaybillNumberDisplay_.currentAssigneeAgentId).in(Arrays.asList(currentAssigneeAgentIds));
+		}
+
+		// AND/OR
+		switch (agentConditionType) {
+		case OwnerAndAssignee:
+			// OwnerAgentIds
+			if (Validator.isNotNull(ownerAgentPredicate)) {
+				predicateList.add(ownerAgentPredicate);
+			}
+
+			// CurrentAssigneeAgentIds
+			if (Validator.isNotNull(currentAssigneeAgentPredicate)) {
+				predicateList.add(currentAssigneeAgentPredicate);
+			}
+
+			break;
+
+		case OwnerOrAssignee:
+			List<Predicate> orPredicates = new ArrayList<Predicate>();
+			// OwnerAgentIds
+			if (Validator.isNotNull(ownerAgentPredicate)) {
+				orPredicates.add(ownerAgentPredicate);
+			}
+
+			// CurrentAssigneeAgentIds
+			if (Validator.isNotNull(currentAssigneeAgentPredicate)) {
+				orPredicates.add(currentAssigneeAgentPredicate);
+			}
+
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+
+			break;
+
+		default:
+			break;
+		}
+
+		// ----------------------------------------------------------------
+		// HasAgent
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(hasAgent)) {
+
+			Predicate predicate = null;
+			if (Validator.equals(hasAgent.booleanValue(), true)) {
+
+				predicate = builder.isNotNull(root.<Long> get(WaybillNumberDisplay_.currentAssigneeAgentId));
+
+			} else {
+
+				predicate = builder.isNull(root.<Long> get(WaybillNumberDisplay_.currentAssigneeAgentId));
+
+			}
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Domestic
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(domestic)) {
+			Predicate predicate = builder.equal(root.<Boolean> get(WaybillNumberDisplay_.domestic), domestic);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Format
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(format)) {
+			Predicate predicate = builder.equal(root.<WaybillNumberFormat> get(WaybillNumberDisplay_.format), format);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// WaybillNumberType
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(waybillNumberType)) {
+			
+			predicateList.add(root.<WaybillNumberType> get(WaybillNumberDisplay_.waybillNumberType).in(Arrays.asList(waybillNumberType)));
+		}
+
+		// LOG
+		log.trace("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+
+	}
+
+	@Override
+	public long countWaybillNumberDisplayByCriteria(WaybillNumberCriteria cri) throws ParvanDaoException {
+		// LOG
+		log.debug("Entering countWaybillNumberDisplayByCriteria( cri={})", cri);
+
+		int count = 0;
+
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+
+			// make criteria
+			CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+			Metamodel metamodel = this.entityManager.getMetamodel();
+			EntityType<WaybillNumberDisplay> WaybillNumberDisplay_ = metamodel.entity(WaybillNumberDisplay.class);
+			Root<WaybillNumberDisplay> root = criteria.from(WaybillNumberDisplay_);
+
+			criteria.select(builder.countDistinct(root));
+
+			Map<String, Join> joins = new HashMap<String, Join>();
+
+			List<Predicate> predicateList = buildPredicateList(cri, builder, metamodel, root, joins);
+
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+
+			// create query
+			Query q = this.entityManager.createQuery(criteria);
+
+			// execute query
+			Long countLong = (Long) q.getSingleResult();
+			count = countLong.intValue();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting count of records by criteria.", e);
+		}
+
+		// LOG
+		log.debug("Leaving countWaybillNumberDisplayByCriteria(): ret={}", count);
+
+		return count;
+	}
+	
+	@Override
+	public long countWaybillNumberByWaybillNumber(String waybillNumberFrom,String waybillNumberTo) throws ParvanDaoException {
+		// LOG
+		log.debug("Entering countWaybillNumberByWaybillNumber( waybillNumberFrom={},waybillNumberTo={})", waybillNumberFrom,waybillNumberTo);
+
+		int count = 0;
+
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+
+			// make criteria
+			CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+			Metamodel metamodel = this.entityManager.getMetamodel();
+			EntityType<WaybillNumber> WaybillNumberMM_ = metamodel.entity(WaybillNumber.class);
+			Root<WaybillNumber> root = criteria.from(WaybillNumberMM_);
+
+			criteria.select(builder.countDistinct(root));
+
+			// build predicate list
+			List<Predicate> predicateList = new ArrayList<Predicate>();
+
+			// ----------------------------------------------------------------
+			// WaybillNumber
+			// ----------------------------------------------------------------
+			if (Validator.isNotNull(waybillNumberFrom) || Validator.isNotNull(waybillNumberTo)) {
+
+				if (Validator.isNotNull(waybillNumberFrom)) {
+
+					Predicate predicate = builder.greaterThanOrEqualTo(root.<String> get(WaybillNumber_.waybillNumber), waybillNumberFrom);
+					predicateList.add(predicate);
+
+				}
+
+				if (Validator.isNotNull(waybillNumberTo)) {
+
+					Predicate predicate = builder.lessThanOrEqualTo(root.<String> get(WaybillNumber_.waybillNumber), waybillNumberTo);
+					predicateList.add(predicate);
+				}
+			}
+
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+
+			// create query
+			Query q = this.entityManager.createQuery(criteria);
+
+			// execute query
+			Long countLong = (Long) q.getSingleResult();
+			count = countLong.intValue();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting count of records by criteria.", e);
+		}
+
+		// LOG
+		log.debug("Leaving countWaybillNumberByWaybillNumber(): ret={}", count);
+
+		return count;
+	}
+
+	@Override
+	public List<WaybillNumberDisplay> findWaybillNumberChangedEventByCriteria(WaybillNumberChangedEventCriteria criteria, int firstResult, int maxResults,
+			SortDirectionEnum sortDirection, String sortCriterion) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	@Override
+	public List<WaybillNumberDisplay> countWaybillNumberChangedEventByCriteria(WaybillNumberChangedEventCriteria criteria) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	@Override
+	public List<WaybillNumberCommand> findWaybillNumberCommandsById(String waybillNumber) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	@Override
+	public WaybillNumber getWaybillNumber(String waybillNumber) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering getWaybillNumber( waybillNumber={})", waybillNumber);
+
+		WaybillNumber entity = null;
+
+		try {
+			// get record
+			entity = this.entityManager.find(WaybillNumber.class, waybillNumber);
+
+			// check
+			if (entity == null) {
+				String msg = String.format("'%s' waybillNumber with number '%s' not found.", WaybillNumber.class, waybillNumber);
+				throw new ObjectNotFoundException(msg);
+			}
+
+		} catch (ParvanDaoException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting waybillNumber by its number. " + waybillNumber, e);
+		}
+
+		return entity;
+
+	}
+
+	@Override
+	public WaybillNumberDisplay getWaybillNumberDisplay(String waybillNumber) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering getWaybillNumberDisplay( waybillNumber={})", waybillNumber);
+
+		WaybillNumberDisplay entity = null;
+
+		try {
+			// get record
+			entity = this.entityManager.find(WaybillNumberDisplay.class, waybillNumber);
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting waybillNumberDisplay by number [" + waybillNumber + "]", e);
+		}
+
+		return entity;
+
+	}
+
+	@Override
+	public void deleteWaybillNumber(WaybillNumber waybillNumber) throws ParvanDaoException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public WaybillNumber saveWaybillNumber(WaybillNumber waybillNumber) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering saveWaybillNumberGenerateCommand( waybillNumber={})", waybillNumber);
+
+		WaybillNumber savedWaybillNumber = null;
+
+		try {
+
+			Set<WaybillNumberCommand> waybillNumberCommands = waybillNumber.getWaybillNumberCommands();
+			for (WaybillNumberCommand thisWaybillNumberCommand : waybillNumberCommands) {
+				Long thisCmdId = thisWaybillNumberCommand.getId();
+				if (thisCmdId != null) {
+					// this is a saved command. We never update an previously
+					// saved object in EventSourcing
+					// do nothing
+
+				} else {
+
+					WaybillNumberCommandType thisCmdType = thisWaybillNumberCommand.getWaybillNumberCommandType();
+					switch (thisCmdType) {
+					case Generate:
+						WaybillNumberGenerateCommand thisWbnGenerateCommand = thisWaybillNumberCommand.getWaybillNumberGenerateCommand();
+
+						// save generate-command
+						WaybillNumberGenerateCommand savedWaybillNumberGenerateCommand = this.entityManager.merge(thisWbnGenerateCommand);
+
+						// set command
+						thisWaybillNumberCommand.setWaybillNumberCommandType(WaybillNumberCommandType.Generate);
+						thisWaybillNumberCommand.setWaybillNumberGenerateCommand(savedWaybillNumberGenerateCommand);
+						break;
+
+					case Update:
+						WaybillNumberUpdateCommand thisWbnUpdateCommand = thisWaybillNumberCommand.getWaybillNumberUpdateCommand();
+
+						// save update-command
+						WaybillNumberUpdateCommand savedWaybillNumberUpdateCommand = this.entityManager.merge(thisWbnUpdateCommand);
+
+						// set command
+						thisWaybillNumberCommand.setWaybillNumberCommandType(WaybillNumberCommandType.Update);
+						thisWaybillNumberCommand.setWaybillNumberUpdateCommand(savedWaybillNumberUpdateCommand);
+						break;
+
+					case ChangeState:
+						WaybillNumberChangeStateCommand thisWbnChangeStateCommand = thisWaybillNumberCommand.getWaybillNumberChangeStateCommand();
+
+						// save change-state-command
+						WaybillNumberChangeStateCommand savedWbnChangeStateCommand = this.entityManager.merge(thisWbnChangeStateCommand);
+
+						// set command
+						thisWaybillNumberCommand.setWaybillNumberCommandType(WaybillNumberCommandType.ChangeState);
+						thisWaybillNumberCommand.setWaybillNumberChangeStateCommand(savedWbnChangeStateCommand);
+						break;
+
+					case ChangeAssignee:
+						WaybillNumberChangeAssigneeCommand thisWbnChangeAssigneeCommand = thisWaybillNumberCommand.getWaybillNumberChangeAssigneeCommand();
+
+						// save change-assignee-command
+						WaybillNumberChangeAssigneeCommand savedWbnChangeAssigneeCommand = this.entityManager.merge(thisWbnChangeAssigneeCommand);
+
+						// set command
+						thisWaybillNumberCommand.setWaybillNumberCommandType(WaybillNumberCommandType.ChangeAssignee);
+						thisWaybillNumberCommand.setWaybillNumberChangeAssigneeCommand(savedWbnChangeAssigneeCommand);
+						break;
+						
+					case Use:
+						UseCommand thisUseCommand = thisWaybillNumberCommand.getUseCommand();
+
+						// save use-command
+						UseCommand savedUseCommand = this.entityManager.merge(thisUseCommand);
+
+						// set command
+						thisWaybillNumberCommand.setWaybillNumberCommandType(WaybillNumberCommandType.Use);
+						thisWaybillNumberCommand.setUseCommand(savedUseCommand);
+						break;
+						
+					case ReturnToStock:
+						ReturnToStockCommand thisReturnToStockCommand = thisWaybillNumberCommand.getReturnToStockCommand();
+
+						// save return-to-stock-command
+						ReturnToStockCommand savedWbnReturnToStockCommand = this.entityManager.merge(thisReturnToStockCommand);
+
+						// set command
+						thisWaybillNumberCommand.setWaybillNumberCommandType(WaybillNumberCommandType.ReturnToStock);
+						thisWaybillNumberCommand.setReturnToStockCommand(savedWbnReturnToStockCommand);
+						break;
+						
+					case Void:
+						VoidCommand thisVoidCommand = thisWaybillNumberCommand.getVoidCommand();
+
+						// save void-command
+						VoidCommand savedVoidCommand = this.entityManager.merge(thisVoidCommand);
+
+						// set command
+						thisWaybillNumberCommand.setWaybillNumberCommandType(WaybillNumberCommandType.Void);
+						thisWaybillNumberCommand.setVoidCommand(savedVoidCommand);
+						break;
+
+					default:
+						break;
+					}
+
+					// save command
+					this.entityManager.persist(thisWaybillNumberCommand);
+				}
+			}
+
+			// save waybillNumber
+			savedWaybillNumber = this.entityManager.merge(waybillNumber);
+
+			// update waybillNumberDisplay
+			updateWaybillNumberDisplay(savedWaybillNumber);
+
+			this.entityManager.flush();
+
+		} catch (Exception e) {
+
+			throw new ParvanDaoException("Error occurred while saving WaybillNumber.", e);
+		}
+
+		return savedWaybillNumber;
+	}
+
+	@Override
+	public WaybillNumberDisplay updateWaybillNumberDisplay(WaybillNumber waybillNumber) throws ParvanDaoException {
+		// LOG
+		log.debug("Entering updateWaybillNumberDisplay( waybillNumber={})", waybillNumber);
+
+		WaybillNumberDisplay savedWbnDisplay = null;
+
+		try {
+			LocalDateTime now = LocalDateTime.now();
+
+			String number = waybillNumber.getWaybillNumber();
+			WaybillNumberDisplay existingWbnd = getWaybillNumberDisplay(number);
+
+			// get record
+			WaybillNumberDisplay wbnDisplay = WaybillNumber.getDisplayRecord(existingWbnd, waybillNumber);
+
+			if (wbnDisplay.getRecordCreateDate() == null) {
+				wbnDisplay.setRecordCreateDate(now);
+				wbnDisplay.setRecordUpdateDate(now);
+			} else {
+				wbnDisplay.setRecordUpdateDate(now);
+			}
+
+			// save generate-command
+			savedWbnDisplay = this.entityManager.merge(wbnDisplay);
+
+		} catch (Exception e) {
+
+			throw new ParvanDaoException("Error occurred while saving WaybillNumber.", e);
+		}
+
+		return savedWbnDisplay;
+	}
+
+	@Override
+	public boolean findWaybillNumberGenerateCommandByGroupId(Long waybillNumberGroupId) throws ParvanDaoException {
+
+		// LOG
+		log.trace("Entering findWaybillNumberGenerateCommandByGroupId waybillNumberGroupId={}", waybillNumberGroupId);
+
+		boolean hasChildren = false;
+		List<WaybillNumberGenerateCommand> list;
+
+		try {
+			// Make query
+			TypedQuery<WaybillNumberGenerateCommand> q = this.entityManager.createQuery(
+					"from WaybillNumberGenerateCommand obj where obj.waybillNumberGroup.id = ?",
+					WaybillNumberGenerateCommand.class);
+
+			q.setParameter(1, waybillNumberGroupId);
+
+			list = q.getResultList();
+
+			if (list != null && list.size() > 0) {
+				hasChildren = true;
+			}
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting waybillNumberGenerateCommand with waybillNumberGroupId: " + waybillNumberGroupId, e);
+		}
+
+		// LOG
+		log.trace("Leaving findWaybillNumberGenerateCommandByGroupId : ret={}", (list != null) ? list.size() : "NULL");
+
+		return hasChildren;
+
+	}
+
+	@Override
+	public String getFirstAvailable(Long currentAssigneeAgentId) throws ParvanDaoException {
+		log.trace("Entering getFirstAvailable currentAssigneeAgentId={}", currentAssigneeAgentId);
+		List<String> results;
+		try {
+			TypedQuery<String> q = this.entityManager.createQuery(
+					"select obj.waybillNumber from WaybillNumberDisplay obj where obj.currentAssigneeAgentId = ? and obj.currentState = 'NEW'",
+					String.class);
+
+			q.setParameter(1, currentAssigneeAgentId);
+			q.setMaxResults(1);
+
+			results = q.getResultList();
+			
+			if ( results.isEmpty() ) {
+				throw new ParvanDaoException(String.format("No Waybill Number is available for Agent with ID of '%s'", currentAssigneeAgentId));
+			}
+			return results.get(0);
+		} catch (ParvanDaoException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting first available waybillNumber with agent ID : " + currentAssigneeAgentId, e);
+		}
+	}
+
+}

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="layout">
+
+<head>
+    <title>Add Link</title>
+</head>
+
+<body>
+    <section class="content" layout:fragment="content">
+
+        <blockquote>
+            <p>
+                <i class="fa fa-tasks" aria-hidden="true"></i>
+                <i class="text" th:text="*{task.group.name}"></i>
+                <i class="fa fa-long-arrow-left" aria-hidden="true"></i>
+                <i class="text" th:text="*{task.id}"></i>
+                <i class="fa fa-long-arrow-left" aria-hidden="true"></i>
+                <i class="text" th:text="*{task.subject}"></i>
+            </p>
+        </blockquote>
+
+        <div id="section">
+
+            <form class="form-horizontal" method="post" th:action="@{/editRelation/save}" th:object="${relationVO}">
+
+ 				    <input name="currentTask" th:value="${tasksId}" readonly="readonly" type="hidden" />  
+ 				    <input name="tasksId" th:value="${task.id}" hidden="hidden" />
+ 				    <input th:field="*{id}" th:value="*{id}" hidden="hidden" />           
+
+					<div class="form-group required">
+                        <label class="col-sm-3 control-label">نوع رابطه</label>
+                        <div class="col-sm-7">
+                            <select class="js-example-basic-hide-search form-control" id="typeId" name="type" >
+					            	 <option th:text="#{lookup_option}"></option>
+					                 <option th:each="t : ${T(com.parvanpajooh.issuemanager.model.enums.RelationTypeEnum).values()}" th:value="${t}" th:text="${t.value}" th:attr="selected=${t == relationVO.type ? 'true' : 'false'}"></option>
+				            </select>
+                        </div>
+                	</div>
+
+
+					<div class="form-group required">
+	                      <label class="col-sm-3 control-label">کار مورد نظر</label>
+	                      <div class="col-sm-7">
+                      		  <select class="js-data-example-ajax form-control" name="ajaxSearching">
+                      		<!--   	<option th:text="#{lookup_option}"></option>
+                      		  	<option th:each="t : ${tasks}" th:value="${t.id}" th:text="${t.subject}"></option> -->
+                      		  	<!-- <option th:value="subject" selected="selected">subject</option> -->
+                      		  	<option></option>
+                      		  </select>
+	                      </div>
+	                </div>                    
+                    
+
+                    <div class="form-group required">
+                        <label for="members" class="col-sm-3 control-label"> یادداشت</label>
+                        <div class="col-sm-7">
+                            <input name="task.id" th:value="${tasksId}" hidden="hidden" />
+                            <textarea rows="15" name="description" th:field="*{description}" class="form-control" />
+                        </div>
+                    </div>
+
+	                <button class="btn btn-default" th:text="#{btn_add}" th:onclick="${'typeSelected()'}"></button>
+	                <a class="btn btn-default" th:text="#{btn_return}" th:href="@{'/taskDetails/' + ${tasksId}}"></a>
+
+            </form>
+
+            <script>
+
+          //<![CDATA[
+          
+          jQuery(document).ready(function() {
+              
+       	   $(".js-example-basic-hide-search").select2({
+       		  minimumResultsForSearch: Infinity
+       		});
+
+              
+            $(".js-data-example-ajax").select2({
+
+            	  ajax: {
+            		closeOnSelect: false,
+            	    url: "/issuemanager-web/paging",
+            	    dataType: 'json',
+            	    delay: 350,
+            	    data: function (params) {
+                	    var page = (params.page ? params.page : 1);
+            	      return {
+            	        iColumns: 1,
+            	        iSortCol_0: 0,
+                        mDataProp_0: 'id',
+                        bSortable_0: 'false',
+                        iSortingCols: 1,
+                        iDisplayStart : (page - 1) * 20,
+                        iDisplayLength : 20,
+                        sEcho: 1,
+                        sSortDir_0: 'asc',
+                        subject: params.term,
+            	        page: page
+            	      };
+            	    },
+
+            	    
+            	    processResults: function (data, params) {
+
+            	      params.page = params.page || 1;
+
+            	      console.debug(data);
+
+            	      return {
+            	        results: data.aaData,
+            	        pagination: {
+            	          more: (params.page * 30) < data.total_count
+            	        }
+            	      };
+            	    },
+
+            	    
+            	    cache: true
+            	  },
+            	  
+            	  placeholder: "Search for a Subject",
+            	  escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+              	  minimumInputLength: 0,
+            	  templateResult: function(aaData){ console.debug(aaData); return aaData.subject; }, // omitted for brevity, see the source of this page
+            	  templateSelection: function(aaData) { return aaData.subject; } // omitted for brevity, see the source of this page
+            	});
+          });
+            //]]>
+        	
+                function typeSelected() {
+
+                    var choose = "انتخاب کنید";
+                    var e = document.getElementById("typeId").value;
+                    
+                    if (e != choose) {
+                        $('#typeId').val(e);
+                    } else {
+                        $('#typeId').val(null);
+                    }
+                    
+                }
+            </script>
+
+        </div>
+    </section>
+</body>
+
+</html>

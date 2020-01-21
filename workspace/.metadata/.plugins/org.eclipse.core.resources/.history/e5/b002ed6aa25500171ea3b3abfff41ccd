@@ -1,0 +1,325 @@
+package com.parvanpajooh.routemanagement.model.vo;
+
+import java.util.List;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.routemanagement.model.NodeMsg;
+import com.parvanpajooh.client.routemanagement.model.enums.RouteEnums;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.routemanagement.model.enums.FreightNodeType;
+
+/**
+ * 
+ * @author mehrdad
+ *
+ */
+
+public class NodeVO extends BaseVO {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1304277576944253813L;
+	
+	private String codeName;
+	
+	private String name;
+	
+	private String otherNames;
+	
+	private FreightNodeType freightType;
+	
+	private Boolean active;
+	
+    private List<RouteVO> toRoutes;
+	
+	private List<RouteVO> fromRoutes;
+	
+	private ZoneVO zone;
+	
+	private String timeZoneId;
+	
+//	private GeoEntityVO geoEntity;
+	
+	private String geoEntityCode;
+	
+	private Double geoLat;
+	
+	private Double geoLng;
+	
+	private List<String> tags;
+
+	/**
+	 * @return the codeName
+	 */
+	public String getCodeName() {
+		return codeName;
+	}
+
+	/**
+	 * @param codeName the codeName to set
+	 */
+	public void setCodeName(String codeName) {
+		this.codeName = codeName;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the otherNames
+	 */
+	public String getOtherNames() {
+		return otherNames;
+	}
+
+	/**
+	 * @param otherNames the otherNames to set
+	 */
+	public void setOtherNames(String otherNames) {
+		this.otherNames = otherNames;
+	}
+
+	/**
+	 * @return the freightType
+	 */
+	public FreightNodeType getFreightType() {
+		return freightType;
+	}
+
+	/**
+	 * @param freightType the freightType to set
+	 */
+	public void setFreightType(FreightNodeType freightType) {
+		this.freightType = freightType;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the toRoutes
+	 */
+	public List<RouteVO> getToRoutes() {
+		return toRoutes;
+	}
+
+	/**
+	 * @param toRoutes the toRoutes to set
+	 */
+	public void setToRoutes(List<RouteVO> toRoutes) {
+		this.toRoutes = toRoutes;
+	}
+
+	/**
+	 * @return the fromRoutes
+	 */
+	public List<RouteVO> getFromRoutes() {
+		return fromRoutes;
+	}
+
+	/**
+	 * @param fromRoutes the fromRoutes to set
+	 */
+	public void setFromRoutes(List<RouteVO> fromRoutes) {
+		this.fromRoutes = fromRoutes;
+	}
+
+	/**
+	 * @return the zone
+	 */
+	public ZoneVO getZone() {
+		return zone;
+	}
+
+	/**
+	 * @param zone the zone to set
+	 */
+	public void setZone(ZoneVO zone) {
+		this.zone = zone;
+	}
+
+//	/**
+//	 * @return the geoEntity
+//	 */
+//	public GeoEntityVO getGeoEntity() {
+//		return geoEntity;
+//	}
+//
+//	/**
+//	 * @param geoEntity the geoEntity to set
+//	 */
+//	public void setGeoEntity(GeoEntityVO geoEntity) {
+//		this.geoEntity = geoEntity;
+//	}
+	
+	/**
+	 * @return the tags
+	 */
+	public List<String> getTags() {
+		return tags;
+	}
+
+	/**
+	 * @return the geoEntityCode
+	 */
+	public String getGeoEntityCode() {
+		return geoEntityCode;
+	}
+
+	/**
+	 * @param geoEntityCode the geoEntityCode to set
+	 */
+	public void setGeoEntityCode(String geoEntityCode) {
+		this.geoEntityCode = geoEntityCode;
+	}
+
+	/**
+	 * @return the geoLat
+	 */
+	public Double getGeoLat() {
+		return geoLat;
+	}
+
+	/**
+	 * @param geoLat the geoLat to set
+	 */
+	public void setGeoLat(Double geoLat) {
+		this.geoLat = geoLat;
+	}
+
+	/**
+	 * @return the geoLng
+	 */
+	public Double getGeoLng() {
+		return geoLng;
+	}
+
+	/**
+	 * @param geoLng the geoLng to set
+	 */
+	public void setGeoLng(Double geoLng) {
+		this.geoLng = geoLng;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(List<String> tags) {
+		this.tags = tags;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public NodeMsg toMsg() {
+		NodeMsg msg = new NodeMsg();
+
+		msg.setId(getId());
+		msg.setCodeName(this.codeName);
+		msg.setName(this.name);
+		msg.setGeoEntityCode(this.geoEntityCode);
+		msg.setGeoLat(this.geoLat);
+		msg.setGeoLng(this.geoLng);
+		msg.setOtherNames(this.otherNames);
+		if (freightType != null) {
+			msg.setFreightType( RouteEnums.FreightNodeType.valueOf( this.freightType.toString() ) );
+		}
+
+		msg.setActive(this.active);
+		/*if (toRoutes != null) {
+			msg.setToRoutes(this.toRoutes.toMsg());
+		}*/
+
+		/*if (fromRoutes != null) {
+			msg.setFromRoutes(this.fromRoutes.toMsg());
+		}*/
+
+		if (zone != null) {
+			msg.setZone(this.zone.toMsg());
+		}
+
+		if (tags != null) {
+			msg.setTags(this.tags);
+		}
+
+		return msg;
+	}
+	
+	public static NodeVO fromMsg(NodeMsg msg) {
+		NodeVO vo = new NodeVO();
+
+		vo.setId(msg.getId());
+		vo.setCodeName(msg.getCodeName());
+		vo.setName(msg.getName());
+		
+		if (msg.getFreightType() != null) {
+			vo.setFreightType(FreightNodeType.valueOf(msg.getFreightType().toString()));
+		}
+
+		vo.setActive(msg.getActive());
+		
+		/*if (msg.getToRoutes() != null) {
+			vo.setToRoutes(toRoutes.fromMsg(msg.getToRoutes()));
+		}*/
+
+		/*if (msg.getFromRoutes() != null) {
+			vo.setFromRoutes(fromRoutes.fromMsg(msg.getFromRoutes()));
+		}*/
+
+		if (msg.getZone() != null) {
+			vo.setZone(ZoneVO.fromMsg(msg.getZone()));
+		}
+
+//		if (msg.getGeoEntity() != null) {
+//			vo.setGeoEntity(GeoEntityVO.fromMsg(msg.getGeoEntity()));
+//		}
+
+		if (msg.getTags() != null) {
+			vo.setTags(msg.getTags());
+		}
+
+
+		return vo;
+	}
+
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("id", getId())
+			.add("codeName", codeName)
+			.add("name", name)
+			.add("otherNames", otherNames)
+			.add("freightType", freightType)
+			.add("active", active)
+			.add("toRoutes", toRoutes)
+			.add("fromRoutes", fromRoutes)
+			.add("zone", zone)
+			.add("version", getVersion())
+			.toString();
+	}
+}

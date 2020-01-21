@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:ddl="http://www.thymeleaf.org/dandelion"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+
+<head ddl:bundle-includes="jquery, bootstrap3, font-awesome, icheck, pnotify3, theme" ddl:bundle-excludes="bootstrap2">
+	<!-- Basic -->
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<title>ماهکس | @ViewBag.Title</title>
+	<meta name="keywords" content="ماهکس,حمل هوایی,حمل و نقل هوایی" />
+	<meta name="description" content="حمل و نقل هوایی - ماهکس" />
+	<meta name="author" content="dapna.ir - داپنا" />
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+<style>
+
+</style>
+
+<th:block ddl:placeholder-replace="css" />
+
+<!-- JQuery -->
+<script src="../../resources/lib/jquery-2.1.4/jQuery-2.1.4.min.js" th:src="@{/resources/lib/jquery-2.1.4/jQuery-2.1.4.min.js}"></script>
+
+<!-- Just for debugging purposes. Don't actually copy this line! -->
+<!--[if lt IE 9]><script src="../../js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+		      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+		      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+		    <![endif]-->
+
+<script th:inline="javascript">
+	        var messages = {
+	        };
+
+	        var dateFormat = 'YYYY-MM-DD';
+	        var datetimeFormat = 'YYYY-MM-DD HH:mm';
+	        var timeFormat = 'HH:mm';
+</script>
+
+</head>
+
+<body ng-app="myApp">
+	<div class="body">
+		<header id="header" class="header-no-border-bottom"
+			data-plugin-options="{'stickyEnabled': true, 'stickyEnableOnBoxed': true, 'stickyEnableOnMobile': true, 'stickyStartAt': 124, 'stickySetTop': '-124px', 'stickyChangeLogo': false}">
+			<div class="header-body">
+				<div class="header-top header-top-style-2">
+					<div class="container"></div>
+				</div>
+				<div class="header-container container">
+					<div class="header-row">
+						<div class="header-column">
+							<ul class="header-extra-info hidden-xs">
+								<li>
+									<div class="feature-box feature-box-style-3">
+
+										<div class="feature-box-info">
+
+											<div class="login-register">
+												<a href="#">
+													<i class="fa fa-user"></i>
+													ثبت نام
+												</a>
+												<a href="#">
+													<i class="fa fa-lock"></i>
+													ورود
+												</a>
+											</div>
+											<div class="call-mahex">
+												<a href="tel:+98218759">۰۲۱۴۸۰۵۹</a>
+												<i class="fa fa-phone"></i>
+											</div>
+										</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+						<div class="header-column">
+							<div class="header-logo">
+								<a href="#">
+									<img alt="Mahex" width="200" height="51" data-sticky-width="82" data-sticky-height="40" data-sticky-top="33" th:src="@{/resources/images/logo-default.png}" />
+								</a>
+							</div>
+						</div>
+
+					</div>
+				</div>
+				<div class="header-container header-nav header-nav-bar header-nav-bar-primary">
+					<div class="container">
+						<button class="btn header-btn-collapse-nav" data-toggle="collapse" data-target=".header-nav-main">
+							<i class="fa fa-bars"></i>
+						</button>
+						<div class="header-nav-main header-nav-main-light header-nav-main-effect-1 header-nav-main-sub-effect-1 collapse">
+							<nav>
+								<ul class="nav nav-pills" id="mainNav">
+									<li class="">
+										<a href="http://mahex.com/Fa"> بازگشت به صفحه اصلی </a>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<div role="main" class="main">
+
+			<!-- title placeholder -->
+			<section layout:fragment="top-header"></section>
+
+			<!-- Main content -->
+			<section class="content" layout:fragment="content"></section>
+			<!-- /.content -->
+
+		</div>
+
+		<footer id="footer">
+			<div class="container">
+				<div class="row">
+
+					<div class="col-md-3">
+						<h4>درباره ماهکس</h4>
+						<p>نمونه متن برای این بخش</p>
+					</div>
+					<div class="col-md-3">
+						<div class="newsletter">
+							<h4>خبرنامه</h4>
+							<p>در خبرنامه از آخرین اخبار ماهکس مطلع شوید .</p>
+
+							<form id="rss-form" method="post" class="nobottommargin">
+								<div class="input-group divcenter">
+									<input type="email" id="rss_Email" name="rss_Email" class="form-control required email" placeholder="ایمیل خود را وارد نمایید" />
+									<span class="input-group-btn">
+										<button id="rss-submit" class="btn btn-default btn-login" type="button">عضویت</button>
+									</span>
+								</div>
+							</form>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<h4>عضویت در شبکه های اجتماعی</h4>
+						<ul class="social-icons">
+							<li class="social-icons-facebook">
+								<a href="Model.Telegram" target="_blank" title="Telegram">
+									<i class="fa fa-send"></i>
+								</a>
+							</li>
+							<li class="social-icons-instagram">
+								<a href="Model.Instagram " target="_blank" title="Instagram">
+									<i class="fa fa-instagram"></i>
+								</a>
+							</li>
+							<li class="social-icons-twitter">
+								<a href="Model.Twitter" target="_blank" title="Twitter">
+									<i class="fa fa-twitter"></i>
+								</a>
+							</li>
+							<li class="social-icons-linkedin">
+								<a href="Model.Linkedin" target="_blank" title="Linkedin">
+									<i class="fa fa-linkedin"></i>
+								</a>
+							</li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<div class="contact-details">
+							<h4>اطلاعات تماس</h4>
+							<ul class="contact">
+								<li>
+									<p>
+										<i class="fa fa-map-marker"></i>
+										<strong>آدرس :</strong>
+										تهران
+									</p>
+								</li>
+								<li>
+									<p>
+										<i class="fa fa-phone"></i>
+										<strong>تلفن :</strong>
+										02188447733
+									</p>
+								</li>
+
+								<li>
+									<p>
+										<i class="fa fa-fax"></i>
+										<strong>فکس :</strong>
+										02155884466
+									</p>
+								</li>
+								<li>
+									<p>
+										<i class="fa fa-envelope"></i>
+										<strong>ایمیل :</strong>
+										mahex@info.com
+									</p>
+								</li>
+							</ul>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+
+			<div class="footer-copyright">
+				<div class="container">
+					<div class="row">
+
+						<div class="col-md-8">
+							<p>© کلیه حقوق این سایت متعلق به ماهکس میباشد .</p>
+						</div>
+						<div class="col-md-4" style="text-align: left !important">
+							<a href="http://dapna.ir" target="_blank">طراحی سایت : </a>
+							<a href="http://dapna.ir" target="_blank">داپنا</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</footer>
+		<!-- /.footer -->
+
+
+		<div class="modal fade" id="sendNotifyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;"
+			sec:authorize="${hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')}">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h4 class="modal-title">Send Notify To Online Users</h4>
+					</div>
+					<div class="modal-body">
+						<textarea rows="5" cols="80" name="message" style="height: 100px;"></textarea>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" id="sendNotifyBtn">Send</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="showNotifyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h4 class="modal-title">Message from admin</h4>
+					</div>
+					<div class="modal-body"></div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script sec:authorize="${hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')}">
+            $('#notifyUsers').on('click', function() {
+                $('#sendNotifyModal textarea').val('');
+                $('#sendNotifyModal').modal({backdrop: 'static',keyboard: true});
+                $('#sendNotifyModal').modal('show');
+            });
+
+            $('#sendNotifyBtn').on('click', function() {
+                $.post('/ecourier-web/admin/notify', {'message': $('#sendNotifyModal textarea').val()})
+                    .done(function(data) {
+                        if (data.status == 'success') {
+                            $('#sendNotifyModal').modal('hide');
+                        }
+                    }).fail(failAjax);
+            });
+     </script>
+
+	<fieldset>
+		<input type="hidden" id="user-locale" name="user-locale" th:if="${#authentication != null and #authentication.authenticated}"
+			th:value="${#authentication.authenticated} ? ${#authentication.principal.userInfo.locale} : ''" />
+	</fieldset>
+
+	<th:block layout:fragment="custom-footer"></th:block>
+
+	<!-- Page JavaScripts -->
+	<th:block layout:fragment="javascripts" />
+
+	<th:block ddl:placeholder-replace="js" />
+
+</body>
+
+</html>

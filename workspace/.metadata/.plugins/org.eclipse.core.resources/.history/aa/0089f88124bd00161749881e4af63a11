@@ -1,0 +1,79 @@
+package com.parvanpajooh.agentmanagement.service.adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.agentmanagement.model.vo.AccountVO;
+import com.parvanpajooh.client.accounting.AccountingApiRestClient;
+import com.parvanpajooh.client.accounting.model.AccountMsg;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+
+@Stateless
+public class AccountingServiceAdapterRest implements AccountingServiceAdapter {
+
+	private AccountingApiRestClient accountingApiRestClient;
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	public AccountingServiceAdapterRest() {
+		this.accountingApiRestClient = new AccountingApiRestClient();
+	}
+
+	@Override
+	public List<AccountVO> findAccountsByName(String term) throws ParvanUnrecoverableException {
+
+		//LOG
+		log.debug("Entering findAccountsByName(term={})",term);
+		
+		List<AccountVO> accountVOs = null;
+		AccountVO accountVO = null;
+		String clientAppCode= "E-COURIER";//TODO dev-03: read from .properties file
+		long accountGroupId = 1;//TODO dev-03: read from .properties file
+
+		try {
+
+			List<AccountMsg> accountMsgs = accountingApiRestClient.findAccountsByName(clientAppCode, accountGroupId, term);
+			
+			accountVOs = new ArrayList<AccountVO>();			
+			for (AccountMsg accountMsg : accountMsgs) {
+				accountVO = new AccountVO();
+				accountVO.fromMsg(accountMsg);
+
+				accountVOs.add(accountVO);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findAccountsByName", e);
+		}
+
+		return accountVOs;
+	}
+	
+	@Override
+	public AccountVO findAccountByAccountNumber(String accountNumber) throws ParvanUnrecoverableException {
+
+		//LOG
+		log.debug("Entering findAccountByAccountNumber(accountNumber={} )", accountNumber);
+
+		AccountVO accountVO = null;
+
+		try {
+
+			AccountMsg accountMsg = accountingApiRestClient.findAccountByAccountNumberAndClientAppCode(accountNumber, "E-COURIER");
+
+			accountVO = new AccountVO();
+			accountVO.fromMsg(accountMsg);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findAccountByAccountNumber", e);
+		}
+
+		return accountVO;
+	}
+
+}

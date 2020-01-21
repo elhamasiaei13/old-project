@@ -1,0 +1,64 @@
+package com.parvanpajooh.sample.dao.jpa;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.common.exceptions.ParvanException;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseCriteria;
+import com.parvanpajooh.ecourier.dao.jpa.GenericDaoJpa;
+
+import com.parvanpajooh.sample.model.Sample;
+import com.parvanpajooh.sample.model.Sample_;
+import com.parvanpajooh.sample.model.criteria.SampleCriteria;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.thymeleaf.econtacts.web.domain.Contact;
+
+import java.util.List;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+//@Stateless
+@Repository
+public class JpaContactDao extends GenericDaoJpa<Sample, Long> implements ContactDao {
+
+	public SampleDaoJpa() {
+		super(Sample.class);
+	}
+	
+	@Autowired
+	SessionFactory sessionFactory;
+
+	public void save(Contact contact) {
+		sessionFactory.getCurrentSession().save(contact);
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Contact> findAll() {
+		return sessionFactory.getCurrentSession().createQuery("from Contact")
+				.list();
+
+	}
+
+	@SuppressWarnings("deprecation")
+	public void deleteAll() {
+		sessionFactory.getCurrentSession().delete("from contact");
+
+	}
+	
+}

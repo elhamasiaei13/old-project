@@ -1,0 +1,18 @@
+package com.parvanpajooh.sample.model;
+
+import javax.annotation.Generated;
+import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.StaticMetamodel;
+
+@Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
+@StaticMetamodel(Membership.class)
+public abstract class Membership_ extends com.parvanpajooh.ecourier.model.BaseModel_ {
+
+	public static volatile SingularAttribute<Membership, Group> groupId;
+	public static volatile SingularAttribute<Membership, Long> id;
+	public static volatile SingularAttribute<Membership, String> type;
+	public static volatile SingularAttribute<Membership, Integer> version;
+	public static volatile SingularAttribute<Membership, Member> memberId;
+
+}
+

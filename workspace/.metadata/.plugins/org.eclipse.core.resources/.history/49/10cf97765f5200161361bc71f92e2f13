@@ -1,0 +1,295 @@
+package com.parvanpajooh.accounting.model;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.parvanpajooh.accounting.model.vo.AccountVO;
+import com.parvanpajooh.accounting.model.vo.GroupVO;
+import com.parvanpajooh.commons.platform.ejb.model.BaseModel;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+
+/**
+ * @author moosa
+ *
+ */
+@Entity
+@XmlRootElement
+@Table(name = "group_tbl",uniqueConstraints = { @UniqueConstraint( columnNames = { "name", "active" } ) })
+public class Group extends BaseModel {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -4036378126742804100L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@NotNull
+	@NotEmpty
+	@Column(unique = true)
+	private String name;
+
+	@NotNull
+	@NotEmpty
+	@Lob
+	@Column(length = 10000)
+	private String description;
+
+	@ManyToOne
+	@JoinColumn(name = "parentId", referencedColumnName = "id")
+	private Group parent;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "parent")
+	private Set<Group> children;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "group")
+	private Set<Account> account;
+
+	private boolean active;
+
+	@Version
+	private Integer version;
+
+	@Override
+	public GroupVO toVOLite() {
+		GroupVO vo = new GroupVO();
+
+		vo.setId(this.id);
+		vo.setName(this.name);
+		vo.setDescription(this.description);
+		vo.setActive(this.active);
+		vo.setVersion(this.version);
+
+//		if (Validator.isNotNull(this.parent)) {
+//
+//			GroupVO groupVO = this.parent.toVOLite();
+//			vo.setParent(groupVO);
+//		}
+
+		setAuditToVO(vo);
+
+		return vo;
+	}
+
+	@Override
+	public GroupVO toVO() {
+
+		GroupVO groupVO = (GroupVO) toVOLite();
+
+		if (Validator.isNotNull(this.children)) {
+
+			List<GroupVO> list = new ArrayList<GroupVO>();
+
+			for (Group group : this.children) {
+				list.add(group.toVOLite());
+			}
+			groupVO.setChildren(list);
+		}
+
+		if (Validator.isNotNull(this.account)) {
+
+			List<AccountVO> list = new ArrayList<AccountVO>();
+
+			for (Account account : this.account) {
+				list.add(account.toVOLite());
+			}
+			groupVO.setAccount(list);
+		}
+
+		return groupVO;
+	}
+
+	@Override
+	public void fromVO(BaseVO baseVO) {
+
+		GroupVO vo = (GroupVO) baseVO;
+
+		this.id = vo.getId();
+		this.name = vo.getName();
+		this.description = vo.getDescription();
+		this.active = vo.isActive();
+		this.version = vo.getVersion();
+
+		getAuditFromVO(vo);
+	}
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @param description
+	 *            the description to set
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	/**
+	 * @return the parent
+	 */
+	public Group getParent() {
+		return parent;
+	}
+
+	/**
+	 * @param parent
+	 *            the parent to set
+	 */
+	public void setParent(Group parent) {
+		this.parent = parent;
+	}
+
+	/**
+	 * @return the children
+	 */
+	public Set<Group> getChildren() {
+		return children;
+	}
+
+	/**
+	 * @param children
+	 *            the children to set
+	 */
+	public void setChildren(Set<Group> children) {
+		this.children = children;
+	}
+
+	/**
+	 * @return the account
+	 */
+	public Set<Account> getAccount() {
+		return account;
+	}
+
+	/**
+	 * @param account
+	 *            the account to set
+	 */
+	public void setAccount(Set<Account> account) {
+		this.account = account;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version
+	 *            the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * @param active
+	 *            the active to set
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Group [id=" + id + ", name=" + name + ", description=" + description + ", active=" + active + ", version=" + version + "]";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Group)) {
+			return false;
+		}
+
+		final Group obj = (Group) o;
+
+		return new EqualsBuilder().append(this.id, obj.getId()).isEquals();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(-970989579, 1884842917).append(this.id).toHashCode();
+	}
+
+}

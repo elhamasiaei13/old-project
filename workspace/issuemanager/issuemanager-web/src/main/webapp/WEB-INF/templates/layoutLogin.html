@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+
+<head>
+    <title th:text="${config.getProperty('system.name')}"></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+        #header {
+            background-color: black;
+            color: white;
+            text-align: center;
+            padding: 5px;
+        }
+        
+        #main-wrap {
+            margin: auto;
+            height: 20%;
+            width: 20%;
+        }
+    </style>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../resources/lib/bootstrap-3.3.4/css/bootstrap.min.css" th:href="@{/resources/lib/bootstrap-3.3.4/css/bootstrap.min.css}" rel="stylesheet" />
+
+    <link href="../../resources/lib/bootstrap-3.3.4/css/application.css" th:href="@{/resources/lib/bootstrap-3.3.4/css/application.css}" rel="stylesheet" />
+
+    <!-- Bootstrap RTL Theme -->
+    <!-- <link rel="stylesheet" href="../../resources/lib/bootstrap-3.3.4/css/bootstrap-rtl.css"
+			th:unless="${#locale.language == 'en'}" th:href="@{/resources/lib/bootstrap-3.3.4/css/bootstrap-rtl.css}" /> -->
+
+    <link href="../../resources/lib/font-awesome-4.4.0/css/font-awesome.min.css" th:href="@{/resources/lib/font-awesome-4.4.0/css/font-awesome.min.css}" rel="stylesheet" />
+
+    <!-- ion Icons CSS -->
+    <link href="../../resources/lib/ionicons-2.0.1/css/ionicons.min.css" th:href="@{/resources/lib/ionicons-2.0.1/css/ionicons.min.css}" rel="stylesheet" />
+
+    <!-- iCheck CSS -->
+    <link href="../../resources/lib/iCheck/minimal/minimal.css" th:href="@{/resources/lib/iCheck/minimal/minimal.css}" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../../resources/css/style.css" th:href="@{/resources/css/style.css}" />
+
+    <!-- dataTables -->
+    <link href="../../resources/lib/DataTables-1.9.4/media/css/dataTables.bootstrap.css" th:href="@{/resources/lib/DataTables-1.9.4/media/css/dataTables.bootstrap.css}" rel="stylesheet" />
+
+    <!-- PNotify -->
+    <link rel="stylesheet" href="../../resources/lib/PNotify/pnotify.custom.min.css" th:href="@{/resources/lib/PNotify/pnotify.custom.min.css}" />
+
+    <!-- JQuery -->
+    <script src="../../resources/lib/jquery-2.1.4/jQuery-2.1.4.min.js" th:src="@{/resources/lib/jquery-2.1.4/jQuery-2.1.4.min.js}"></script>
+
+
+    <script th:inline="javascript">
+        var messages = {
+            'parsererror': '<span th:text="#{errorCode.parsererror}" th:remove="tag">parsererror</span>',
+            'timeout': '<span th:text="#{errorCode.timeout}" th:remove="tag">timeout</span>',
+            '302': '<span th:text="#{errorCode.302}" th:remove="tag">302</span>',
+            '404': '<span th:text="#{errorCode.404}" th:remove="tag">404</span>',
+            '403': '<span th:text="#{errorCode.403}" th:remove="tag">403</span>',
+            '503': '<span th:text="#{errorCode.503}" th:remove="tag">503</span>',
+        };
+        var systemName = '';
+    </script>
+</head>
+
+<body>
+
+    <div th:if="${result}" th:object="${result}">
+        <div th:if="*{status != 'success'}" th:include="errors :: error-content" th:remove="tag"></div>
+        <div th:if="*{status == 'success'}" class="callout callout-success">update successful</div>
+    </div>
+
+    <section class="content" layout:fragment="content">
+    </section>
+
+    <script src="../../resources/lib/bootstrap-3.3.4/js/bootstrap.min.js" th:src="@{/resources/lib/bootstrap-3.3.4/js/bootstrap.min.js}"></script>
+    <script src="../../resources/lib/DataTables-1.9.4/media/js/jquery.dataTables.min.js" th:src="@{/resources/lib/DataTables-1.9.4/media/js/jquery.dataTables.min.js}"></script>
+    <script src="../../resources/lib/PNotify/pnotify.custom.min.js" th:src="@{/resources/lib/PNotify/pnotify.custom.min.js}"></script>
+    <script src="../../resources/lib/cookie.js/cookie.min.js" th:src="@{/resources/lib/cookie.js/cookie.min.js}"></script>
+    <script src="../../resources/lib/slimScroll/jquery.slimscroll.min.js" th:src="@{/resources/lib/slimScroll/jquery.slimscroll.min.js}"></script>
+    <script src="../../resources/lib/iCheck/icheck.min.js" th:src="@{/resources/lib/iCheck/icheck.min.js}"></script>
+
+    <!-- Page JavaScripts -->
+    <th:block layout:fragment="javascripts" />
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+	<ul xmlns:th="http://www.thymeleaf.org" 
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		xmlns:idm="http://www.parvanpajooh/thymeleaf/idm"
+		xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" 
+		layout:fragment="menu" class="nav sidebar-menu">
+
+		<li th:title="#{geoTypes}">
+			<a th:href="@{'/geoType'}">
+				<i class="fa fa-globe"></i> 
+				<span th:text="#{geoTypes}">geoTypes</span>
+			</a>
+		</li>
+	
+		<li th:title="#{geoEntities}">
+			<a th:href="@{'/geoEntity'}">
+				<i class="fa fa-globe"></i> 
+				<span th:text="#{geoEntities}">geoEntities</span>
+			</a>
+		</li>
+	</ul>

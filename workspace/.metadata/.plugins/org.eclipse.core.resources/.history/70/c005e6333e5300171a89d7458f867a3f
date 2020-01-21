@@ -1,0 +1,143 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.service.adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.complaintmanagement.ComplaintManagementApiRestClient;
+import com.parvanpajooh.client.complaintmanagement.model.ComplaintCategoryMsg;
+import com.parvanpajooh.client.complaintmanagement.model.ComplaintManagementEnums;
+import com.parvanpajooh.client.complaintmanagement.model.ComplaintMsg;
+import com.parvanpajooh.client.complaintmanagement.model.criteria.ComplaintCriteriaMsg;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.siteservices.model.criteria.ComplaintCriteria;
+import com.parvanpajooh.siteservices.model.enums.ComplaintStatus;
+import com.parvanpajooh.siteservices.model.vo.ComplaintCategoryVO;
+import com.parvanpajooh.siteservices.model.vo.ComplaintVO;
+
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class ComplaintManagementServiceAdapterRest implements ComplaintManagementServiceAdapter {
+
+	private ComplaintManagementApiRestClient complaintManagementApiRestClient;
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	public ComplaintManagementServiceAdapterRest() {
+		this.complaintManagementApiRestClient = new ComplaintManagementApiRestClient();
+	}
+
+
+	@Override
+	public ComplaintCategoryVO getComplaintCategory(Long id) throws ParvanServiceException {
+		ComplaintCategoryVO complaintCategoryVO = null;
+
+		try {
+			ComplaintCategoryMsg complaintCategoryMsg = complaintManagementApiRestClient.getComplaintCategory(id);
+
+			complaintCategoryVO = new ComplaintCategoryVO();
+			complaintCategoryVO.fromMsg(complaintCategoryMsg);
+
+		} catch (ParvanClientException e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting agent by its id: " + id, e);
+		}
+
+		return complaintCategoryVO;
+	}
+
+
+	@Override
+	public PageList<ComplaintCategoryVO> findComplaintCategoriesBy(String term, int page, int size) throws ParvanServiceException {
+
+		List<ComplaintCategoryVO> complaintCategoryVOs = null;
+		PageList<ComplaintCategoryVO> pageList = null;
+		ComplaintCategoryVO complaintCategoryVO = null;
+
+		try {
+
+			PageList<ComplaintCategoryMsg> result = complaintManagementApiRestClient.findComplaintCategoriesBy(term, page, size);
+
+			complaintCategoryVOs = new ArrayList<ComplaintCategoryVO>();
+			for (ComplaintCategoryMsg complaintCategoryMsg : result.getElements()) {
+				complaintCategoryVO = new ComplaintCategoryVO();
+				complaintCategoryVO.fromMsg(complaintCategoryMsg);
+
+				complaintCategoryVOs.add(complaintCategoryVO);
+			}
+			if (Validator.isNotNull(complaintCategoryVOs)) {
+				pageList = new PageList<>(complaintCategoryVOs, result.getTotal());
+			}
+
+		} catch (ParvanClientException e) {
+			throw new ParvanUnrecoverableException("Error occurred while finding Complaint Categories by term = " + term, e);
+		}
+		return pageList;
+	}
+
+
+	@Override
+	public void saveComplaint(ComplaintVO complaintVO) throws ParvanServiceException {
+
+		try {
+			ComplaintMsg complaintMsg = complaintVO.toMsg();
+			
+			complaintManagementApiRestClient.saveComplaint(complaintMsg);
+
+			complaintVO = new ComplaintVO();
+			complaintVO.fromMsg(complaintMsg);
+
+		} catch (ParvanClientException e) {
+			throw new ParvanServiceException(e);
+		}
+	}
+
+
+	@Override
+	public PageList<ComplaintVO> findMyComplaintsBy(String term,ComplaintStatus status, int page, int size, SortDirectionEnum sortDirection, String sortCriterion) throws ParvanServiceException {
+	
+		List<ComplaintVO> complaintVOs = null;
+		PageList<ComplaintVO> pageList = null;
+		ComplaintVO complaintVO = null;
+
+		try {
+
+			if(Validator.isNotNull(status)){
+				ComplaintManagementEnums.ComplaintStatus complaintStatus = ComplaintManagementEnums.ComplaintStatus.valueOf(status.toString());
+			}
+			
+			PageList<ComplaintMsg> result = complaintManagementApiRestClient.findMyComplaintsBy(term, complaintStatus, page, size, sortDirection, sortCriterion);
+
+			complaintVOs = new ArrayList<ComplaintVO>();
+			for (ComplaintMsg complaintMsg : result.getElements()) {
+				complaintVO = new ComplaintVO();
+				complaintVO.fromMsg(complaintMsg);
+
+				complaintVOs.add(complaintVO);
+			}
+			if (Validator.isNotNull(complaintVOs)) {
+				pageList = new PageList<>(complaintVOs, result.getTotal());
+			}
+
+		} catch (ParvanClientException e) {
+			throw new ParvanUnrecoverableException("Error occurred while finding my Complaints by term = " + term, e);
+		}
+		return pageList;
+	}
+
+}

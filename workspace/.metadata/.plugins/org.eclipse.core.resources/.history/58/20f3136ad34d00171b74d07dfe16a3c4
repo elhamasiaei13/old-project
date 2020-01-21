@@ -1,0 +1,36 @@
+package com.parvanpajooh.agentmanagement.service;
+
+import java.util.List;
+
+import com.parvanpajooh.agentmanagement.model.vo.NodeVO;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+
+/**
+ * @author dev-03
+ *
+ */
+public interface RateAndRouteService {
+
+	public List<NodeVO> findNodesBy(
+			UserInfo userInfo, 
+			String term, 
+			String cityShortCode, 
+			int firstResult, 
+			int maxResults, 
+			String sortDirection,
+			String sortCriterion) throws ParvanServiceException;
+	
+	public NodeVO getNode(
+			UserInfo userInfo,
+			Long id) throws ParvanServiceException;
+
+	public List<NodeVO> findHubNodesBy(
+			UserInfo userInfo, 
+			String term, 
+			String cityShortCode, 
+			int firstResult, 
+			int maxResults, 
+			String sortDirection,
+			String sortCriterion) throws ParvanServiceException;
+}

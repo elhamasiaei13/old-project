@@ -1,0 +1,102 @@
+package com.parvanpajooh.transportationmanagement.mvc;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+import com.parvanpajooh.common.auth.UserInfoLoader;
+import com.parvanpajooh.common.util.ParamUtil;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.transportationmanagement.base.mvc.TransportaionMngBaseController;
+import com.parvanpajooh.transportationmanagement.model.vo.CarrierVO;
+import com.parvanpajooh.transportationmanagement.model.vo.NodeVO;
+import com.parvanpajooh.transportationmanagement.service.CarrierManagementService;
+import com.parvanpajooh.transportationmanagement.service.RouteManagementService;
+
+@ControllerAdvice
+public class GlobalController extends TransportaionMngBaseController {
+	
+	@EJB(mappedName = "java:global/transportationManagement-ear/transportationManagement-ejb/RouteManagementServiceImpl")
+	private RouteManagementService routeManagementService;
+
+	@EJB(mappedName = "java:global/transportationManagement-ear/transportationManagement-ejb/CarrierManagementServiceImpl")
+	private CarrierManagementService carrierManagementService;
+
+	@ModelAttribute("userInfo")
+	public UserInfo populateUserInfo(HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+
+		return UserInfoLoader.getInstance().getUserInfo();
+	}
+
+	@ModelAttribute("nodes")
+	public List<NodeVO> loadProducts(HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+		ServletContext servletContext = request.getSession().getServletContext();
+		
+		@SuppressWarnings("unchecked")
+		List<NodeVO> nodes = (List<NodeVO>) servletContext.getAttribute("nodes");
+		
+		boolean doRefresh = ParamUtil.getBoolean(request, "doRefresh", false);
+		
+		if(Validator.isNull(nodes) || doRefresh){
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+			nodes = routeManagementService.getAllNodes(userInfo);
+
+			Map<Long, NodeVO> nodesIdMap = new HashMap<>();
+			Map<String, NodeVO> nodesCodeNameMap = new HashMap<>();
+			
+			for (NodeVO node : nodes) {
+				
+				nodesIdMap.put(node.getId(), node);
+				nodesCodeNameMap.put(node.getCodeName(), node);
+			}
+			
+			servletContext.setAttribute("nodes", nodes);
+			servletContext.setAttribute("nodesIdMap", nodesIdMap);
+			servletContext.setAttribute("nodesCodeNameMap", nodesCodeNameMap);
+		}
+		
+		return nodes;
+	}
+
+	@ModelAttribute("carriers")
+	public List<CarrierVO> loadCarriers(HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+		ServletContext servletContext = request.getSession().getServletContext();
+
+		@SuppressWarnings("unchecked")
+		List<CarrierVO> carriers = (List<CarrierVO>) servletContext.getAttribute("carriers");
+
+		boolean doRefresh = ParamUtil.getBoolean(request, "doRefresh", false);
+
+		if (Validator.isNull(carriers) || doRefresh) {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+
+			carriers = carrierManagementService.findCarriers(userInfo, null, 0, Integer.MAX_VALUE).getElements();
+
+			Map<Long, CarrierVO> carriersIdMap = new HashMap<>();
+			Map<String, CarrierVO> carriersCodeMap = new HashMap<>();
+
+			for (CarrierVO carrier : carriers) {
+
+				carriersIdMap.put(carrier.getId(), carrier);
+				carriersCodeMap.put(carrier.getCarrierCode(), carrier);
+			}
+
+			servletContext.setAttribute("carriers", carriers);
+			servletContext.setAttribute("carriersIdMap", carriersIdMap);
+			servletContext.setAttribute("carriersCodeMap", carriersCodeMap);
+		}
+
+		return carriers;
+	}
+}

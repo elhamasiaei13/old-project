@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;NodeDaoJpa.java&apos; to &apos;siteservices-ejb/src/main/java/com.parvanpajooh.siteservices.dao.jpa&apos;&#x0A;- Original project: &apos;routemanagement-ejb&apos;&#x0A;- Destination element: &apos;siteservices-ejb/src/main/java/com.parvanpajooh.siteservices.dao.jpa&apos;&#x0A;- Original element: &apos;com.parvanpajooh.routemanagement.dao.jpa.NodeDaoJpa.java&apos;" description="Copy compilation unit" destination="=siteservices-ejb/src\/main\/java&lt;com.parvanpajooh.siteservices.dao.jpa" element1="/src\/main\/java&lt;com.parvanpajooh.routemanagement.dao.jpa{NodeDaoJpa.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1495952158211" units="1" version="1.0"/>
+</session>

@@ -1,0 +1,21 @@
+<ul xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:idm="http://www.parvanpajooh/thymeleaf/idm"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" layout:fragment="menu" class="nav sidebar-menu">
+
+	
+	<li th:title="#{complaintCategory}" th:class="${rightMenu == '' || rightMenu == 'complaintcategory' ? 'active' : ''}">
+		<a th:href="@{'/complaintCategory'}">
+			<i class="fa fa-object-group"></i>
+			<span th:text="#{complaintCategories}"> دسته‌بندی شکایت‌ها </span>
+		</a>
+	</li>
+	
+	<li th:title="#{complaint}" th:class="${rightMenu == '' || rightMenu == 'complaint' ? 'active' : ''}">
+		<a th:href="@{'/complaint'}">
+			<i class="fa fa-object-group"></i>
+			<span th:text="#{complaints}"> شکایت‌ها </span>
+		</a>
+	</li>
+
+	
+</ul>
+

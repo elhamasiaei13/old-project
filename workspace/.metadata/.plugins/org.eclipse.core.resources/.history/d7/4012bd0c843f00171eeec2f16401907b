@@ -1,0 +1,169 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.geomanagement;
+
+import java.util.List;
+
+import com.parvanpajooh.client.common.GenericRestClient;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.common.RestClientConstants;
+import com.parvanpajooh.client.geomanagement.service.GeoManagementApi;
+import com.parvanpajooh.client.rateandroute.model.CarrierMsg;
+import com.parvanpajooh.client.rateandroute.model.CityInfoMsg;
+import com.parvanpajooh.client.rateandroute.model.CountryInfoMsg;
+import com.parvanpajooh.client.rateandroute.model.CurrencyMsg;
+import com.parvanpajooh.client.rateandroute.model.NodeMsg;
+import com.parvanpajooh.client.rateandroute.model.StateInfoMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.FreightNodeType;
+import com.parvanpajooh.client.rateandroute.service.RateAndRouteApi;
+import com.parvanpajooh.commons.config.Config;
+
+import retrofit2.Call;
+
+/**
+ * @author MO
+ *
+ */
+public class GeoManagementApiRestClient extends GenericRestClient<GeoManagementApi> {
+	
+	private static final String ENDPOINT_PATH = "/geomanagement-rest/";
+
+	private GeoManagementApi geoManagementApi;
+
+	public GeoManagementApiRestClient() {
+		super(
+				Config.getProperty("geomanagement.rest.endpoint.protocol", RestClientConstants.ENDPOINT_DEF_PROTOCOL__HTTP),
+				Config.getProperty("geomanagement.rest.endpoint.host", RestClientConstants.ENDPOINT_DEF_HOST__LOCALHOST),
+				Config.getProperty("geomanagement.rest.endpoint.port", RestClientConstants.ENDPOINT_DEF_PORT__80),
+				ENDPOINT_PATH,
+				Config.getLongProperty("geomanagement.rest.endpoint.timeout", RestClientConstants.TIMEOUT));
+		
+		geoManagementApi = super.createRestClient();
+	}
+	
+	/**
+	 * 
+	 * @param shortCode
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public CityInfoMsg getCityByShortCode(String shortCode) throws ParvanClientException {
+		Call<CityInfoMsg> call = rateAndRouteApi.getCityByShortCode(shortCode);
+		return executeCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param term
+	 * @param start
+	 * @param length
+	 * @param sortDirection
+	 * @param sortCriterion
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public PageList<CityInfoMsg> findCitiesByNameOrShortCode(
+			String parentCode,
+			String term,
+			Integer start,
+			Integer length,
+			String sortDirection,
+			String sortCriterion) throws ParvanClientException {
+		
+		Call<List<CityInfoMsg>> call = rateAndRouteApi.findCityByNameOrShortCode(
+				parentCode,
+				term,
+				start,
+				length,
+				sortDirection,
+				sortCriterion);
+		
+		return executePageCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param term
+	 * @param start
+	 * @param length
+	 * @param sortDirection
+	 * @param sortCriterion
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public PageList<StateInfoMsg> findStatesByNameOrShortCode(
+			String parentCode,
+			String term,
+			Integer start,
+			Integer length,
+			String sortDirection,
+			String sortCriterion) throws ParvanClientException {
+		
+		Call<List<StateInfoMsg>> call = rateAndRouteApi.findStateByNameOrShortCode(
+				parentCode,
+				term,
+				start,
+				length,
+				sortDirection,
+				sortCriterion);
+		
+		return executePageCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param term
+	 * @param start
+	 * @param length
+	 * @param sortDirection
+	 * @param sortCriterion
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public PageList<CountryInfoMsg> findCountriesByNameOrShortCode(
+			String term,
+			Integer start,
+			Integer length,
+			String sortDirection,
+			String sortCriterion) throws ParvanClientException {
+		
+		Call<List<CountryInfoMsg>> call = rateAndRouteApi.findCountryByNameOrShortCode(
+				term,
+				start,
+				length,
+				sortDirection,
+				sortCriterion);
+		
+		return executePageCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param cityShortCode
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public List<NodeMsg> findHubNodesByCity(String cityShortCode) throws ParvanClientException {
+		Call<List<NodeMsg>> call = rateAndRouteApi.findHubNodesByCity(cityShortCode);
+		return executeCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public CityInfoMsg getCityByNodeId(Long id) throws ParvanClientException {
+		Call<CityInfoMsg> call = rateAndRouteApi.getCityByNodeId(id);
+		return executeCall(call);
+	}
+	
+	public CarrierMsg getCarrierByCode(String code) throws ParvanClientException {
+		Call<CarrierMsg> call = rateAndRouteApi.getCarrierByCode(code);
+		return executeCall(call);
+	}
+	
+}

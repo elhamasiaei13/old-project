@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" 
+	xmlns:dt="http://github.com/dandelion/datatables" 
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+	layout:decorator="filter-layout" ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+	<title>WaybillNumber List</title>
+
+	<style>
+		.select-device-modal label {
+			margin-bottom: 0px;
+		}
+		
+		.select-device-modal input {
+			width: auto;
+			height: 28px;
+		}
+		
+		.select-device-modal .form-control {
+			width: auto;
+		}
+		
+		.select-device-modal table.dataTable td {
+			padding: 1px 10px;
+		}
+		
+		.select-device-modal .dataTables_filter label {
+			margin-bottom: 5px;
+		}
+		
+		.limited {
+		    white-space: nowrap;          
+		    overflow: hidden;
+		    text-overflow: ellipsis;
+		}
+		
+		.tooltip-inner {
+		    max-width: 900px;
+		}
+	</style>
+</head>
+
+<body th:with="rightMenu='WaybillNumberGenerateCommands'">
+	<div class="page-container">
+		<section layout:fragment="top-header" class="fixed-header">
+			<div class="ui-header-image pull-left">
+				<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/stock2-web/resources/images/stack.png" th:src="@{/resources/images/stack.png}" style="width: 48px; height: 48px;" />
+			</div>
+			<div class="ui-header-title">
+				<div class="split-left">
+					<h3>
+						<small>View</small>
+					</h3>
+					<h3>WaybillNumbers</h3>
+				</div>
+				<div class="split-right">
+					<a data-toggle="modal" th:href="@{'/waybillNumber/generate'}" class="btn btn-success">
+						<i class="fa fa-plus">&nbsp;&nbsp;</i>
+						<span th:text="#{waybillNumberGenerateCommand.create}">ایجاد شماره‌های بارنامه</span>
+					</a>
+					<a href="#menu-toggle" class="btn btn-default" id="menu-toggle" onclick="setSearchViewState();return false">
+						<i class="fa fa-binoculars">&nbsp;&nbsp;</i>
+						<span th:text="#{filter}">Search</span>
+					</a>
+				</div>
+			</div>
+		</section>
+	</div>
+	<!-- CONTENT -->
+	<section class="content" layout:fragment="content">
+		<div id="wrapper" class="toggled">
+			<div th:if="${result}" th:object="${result}">
+        		<div th:if="*{status != 'success'}" th:include="errors :: error-content" th:remove="tag"></div>
+			</div>
+			<form id="frmWaybillNumberDisplaySearch" action="/stock2-web/waybillNumber/show" method="post">
+				<input type="hidden" id="templateName" name="templateName"></input>
+				<div th:include="waybillNumber-search-fragment :: waybillNumber-search-filters" />
+			</form>
+			<div class="page-container">
+				<div class="box">
+					<div class="box-body">
+						<div idm:authorize="com.parvanpajooh.stock2.domain.model.WaybillNumber" data-action="WB__UPDATE" class="pull-right" style="margin: 10px">
+							<a class="btn btn-success" onclick="modfiyWaybillNumberDisplayes('modifyWaybillNumbers');">
+								<span th:text="#{waybillNumber.modify}">به‌روزرسانی</span>
+							</a>
+						</div>	
+						<div idm:authorize="com.parvanpajooh.stock2.domain.model.WaybillNumber" data-action="WB__CHANGE_STATE" class="pull-right" style="margin: 10px">
+							<a class="btn btn-success" onclick="modfiyWaybillNumberDisplayes('changeWaybillNumberState');">
+								<span th:text="#{waybillNumber.changeState}"> تغییر وضعیت</span>
+							</a>
+						</div>
+						<div idm:authorize="com.parvanpajooh.stock2.domain.model.WaybillNumber" data-action="WB__CHANGE_ASSIGNEE" class="pull-right" style="margin: 10px">
+							<a class="btn btn-success" onclick="modfiyWaybillNumberDisplayes('changeWaybillNumberAssignee');">
+								<span th:text="#{waybillNumber.changeAssignee}"> تغییر نمایندگی</span>
+							</a>
+						</div>
+						<div idm:authorize="com.parvanpajooh.stock2.domain.model.WaybillNumber" data-action="WB__ASSIGN_TO_SUBAGENT" class="pull-right" style="margin: 10px">
+							<a class="btn btn-success" onclick="modfiyWaybillNumberDisplayes('waybillnumber-assigntosubagent');">
+								<span th:text="#{waybillNumber.assignToSubAgent}"> تخصیص به نماینده زیر مجموعه</span>
+							</a>
+						</div>
+						<div idm:authorize="com.parvanpajooh.stock2.domain.model.WaybillNumber" data-action="WB__RETURN_TO_PARENTAGENT" class="pull-right" style="margin: 10px">
+							<a class="btn btn-success" onclick="modfiyWaybillNumberDisplayes('waybillnumber-returntoparentagent');">
+								<span th:text="#{waybillNumber.returnToParentAgent}"> عودت به نماینده والد</span>
+							</a>
+						</div>
+					</div>
+					<div th:include="customSearch :: list"></div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<th:block layout:fragment="javascripts">
+		<script th:inline="javascript">
+				/*<![CDATA[*/
+				
+				jQuery(document).ready(function() {
+					$('#waybillNumbersFilter').val('');			
+				});
+								
+				function modfiyWaybillNumberDisplayes(templateName){
+					var $templateName = $("#templateName");
+					$templateName.val(templateName);
+					$("#frmWaybillNumberDisplaySearch").submit();
+				}	
+				/*]]>*/
+			</script>
+	</th:block>
+</body>
+</html>
+

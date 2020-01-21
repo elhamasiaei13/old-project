@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="layout">
+
+<head>
+    <title>Edit Task</title>
+</head>
+
+<body>
+    <section class="content" layout:fragment="content">
+
+        <blockquote>
+            <p class="bg-info" th:text="#{title_edit_task}"></p>
+        </blockquote>
+
+
+        <form action="#" class="form-horizontal" th:action="@{/editTask/save}" th:object="${task}" method="post">
+
+
+            <input type="hidden" name="id" class="input-small" th:field="*{id}" value="${id}" />
+
+            <div class="form-group required">
+                <label for="groups" th:text="#{groups_list}" class="col-sm-2 control-label"></label>
+                <div class="col-sm-8">                    
+		            	 <!-- <option th:text="#{lookup_option}"></option>
+		                 <option th:each="g : ${groups}" th:value="${g.id}" th:text="${g.name}" th:attr="selected=${g.id == task.group.id ? 'true' : 'false'}"></option> -->
+                          <select class="js-data-example-ajax form-control" name="ajaxSearching" id="ajaxSearching">
+                  		  	<option></option>
+                  		  </select>
+                </div>
+            </div>
+
+            <div class="form-group required">
+                <label for="typeId" class="col-sm-2 control-label">نوع</label>
+                <div class="col-sm-8">
+	                <select id="typeId" name="taskType" class="js-example-basic-hide-search form-control"> 
+						<option th:text="#{lookup_option}"></option>
+						<option th:each="s : ${T(com.parvanpajooh.issuemanager.model.enums.TaskTypeEnum).values()}" th:value="${s}" th:text="${s.value}" th:attr="selected=${s == task.taskType ? 'true' : 'false'}"></option>
+					</select>
+                </div>
+            </div>
+
+			<div class="form-group required">
+				<label for="priority" class="col-sm-2 control-label" >تعیین اولویت</label>			
+                <div class="col-sm-8">
+                    <select id="priorityId" name="priority" class="js-example-basic-hide-search form-control"> 
+						<option ></option>
+						<option th:each="s : ${T(com.parvanpajooh.issuemanager.model.enums.TaskPriorityEnum).values()}" th:value="${s}" th:text="${s.value}" th:attr="selected=${s == task.priority ? 'true' : 'false'}"></option>
+					</select>
+                </div>		
+			</div>
+			
+            <div class="form-group required">
+                <label th:text="#{lbl_subject}" class="col-sm-2 control-label"></label>
+                <div class="col-sm-8">
+                    <input type="text" name="subject" class="form-control" placeholder="Subject" th:field="*{subject}" th:value="${subject}" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label th:text="#{lbl_description}" class="col-sm-2 control-label"></label>
+                <div class="col-sm-8">
+                    <textarea class="form-control" rows="3" name="description" placeholder="Description" th:field="*{description}" th:value="${description}" />
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label th:text="#{lbl_duedate}" class="col-sm-2 control-label"></label>
+                <div class="col-sm-8">
+                    <input class="form-control datepicker" type="text" name="dueDate" th:field="*{dueDate}" th:value="${dueDate}" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-default" th:text="#{btn_edit}" th:onclick="${'groupSelected()'}"></button>
+                </div>
+            </div>
+
+            <script>
+
+            //<![CDATA[
+            
+            jQuery(document).ready(function() {
+                
+         	   $(".js-example-basic-hide-search").select2({
+         		  minimumResultsForSearch: Infinity
+         		});
+
+         	  $('select').select2().select2('val', $('.select2 option:eq(1)').val()); 
+
+         	  
+              $(".js-data-example-ajax").select2({
+
+              	  ajax: {
+                  	
+              		closeOnSelect: false,
+              	    url: "/issuemanager-web/pagingGroups",
+              	    dataType: 'json',
+              	    delay: 350,
+              	 
+              	    data: function (params) {
+                  	    var page = (params.page ? params.page : 1);
+              	      return {
+              	        iColumns: 1,
+              	        iSortCol_0: 0,
+                          mDataProp_0: 'id',
+                          bSortable_0: 'false',
+                          iSortingCols: 1,
+                          iDisplayStart : (page - 1) * 20,
+                          iDisplayLength : 20,
+                          sEcho: 1,
+                          sSortDir_0: 'asc',
+                          name: params.term,
+              	        page: page
+              	      };
+              	    },
+
+              	    
+              	    processResults: function (data, params) {
+
+              	      params.page = params.page || 1;
+
+              	      console.debug(data);
+
+              	      return {
+              	        results: data.aaData,
+              	        pagination: {
+              	          more: (params.page * 30) < data.total_count
+              	        }
+              	      };
+              	    },
+
+              	    
+              	    cache: true
+              	  },
+              	  
+              	  placeholder: "Search for a Subject",
+              	  escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+              	  minimumInputLength: 0,
+              	  templateResult: function(aaData){ console.debug(aaData); return aaData.name; }, // omitted for brevity, see the source of this page
+              	  templateSelection: function(aaData) { return aaData.name; } // omitted for brevity, see the source of this page
+              	});
+            });
+              //]]>
+            
+                function groupSelected() {
+
+                    var choose = "انتخاب کنید";
+                    var e = document.getElementById("groupId").value;
+                    if (e != choose) {
+                        $('#groupId').val(e);
+                    } else {
+                        $('#groupId').val(null);
+                    }
+
+
+                }
+                jQuery(document).ready(function() {
+
+                    $('.datepicker').datetimepicker({
+                        format: 'YYYY-MM-DD hh:mm'
+                    });
+
+               	   $(".js-example-basic-hide-search").select2({
+                   		  minimumResultsForSearch: Infinity
+                   });
+                });
+            </script>
+        </form>
+    </section>
+</body>
+
+</html>

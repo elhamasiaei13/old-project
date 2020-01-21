@@ -1,0 +1,247 @@
+package com.parvanpajooh.siteservices.model;
+
+import java.time.LocalDateTime;
+
+import javax.persistence.Cacheable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.validator.constraints.Email;
+
+import com.google.common.base.Objects;
+import com.parvanpajooh.commons.platform.ejb.model.BaseModel;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.siteservices.model.enums.PasswordRecoveryMethod;
+import com.parvanpajooh.siteservices.model.vo.RecoveryCodeVO;
+
+
+/**
+ * @author dev-03
+ *
+ */
+@Entity
+@Cacheable
+@Table(name="recoveryCode_tbl")
+public class RecoveryCode extends BaseModel{
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8148418429521524980L;
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long id;
+	
+	private Long userId;
+	
+	private String userName;
+	
+	@Email
+	private String email;
+	
+	private String mobile;
+	
+	private PasswordRecoveryMethod recoveryMethod;
+	
+	private String code;
+	
+	@Column(insertable=true, updatable=false)
+	private LocalDateTime expireDate;
+	
+	@Version
+	private Integer version;
+	
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the userId
+	 */
+	public Long getUserId() {
+		return userId;
+	}
+
+	/**
+	 * @param userId the userId to set
+	 */
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	/**
+	 * @return the userName
+	 */
+	public String getUserName() {
+		return userName;
+	}
+
+	/**
+	 * @param userName the userName to set
+	 */
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	/**
+	 * @return the mobile
+	 */
+	public String getMobile() {
+		return mobile;
+	}
+
+	/**
+	 * @param mobile the mobile to set
+	 */
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	/**
+	 * @return the recoveryMethod
+	 */
+	public PasswordRecoveryMethod getRecoveryMethod() {
+		return recoveryMethod;
+	}
+
+	/**
+	 * @param recoveryMethod the recoveryMethod to set
+	 */
+	public void setRecoveryMethod(PasswordRecoveryMethod recoveryMethod) {
+		this.recoveryMethod = recoveryMethod;
+	}
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the expireDate
+	 */
+	public LocalDateTime getExpireDate() {
+		return expireDate;
+	}
+
+	/**
+	 * @param expireDate the expireDate to set
+	 */
+	public void setExpireDate(LocalDateTime expireDate) {
+		this.expireDate = expireDate;
+	}
+	
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	@Override
+	public RecoveryCodeVO toVO() {
+		RecoveryCodeVO vo = toVOLite();
+		
+		return vo;
+	}
+
+	@Override
+	public RecoveryCodeVO toVOLite() {
+		RecoveryCodeVO vo = new RecoveryCodeVO();
+		
+		vo.setId(this.id);
+		vo.setUserId(this.userId);
+		vo.setEmail(this.email);
+		vo.setMobile(this.mobile);
+		vo.setRequestMethod(this.recoveryMethod);
+		vo.setCode(this.code);
+		vo.setExpireDate(this.expireDate);
+		vo.setVersion(this.version);
+		
+		return vo;
+	}
+
+	@Override
+	public void fromVO(BaseVO baseVO) {
+		RecoveryCodeVO vo = (RecoveryCodeVO) baseVO;
+		
+		this.id = vo.getId();
+		this.userId = vo.getUserId();
+		this.email = vo.getEmail();
+		this.mobile = vo.getMobile();
+		this.recoveryMethod = vo.getRequestMethod();
+		this.code = vo.getCode();
+		this.expireDate = vo.getExpireDate();
+		this.version = vo.getVersion();
+	}
+
+	@Override
+	public int hashCode(){
+		return Objects.hashCode(id);
+	}
+	
+	@Override
+	public boolean equals(Object object){
+		if (object instanceof RecoveryCode) {
+			RecoveryCode that = (RecoveryCode) object;
+			return Objects.equal(this.id, that.id);
+		}
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "RecoveryCode [id=" + id + ", userId=" + userId + ", userName=" + userName + ", "
+				+ "email=" + email + ", mobile=" + mobile + ", recoveryMethod="
+				+ recoveryMethod + ", code=" + code + ", expireDate=" + expireDate + ", version=" + version + "]";
+	}
+
+}

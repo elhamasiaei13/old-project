@@ -1,0 +1,42 @@
+package com.parvanpajooh.client.carriermanagement;
+
+import java.util.List;
+
+import com.parvanpajooh.client.carriermanagement.model.CarrierMsg;
+import com.parvanpajooh.client.carriermanagement.service.CarrierManagementApi;
+import com.parvanpajooh.client.common.GenericRestClient;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.common.RestClientConstants;
+import com.parvanpajooh.commons.config.Config;
+
+import retrofit2.Call;
+
+public class CarrierManagementApiRestClient   extends GenericRestClient<CarrierManagementApi>{
+	
+private static final String ENDPOINT_PATH = "/carriermanagement-rest/v1/";
+	
+	private CarrierManagementApi carrierManagementApi;
+	
+	public CarrierManagementApiRestClient() {
+
+		super(
+				Config.getProperty("carriermanagement.rest.endpoint.protocol", RestClientConstants.ENDPOINT_DEF_PROTOCOL__HTTP),
+				Config.getProperty("carriermanagement.rest.endpoint.host", RestClientConstants.ENDPOINT_DEF_HOST__LOCALHOST),
+				Config.getProperty("carriermanagement.rest.endpoint.port", RestClientConstants.ENDPOINT_DEF_PORT__80),
+				ENDPOINT_PATH,
+				Config.getLongProperty("jobmanagement.rest.endpoint.timeout", RestClientConstants.TIMEOUT));
+		
+		carrierManagementApi = super.createRestClient();
+	}
+	
+	public CarrierMsg getCarrierByCarrierCode(String carrierCode) throws ParvanClientException {
+		Call<CarrierMsg> call = carrierManagementApi.getCarrierByCarrierCode(carrierCode);
+		return executeCall(call);
+	}
+
+	public PageList<CarrierMsg> findCarriers(String term, int page, int size) throws ParvanClientException {
+		Call<List<CarrierMsg>> call = carrierManagementApi.findCarriers(term,page,size);
+		return executePageCall(call);
+	}
+}

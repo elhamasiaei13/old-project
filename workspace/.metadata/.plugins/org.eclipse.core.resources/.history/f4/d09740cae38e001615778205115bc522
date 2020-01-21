@@ -1,0 +1,106 @@
+package com.parvanpajooh.accounting.service.impl;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.accounting.dao.FiscalYearDao;
+import com.parvanpajooh.accounting.dao.VoucherDao;
+import com.parvanpajooh.accounting.model.FiscalYear;
+import com.parvanpajooh.accounting.model.Voucher;
+import com.parvanpajooh.accounting.model.vo.ClientAppVO;
+import com.parvanpajooh.accounting.model.vo.VoucherRowVO;
+import com.parvanpajooh.accounting.model.vo.VoucherVO;
+import com.parvanpajooh.accounting.service.VoucherLocalService;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.commons.util.Validator;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class VoucherLocalServiceImpl extends GenericLocalServiceImpl<Voucher, Long>implements VoucherLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(VoucherLocalServiceImpl.class);
+
+	public VoucherDao voucherDao;
+
+	@Inject
+	public void setVoucherDao(VoucherDao voucherDao) {
+		this.dao = voucherDao;
+		this.voucherDao = voucherDao;
+	}
+
+	@Inject
+	private FiscalYearDao fiscalYearDao;
+
+	@Override
+	public VoucherVO save(VoucherVO voucherVO, String clientAppCode) throws ParvanServiceException {
+
+		// LOG
+		log.info("Entering save(voucherVO={})", voucherVO);
+
+		ClientAppVO clientAppVO = new ClientAppVO();
+		List<VoucherRowVO> rows = new ArrayList<VoucherRowVO>();
+		LocalDateTime now = LocalDateTime.now();
+		Voucher voucher = new Voucher();
+		FiscalYear fiscalYear = null;
+
+		try {
+
+			// get user info from current context
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+
+			if (Validator.isNull(voucherVO.getIssueDate())) {
+
+				throw new ParvanRecoverableException(ErrorCode.FIELD_IS_EMPTY);
+			}
+
+			if (Validator.isNull(clientAppCode)) {
+				clientAppCode = clientAppVO.getDefaultAppCode();
+			}
+
+			fiscalYear = fiscalYearDao.findByclientAppId(clientAppCode);
+			
+			rows = voucherVO.getVoucherRow();
+
+			voucher.fromVO(voucherVO);
+			voucher.setActive(true);
+			voucher.setFiscalYear(fiscalYear);
+			voucher.setCreateDate(now);
+			voucher.setUpdateDate(now);
+			voucher.setCreateUserId(userInfo.getUserId());
+			voucher.setUpdateUserId(userInfo.getUserId());
+
+			// save entity
+			voucher = voucherDao.save(voucher, rows);
+
+			voucherVO = (VoucherVO) voucher.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving voucher.", e);
+		}
+
+		// LOG
+		log.info("Leaving save(): ret={}", voucherVO);
+		return voucherVO;
+	}
+}

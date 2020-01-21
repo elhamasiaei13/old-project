@@ -1,0 +1,693 @@
+package com.parvanpajooh.personmanagement.rest;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
+import javax.ws.rs.core.Context;
+
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.personmanagement.model.ContactInfoMsg;
+import com.parvanpajooh.client.personmanagement.model.OrganizationMsg;
+import com.parvanpajooh.client.personmanagement.model.PersonManagementEnums;
+import com.parvanpajooh.client.personmanagement.model.PersonMsg;
+import com.parvanpajooh.common.auth.BaseRestController;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.StringUtil;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.personmanagement.model.criteria.OrganizationCriteria;
+import com.parvanpajooh.personmanagement.model.criteria.PersonCriteria;
+import com.parvanpajooh.personmanagement.model.enums.RelationType;
+import com.parvanpajooh.personmanagement.model.vo.ContactInfoVO;
+import com.parvanpajooh.personmanagement.model.vo.OrganizationVO;
+import com.parvanpajooh.personmanagement.model.vo.PersonVO;
+import com.parvanpajooh.personmanagement.model.vo.RelationVO;
+import com.parvanpajooh.personmanagement.service.ContactInfoService;
+import com.parvanpajooh.personmanagement.service.GeneralAgentService;
+import com.parvanpajooh.personmanagement.service.OrganizationService;
+import com.parvanpajooh.personmanagement.service.PersonService;
+import com.parvanpajooh.personmanagement.service.UserService;
+
+@RestController
+@RequestMapping("/v1")
+public class PersonManagementRestController extends BaseRestController {
+	
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+	
+	@EJB(mappedName = "java:global/personmanagement-ear/personmanagement-ejb/PersonServiceImpl")
+	private PersonService personService;
+	
+	@EJB(mappedName = "java:global/personmanagement-ear/personmanagement-ejb/OrganizationServiceImpl")
+	private OrganizationService organizationService;
+	
+	@EJB(mappedName = "java:global/personmanagement-ear/personmanagement-ejb/ContactInfoServiceImpl")
+	private ContactInfoService contactInfoService;
+	
+	@EJB(mappedName = "java:global/personmanagement-ear/personmanagement-ejb/UserServiceImpl")
+	private UserService userService;
+	
+	@EJB(mappedName = "java:global/personmanagement-ear/personmanagement-ejb/GeneralAgentServiceImpl")
+	private GeneralAgentService generalAgentService;
+
+	@RequestMapping(value = "/hello", method = RequestMethod.GET)
+	public String hello(@RequestParam(value = "name") String name) {
+		return "Hello " + name;
+	}
+
+	@RequestMapping(value = "/persons", method = RequestMethod.GET)
+	public List<PersonMsg> findPersonsByCriteria(
+			@RequestHeader(value = "userName") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			PersonCriteria criteria,
+			@RequestParam(value = "page") int page,
+			@RequestParam(value = "size") int size,
+			@RequestParam(value = "sort") String sort,
+			@Context HttpServletResponse response) {
+		
+		log.trace("Entering findPersonsByCriteria(userName={}, ip={}, criteria={}, page={}, size={}, sort={})", userName, ip, criteria, page, size, sort);
+		
+		List<PersonMsg> result = null;
+		
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		if (Validator.isNotNull(sort) && sort.startsWith(StringPool.MINUS)) {
+			sort = sort.substring(1);
+			sortDirection = SortDirectionEnum.Descending;
+		}
+		
+		String sortCriterion = "createDate";
+		if (Validator.isNotNull(sort)) {
+			sortCriterion = sort;
+		}
+		
+		if (page > 0) {
+			page = page - 1;// my pagination is zero based, but rest pagination best practice is 1-based
+		}
+		
+		if (size == 0) {
+			size = 20;//it's default page size
+		}
+		
+		int firstResult = page * size;
+		int maxResults = size;
+		
+		try {
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			List<BaseVO> persons = personService.findByCriteria(userInfo, criteria, firstResult, maxResults, sortDirection, sortCriterion);
+			int total = personService.countByCriteria(userInfo, criteria);
+			if (persons != null) {
+				result = new ArrayList<>(persons.size());
+				for (BaseVO baseVO : persons) {
+					PersonVO person = (PersonVO) baseVO;
+					PersonMsg msg = _toPersonMsg(person);
+					result.add(msg);
+				}
+			}
+			response.addIntHeader("total", total);
+		} catch (Exception e) {
+			log.error("error in findPersonsByCriteria", e);
+		}
+		return result;
+	}
+	
+	@RequestMapping(value = "/person_by_nationalid", method = RequestMethod.GET)
+	public PersonMsg loadPersonByNationalId(
+			@RequestHeader(value = "userName") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "nationalId") String nationalId) {
+		log.debug("Entering loadPersonByNationalId(nationalId={}, userName={}, ip={})", nationalId, userName, ip);
+
+		PersonMsg result = null;
+
+		try {
+
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			
+			PersonCriteria criteria = new PersonCriteria();
+			criteria.setNationalId(nationalId);
+
+			List<BaseVO> baseVOs = personService.findByCriteria(userInfo, criteria, 0, 1, SortDirectionEnum.Ascending, "createDate");
+			
+			if (baseVOs.size() == 1) {
+				result = _toPersonMsg((PersonVO) baseVOs.get(0)); 
+			}
+
+		} catch (Exception e) {
+			log.error("error in loadPersonByNationalId", e);
+		}
+
+		return result;
+	}
+	
+	@RequestMapping(value = "/person_by_uuid", method = RequestMethod.GET)
+	public PersonMsg loadPersonByUuid(
+			@RequestHeader(value = "userName") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "uuid") String uuid) {
+		log.debug("Entering loadPersonByUuid(uuid={}, userName={}, ip={})", uuid, userName, ip);
+		
+		PersonMsg result = null;
+		
+		try {
+			
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			
+			PersonCriteria criteria = new PersonCriteria();
+			criteria.setUuid(uuid);
+			
+			List<BaseVO> baseVOs = personService.findByCriteria(userInfo, criteria, 0, 1, SortDirectionEnum.Ascending, "createDate");
+			
+			if(baseVOs.size() == 1){
+				result = _toPersonMsg((PersonVO) baseVOs.get(0)); 
+			}
+			
+		} catch (Exception e) {
+			log.error("error in loadPersonByUuid", e);
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/persons_by_ids", method = RequestMethod.GET)
+	public List<PersonMsg> loadPersonsByIds(
+			@RequestHeader(value = "userName") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "ids") List<Long> ids) {
+		log.trace("Entering loadPersonsByIds(userName={}, ip={}, ids={})", userName, ip, ids);
+		List<PersonMsg> result = null;
+		try {
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			List<BaseVO> persons = personService.findByIds(userInfo, ids);
+			if (persons != null) {
+				result = new ArrayList<>(persons.size());
+				for (BaseVO baseVO : persons) {
+					PersonVO person = (PersonVO) baseVO;
+					result.add(_toPersonMsg(person));
+				}
+			}
+		} catch (Exception e) {
+			log.error("error in loadPersonsByIds", e);
+		}
+		return result;
+	}
+	
+	@RequestMapping(value = "/persons/index", method = RequestMethod.POST)
+	public Map<String, Object> index(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		UserInfo userInfo = null;
+		try {
+			userInfo = loadUserInfo(userName, ip);
+			personService.index(userInfo);
+			result.put("status", "success");
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		return result;
+	}
+	
+	@RequestMapping(value = "/organizations/{id}/persons/active", method = RequestMethod.GET)
+	public List<PersonMsg> searchActivePeopleInOrganization(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(required = false, value = "term") String term,
+			@PathVariable(value = "id") Long organizationId,
+			@RequestParam(value = "start") Integer start,
+			@RequestParam(value = "length") Integer length,
+			@RequestParam(value = "sort_direction") String sortDirection,
+			@RequestParam(value = "sort_criterion") String sortCriterion,
+			@Context HttpServletResponse response) throws ObjectNotFoundException, ParvanServiceException {
+		
+		log.debug("Entering searchActivePeopleInOrganization(userName={},term={}, organizationId={})", userName, term, organizationId);
+		List<PersonMsg> result = null;
+		UserInfo userInfo = null;
+		try {
+			userInfo = loadUserInfo(userName, ip);
+		} catch (Exception e) {
+			throw new ParvanServiceException(e);
+		}
+		SortDirectionEnum directionEnum = SortDirectionEnum.Descending;
+		if ( Validator.isNotNull(sortDirection) ) {
+			directionEnum = SortDirectionEnum.valueOf(sortDirection);
+		}
+		PageList<PersonVO> pagedPeople = personService.searchActivePeopleInOrganization(userInfo, organizationId, term, start,
+				length, directionEnum, sortCriterion);
+		List<PersonVO> people = pagedPeople.getElements();
+		if (pagedPeople != null) {
+			result = new ArrayList<>(people.size());
+			for (PersonVO person : people) {
+				PersonMsg msg = _toPersonMsg(person);
+				result.add(msg);
+			}
+		}
+		response.addIntHeader("total", pagedPeople.getTotal());
+		return result;
+	}
+	
+	@RequestMapping(value = "/persons/uuid/{uuid}", method = RequestMethod.GET)
+	public PersonMsg getPersonByUuid(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable(value = "uuid") String uuid) throws Exception {
+		log.debug("Entering getPersonByUuid(uuid={}, userName={}, ip={})", uuid, userName, ip);
+		
+		PersonMsg result = null;
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		result = _toPersonMsg( personService.getByUuid(userInfo, uuid) ); 
+		return result;
+	}
+	
+	@RequestMapping(value = "/persons/{id}", method = RequestMethod.GET)
+	public PersonMsg loadPersonById(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable long id) {
+		log.debug("Entering loadPersonById(id={}, userName={}, ip={})", id, userName, ip);
+		PersonMsg result = null;
+		try {
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			PersonVO personVO = (PersonVO) personService.get(userInfo, id);
+			if(personVO != null){
+				result = _toPersonMsg(personVO); 
+			}
+		} catch (Exception e) {
+			log.error("error in loadPersonById", e);
+		}
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param request
+	 * @param userName
+	 * @param ip
+	 * @param uuids
+	 * @return
+	 */
+	@RequestMapping(value = "/persons/names/uuids", method = RequestMethod.GET)
+	public Map<String, String> getPersonsByUuids(
+			HttpServletRequest request, 
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "uuids") String[] uuids) {
+
+		// LOG
+		log.debug("Entering getPersonsByUuids(userName={} , ip={} , uuids={})", userName, ip, uuids);
+		Map<String, String> personsMap = null;
+		List<String> uuidList = Arrays.asList(uuids);
+
+		try {
+
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			personsMap = personService.getPersonsByUuids(userInfo, uuidList);
+
+		} catch (Exception e) {
+			log.error("error occured while getting persons by uuids:" + uuidList, e);
+		}
+
+		// LOG
+		log.debug("Leaving findAgentNamesByIds(): ret={}", personsMap.values());
+		return personsMap;
+	}
+	
+	/**
+	 * 
+	 * @param userName
+	 * @param ip
+	 * @param term
+	 * @param start
+	 * @param length
+	 * @param sortDirection
+	 * @param sortCriterion
+	 * @param response
+	 * @return
+	 * @throws ObjectNotFoundException
+	 * @throws ParvanServiceException
+	 */
+	@RequestMapping(value = "/organizations", method = RequestMethod.GET)
+	public List<OrganizationMsg> findOrganizations(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip, 
+			@RequestParam(value = "term") String term,
+			@RequestParam(value = "start") Integer start, 
+			@RequestParam(value = "length") Integer length,
+			@RequestParam(value = "sort_direction") String sortDirection,
+			@RequestParam(value = "sort_criterion") String sortCriterion, 
+			@Context HttpServletResponse response) throws ObjectNotFoundException, ParvanServiceException {
+
+		log.debug("Entering findOrganizations(userName={},term={})", userName, term);
+		List<OrganizationMsg> result = null;
+		UserInfo userInfo = null;
+		try {
+			userInfo = loadUserInfo(userName, ip);
+		} catch (Exception e) {
+			throw new ParvanServiceException(e);
+		}
+		SortDirectionEnum directionEnum = SortDirectionEnum.Descending;
+		if (Validator.isNotNull(sortDirection)) {
+			directionEnum = SortDirectionEnum.valueOf(sortDirection);
+		}
+		OrganizationCriteria criteria = new OrganizationCriteria();
+		criteria.setCanonicalSearchName(term);
+		List<BaseVO> organizations = organizationService.findByCriteria(
+				userInfo, 
+				criteria, 
+				start.intValue(), 
+				length.intValue(),
+				directionEnum, 
+				sortCriterion);
+		
+		int total = organizationService.countByCriteria(userInfo, criteria);
+		
+		result = new ArrayList<>(organizations.size());
+		for (BaseVO vo : organizations) {
+			OrganizationVO organizationVO = (OrganizationVO) vo;
+			OrganizationMsg msg = _toOrganizationMsg(organizationVO);
+			result.add(msg);
+		}
+		response.addIntHeader("total", total);
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param userName
+	 * @param ip
+	 * @param id
+	 * @return
+	 * @throws ParvanServiceException 
+	 * @throws ObjectNotFoundException 
+	 */
+	@RequestMapping(value = "/organizations/{id}", method = RequestMethod.GET)
+	public OrganizationMsg getOrganization(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip, 
+			@PathVariable long id) throws Exception {
+		log.debug("Entering getOrganization(id={}, userName={}, ip={})", id, userName, ip);
+		OrganizationMsg result = null;
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		OrganizationVO vo = (OrganizationVO) organizationService.get(userInfo, id);
+		result = _toOrganizationMsg(vo);
+		return result;
+	}
+
+	/*@RequestMapping(value = "/persons", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> createPerson(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestBody Map<String, Object> data) throws Exception{
+		log.debug("Entering createPerson(data={}, userName={}, ip={})", data, userName, ip);
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		String mapAsJson = mapper.writeValueAsString(data);
+		
+		String appId = "SITE";
+		String appWideUniqueId = "SITE";
+		String type = "REAL";
+		Long organizationId = 31L;
+		
+		JSONObject organization = new JSONObject();
+		organization.put("id", organizationId);
+		
+		JSONObject jsonObject = new JSONObject(mapAsJson);
+		
+		jsonObject.put("appId", appId);
+		jsonObject.put("appWideUniqueId", appWideUniqueId);
+		jsonObject.put("type", type);
+		jsonObject.put("organization", organization);
+		
+		Map<String, Object> result = new HashMap<>();
+		
+		jsonObject = personService.createPerson(userInfo, jsonObject);
+		
+		result = mapper.readValue(jsonObject.toString(), Map.class);
+		
+		result.put("errorCode", "0");
+		result.put("errorMessage", "");
+		
+		return result;
+	}*/
+	
+	@RequestMapping(value = "/persons/personuser_by_uuid", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> getPersonAndUser(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "uuid") String uuid) throws Exception{
+		log.debug("Entering getPersonAndUser(uuid={}, userName={}, ip={})", uuid, userName, ip);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		
+		Map<String, Object> result = new HashMap<>();
+		
+		JSONObject jsonObject = personService.findPersonAndUserByUuid(userInfo, uuid);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		result = mapper.readValue(jsonObject.toString(), Map.class);
+		
+		result.put("errorCode", "0");
+		result.put("errorMessage", "");
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/persons", method = RequestMethod.POST)
+	public PersonMsg createPerson(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestBody PersonMsg personMsg) throws ParvanServiceException{
+		log.debug("Entering createPerson(userName={}, ip={},personMsg={})", userName, ip, personMsg);
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		OrganizationVO organizationVO = null;
+
+		if (Validator.isNotNull(personMsg.getOrganizationId())) {
+			organizationVO = (OrganizationVO) organizationService.get(userInfo, personMsg.getOrganizationId());
+		}
+		
+		PersonVO personVO = new PersonVO();
+		personVO.fromMsg(personMsg);
+		personVO.setOrganization(organizationVO);
+		personVO = (PersonVO) personService.save(userInfo, personVO);
+		
+		return _toPersonMsg(personVO);
+	}
+	
+	@RequestMapping(value = "/persons/delete", method = RequestMethod.POST)
+	public void deletePerson(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "uuid") String uuid) throws ParvanServiceException {
+		log.debug("Entering deletePerson(userName={}, ip={}, uuid={})", userName, ip, uuid);
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+
+		PersonVO personVO = personService.getByUuid(userInfo, uuid);
+
+		personService.delete(userInfo, personVO.getId());
+
+	}
+	
+	@RequestMapping(value = "/persons/{personuuid}/relatedfrom", method = RequestMethod.GET)
+	public List<PersonMsg> findRelatedFrom(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable(value = "personuuid") String personUuid,
+			@RequestParam(value = "relation_type", required = false) RelationType type, 
+			@RequestParam(value = "allowed_org_id") String allowedOrgId,
+			@RequestParam(value = "term", required = false) String term){
+		
+		log.trace("Entering findRelatedFrom(userName={}, ip={}, uuid={}, type={}, allowedOrgId={}, term={})", userName, ip, personUuid, type, allowedOrgId, term);
+		List<PersonMsg> personMsgs = null;
+		
+		try {
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			List<PersonVO> personVOs = personService.findRelatedFrom(userInfo,personUuid,type,term);
+			
+			if (personVOs != null) {
+				personMsgs = new ArrayList<>();
+				for (PersonVO personVO : personVOs) {
+					PersonMsg msg = _toPersonMsg(personVO);
+					personMsgs.add(msg);
+				}
+			}
+			
+		} catch (Exception e) {
+			log.error("error in findRelatedFrom", e);
+		}
+		return personMsgs;
+	}
+	
+	@RequestMapping(value = "/persons/{personuuid}/relatedto", method = RequestMethod.GET)
+	public List<PersonMsg> findRelatedTo(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable(value = "personuuid") String personUuid,
+			@RequestParam(value = "relation_type", required = false) RelationType type,
+			@RequestParam(value = "allowed_org_id") String allowedOrgId,
+			@RequestParam(value = "term", required = false) String term){
+		
+		log.trace("Entering findRelatedTo(userName={}, ip={}, uuid={}, type={}, allowedOrgId={}, term={})", userName, ip, personUuid, type, allowedOrgId, term);
+		List<PersonMsg> personMsgs = null;
+		
+		try {
+			UserInfo userInfo = loadUserInfo(userName, ip);
+			List<PersonVO> personVOs = personService.findRelatedTo(userInfo,personUuid,type,term);
+			
+			if (personVOs != null) {
+				personMsgs = new ArrayList<>();
+				for (PersonVO personVO : personVOs) {
+					PersonMsg msg = _toPersonMsg(personVO);
+					personMsgs.add(msg);
+				}
+			}
+			
+		} catch (Exception e) {
+			log.error("error in findRelatedTo", e);
+		}
+		return personMsgs;
+	}
+	
+	protected void proccessException(Exception e, Map<String, Object> result) {
+
+		if (e instanceof ParvanRecoverableException) {
+			ParvanRecoverableException recoverableException = (ParvanRecoverableException) e;
+
+			Exception cause = (Exception) recoverableException.getCause();
+
+			if (recoverableException.getErrorCode().equals(
+					ErrorCode.DATA_IS_INVALID)) {
+				String invalidField = null;
+				if (cause != null
+						&& cause instanceof ConstraintViolationException) {
+					invalidField = ((ConstraintViolationException) cause)
+							.getConstraintViolations().iterator().next()
+							.getPropertyPath().toString();
+
+				} else {
+					invalidField = recoverableException.getMessage();
+				}
+				result.put("invalidField", invalidField);
+				result.put("status", "ValidationException");
+			} else if (recoverableException.getErrorCode().equals(
+					ErrorCode.OBJECT_EXIST)) {
+				result.put("status", "ObjectExistsException");
+			} else if (recoverableException.getErrorCode().equals(
+					ErrorCode.DATA_DUPLICATE)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error.data-duplicate", getMessage(recoverableException.getMessage(), (Object) null)));
+			} else if (recoverableException.getErrorCode().equals(
+					ErrorCode.FIELD_IS_EMPTY)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error-required", getMessage(recoverableException.getMessage(), (Object) null)));
+			} else if (recoverableException.getErrorCode().equals(
+					ErrorCode.SHIPMENT_INVALID_STATE_TRANSITION)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error-invalid-shipment-state", getMessage("trackstate." + StringUtil.upperCase(recoverableException.getMessage()), (Object) null)));
+			} else {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorMessage", recoverableException.getMessage());
+			}
+		} else {
+			log.error("error in proccessException", e);
+			result.put("status", "fail");
+		}
+	}
+
+	private PersonMsg _toPersonMsg(PersonVO vo) {
+		PersonMsg msg = new PersonMsg();
+		
+		msg.setUuid(vo.getUuid());
+		msg.setAppWideUniqueId(vo.getAppWideUniqueId());
+		msg.setPrefix(vo.getPrefix());	
+		msg.setFirstNameLocal(vo.getFirstNameLocal());	
+		msg.setFirstNameEn(vo.getFirstNameEn());	
+		msg.setMiddleNameLocal(vo.getMiddleNameLocal());	
+		msg.setMiddleNameEn(vo.getMiddleNameEn());	
+		msg.setLastNameLocal(vo.getLastNameLocal());	
+		msg.setLastNameEn(vo.getLastNameEn());	
+		msg.setSuffixLocal(vo.getSuffixLocal());	
+		msg.setSuffixEn(vo.getSuffixEn());	
+		msg.setNickNameLocal(vo.getNickNameLocal());	
+		msg.setNickNameEn(vo.getNickNameEn());	
+		msg.setNationalId(vo.getNationalId());	
+		msg.setEconomicCode(vo.getEconomicCode());
+		msg.setRemarks(vo.getRemarks());	
+		msg.setActive(vo.isActive());
+		if (vo.getType() != null) {
+			msg.setType(PersonManagementEnums.PersonType.valueOf(vo.getType().name()));
+		}
+		if (vo.getPrimaryContactInfo() != null) {
+			msg.setPrimaryContactInfo( _toContactInfoMsg(vo.getPrimaryContactInfo()) );
+		}
+		return msg;
+	}
+
+	private ContactInfoMsg _toContactInfoMsg(ContactInfoVO vo) {
+		ContactInfoMsg msg = new ContactInfoMsg();
+		msg.setTel(vo.getTel());
+		msg.setFax(vo.getFax());
+		msg.setMobile(vo.getMobile());
+		msg.setEmail(vo.getEmail());
+		msg.setCountryCode(vo.getCountryCode());
+		msg.setCountryNameEn(vo.getCountryNameEn());
+		msg.setCountryNameLocal(vo.getCountryNameFa());
+		msg.setProvinceCode(vo.getProvinceCode());
+		msg.setProvinceNameEn(vo.getProvinceNameEn());
+		msg.setProvinceNameLocal(vo.getProvinceNameFa());
+		msg.setCityCode(vo.getCityCode());
+		msg.setCityNameEn(vo.getCityNameEn());
+		msg.setCityNameLocal(vo.getCityNameFa());
+		msg.setPostalCode(vo.getPostalCode());
+		msg.setAddress(vo.getAddress());
+		msg.setContactPersonName(vo.getContactPersonName());
+		msg.setContactPersonNationalId(vo.getContactPersonNationalId());
+		msg.setPrimary(vo.isPrimary());
+		return msg;
+	}
+	
+	private OrganizationMsg _toOrganizationMsg(OrganizationVO vo) {
+		OrganizationMsg msg = new OrganizationMsg();
+		msg.setId(vo.getId());
+		msg.setNameEn(vo.getNameEn());
+		msg.setNameLocal(vo.getNameLocal());
+		return msg;
+	}
+}
+	

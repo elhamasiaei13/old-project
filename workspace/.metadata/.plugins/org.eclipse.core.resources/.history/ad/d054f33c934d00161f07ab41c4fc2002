@@ -1,0 +1,100 @@
+package com.parvanpajooh.issuemanager.service.impl;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Lock;
+import javax.ejb.LockType;
+import javax.ejb.Schedule;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+import javax.ejb.Timer;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.issuemanager.common.exceptions.SendMail;
+import com.parvanpajooh.issuemanager.dao.MemberDao;
+import com.parvanpajooh.issuemanager.dao.TaskDao;
+import com.parvanpajooh.issuemanager.dao.TaskMemberRelationDao;
+import com.parvanpajooh.issuemanager.model.Task;
+import com.parvanpajooh.issuemanager.model.TaskMemberRelation;
+import com.parvanpajooh.issuemanager.model.enums.EmailEnum;
+import com.parvanpajooh.issuemanager.model.enums.TaskMemberRelationEnum;
+
+@Singleton
+@Lock(LockType.READ) // allows timers to execute in parallel
+@Startup
+public class TimingJob {
+	/**
+	 * Log variable for all child classes.
+	 */
+	private static final Logger log = LoggerFactory.getLogger(TimingJob.class);
+
+	private static boolean SEND_EMAIL__IS_RUNNING = false;
+
+	@Inject
+	private TaskDao taskDao;
+
+	@Inject
+	private TaskMemberRelationDao taskMemberRelationDao;
+
+
+	public TimingJob() {
+		log.debug("LostAndFound Job Created.");
+	}
+
+	@Schedule(minute = "*/10", hour = "*", info = "MANIFEST_INDEX", persistent = false)
+	public void sendEmail(Timer timer) {
+		log.debug("start running job indexManifest [{}]", LocalDateTime.now());
+
+		try {
+			if (SEND_EMAIL__IS_RUNNING) {
+				log.debug("ignoring timer due to currently running job. [{}]");
+
+			} else {
+				try {
+					// run job
+					SEND_EMAIL__IS_RUNNING = true;
+					SendMail mail = new SendMail();
+					List<String> mails = new ArrayList<>();
+					List<Task> tasks = taskDao.findByEmailStatus(EmailEnum.NEED);
+					for (Task task : tasks) {
+						List<TaskMemberRelation> taskMemberRelation = taskMemberRelationDao.findByTaskId(task.getId(), TaskMemberRelationEnum.WATCHING);
+						for (TaskMemberRelation taskMembRelation : taskMemberRelation) {
+							mails.add(taskMembRelation.getMember().getEmail());
+						}
+					}
+
+					String[] idList = new String[mails.size()];
+					idList = mails.toArray(idList);
+					mail.send(idList,
+    				"test1@mahmadar.com", 
+    				"ismt150098", 
+    				"mail.parvanpajooh.com", 
+    				"587", 
+    				"false", 
+    				"true", 
+    				"-");
+					
+					
+					for(Task task : tasks){
+						task.setEmailStatus(EmailEnum.SENT);
+						taskDao.save(task);
+					}
+
+				} catch (ParvanDaoException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+		} finally {
+			SEND_EMAIL__IS_RUNNING = false;
+		}
+
+	}
+}

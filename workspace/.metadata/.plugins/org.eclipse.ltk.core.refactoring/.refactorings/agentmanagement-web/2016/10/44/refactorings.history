@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;ControllerInterceptors.java&apos; to &apos;job-management-web/src/main/java/com.parvanpajooh.jobmanagement.mvc&apos;&#x0A;- Original project: &apos;agentmanagement-web&apos;&#x0A;- Destination element: &apos;job-management-web/src/main/java/com.parvanpajooh.jobmanagement.mvc&apos;&#x0A;- Original element: &apos;com.parvanpajooh.agentmanagement.mvc.ControllerInterceptors.java&apos;" description="Copy compilation unit" destination="=job-management-web/src\/main\/java&lt;com.parvanpajooh.jobmanagement.mvc" element1="/src\/main\/java&lt;com.parvanpajooh.agentmanagement.mvc{ControllerInterceptors.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1477205753544" units="1" version="1.0"/>
+</session>

@@ -1,0 +1,24 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.personmanagement.model;
+
+/**
+ * @author MO
+ *
+ */
+public final class PersonManagementEnums {
+	
+	public enum PersonType {
+		REAL, LEGAL;
+	}
+	
+	public enum Gender {
+		MALE, FEMALE, OTHER;
+	}
+	
+	public enum RelationType {
+		BRANCH, BROKER;
+	}
+
+}

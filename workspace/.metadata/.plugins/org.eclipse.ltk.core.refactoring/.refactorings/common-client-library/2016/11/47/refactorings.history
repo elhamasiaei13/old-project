@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;VoucherRowMsg.java&apos; to &apos;common-client-library/src/main/java/com.parvanpajooh.client.accounting.model&apos;&#x0A;- Original project: &apos;common-client-library&apos;&#x0A;- Destination element: &apos;common-client-library/src/main/java/com.parvanpajooh.client.accounting.model&apos;&#x0A;- Original element: &apos;com.parvanpajooh.client.accounting.model.VoucherRowMsg.java&apos;" description="Copy compilation unit" destination="/src\/main\/java&lt;com.parvanpajooh.client.accounting.model" element1="/src\/main\/java&lt;com.parvanpajooh.client.accounting.model{VoucherRowMsg.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1479106891660" units="1" version="1.0"/>
+</session>

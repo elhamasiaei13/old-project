@@ -1,0 +1,19 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.service.adapter;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.siteservices.model.vo.UserVO;
+
+/**
+ * @author dev-03
+ *
+ */
+public interface IdentityManagement2ServiceAdapter {
+
+	public UserVO createUser(UserVO userVO) throws ParvanServiceException;
+
+	public UserVO getUserByUuid(String uuid) throws ParvanServiceException;
+	
+}

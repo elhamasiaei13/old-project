@@ -1,0 +1,20 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.service.adapter;
+
+import java.util.List;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+
+/**
+ * @author dev-03
+ *
+ */
+public interface ComplaintManagementServiceAdapter {
+
+	public CategoryComplaintVO getCategoryComplaint(Long id) throws ParvanServiceException;
+	
+	public List<CategoryComplaintVO> findCategoryComplaintsBy(String term,int page,int size) throws ParvanServiceException;
+	
+}

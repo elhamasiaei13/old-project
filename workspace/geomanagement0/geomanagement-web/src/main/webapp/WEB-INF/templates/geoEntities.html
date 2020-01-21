@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	layout:decorator="filter-layout" ddl:bundle-includes="bootstrapValidator,select2">
+
+	<head>
+		<title>Geo entity List</title>
+	</head>
+
+	<body th:with="rightMenu='admin', subRightMenu='geoEntities'">
+		<section layout:fragment="top-header" class="fixed-header">
+			<div class="ui-header-image pull-left">
+            	<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/geomanagement-web/resources/images/globe-o.png" style="width: 48px; height: 48px;" />
+           	</div>
+            <div class="ui-header-title">
+                <div class="split-left">
+                    <h3>
+                        <small>Search</small>
+                    </h3>
+                    <h3>Geo Entities</h3>
+                </div>
+                <div class="split-right">
+                	<a data-toggle="modal" onclick="createGeoEntity();" class="btn btn-success" >
+						<i class="fa fa-plus">&nbsp;&nbsp;</i><span th:text="#{geoEntity.create}">جدید</span>
+					</a>
+                </div>
+            </div>
+		</section>
+		
+		<!-- Main content -->
+		<!-- BODY -->
+		<section class="content" layout:fragment="content">
+			<div class="box box-primary">
+				<div class="box-header">
+					<h3 class="box-title" th:text="#{search}">Search</h3>
+	                <div class="box-tools pull-right">
+	                	<button title="" data-widget="collapse" class="btn btn-primary btn-xs" ><i class="fa fa-minus"></i></button>
+	               	</div>
+               	</div>
+               	<div class="box-body" style="display: block;">
+                   	<dy:form entity="GeoEntity" form="search" type="search"/>
+               	</div><!-- /.box-body -->
+           	</div>
+           	
+			<div class="box">
+				<div class="box-body table-responsive">
+					<dy:table entity="GeoEntity" table="list" customSearch="true"/>
+				</div>
+			</div>
+			
+			<div class="modal fade" id="createGeoEntityModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" th:text="#{geoEntity.create}">جدید</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <dy:form entity="GeoEntity" form="create" type="create"/>
+		                </div>
+		                <div class="modal-footer checkbox">
+		                	<label class="create-another" for="createGeoEntity-create-another">
+		                		<input type="checkbox" id="createGeoEntity-create-another" value="true"/>
+		                		<span th:text="#{create-another}" th:remove="tag">Create another</span>
+		                	</label>
+		                	
+		                    <button type="button" class="btn btn-primary" th:text="#{button.save}" id="createGeoEntityBtn">Save</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+			
+			<div class="modal fade" id="modifyGeoEntityModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" th:text="#{geoEntity.modify}">ویرایش اطلاعات</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <dy:form entity="GeoEntity" form="modify" type="modify"/>
+		                </div>
+		                <div class="modal-footer">
+		                    <button type="button" class="btn btn-primary" th:text="#{button.save}" id="modifyGeoEntityBtn">Save</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+			
+			<div class="modal fade" id="deleteGeoEntityModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" th:text="#{geoEntity.delete}">حذف</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <dy:form entity="GeoEntity" form="delete" type="delete"/>
+		                </div>
+		                <div class="modal-footer">
+		                    <button type="button" class="btn btn-primary" th:text="#{button.delete}" id="deleteGeoEntityBtn">Delete</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+		    
+		</section>
+		
+		<th:block layout:fragment="javascripts">
+			<script  th:inline="javascript">
+				var titleSelect = '<span class="label label-info" th:text="#{select}" th:remove="tag"></span>';
+			
+		   		/*<![CDATA[*/
+			  	function getGeoEntityExtraParams() {
+			  		return {
+			  		    "data" : function(data){
+			  				customPush(data, 'code', $('#codeFilter').val());
+			  				customPush(data, 'parent.id', $('#parentidFilter').val());
+							customPush(data, 'type.code', $('#typecodeFilter').val());
+							customPush(data, 'shortCode', $('#shortCodeFilter').val());
+							customPush(data, 'nameFa', $('#nameFaFilter').val());
+							customPush(data, 'nameEn', $('#nameEnFilter').val());
+			  		    }
+			  		};
+				}
+		   	
+			  	function selectAsParent(data, type, full) {
+			  		return '<a title="'+titleSelect+'" href="javascript:;" onclick="selectGeoEntity('+full.id+')">'+full.nameFa+'</a>';
+			  	}
+			  	
+			  	function selectGeoEntity(id){
+			  		$('#parentidFilter').val(id);
+			  		$('#parentidFilter').select2('val', id);
+			  		oTable_GeoEntityTable.ajax.reload();
+			  	}
+			  	
+			  	function createGeoEntityModalOnShow(){
+			  		/*$.getJSON('/rateAndRoute-web/admin/geoType/' + id).done(function(data) {
+			  			if(data.status == 'success'){
+			  				
+			  			}
+			  			else{
+			  				console.debug('failed');
+			  			}
+			  		})
+			  		.fail(failAjax);*/
+			  		
+			  		$('#parentidCreate').select2('val', $('#parentidFilter').val());
+			  	}
+				/*]]>*/
+			</script>
+		</th:block>
+	</body>
+</html>

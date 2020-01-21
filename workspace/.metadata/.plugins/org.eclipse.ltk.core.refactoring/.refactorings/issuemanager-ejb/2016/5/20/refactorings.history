@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;task&apos; in &apos;com.parvanpajooh.issuemanager.service.impl.CommentLocalServiceImpl.delete(...)&apos; to &apos;comment&apos;&#x0A;- Original project: &apos;issuemanager-ejb&apos;&#x0A;- Original element: &apos;com.parvanpajooh.issuemanager.service.impl.CommentLocalServiceImpl.delete(UserInfo, Long).task&apos;&#x0A;- Renamed element: &apos;task&apos;&#x0A;- Update references to refactored element" description="Rename local variable &apos;task&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src\/main\/java&lt;com.parvanpajooh.issuemanager.service.impl{CommentLocalServiceImpl.java[CommentLocalServiceImpl~delete~QUserInfo;~QLong;@task!5089!5108!5097!5100!QComment;!0!false" name="comment" references="true" stamp="1463203974153" version="1.0"/>
+</session>

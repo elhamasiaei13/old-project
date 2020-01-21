@@ -1,0 +1,36 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.geomanagement.service;
+
+import java.util.List;
+
+import com.parvanpajooh.client.geomanagement.model.CityInfoMsg;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+/**
+ * @author MO
+ *
+ */
+public interface GeoManagementApi {
+	
+	@GET("v1/cities/{shortCode}")
+	public Call<CityInfoMsg> getCityByShortCode(@Path(value = "shortCode") String shortCode);
+	
+	@GET("v1/cities/node/{nodeId}")
+	public Call<CityInfoMsg> getCityByNodeId(@Path(value = "nodeId") Long id);
+	
+	@GET("v1/cities")
+	public Call<List<CityInfoMsg>> findCityByNameOrShortCode(
+			@Query(value = "parent_code") String parentCode,
+			@Query(value = "term") String term,
+			@Query(value = "start") Integer start,
+			@Query(value = "length") Integer length,
+			@Query(value = "sort_direction") String sortDirection,
+			@Query(value = "sort_criterion") String sortCriterion);
+
+}

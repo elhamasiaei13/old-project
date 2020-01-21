@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:ddl="http://www.thymeleaf.org/dandelion"
+	xmlns:idm="http://www.parvanpajooh/thymeleaf/idm"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+
+	<head ddl:bundle-includes="bootstrap3,font-awesome,ionicons,icheck,slimscroll,cookie,pnotify3,ecargo,datatables,date" ddl:bundle-excludes="bootstrap2" ddl:asset-css-excludes="datatables">
+		<title >/identitymanagement2-web</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		
+		<style>
+		@font-face {
+		    font-family: "0 Bardiya";
+		    src: url('/identitymanagement2-web/resources/fonts/bardiya.eot'); /* IE9 Compat Modes */
+		    src: url('/identitymanagement2-web/resources/fonts/bardiya.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ 
+		    url('/identitymanagement2-web/resources/fonts/bardiya.woff') format('woff'), /* Modern Browsers */ 
+		    url('/identitymanagement2-web/resources/fonts/bardiya.ttf') format('truetype'), /* Safari, Android, iOS */ 
+		    url('/identitymanagement2-web/resources/fonts/bardiya.svg.svg#svgFontName') format('svg'); /* Legacy iOS */
+		    font-weight: normal;
+		    font-style: normal;
+		}
+		
+		@font-face {
+		    font-family: "B Bardiya";
+		    src: url('/identitymanagement2-web/resources/fonts/bbardiyabold.eot'); /* IE9 Compat Modes */
+		    src: url('/identitymanagement2-web/resources/fonts/bbardiyabold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ 
+		    url('/identitymanagement2-web/resources/fonts/bbardiyabold.woff') format('woff'), /* Modern Browsers */ 
+		    url('/identitymanagement2-web/resources/fonts/bbardiyabold.ttf') format('truetype'), /* Safari, Android, iOS */ 
+		    url('/identitymanagement2-web/resources/fonts/bbardiyabold.svg.svg#svgFontName') format('svg'); /* Legacy iOS */
+		    font-weight: bold;
+		    font-style: normal;
+		}
+		
+		@font-face {
+		    font-family: "B Mitra2";
+		    src: url('/identitymanagement2-web/resources/fonts/bmitrabold-webfont.eot'); /* IE9 Compat Modes */
+		    src: url('/identitymanagement2-web/resources/fonts/bmitrabold-webfont.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ 
+		    	url('/identitymanagement2-web/resources/fonts/bmitrabold-webfont.woff') format('woff'), /* Modern Browsers */ 
+		    	url('/identitymanagement2-web/resources/fonts/bmitrabold-webfont.ttf') format('truetype'), /* Safari, Android, iOS */ 
+		    	url('/identitymanagement2-web/resources/fonts/bmitrabold-webfont.svg.svg#svgFontName') format('svg'); /* Legacy iOS */
+		    font-weight: bold;
+		    font-style: normal;
+		}
+		
+		</style>
+			
+		<th:block ddl:placeholder-replace="css"/>
+			
+	    <!-- JQuery -->
+		<script src="../../resources/lib/jquery-2.1.4/jQuery-2.1.4.min.js" th:src="@{/resources/lib/jquery-2.1.4/jQuery-2.1.4.min.js}"></script>
+			
+		<!-- Just for debugging purposes. Don't actually copy this line! -->
+	    <!--[if lt IE 9]><script src="../../js/ie8-responsive-file-warning.js"></script><![endif]-->
+	    
+		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]>
+	      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+	      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+	    <![endif]-->
+	    
+	    <script th:inline="javascript">
+		var messages = {
+				'parsererror':'<span th:text="#{errorCode.parsererror}" th:remove="tag">parsererror</span>',
+				'timeout':'<span th:text="#{errorCode.timeout}" th:remove="tag">timeout</span>',
+				'302':'<span th:text="#{errorCode.302}" th:remove="tag">302</span>',
+				'404':'<span th:text="#{errorCode.404}" th:remove="tag">404</span>',
+				'403':'<span th:text="#{errorCode.403}" th:remove="tag">403</span>',
+				'503':'<span th:text="#{errorCode.503}" th:remove="tag">503</span>',
+				<span th:utext="${session.errorCodes}" th:remove="tag"></span>
+				};
+		var systemName = '<span  th:remove="tag">/identitymanagement2-web</span>';
+		var username = '<span th:text="${#authentication.authenticated} ? ${#authentication.principal.userInfo.userName} : ''" th:remove="tag">guest</span>';
+		var userLocale = '<span th:text="${#authentication.authenticated} ? ${#authentication.principal.userInfo.locale} : ''" th:remove="tag">fa_IR</span>';
+		var userLanguage = '<span th:text="${#authentication.authenticated} ? ${#authentication.principal.userInfo.language} : ''" th:remove="tag">fa</span>';
+		var userCalendar = '<span th:text="${#authentication.authenticated} ? ${#authentication.principal.userInfo.calendar} : ''" th:remove="tag">jalali</span>';
+		var userCalendarLanguage = userCalendar == 'jalali' ? 'fa' : 'en';
+		var dateFormat = 'YYYY-MM-DD';
+		var datetimeFormat = 'YYYY-MM-DD HH:mm';
+		var timeFormat = 'HH:mm';
+		</script>
+	</head>
+
+	<body class="wysihtml5-supported  pace-done skin-black fixed">
+		<div class="wrapper row-offcanvas row-offcanvas-left">
+		
+			<!-- header logo: style can be found in header.less -->
+		    <header class="main-header">
+		        <a href="#" th:href="@{/}" class="logo" >
+		            <!-- Add the class icon to your logo image or logo icon to add the margining -->
+		            IDM
+		        </a>
+		        <!-- Header Navbar: style can be found in header.less -->
+		        <nav class="navbar navbar-static-top" role="navigation">
+		            <!-- Sidebar toggle button-->
+		            <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+            			<span class="sr-only">Toggle navigation</span>
+          			</a>
+		            <div class="navbar-custom-menu" th:if="${#authentication.authenticated}">
+		                <ul class="nav navbar-nav">
+		                    <li class="dropdown" sec:authorize="${hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')}">
+		                    	<a href="#" class="dropdown-toggle" data-toggle="dropdown" id="notifyUsers">
+		                    		 <i class="fa fa-bullhorn"></i>
+		                    		 Notify
+		                    	</a>
+		                    </li>
+		                    <!-- User Account: style can be found in dropdown.less -->
+		                    <li class="dropdown user user-menu">
+		                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+		                            <i class="glyphicon glyphicon-user"></i>
+		                            <span>
+		                            	<span th:text="${#authentication.principal.userInfo.fullName}">User Name</span>
+		                            	<span sec:authorize="${hasRole('ROLE_PREVIOUS_ADMINISTRATOR')}">
+									       (Impersonated)
+									    </span>
+		                                <i class="caret"></i>
+		                            </span>
+		                        </a>
+		                        <ul class="dropdown-menu">
+		                            <!-- User image -->
+		                            <li class="user-header bg-light-blue">
+		                                <img src="/identitymanagement2-web/resources/images/profile.png" th:src="@{/resources/images/profile.png}" class="img-circle" alt="User Image" />
+		                                <p>
+		                                    <span th:text="${#authentication.principal.userInfo.fullName}">User Name</span>
+		                                </p>
+		                            </li>
+		                            <!-- Menu Footer-->
+		                            <li class="user-footer">
+		                                <div class="pull-left">
+		                                    <a href="/identityManagment-web/user/profile" class="btn btn-default btn-flat" th:text="profile">Profile</a>
+		                                </div>
+		                                <span sec:authorize="${hasRole('ROLE_PREVIOUS_ADMINISTRATOR')}">
+			                                <div class="pull-right">
+			                                    <a href="/" th:href="@{/switchuserlogout}" class="btn btn-default btn-flat" th:text="switchuser-logout">Exit</a>
+			                                </div>
+									    </span>
+		                                <div class="pull-right">
+		                                    <a href="/" th:href="@{/logout}" class="btn btn-default btn-flat" th:text="sign-out">Sign out</a>
+		                                </div>
+		                            </li>
+		                        </ul>
+		                    </li>
+		                </ul>
+		            </div>
+		            <div th:if="!${#lists.isEmpty(application.messages)}">
+	                   	<div class="notify-container bg-yellow text-center">
+	                   		<span th:each="msg : ${application.messages}" th:text="${msg}">message 1</span>
+	                   	</div>
+	                </div>
+		        </nav>
+		    </header>
+
+
+        <div class="modal fade" id="changeUserPasswordModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">جدید</h4>
+                    </div>
+                    <div class="modal-body">
+                        <dy:form entity="User" form="create" type="create" />
+                    </div>
+                    <div class="modal-footer checkbox">
+
+                        <button type="button" class="btn btn-primary" id="createUserBtn">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+		
+	        <!-- Left side column. contains the logo and sidebar -->
+	        <aside class="main-sidebar sidebar-offcanvas">
+	            <!-- sidebar: style can be found in sidebar.less -->
+	            <section class="sidebar" >
+	                <!-- Sidebar user panel -->
+	                <div class="user-panel" th:if="${#authentication.authenticated}">
+	                    <div class="pull-left image">
+	                        <img src="/identitymanagement2-web/resources/images/profile.png" th:src="@{/resources/images/profile.png}" class="img-circle" alt="User Image" />
+	                    </div>
+	                    <div class="pull-left info">
+	                        <p th:text="${#authentication.principal.userInfo.fullName}">User name</p>
+	                        <a id="onlineStatus"></a>
+	                    </div>
+	                </div>
+
+	                <!-- sidebar menu: : style can be found in sidebar.less -->
+	                
+	                <div th:include="sidebar" th:remove="tag"></div>
+	                
+	                <br/>
+	                <br/>
+	            </section>
+	            <!-- /.sidebar -->
+	        </aside>
+
+			<div class="content-wrapper">
+	            <!-- Content Header (Page header) -->
+	            <section class="content-header ui-header" layout:fragment="content-header">
+	            
+	            	<!-- title placeholder -->
+	            	<section layout:fragment="top-header">
+		                
+	                </section>
+	            
+	            </section>
+	
+	            <!-- Main content -->
+	            <section class="content" layout:fragment="content">
+	                	
+	            </section><!-- /.content -->
+	        </div><!-- /.content-wrapper -->
+	    </div><!-- ./wrapper -->
+	    
+	    <footer class="main-footer">
+	        <div class="pull-right hidden-xs">
+	          <p>
+	          	Coded with <i class="fa fa-heart text-red"></i> + <i class="fa fa-coffee"></i> at <b><a href="http://parvanpajooh.com">Parvan Pajooh</a></b>
+	          </p>
+	        </div>
+	        <strong><i class="fa fa-lightbulb-o text-yellow"></i></strong>
+      	</footer>
+	    
+	    <div class="modal fade" id="sendNotifyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;" sec:authorize="${hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')}">
+	        <div class="modal-dialog">
+	            <div class="modal-content">
+	                <div class="modal-header">
+	                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+	                    <h4 class="modal-title">Send Notify To Online Users</h4>
+	                </div>
+	                <div class="modal-body">
+	                	<textarea rows="5" cols="80" name="message" style="height: 100px;"></textarea>
+	                </div>
+	                <div class="modal-footer">
+	                    <button type="button" class="btn btn-primary" id="sendNotifyBtn">Send</button>
+	                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal fade" id="showNotifyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+	        <div class="modal-dialog">
+	            <div class="modal-content">
+	                <div class="modal-header">
+	                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+	                    <h4 class="modal-title">Message from admin</h4>
+	                </div>
+	                <div class="modal-body">
+	                	
+	                </div>
+	                <div class="modal-footer">
+	                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <fieldset>
+	    	<input type="hidden" id="user-locale" name="user-locale" th:value="${#authentication.authenticated} ? ${#authentication.principal.userInfo.locale} : ''" />
+	    </fieldset>
+	    
+	    <!-- Page JavaScripts -->
+        <th:block layout:fragment="javascripts"/>
+        
+        <th:block ddl:placeholder-replace="js"/>
+        
+        <script>
+
+	    if(userCalendar == 'jalali'){
+			window.Date = pDate;
+		}
+
+	    $(document).ready(function(){
+		    $('.datePicker').datetimepicker({
+				locale: userCalendarLanguage,
+				format: dateFormat,
+				useCurrent: false
+			});
+			
+		    $('.timePicker').datetimepicker({
+				locale: userCalendarLanguage,
+				format: timeFormat,
+				useCurrent: false
+			});
+
+		    $('.datetimePicker,.dateTimePicker').datetimepicker({
+				locale: userCalendarLanguage,
+				format: datetimeFormat,
+				inline: false,
+				useCurrent: false
+			});
+
+		    $('.persianDatePicker').datetimepicker({
+		    	locale: 'fa',
+				format: dateFormat,
+				useCurrent: false
+			});
+			
+		    $('.persianDatetimePicker').datetimepicker({
+				locale: 'fa',
+				format: datetimeFormat,
+				useCurrent: false
+			});
+	    });
+	    </script>
+	</body>
+
+</html>

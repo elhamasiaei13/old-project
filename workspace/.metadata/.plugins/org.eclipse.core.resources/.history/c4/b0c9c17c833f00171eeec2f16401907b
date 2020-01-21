@@ -1,0 +1,215 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.geomanagement.model;
+
+import java.util.List;
+
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.ProductStatus;
+
+/**
+ * @author mehrdad
+ * 
+ */
+public class ProductMsg extends BaseMsg {
+
+    /**
+	 * 
+	 */
+    private static final long serialVersionUID = -6610026251898093167L;
+
+    private Long id;
+    
+    private String name;
+
+    private String code;
+    
+    private List<String> distributeFreightNodeTypes;
+    
+    private List<String> collectFreightNodeTypes;
+    
+    private Boolean collectDistributeCondition;
+    
+    private Boolean customerBase;
+    
+    private Boolean active;
+    
+    private RateAndRouteEnums.ProductStatus status;
+    
+    private Integer productVersion;
+    
+    private Long generationId;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+    	return name;
+    }
+
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+    	this.name = name;
+    }
+
+    /**
+     * @return the code
+     */
+    public String getCode() {
+    	return code;
+    }
+
+    /**
+     * @param code
+     *            the code to set
+     */
+    public void setCode(String code) {
+    	this.code = code;
+    }
+
+    /**
+	 * @return the distributeFreightNodeTypes
+	 */
+	public List<String> getDistributeFreightNodeTypes() {
+		return distributeFreightNodeTypes;
+	}
+
+	/**
+	 * @param distributeFreightNodeTypes the distributeFreightNodeTypes to set
+	 */
+	public void setDistributeFreightNodeTypes(
+			List<String> distributeFreightNodeTypes) {
+		this.distributeFreightNodeTypes = distributeFreightNodeTypes;
+	}
+
+	/**
+	 * @return the collectFreightNodeTypes
+	 */
+	public List<String> getCollectFreightNodeTypes() {
+		return collectFreightNodeTypes;
+	}
+
+	/**
+	 * @param collectFreightNodeTypes the collectFreightNodeTypes to set
+	 */
+	public void setCollectFreightNodeTypes(List<String> collectFreightNodeTypes) {
+		this.collectFreightNodeTypes = collectFreightNodeTypes;
+	}
+
+	/**
+	 * @return the collectDistributeCondition
+	 */
+	public Boolean getCollectDistributeCondition() {
+		return collectDistributeCondition;
+	}
+
+	/**
+	 * @param collectDistributeCondition the collectDistributeCondition to set
+	 */
+	public void setCollectDistributeCondition(Boolean collectDistributeCondition) {
+		this.collectDistributeCondition = collectDistributeCondition;
+	}
+
+	/**
+	 * @return the customerBase
+	 */
+	public Boolean getCustomerBase() {
+		return customerBase;
+	}
+
+	/**
+	 * @param customerBase the customerBase to set
+	 */
+	public void setCustomerBase(Boolean customerBase) {
+		this.customerBase = customerBase;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the status
+	 */
+	public ProductStatus getStatus() {
+		return status;
+	}
+
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(ProductStatus status) {
+		this.status = status;
+	}
+
+	/**
+	 * @return the productVersion
+	 */
+	public Integer getProductVersion() {
+		return productVersion;
+	}
+
+	/**
+	 * @param productVersion the productVersion to set
+	 */
+	public void setProductVersion(Integer productVersion) {
+		this.productVersion = productVersion;
+	}
+
+	/**
+	 * @return the generationId
+	 */
+	public Long getGenerationId() {
+		return generationId;
+	}
+
+	/**
+	 * @param generationId the generationId to set
+	 */
+	public void setGenerationId(Long generationId) {
+		this.generationId = generationId;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "ProductMsg [id=" + getId() + ", name=" + name + ", code=" + code
+				+ ", distributeFreightNodeTypes=" + distributeFreightNodeTypes
+				+ ", collectFreightNodeTypes=" + collectFreightNodeTypes
+				+ ", collectDistributeCondition=" + collectDistributeCondition
+				+ ", customerBase=" + customerBase + ", active=" + active
+				+ ", status=" + status + ", productVersion=" + productVersion
+				+ ", generationId=" + generationId + "]";
+	}
+}

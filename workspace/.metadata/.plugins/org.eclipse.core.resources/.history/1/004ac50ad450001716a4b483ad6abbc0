@@ -1,0 +1,88 @@
+package com.parvanpajooh.siteservices.model.vo;
+
+import com.parvanpajooh.client.complaintmanagement.model.ComplaintCategoryMsg;
+import com.parvanpajooh.client.complaintmanagement.model.ComplaintMsg;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseDto;
+import com.parvanpajooh.commons.util.Validator;
+
+public class ComplaintCategoryVO extends BaseDto {
+
+	private static final long serialVersionUID = 1L;
+
+	private Long id;
+
+	private String code;
+
+	private String nameFa;
+
+	private String nameEn;
+
+	private String description;
+
+	private ComplaintCategoryVO parentCategoryDto;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getNameFa() {
+		return nameFa;
+	}
+
+	public void setNameFa(String nameFa) {
+		this.nameFa = nameFa;
+	}
+
+	public String getNameEn() {
+		return nameEn;
+	}
+
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public ComplaintCategoryVO getParentCategoryDto() {
+		return parentCategoryDto;
+	}
+
+	public void setParentCategoryDto(ComplaintCategoryVO parentCategoryDto) {
+		this.parentCategoryDto = parentCategoryDto;
+	}
+	
+	/**
+	 * 
+	 * @param msg
+	 */
+	public void fromMsg(ComplaintCategoryMsg msg) {
+
+		this.id = msg.getId();
+		this.code = msg.getCode();
+		this.nameFa = msg.getNameFa();
+		this.nameEn = msg.getNameEn();
+		this.active = msg.
+
+	}
+
+
+	
+}

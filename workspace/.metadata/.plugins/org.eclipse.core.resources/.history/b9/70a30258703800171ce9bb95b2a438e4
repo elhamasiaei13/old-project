@@ -1,0 +1,13 @@
+package com.parvanpajooh.transportationmanagement.service.adapter;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.transportationmanagement.model.vo.CarrierVO;
+
+public interface CarrierManagementServiceAdapter {
+
+	public PageList<CarrierVO> findCarriers(String term, int page, int size) throws ParvanUnrecoverableException;
+
+	public CarrierVO findCarrierByCode(String carrierCode) throws ParvanUnrecoverableException;
+
+}

@@ -1,0 +1,416 @@
+package com.parvanpajooh.siteservices.model;
+
+import java.time.LocalDateTime;
+
+import javax.persistence.Cacheable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import org.hibernate.validator.constraints.Email;
+
+import com.google.common.base.Objects;
+import com.parvanpajooh.commons.platform.ejb.model.BaseModel;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.siteservices.model.vo.ContactInfoVO;
+
+
+/**
+ * @author dev-03
+ *
+ */
+@Entity
+@Cacheable
+@Table(name="recoveryCode_tbl")
+public class RecoveryCode {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8148418429521524980L;
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long id;
+	
+	private Long userId;
+	
+	private String userName;
+	
+	@Email
+	private String email;
+	
+	private String mobile;
+	
+	private String requestMethod;
+	
+	private String code;
+	
+	@Column(insertable=true, updatable=false)
+	private LocalDateTime expireDate;
+	
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the tel
+	 */
+	public String getTel() {
+		return tel;
+	}
+
+	/**
+	 * @param tel the tel to set
+	 */
+	public void setTel(String tel) {
+		this.tel = tel;
+	}
+
+	/**
+	 * @return the fax
+	 */
+	public String getFax() {
+		return fax;
+	}
+
+	/**
+	 * @param fax the fax to set
+	 */
+	public void setFax(String fax) {
+		this.fax = fax;
+	}
+
+	/**
+	 * @return the mobile
+	 */
+	public String getMobile() {
+		return mobile;
+	}
+
+	/**
+	 * @param mobile the mobile to set
+	 */
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	/**
+	 * @return the countryCode
+	 */
+	public String getCountryCode() {
+		return countryCode;
+	}
+
+	/**
+	 * @param countryCode the countryCode to set
+	 */
+	public void setCountryCode(String countryCode) {
+		this.countryCode = countryCode;
+	}
+
+	/**
+	 * @return the countryNameEn
+	 */
+	public String getCountryNameEn() {
+		return countryNameEn;
+	}
+
+	/**
+	 * @param countryNameEn the countryNameEn to set
+	 */
+	public void setCountryNameEn(String countryNameEn) {
+		this.countryNameEn = countryNameEn;
+	}
+
+	/**
+	 * @return the countryNameFa
+	 */
+	public String getCountryNameFa() {
+		return countryNameFa;
+	}
+
+	/**
+	 * @param countryNameFa the countryNameFa to set
+	 */
+	public void setCountryNameFa(String countryNameFa) {
+		this.countryNameFa = countryNameFa;
+	}
+
+	/**
+	 * @return the provinceNameEn
+	 */
+	public String getProvinceNameEn() {
+		return provinceNameEn;
+	}
+
+	/**
+	 * @param provinceNameEn the provinceNameEn to set
+	 */
+	public void setProvinceNameEn(String provinceNameEn) {
+		this.provinceNameEn = provinceNameEn;
+	}
+
+	/**
+	 * @return the provinceNameFa
+	 */
+	public String getProvinceNameFa() {
+		return provinceNameFa;
+	}
+
+	/**
+	 * @param provinceNameFa the provinceNameFa to set
+	 */
+	public void setProvinceNameFa(String provinceNameFa) {
+		this.provinceNameFa = provinceNameFa;
+	}
+
+	/**
+	 * @return the cityNameEn
+	 */
+	public String getCityNameEn() {
+		return cityNameEn;
+	}
+
+	/**
+	 * @param cityNameEn the cityNameEn to set
+	 */
+	public void setCityNameEn(String cityNameEn) {
+		this.cityNameEn = cityNameEn;
+	}
+
+	/**
+	 * @return the cityNameFa
+	 */
+	public String getCityNameFa() {
+		return cityNameFa;
+	}
+
+	/**
+	 * @param cityNameFa the cityNameFa to set
+	 */
+	public void setCityNameFa(String cityNameFa) {
+		this.cityNameFa = cityNameFa;
+	}
+
+	/**
+	 * @return the provinceCode
+	 */
+	public String getProvinceCode() {
+		return provinceCode;
+	}
+
+	/**
+	 * @param provinceCode the provinceCode to set
+	 */
+	public void setProvinceCode(String provinceCode) {
+		this.provinceCode = provinceCode;
+	}
+
+	/**
+	 * @return the cityCode
+	 */
+	public String getCityCode() {
+		return cityCode;
+	}
+
+	/**
+	 * @param cityCode the cityCode to set
+	 */
+	public void setCityCode(String cityCode) {
+		this.cityCode = cityCode;
+	}
+
+	/**
+	 * @return the postalCode
+	 */
+	public String getPostalCode() {
+		return postalCode;
+	}
+
+	/**
+	 * @param postalCode the postalCode to set
+	 */
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
+	}
+
+	/**
+	 * @return the address
+	 */
+	public String getAddress() {
+		return address;
+	}
+
+	/**
+	 * @param address the address to set
+	 */
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	/**
+	 * @return the contactPersonName
+	 */
+	public String getContactPersonName() {
+		return contactPersonName;
+	}
+
+	/**
+	 * @param contactPersonName the contactPersonName to set
+	 */
+	public void setContactPersonName(String contactPersonName) {
+		this.contactPersonName = contactPersonName;
+	}
+
+	/**
+	 * @return the contactPersonNationalId
+	 */
+	public String getContactPersonNationalId() {
+		return contactPersonNationalId;
+	}
+
+	/**
+	 * @param contactPersonNationalId the contactPersonNationalId to set
+	 */
+	public void setContactPersonNationalId(String contactPersonNationalId) {
+		this.contactPersonNationalId = contactPersonNationalId;
+	}
+
+	/**
+	 * @return the primary
+	 */
+	public boolean isPrimary() {
+		return primary;
+	}
+
+	/**
+	 * @param primary the primary to set
+	 */
+	public void setPrimary(boolean primary) {
+		this.primary = primary;
+	}
+
+	@Override
+	public ContactInfoVO toVO() {
+		ContactInfoVO vo = toVOLite();
+		
+		return vo;
+	}
+
+	@Override
+	public ContactInfoVO toVOLite() {
+		ContactInfoVO vo = new ContactInfoVO();
+		
+		vo.setId(id);
+		vo.setTel(tel);
+		vo.setFax(fax);
+		vo.setMobile(mobile);
+		vo.setEmail(email);
+		vo.setCountryCode(countryCode);
+		vo.setCountryNameEn(countryNameEn);
+		vo.setCountryNameFa(countryNameFa);
+		vo.setProvinceCode(provinceCode);
+		vo.setProvinceNameEn(provinceNameEn);
+		vo.setProvinceNameFa(provinceNameFa);
+		vo.setCityCode(cityCode);
+		vo.setCityNameEn(cityNameEn);
+		vo.setCityNameFa(cityNameFa);
+		vo.setPostalCode(postalCode);
+		vo.setAddress(address);
+		vo.setPrimary(primary);
+		vo.setContactPersonName(contactPersonName);
+		vo.setContactPersonNationalId(contactPersonNationalId);
+		
+		setAuditToVO(vo);
+		
+		return vo;
+	}
+
+	@Override
+	public void fromVO(BaseVO baseVO) {
+		ContactInfoVO vo = ( ContactInfoVO ) baseVO;
+		
+		this.id = vo.getId();
+		this.tel = vo.getTel();
+		this.fax = vo.getFax();
+		this.mobile = vo.getMobile();
+		this.email = vo.getEmail();
+		this.countryCode = vo.getCountryCode();
+		this.countryNameEn = vo.getCountryNameEn();
+		this.countryNameFa = vo.getCountryNameFa();
+		this.provinceCode = vo.getProvinceCode();
+		this.provinceNameEn = vo.getProvinceNameEn();
+		this.provinceNameFa = vo.getProvinceNameFa();
+		this.cityCode = vo.getCityCode();
+		this.cityNameEn = vo.getCityNameEn();
+		this.cityNameFa = vo.getCityNameFa();
+		this.postalCode = vo.getPostalCode();
+		this.address = vo.getAddress();
+		this.primary = vo.isPrimary();
+		this.contactPersonName = vo.getContactPersonName();
+		this.contactPersonNationalId = vo.getContactPersonNationalId();
+		
+		getAuditFromVO(vo);
+	}
+
+	@Override
+	public int hashCode(){
+		return Objects.hashCode(id);
+	}
+	
+	@Override
+	public boolean equals(Object object){
+		if (object instanceof RecoveryCode) {
+			RecoveryCode that = (RecoveryCode) object;
+			return Objects.equal(this.id, that.id);
+		}
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "ContactInfo [id=" + id + ", tel=" + tel + ", fax=" + fax
+				+ ", mobile=" + mobile + ", email=" + email + ", countryCode="
+				+ countryCode + ", countryNameEn=" + countryNameEn
+				+ ", countryNameFa=" + countryNameFa + ", provinceCode="
+				+ provinceCode + ", provinceNameEn=" + provinceNameEn
+				+ ", provinceNameFa=" + provinceNameFa + ", cityCode="
+				+ cityCode + ", cityNameEn=" + cityNameEn + ", cityNameFa="
+				+ cityNameFa + ", postalCode=" + postalCode + ", address="
+				+ address + ", contactPersonName=" + contactPersonName
+				+ ", contactPersonNationalId=" + contactPersonNationalId
+				+ ", primary=" + primary + "]";
+	}
+
+}

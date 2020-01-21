@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>Add Membership</title>
+</head>
+
+<body>
+	<section class="content" layout:fragment="content">
+		<blockquote>
+			<p>لیست اعضا</p>
+		</blockquote>
+		<form action="#" class="form-inline" id="hideRowId"
+			th:action="@{/addMembership/save}" method="post">
+			<div id="membersTable">
+
+
+				<table id="MembershipTable"
+					class="table table-hover table-bordered table-condensed drop-shadow"
+					dt:serverside="true" dt:url="@{/pagingMembership}" dt:table="true"
+					dt:proccessing="true" dt:filter="false"
+					dt:serverparams="'getExtraParams'" dt:theme="bootstrap2" dt:paginationtype="bootstrap_full_numbers">
+
+
+					<thead>
+						<tr>
+							<th  dt:property="id" th:text="#{table_column_id}"></th>
+							<th  dt:property="member.firstName">نام</th>
+							<th  dt:property="member.lastName">نام خانوادگی</th>														
+						</tr>
+					</thead>
+
+					<tbody  dt:cbk:draw="'myCustomDrawCallback'"
+						dt:cbk:footer="'footerCallback'">
+					</tbody>
+
+				</table>
+
+
+				<!-- <table>
+					<tr>
+						<th>Members</th>
+						<th>Types</th>
+					</tr>
+					<tr th:each="member : ${members}" >							
+						<td hidden="true">
+							<input type="text" name="groupId" th:value="${groupId}" />
+						</td>
+						<td style="padding: 0 15px 0 15px;" th:text="${member.firstName}+' '+${member.lastName}" >firstName</td>
+						<td style="padding: 0 15px 0 15px;">
+							<select name="typeItems" id="selectedTypeId"  th:attr="disabled=${member.tenantId == '1' ? 'true' : 'false'}" >
+							<option
+										th:each="type : ${T(com.parvanpajooh.issuemanager.model.enums.MemberTypeEnum).values()}"
+										th:value="${type}" th:text="${type.value}"></option>
+							</select>
+						</td>
+						<td style="padding: 0 15px 0 15px;">
+							<input type="checkbox" th:attr="disabled=${member.tenantId == '1' ? 'true' : 'false'}" th:value="${member.id}" id="checkListId" name="checkboxItems"/>
+						</td>
+					</tr>
+				</table> -->
+			</div>
+
+			<td>
+				<button type="submit" class="btn btn-default" th:text="#{btn_save}"></button>
+			</td>
+		</form>
+		<script>
+
+		//<![CDATA[
+		
+		
+		function doSearch() {
+				 								
+			oTable_TaskTable.fnReloadAjax();
+		}
+
+	    function getExtraParams( aoData ) {
+	    	 			
+	    	aoData.push({ 'name': 'firstName', 'value': $('#firstName').val()}
+ 	        ,{ 'name': 'lastName', 'value': $('#lastName').val()} 	 
+ 	       ,{ 'name': 'id', 'value': $('#id').val()}       
+	    	);
+	    }
+		jQuery(document).ready(function(){
+			$.fn.dataTableExt.oApi.fnReloadAjax = function ( oSettings, sNewSource, fnCallback, bStandingRedraw ){
+			    if ( $.fn.dataTable.versionCheck ) {
+					var api = new $.fn.dataTable.Api( oSettings );
+					if ( sNewSource ) {
+					    api.ajax.url( sNewSource ).load( fnCallback, !bStandingRedraw );
+					} else {
+					    api.ajax.reload( fnCallback, !bStandingRedraw );
+					}
+					return;
+			    }
+			    if ( sNewSource !== undefined && sNewSource !== null ) {
+					oSettings.sAjaxSource = sNewSource;
+			    }
+			    if ( oSettings.oFeatures.bServerSide ) {
+					oSettings.oApi._fnDraw(oSettings);
+					return;
+			    }
+			    this.oApi._fnProcessingDisplay( oSettings, true );
+			    var that = this;
+			    var iStart = oSettings._iDisplayStart
+			    var aData = [];
+			    this.oApi._fnServerParams( oSettings, aData );
+			    oSettings.fnServerData.call( oSettings.oInstance, oSettings.sAjaxSource, aData, function(json) {
+				that.oApi._fnClearTable( oSettings );
+				var aData =  (oSettings.sAjaxDataProp !== '') ?
+				    that.oApi._fnGetObjectDataFn( oSettings.sAjaxDataProp )( json ) : json;
+				for ( var i=0 ; i<aData.length ; i++ ){
+				    that.oApi._fnAddData( oSettings, aData[i] );
+				}
+				oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
+				that.fnDraw();
+				if ( bStandingRedraw === true ){
+				    oSettings._iDisplayStart = iStart;
+				    that.oApi._fnCalculateEnd( oSettings );
+				    that.fnDraw( false );
+				}
+				that.oApi._fnProcessingDisplay( oSettings, false );
+				if ( typeof fnCallback == 'function' && fnCallback !== null ) {
+				    fnCallback( oSettings );
+				}
+			    }, oSettings );
+			};
+
+
+			/*  $('.datepicker').datetimepicker();  */
+            $('.datepicker').datetimepicker({
+				format: 'YYYY-MM-DD hh:mm',
+				useCurrent: false
+
+			});
+		});
+			
+		function footerCallback(oSettings){
+			$('div.pagination ul').addClass('pagination');
+			$('div.dataTables_wrapper div.row-fluid');
+			$('div.dataTables_wrapper div.span6').addClass('col-md-6 col-lg-6');
+		}
+
+		function myCustomDrawCallback(oSettings){
+			var classMap = [];
+			for ( var i=0, iLen=oSettings.aoColumns.length ; i<iLen ; i++ ){
+				if(oSettings.aoColumns[i].nTh.className.indexOf('responsiveCol') > -1)
+					classMap.push(i);
+			}
+			var iStart = oSettings._iDisplayStart+1;
+			for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
+			{
+				for ( var j=0; j<classMap.length ; j++ ){
+					$('td:eq('+classMap[j]+')', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).addClass('responsiveCol');
+				}
+				$('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( iStart + i );
+			}
+			$('#TaskTable input[type=checkbox], #TaskTable input[type=radio]').iCheck({checkboxClass: "icheckbox_minimal",radioClass: "iradio_minimal"});
+			$('#TaskTable input[type=checkbox], #TaskTable input[type=radio]').on('ifChanged', function(event){$(this).trigger('change');});
+			return false;
+		}
+		//]]>
+		</script>
+	</section>
+</body>
+</html>

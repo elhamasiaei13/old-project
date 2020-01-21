@@ -1,0 +1,151 @@
+package com.parvanpajooh.shipment.mvc;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.ecourier.mvc.EcBaseController;
+import com.parvanpajooh.shipment.model.criteria.PackingItemTypeCriteria;
+import com.parvanpajooh.shipment.model.vo.PackingItemTypeVO;
+import com.parvanpajooh.shipment.service.PackingItemTypeService;
+
+@Controller
+@RequestMapping("/admin/packingItemType")
+public class PackingItemController extends EcBaseController {
+	
+	@EJB(mappedName="java:global/ecourier-ear/shipment-ejb/PackingItemTypeServiceImpl") 
+	private PackingItemTypeService packingItemTypeService;
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public String showPackingItemTypes(HttpServletRequest request, Model model) {
+		
+		model.addAttribute("rightMenu", "packingItemType");
+	    return "packingItemTypes";
+	}
+	
+	@RequestMapping(value="/save", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> savePackingItemType(PackingItemTypeVO packingItemTypeVO, HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			
+			packingItemTypeVO = (PackingItemTypeVO) packingItemTypeService.save(getUserInfo(request), packingItemTypeVO);
+			
+			result.put("status", "success");
+			result.put("result", packingItemTypeVO);
+			
+			request.getSession().removeAttribute("packingItemTypes");
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/{id}", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> getPackingItemType(@PathVariable Long id, HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			PackingItemTypeVO packingItemTypeVO = (PackingItemTypeVO) packingItemTypeService.get(getUserInfo(request), id);
+			
+			result.put("status", "success");
+			result.put("result", packingItemTypeVO);
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/del/{id}", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> deletePackingItemType(@PathVariable Long id, HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			packingItemTypeService.delete(getUserInfo(request), id);
+			
+			result.put("status", "success");
+			
+			request.getSession().removeAttribute("packingItemTypes");
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/delall", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> deletePackingItemTypes(@RequestParam("id") Long[] ids, HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			packingItemTypeService.delete(getUserInfo(request), ids);
+			
+			result.put("status", "success");
+			
+			request.getSession().removeAttribute("packingItemTypes");
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/paging", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<BaseVO> findAll(@DatatablesParams DatatablesCriterias criterias, PackingItemTypeCriteria packingItemTypeCriteria, HttpServletRequest request) {
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = columnDef.getName();
+		
+		if("0".equals(sortCriterion)){
+			sortCriterion = null;
+		}
+		
+		if(columnDef.getSortDirection().equals(SortDirection.DESC)){
+			sortDirection = SortDirectionEnum.Descending;
+		}
+
+		DataSet<BaseVO> dataSet;
+		try {
+			List<BaseVO> rows = packingItemTypeService.findByCriteria(getUserInfo(request), packingItemTypeCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+			long totalRecords = packingItemTypeService.countByCriteria(getUserInfo(request), packingItemTypeCriteria);
+			dataSet = new DataSet<BaseVO>(rows, (long) rows.size(), totalRecords);
+		} catch (Exception e) {
+			log.error("error occured in packingItemType paging..." ,e);
+			e.printStackTrace();
+			dataSet = new DataSet<BaseVO>(new ArrayList<BaseVO>(), 0l, 0l);
+		}
+        return DatatablesResponse.build(dataSet, criterias);
+    }
+}

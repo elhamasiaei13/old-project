@@ -1,0 +1,63 @@
+package com.parvanpajooh.transportationmanagement.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.transportationmanagement.model.vo.VehicleVO;
+import com.parvanpajooh.transportationmanagement.service.LogesticManagementLocalService;
+import com.parvanpajooh.transportationmanagement.service.adapter.LogesticManagementServiceAdapter;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class LogesticManagementLocalServiceImpl implements LogesticManagementLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(LogesticManagementLocalServiceImpl.class);
+
+	@Inject
+	private LogesticManagementServiceAdapter logesticManagementServiceAdapter;
+
+	@Override
+	public PageList<VehicleVO> findVehicles(String term, int page, int size) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findVehicles(term={},page={},size={})", term,page,size);
+		PageList<VehicleVO> vehicleVOs = null;
+		
+		try {
+			vehicleVOs = logesticManagementServiceAdapter.findVehicles(term, page, size);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findVehicles", e);
+		}
+
+		return vehicleVOs;
+	}
+
+	@Override
+	public VehicleVO getVehicle(Long id) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getVehicle(id={})", id);
+		VehicleVO vehicleVO = null;
+
+		try {
+			vehicleVO = logesticManagementServiceAdapter.getVehicle(id);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getVehicle", e);
+		}
+
+		return vehicleVO;
+	}
+	
+}

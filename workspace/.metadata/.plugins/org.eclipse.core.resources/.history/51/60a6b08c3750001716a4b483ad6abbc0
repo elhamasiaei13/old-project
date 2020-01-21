@@ -1,0 +1,51 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.service.adapter;
+
+import javax.ejb.Stateless;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.personmanagement.PersonManagementApiRestClient;
+import com.parvanpajooh.client.personmanagement.model.PersonMsg;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.siteservices.model.vo.ComplaintVO;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class ComplaintManagementServiceAdapterRest implements ComplaintManagementServiceAdapter {
+
+	private ComplaintManagementApiRestClient complaintManagementApiRestClient;
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	public ComplaintManagementServiceAdapterRest() {
+		this.complaintManagementApiRestClient = new ComplaintManagementApiRestClient();
+	}
+
+
+	@Override
+	public ComplaintVO getPerson(String uuid) throws ParvanServiceException {
+		PersonVO personVO = null;
+		PersonMsg personMsg = null;
+		try {
+			
+			personMsg = personManagementApiRestClient.getPersonByUuid(uuid);
+			personVO = new PersonVO();
+			personVO.fromMsg(personMsg);
+			
+		} catch (ParvanClientException e) {
+			throw new ParvanServiceException(e.getMessage());
+		} 
+		return personVO;
+	}
+
+}

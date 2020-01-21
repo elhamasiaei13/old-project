@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;sample-ejb/src/main/resources/META-INF/agentmanagement-ds.xml&apos; to &apos;sample-ds.xml&apos;" description="Rename resource &apos;agentmanagement-ds.xml&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/main/resources/META-INF/agentmanagement-ds.xml" name="sample-ds.xml" stamp="1485850618113" updateReferences="true"/>
+</session>

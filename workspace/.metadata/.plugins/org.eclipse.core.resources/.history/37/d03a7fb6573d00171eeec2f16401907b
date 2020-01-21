@@ -1,0 +1,189 @@
+package com.parvanpajooh.personmanagement.service.adapter;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.identitymanagement2.Identitymanagement2ApiRestClient;
+import com.parvanpajooh.client.identitymanagement2.model.IdentityManagement2Enums.Calendar;
+import com.parvanpajooh.client.identitymanagement2.model.IdentityManagement2Enums.RoleType;
+import com.parvanpajooh.client.identitymanagement2.model.IdentityManagement2Enums;
+import com.parvanpajooh.client.identitymanagement2.model.RoleMsg;
+import com.parvanpajooh.client.identitymanagement2.model.UserGroupMsg;
+import com.parvanpajooh.client.identitymanagement2.model.UserMsg;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.personmanagement.model.vo.RoleVO;
+import com.parvanpajooh.personmanagement.model.vo.UserGroupVO;
+import com.parvanpajooh.personmanagement.model.vo.UserVO;
+
+@Stateless
+public class IdentityManagement2ServiceAdapterRest implements IdentityManagement2ServiceAdapter {
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+	
+	private Identitymanagement2ApiRestClient identitymanagement2ApiRestClient;
+
+	public IdentityManagement2ServiceAdapterRest() {
+		this.identitymanagement2ApiRestClient = new Identitymanagement2ApiRestClient();
+	}
+
+	@Override
+	public UserVO findUserByPersonUuid(String personUuid) throws ParvanServiceException {
+		log.trace("Entering findUserByPersonUuid(uuid={})", personUuid);
+		
+		UserVO returnValue = null;
+		try {
+			UserMsg userMsg = identitymanagement2ApiRestClient.findUserByPersonUuid(personUuid);
+			
+			if(userMsg != null){
+				returnValue = _toUserVO(userMsg);
+			}
+		} catch (Exception x) {
+			log.error("error in findUserByPersonUuid", x);
+			
+			ParvanClientException e = (ParvanClientException) x;
+			
+			if(Validator.isNotNull(e.getCode())){
+				ErrorCode errorCode = ErrorCode.fromValue(Integer.valueOf(e.getCode()));
+				throw new ParvanRecoverableException(e.getInvalidField(), errorCode);
+			} else {
+				throw new ParvanRecoverableException(e.getMessage());
+			}
+			
+		}
+		
+		return returnValue;
+	}
+
+	@Override
+	public UserVO createUser(UserVO user) throws ParvanServiceException {
+		log.trace("Entering createUser(user={})", user);
+		
+		Map<String, Object> returnValue = null;
+		UserMsg userMsg = null;
+		try {
+			userMsg = _toUserMsg(user);
+			
+			userMsg = identitymanagement2ApiRestClient.createUser(userMsg);
+			
+		} catch (Exception x) {
+			log.error("error in createUser", x);
+			
+			ParvanClientException e = (ParvanClientException) x;
+			
+			if(Validator.isNotNull(e.getCode())){
+				ErrorCode errorCode = ErrorCode.fromValue(Integer.valueOf(e.getCode()));
+				throw new ParvanRecoverableException(e.getInvalidField(), errorCode);
+			} else {
+				throw new ParvanRecoverableException(e.getMessage());
+			}
+			
+		}
+		
+		return _toUserVO(userMsg);
+	}
+	
+	private UserVO _toUserVO(UserMsg msg) {
+		UserVO vo = new UserVO();
+		vo.setId( msg.getId() );
+		vo.setUserName( msg.getUserName() );
+		vo.setFirstName( msg.getFirstName() );
+		vo.setLastName( msg.getLastName() );
+		vo.setDisplayName( msg.getDisplayName() );
+		vo.setLocale( msg.getLocale() );
+		vo.setZoneId( msg.getZoneId() );
+		vo.setCalendar( msg.getCalendar().name() );
+		vo.setEmail( msg.getEmail() );
+		vo.setPersonUuid( msg.getPersonUuid() );
+		if (msg.getRoles() != null) {
+			Set<RoleMsg> roleMsgs = msg.getRoles();
+			Set<RoleVO> roleVOs = new HashSet<>(roleMsgs.size());
+			for (RoleMsg roleMsg : roleMsgs) {
+				roleVOs.add( _toRoleVO(roleMsg) );
+			}
+			vo.setRoles(roleVOs);
+		}
+		if (msg.getUserGroup() != null) {
+			vo.setUserGroup( _toUserGroupVO(msg.getUserGroup()) );
+		}
+		return vo;
+	}
+
+	private UserGroupVO _toUserGroupVO(UserGroupMsg msg) {
+		UserGroupVO vo = new UserGroupVO();
+		vo.setId( msg.getId() );
+		vo.setName( msg.getName() );
+		return vo;
+	}
+
+	private RoleVO _toRoleVO(RoleMsg msg) {
+		RoleVO vo = new RoleVO();
+		vo.setId( msg.getId() );
+		vo.setName( msg.getName() );
+		vo.setType( msg.getType().name() );
+		return vo;
+	}
+	
+	private UserMsg _toUserMsg(UserVO vo) {
+		UserMsg msg = new UserMsg();
+		msg.setId( vo.getId() );
+		msg.setUserName( vo.getUserName() );
+		msg.setFirstName( vo.getFirstName() );
+		msg.setLastName( vo.getLastName() );
+		msg.setDisplayName( vo.getDisplayName() );
+		msg.setLocale( vo.getLocale() );
+		msg.setZoneId( vo.getZoneId() );
+		msg.setCalendar( IdentityManagement2Enums.Calendar.valueOf(vo.getCalendar()) );
+		msg.setEmail( vo.getEmail() );
+		msg.setPersonUuid( vo.getPersonUuid() );
+		if (vo.getRoles() != null) {
+			Set<RoleVO> roleVOs = vo.getRoles();
+			Set<RoleMsg> roleMsgs = new HashSet<>(roleVOs.size());
+			for (RoleVO roleMsg : roleVOs) {
+				roleMsgs.add( _toRoleMsg(roleMsg) );
+			}
+			msg.setRoleMsgs(roleMsgs);
+		}
+		if (vo.getUserGroup() != null) {
+			msg.setUserGroupMsg( _toUserGroupMsg(vo.getUserGroup()) );
+		}
+		return msg;
+	}
+	
+	private UserGroupMsg _toUserGroupMsg(UserGroupVO vo) {
+		UserGroupMsg msg = new UserGroupMsg();
+		msg.setId( vo.getId() );
+		msg.setName( vo.getName() );
+		return msg;
+	}
+	
+	private RoleMsg _toRoleMsg(RoleVO vo) {
+		RoleMsg msg = new RoleMsg();
+		msg.setId( vo.getId() );
+		msg.setName( vo.getName() );
+		msg.setType( RoleType.fromValue(vo.getType()) );
+		return msg;
+	}
+
+	/*
+	@Override
+	public UserVO loadUserByUsername(String username) throws ParvanServiceException {
+		UserVO returnValue = null;
+		try {
+			UserMsg result = identitymanagement2ApiRestClient.loadUserByUsername(username);
+			returnValue = _toUserVO(result);
+		} catch (ParvanClientException e) {
+			throw new ParvanUnrecoverableException(e.getMessage());
+		}
+		return returnValue;
+	}*/
+}

@@ -1,0 +1,281 @@
+package com.parvanpajooh.accounting.model;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.ecourier.model.BaseModel;
+import com.parvanpajooh.accounting.model.vo.FiscalYearVO;
+import com.parvanpajooh.accounting.model.vo.VoucherRowVO;
+import com.parvanpajooh.accounting.model.vo.VoucherVO;
+
+/**
+ * @author moosa
+ *
+ */
+@Entity
+@XmlRootElement
+@Table(name = "voucher_tbl")
+public class Voucher extends BaseModel {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -4036378126742804100L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	private String referenceId;
+
+	private LocalDateTime issueDate;
+	
+	private String description;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "voucher")
+	private Set<VoucherRow> voucherRow;
+	
+	@ManyToOne
+	@JoinColumn(name = "fiscalYearId", referencedColumnName = "id")
+	private FiscalYear fiscalYear;
+
+	private boolean active;
+
+	@Version
+	private Integer version;
+
+	@Override
+	public VoucherVO toVOLite() {
+		VoucherVO vo = new VoucherVO();
+
+		vo.setId(this.id);
+		vo.setReferenceId(this.referenceId);
+		vo.setIssueDate(this.issueDate);
+		vo.setActive(this.active);
+		vo.setVersion(this.version);
+		vo.setDescription(this.description);
+
+		if (Validator.isNotNull(this.fiscalYear)) {
+
+			FiscalYearVO fiscalYearVO = this.fiscalYear.toVOLite();
+			vo.setFiscalYear(fiscalYearVO);
+		}
+		
+		setAuditToVO(vo);
+		return vo;
+	}
+
+	@Override
+	public VoucherVO toVO() {
+
+		VoucherVO voucherVO = (VoucherVO) toVOLite();
+		
+		if (Validator.isNotNull(this.voucherRow)) {
+
+			List<VoucherRowVO> list = new ArrayList<VoucherRowVO>();
+
+			for (VoucherRow voucherRow : this.voucherRow) {
+				list.add(voucherRow.toVOLite());
+			}
+			voucherVO.setVoucherRow(list);
+		}
+		return voucherVO;
+	}
+
+	@Override
+	public void fromVO(BaseVO baseVO) {
+
+		VoucherVO vo = (VoucherVO) baseVO;
+
+		this.id = vo.getId();
+		this.referenceId = vo.getReferenceId();
+		this.issueDate = vo.getIssueDate();
+		this.description = vo.getDescription();
+
+		getAuditFromVO(vo);
+	}
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}	
+	
+	/**
+	 * @return the issueDate
+	 */
+	public Date getIssueDate() {
+		return issueDate;
+	}
+
+	/**
+	 * @param issueDate the issueDate to set
+	 */
+	public void setIssueDate(Date issueDate) {
+		this.issueDate = issueDate;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	/**
+	 * @return the voucherRow
+	 */
+	public Set<VoucherRow> getVoucherRow() {
+		return voucherRow;
+	}
+
+	/**
+	 * @param voucherRow the voucherRow to set
+	 */
+	public void setVoucherRow(Set<VoucherRow> voucherRow) {
+		this.voucherRow = voucherRow;
+	}
+
+	/**
+	 * @return the voucher
+	 */
+	public Set<VoucherRow> getvoucher() {
+		return voucherRow;
+	}
+
+	/**
+	 * @param voucher the voucher to set
+	 */
+	public void setvoucher(Set<VoucherRow> voucher) {
+		this.voucherRow = voucherRow;
+	}
+
+	/**
+	 * @return the referenceId
+	 */
+	public String getReferenceId() {
+		return referenceId;
+	}
+
+	/**
+	 * @param referenceId the referenceId to set
+	 */
+	public void setReferenceId(String referenceId) {
+		this.referenceId = referenceId;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version
+	 *            the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * @return the fiscalYear
+	 */
+	public FiscalYear getFiscalYear() {
+		return fiscalYear;
+	}
+
+	/**
+	 * @param fiscalYear the fiscalYear to set
+	 */
+	public void setFiscalYear(FiscalYear fiscalYear) {
+		this.fiscalYear = fiscalYear;
+	}
+
+	/**
+	 * @param active
+	 *            the active to set
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Voucher [id=" + id + ", active=" + active + ", version=" + version + "]";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Voucher)) {
+			return false;
+		}
+
+		final Voucher obj = (Voucher) o;
+
+		return new EqualsBuilder().append(this.id, obj.getId()).isEquals();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(-970989579, 1884842917).append(this.id).toHashCode();
+	}
+
+}

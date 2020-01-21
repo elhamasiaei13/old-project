@@ -1,0 +1,24 @@
+package com.parvanpajooh.client.carriermanagement.service;
+
+import java.util.List;
+
+import com.parvanpajooh.client.carriermanagement.model.CarrierMsg;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+public interface CarrierManagementApi {
+	@GET("carriers/{carrierCode}")
+	public Call<CarrierMsg> getCarrierByCarrierCode(
+			@Path("carrierCode") String carrierCode);
+	
+	@GET("carriers")
+	public Call<List<CarrierMsg>> findCarriers(
+			@Query("term") String term, 
+			@Query("page") int page, 
+			@Query("size") int size,
+			@Query(value = "sort_direction") String sortDirection,
+			@Query(value = "sort_criterion") String sortCriterion);
+}

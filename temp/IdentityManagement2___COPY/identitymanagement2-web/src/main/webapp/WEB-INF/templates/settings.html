@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	layout:decorator="filter-layout">
+
+	<head>
+		<title>Settings</title>
+		
+		<link rel="stylesheet" href="../../resources/lib/bootstrap-validator-0.5.0/css/bootstrapValidator.min.css" 
+			th:href="@{/resources/lib/bootstrap-validator-0.5.0/css/bootstrapValidator.min.css}"></link>
+			
+		<link href="../../resources/lib/select2-3.5.0/select2.css"
+	  	th:href="@{/resources/lib/select2-3.5.0/select2.css}"
+	  	rel="stylesheet" />
+	  	
+		<link href="../../resources/lib/select2-3.5.0/select2-bootstrap.css"
+	  	th:href="@{/resources/lib/select2-3.5.0/select2-bootstrap.css}"
+	  	rel="stylesheet" />
+	  	
+	  	<style type="text/css">
+	  		.setting-link {
+	  			margin-bottom : 12px;
+	  		}
+	  		.setting-label {
+	  			font-family: 'ParvanYekan',Tahoma, Arial,sans-serif;
+	  		}
+	  	</style>
+	  	
+	
+	</head>
+
+	<body th:with="rightMenu='admin', subRightMenu='settings'">
+		<section layout:fragment="top-header" class="fixed-header">
+			<div class="ui-header-image pull-left">
+            	<img data-src="holder.js/140x140" class="img-circle" alt="140x140" 
+            		src="/ecourier-web/resources/images/gear.png"
+            		th:src="@{/resources/images/gear.png}" 
+            		style="width: 48px; height: 48px;" />
+           	</div>
+            <div class="ui-header-title">
+                <div class="split-left">
+                    <h3>
+                        <small>Manage</small>
+                    </h3>
+                    <h3>Settings</h3>
+                </div>
+                <div class="split-right">
+                    
+                </div>
+            </div>
+		</section>
+		
+		<div layout:fragment="command-bar">
+			<div class="command-bar-ops">
+	            <div class="split-left">
+	                
+	            </div>
+	            <div class="split-right">
+
+	            </div>
+	        </div>
+		</div>
+		
+		<!-- Main content -->
+		<!-- BODY -->
+		<section class="content" layout:fragment="content">
+		
+			<div class="row">
+				<div class="col-md-6">
+
+					<div class="box box-solid">
+						<div class="box-header bg-light-blue">
+							<h3 class="box-title">Users and Agents</h3>
+						</div>
+						<div class="box-body">
+
+							<div class="row">
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default .setting-link" href="/identityManagment-web/admin/agent">
+										<i class="fa fa-building-o fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{agents}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/identityManagment-web/admin/user">
+										<i class="fa fa-users fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{users}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/ecourier-web/admin/vehicle">
+										<i class="fa fa-car fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{vehicles}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/ecourier-web/admin/courier">
+										<i class="fa fa-male fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{couriers}"></h4>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-sm-12">
+									<legend></legend>
+								</div>	
+							</div>
+
+							<div class="row">
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/stock-web/admin/waybillType">
+										<i class="fa fa-file-text fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{waybillType.name}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/stock-web/admin/waybillNumber">
+										<i class="fa fa-barcode fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{waybillNumber}"></h4>
+								</div>
+							</div>
+
+						</div>
+					</div>
+
+				</div>
+
+				<div class="col-md-6">
+					<div class="box box-solid">
+						<div class="box-header bg-green">
+							<h3 class="box-title">Rate</h3>
+						</div>
+						<div class="box-body">
+
+							<div class="row">
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/rateAndRoute-web/admin/rateRule">
+										<i class="fa fa-gavel fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{rateRules}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/rateAndRoute-web/admin/rateType">
+										<i class="fa fa-money fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{rateTypes}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/rateAndRoute-web/admin/currency">
+										<i class="fa fa-dollar fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{currency}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/rateAndRoute-web/admin/product">
+										<i class="fa fa-cube fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{products}"></h4>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-sm-12">
+									<legend></legend>
+								</div>	
+							</div>
+
+							<div class="row">
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/rateAndRoute-web/admin/carrier">
+										<i class="fa fa-plane fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{carrier}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/rateAndRoute-web/admin/optionalService">
+										<i class="fa fa-tags fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{optionalServices}"></h4>
+								</div>
+							</div>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+
+				<div class="col-md-6">
+					<div class="box box-solid">
+						<div class="box-header bg-navy">
+							<h3 class="box-title">Route</h3>
+						</div>
+						<div class="box-body">
+
+							<div class="row">
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/rateAndRoute-web/admin/node">
+										<i class="fa fa-map-marker fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{nodes}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/rateAndRoute-web/admin/route">
+										<i class="fa fa-road fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{routes}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/rateAndRoute-web/admin/geoType">
+										<i class="fa fa-globe fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{geoType}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/rateAndRoute-web/admin/geoEntity">
+										<i class="ion ion-earth fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{geoEntity}"></h4>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-sm-12">
+									<legend></legend>
+								</div>	
+							</div>
+
+							<div class="row">
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/rateAndRoute-web/admin/zone">
+										<i class="fa fa-compass fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{zones}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/rateAndRoute-web/admin/nodeAndRoute">
+										<i class="ion ion-map fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{nodeAndRoute}"></h4>
+								</div>
+							</div>
+
+						</div>
+					</div>
+
+				</div>
+				
+				<div class="col-md-6">
+					<div class="box box-solid">
+						<div class="box-header bg-blue">
+							<h3 class="box-title">Others</h3>
+						</div>
+						<div class="box-body">
+
+							<div class="row">
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/ecourier-web/admin/paymentmethod">
+										<i class="fa fa-credit-card fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{paymentMethod}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/ecourier-web/admin/packingItemType">
+										<i class="fa fa-archive fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{packingItemType}"></h4>
+								</div>
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/ecourier-web/admin/ledger">
+										<i class="fa fa-file-text fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{recalcLedger}"></h4>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-sm-12">
+									<legend></legend>
+								</div>	
+							</div>
+
+							<div class="row">
+								<div class="col-sm-3" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')">
+									<a class="btn btn-lg btn-block btn-flat btn-default" href="/news-web/admin/news">
+										<i class="fa fa-newspaper-o fa-5x"></i>
+									</a>
+									<h4 class="text-center setting-label" th:text="#{news}"></h4>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+			
+		</section>
+		
+		<th:block layout:fragment="javascripts">
+		    <script src="../../resources/lib/bootstrap-validator-0.5.0/js/bootstrapValidator.min.js" th:src="@{/resources/lib/bootstrap-validator-0.5.0/js/bootstrapValidator.min.js}"></script>
+		    <script src="../../resources/lib/select2-3.5.0/select2.min.js" th:src="@{/resources/lib/select2-3.5.0/select2.min.js}"></script>
+		    
+		    <script th:inline="javascript">
+		    /*<![CDATA[*/
+		    
+		    /*]]>*/
+		    </script>
+		    
+		</th:block>
+	</body>
+</html>

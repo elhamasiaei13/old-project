@@ -1,0 +1,6 @@
+/target
+/.settings
+/.apt_generated/
+*.swp
+*.orig
+*.gitignore~

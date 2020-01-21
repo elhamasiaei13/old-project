@@ -1,0 +1,15 @@
+*.iml
+.idea/
+*.swp
+*~
+*.log
+.cache
+.classpath
+.factorypath
+.settings
+.manager
+.project
+target
+rebel.xml
+MANIFEST.MF
+/build/

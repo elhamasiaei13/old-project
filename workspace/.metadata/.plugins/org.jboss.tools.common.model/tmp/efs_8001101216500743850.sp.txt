@@ -1,0 +1,431 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<groupId>com.parvanpajooh.commons</groupId>
+	<artifactId>common-platform-springmvc</artifactId>
+	<version>1.1.0</version>
+	<packaging>jar</packaging>
+	<name>parvan - common - platform - springmvc</name>
+	
+	<properties>
+        <!-- Explicitly declaring the source encoding eliminates the following 
+            message: -->
+        <!-- [WARNING] Using platform encoding (UTF-8 actually) to copy filtered 
+            resources, i.e. build is platform dependent! -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Spring version -->
+		<version.spring>4.1.6.RELEASE</version.spring>
+		<version.spring.security>4.0.0.RELEASE</version.spring.security>
+		
+		<!-- Define the version of the JBoss BOMs we want to import to specify 
+			tested stacks. -->
+		<version.jboss.bom>10.0.0.Final</version.jboss.bom>
+		<version.wildfly>10.0.0.Final</version.wildfly>
+		
+		<!-- Spring Third Party dependencies -->
+		<version.aopalliance>1.0</version.aopalliance><!-- Third Party dependencies -->
+		<version.standard.taglibs>1.1.2</version.standard.taglibs>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<version.standard.thymeleaf>2.1.4.RELEASE</version.standard.thymeleaf>
+		
+		<dandelion.version>1.1.1</dandelion.version>
+      	<dandelion-datatables.version>1.1.0</dandelion-datatables.version>
+
+	</properties>
+
+    <dependencyManagement>
+        <dependencies>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-aop</artifactId>
+				<version>${version.spring}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+				<version>${version.spring}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${version.spring}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+				<version>${version.spring}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${version.spring}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-expression</artifactId>
+				<version>${version.spring}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-web</artifactId>
+				<version>${version.spring}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.springframework.session</groupId>
+				<artifactId>spring-session-data-redis</artifactId>
+				<version>1.2.2.RELEASE</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-webmvc</artifactId>
+				<version>${version.spring}</version>
+			</dependency><!-- Third Party dependencies -->
+			<dependency>
+				<groupId>aopalliance</groupId>
+				<artifactId>aopalliance</artifactId>
+				<version>${version.aopalliance}</version>
+			</dependency>
+			<dependency>
+				<groupId>taglibs</groupId>
+				<artifactId>standard</artifactId>
+				<version>${version.standard.taglibs}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.thymeleaf</groupId>
+				<artifactId>thymeleaf</artifactId>
+				<version>${version.standard.thymeleaf}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.thymeleaf</groupId>
+				<artifactId>thymeleaf-spring4</artifactId>
+				<version>${version.standard.thymeleaf}</version>
+			</dependency>
+            
+            
+            <!-- Dandelion -->
+	         <dependency>
+	            <groupId>com.github.dandelion</groupId>
+	            <artifactId>dandelion-thymeleaf</artifactId>
+	            <version>${dandelion.version}</version>
+	         </dependency>
+	         <dependency>
+	            <groupId>com.github.dandelion</groupId>
+	            <artifactId>dandelion-ehcache</artifactId>
+	            <version>${dandelion.version}</version>
+	         </dependency>
+	         
+	         <!-- Dandelion-Datatables -->
+	         <dependency>
+	            <groupId>com.github.dandelion</groupId>
+	            <artifactId>datatables-thymeleaf</artifactId>
+	            <version>${dandelion-datatables.version}</version>
+	         </dependency>
+	         
+	         <dependency>
+			    <groupId>com.github.dandelion</groupId>
+			    <artifactId>datatables-spring3</artifactId>
+	            <version>${dandelion-datatables.version}</version>
+			</dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+    	<!-- Import Spring dependencies, these are either from community or versions 
+			certified in WFK2 -->
+			
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-aop</artifactId>
+			</dependency>
+			<!-- <dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-asm</artifactId>
+				<version>3.1.4.RELEASE</version>
+			</dependency> -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-expression</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-web</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-webmvc</artifactId>
+			</dependency>
+
+			<!-- Other community dependencies -->
+			<dependency>
+				<groupId>aopalliance</groupId>
+				<artifactId>aopalliance</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>taglibs</groupId>
+				<artifactId>standard</artifactId>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.thymeleaf</groupId>
+				<artifactId>thymeleaf</artifactId>
+				<exclusions>
+					<exclusion>
+						<artifactId>javassist</artifactId>
+						<groupId>org.javassist</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>slf4j-api</artifactId>
+						<groupId>org.slf4j</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.thymeleaf</groupId>
+				<artifactId>thymeleaf-spring4</artifactId>
+				<exclusions>
+					<exclusion>
+						<artifactId>slf4j-api</artifactId>
+						<groupId>org.slf4j</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<!-- Needed for running tests (you may also use TestNG) -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.8.2</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>cglib</groupId>
+				<artifactId>cglib-nodep</artifactId>
+				<version>2.2.2</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>javax</groupId>
+				<artifactId>javaee-api</artifactId>
+				<version>6.0</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>nz.net.ultraq.web.thymeleaf</groupId>
+				<artifactId>thymeleaf-layout-dialect</artifactId>
+				<version>1.2.1</version>
+			</dependency>
+			
+			
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-config</artifactId>
+				<version>${version.spring.security}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-core</artifactId>
+				<version>${version.spring.security}</version>
+			</dependency>
+			
+			
+			<dependency>
+				<groupId>org.thymeleaf.extras</groupId>
+				<artifactId>thymeleaf-extras-springsecurity4</artifactId>
+				<version>2.1.2.RELEASE</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>slf4j-api</artifactId>
+						<groupId>org.slf4j</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>com.parvanpajooh.commons</groupId>
+				<artifactId>common</artifactId>
+				<version>1.1.0</version>
+				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<artifactId>stax-api</artifactId>
+						<groupId>stax</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>com.parvanpajooh.commons</groupId>
+				<artifactId>common-platform-ejb</artifactId>
+				<version>1.1.0</version>
+				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>com.parvanpajooh.commons</groupId>
+						<artifactId>common-client-library</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+		
+			<dependency>
+				<groupId>com.parvanpajooh.commons</groupId>
+				<artifactId>common-client-library</artifactId>
+				<version>1.0.0</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.parvanpajooh</groupId>
+				<artifactId>common-crosscutting-ejb</artifactId>
+				<version>1.0.0</version>
+				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>com.parvanpajooh.commons</groupId>
+						<artifactId>common-platform-ejb</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.1</version>
+			</dependency>
+			
+			<dependency>
+		        <groupId>org.springframework.security.oauth</groupId>
+		        <artifactId>spring-security-oauth2</artifactId>
+		        <version>2.0.7.RELEASE</version>
+		    </dependency>
+		    
+			<dependency>
+				<groupId>org.cloudfoundry.identity</groupId>
+				<artifactId>cloudfoundry-identity-common</artifactId>
+				<version>2.3.1</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.hibernate</groupId>
+			   			<artifactId>hibernate-validator</artifactId>
+					</exclusion>
+					<exclusion>
+						<artifactId>spring-security-oauth</artifactId>
+						<groupId>
+							org.springframework.security.oauth
+						</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>spring-security-ldap</artifactId>
+						<groupId>org.springframework.security</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>
+							spring-security-saml2-core
+						</artifactId>
+						<groupId>
+							org.springframework.security.extensions
+						</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>api-ldap-model</artifactId>
+						<groupId>org.apache.directory.api</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>hsqldb</artifactId>
+						<groupId>org.hsqldb</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>mariadb-java-client</artifactId>
+						<groupId>org.mariadb.jdbc</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>spring-ldap-core</artifactId>
+						<groupId>org.springframework.ldap</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>spring-ldap-core-tiger</artifactId>
+						<groupId>org.springframework.ldap</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>
+							wink-client-apache-httpclient
+						</artifactId>
+						<groupId>org.apache.wink</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.cloudfoundry.identity</groupId>
+				<artifactId>cloudfoundry-identity-scim</artifactId>
+				<version>2.3.1</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>scala-library</artifactId>
+						<groupId>org.scala-lang</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>szxcvbn_2.8.2</artifactId>
+						<groupId>eu.tekul</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			
+	         <dependency>
+	            <groupId>com.github.dandelion</groupId>
+	            <artifactId>dandelion-thymeleaf</artifactId>
+	         </dependency>
+
+	         <!-- Dandelion-Datatables -->
+	         <dependency>
+	            <groupId>com.github.dandelion</groupId>
+	            <artifactId>datatables-thymeleaf</artifactId>
+				<exclusions>
+					<exclusion>
+						<artifactId>slf4j-api</artifactId>
+						<groupId>org.slf4j</groupId>
+					</exclusion>
+				</exclusions>
+	         </dependency>
+         	<dependency>
+			    <groupId>com.github.dandelion</groupId>
+			    <artifactId>datatables-spring3</artifactId>
+			</dependency>
+    </dependencies>
+            
+	<build>    
+		<plugins>
+			
+			<!-- compiler -->
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<compilerVersion>1.8</compilerVersion>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

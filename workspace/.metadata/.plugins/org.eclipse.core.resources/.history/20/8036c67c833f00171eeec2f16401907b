@@ -1,0 +1,230 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.geomanagement.model;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RateDisplayType;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RateDueType;
+
+/**
+ * @author mehrdad
+ * 
+ */
+public class RateTypeMsg extends BaseMsg {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private Long id;
+	
+	private Boolean userDefined;
+
+	private String code;
+
+	private String nameLocal;
+
+	private String nameEn;
+
+	private Boolean editable;
+
+	private Integer displayOrder;
+
+	private RateAndRouteEnums.RateDisplayType displayType;
+
+	private Boolean optional;
+
+	private RateAndRouteEnums.RateDueType rateDue;
+
+	private ProductMsg product;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the userDefined
+	 */
+	public Boolean getUserDefined() {
+		return userDefined;
+	}
+
+	/**
+	 * @param userDefined
+	 *            the userDefined to set
+	 */
+	public void setUserDefined(Boolean userDefined) {
+		this.userDefined = userDefined;
+	}
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code
+	 *            the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the nameLocal
+	 */
+	public String getNameLocal() {
+		return nameLocal;
+	}
+
+	/**
+	 * @param nameLocal the nameLocal to set
+	 */
+	public void setNameLocal(String nameLocal) {
+		this.nameLocal = nameLocal;
+	}
+
+	/**
+	 * @return the nameEn
+	 */
+	public String getNameEn() {
+		return nameEn;
+	}
+
+	/**
+	 * @param nameEn
+	 *            the nameEn to set
+	 */
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
+	}
+
+	/**
+	 * @return the editable
+	 */
+	public Boolean isEditable() {
+		return editable;
+	}
+
+	/**
+	 * @param editable
+	 *            the editable to set
+	 */
+	public void setEditable(Boolean editable) {
+		this.editable = editable;
+	}
+
+	/**
+	 * @return the displayOrder
+	 */
+	public Integer getDisplayOrder() {
+		return displayOrder;
+	}
+
+	/**
+	 * @param displayOrder
+	 *            the displayOrder to set
+	 */
+	public void setDisplayOrder(Integer displayOrder) {
+		this.displayOrder = displayOrder;
+	}
+
+	/**
+	 * @return the displayType
+	 */
+	public RateDisplayType getDisplayType() {
+		return displayType;
+	}
+
+	/**
+	 * @param displayType
+	 *            the displayType to set
+	 */
+	public void setDisplayType(RateDisplayType displayType) {
+		this.displayType = displayType;
+	}
+
+	/**
+	 * @return the optional
+	 */
+	public Boolean isOptional() {
+		return optional;
+	}
+
+	/**
+	 * @param optional
+	 *            the optional to set
+	 */
+	public void setOptional(Boolean optional) {
+		this.optional = optional;
+	}
+
+	/**
+	 * @return the rateDue
+	 */
+	public RateDueType getRateDue() {
+		return rateDue;
+	}
+
+	/**
+	 * @param rateDue
+	 *            the rateDue to set
+	 */
+	public void setRateDue(RateDueType rateDue) {
+		this.rateDue = rateDue;
+	}
+
+	/**
+	 * @return the product
+	 */
+	public ProductMsg getProduct() {
+		return product;
+	}
+
+	/**
+	 * @param product
+	 *            the product to set
+	 */
+	public void setProduct(ProductMsg product) {
+		this.product = product;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder sb = new ToStringBuilder(this,
+				ToStringStyle.DEFAULT_STYLE)
+				.append("id", getId())
+				.append("code", this.code)
+				.append("nameLocal", this.nameLocal)
+				.append("nameEn", this.nameEn)
+				.append("userDefined", this.userDefined)
+				.append("editable", this.editable)
+				.append("optional", this.optional)
+				.append("displayOrder", this.displayOrder)
+				.append("displayType", this.displayType)
+				.append("rateDue", this.rateDue)
+				.append("product", this.product)
+				;
+
+		return sb.toString();
+	}
+
+}

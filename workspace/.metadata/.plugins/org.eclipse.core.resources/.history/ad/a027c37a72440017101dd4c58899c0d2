@@ -1,0 +1,33 @@
+package com.parvanpajooh.siteservices.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.siteservices.dao.RecoveryCodeDao;
+import com.parvanpajooh.siteservices.model.RecoveryCode;
+import com.parvanpajooh.siteservices.service.RecoveryCodeLocalService;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class RecoveryCodeLocalServiceImpl extends GenericLocalServiceImpl<RecoveryCode, Long> implements RecoveryCodeLocalService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(RecoveryCodeLocalServiceImpl.class);
+	
+	public RecoveryCodeDao recoveryCodeDao;
+	
+	@Inject
+	public void setRecoveryCodeDao(RecoveryCodeDao recoveryCodeDao) {
+		this.dao = recoveryCodeDao;
+		this.recoveryCodeDao = recoveryCodeDao;
+	}
+}

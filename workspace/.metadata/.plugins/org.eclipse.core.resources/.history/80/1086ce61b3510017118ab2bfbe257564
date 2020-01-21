@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" 
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout" 
+	  ddl:bundle-includes="bootstrapValidator,select2,fileinput">
+<head>
+	<meta charset="UTF-8" />
+	<title>Complaint</title>
+	
+		<style>
+		.col-sm-2 {
+			float: right !important;
+			padding-left: 5px !important;
+			padding-right: 5px !important;
+			direction: ltr;
+		}
+		
+		.col-md-6 {
+			float: right !important;
+			padding-left: 30px !important;
+		}
+		
+		.has-feedback .form-control {
+			padding-right: 0px !important;
+		}
+		
+		.form-control-feedback {
+			right: 350px !important;
+		}
+		
+		.page-header {
+			padding: 20px 0 !important;
+			border-bottom: 5px solid #CCC !important;
+			margin: 0px !important;
+		}
+		
+		.input-group .input-group-addon {
+		    border-radius: 0;
+		    border-color: #d2d6de;
+		    background-color: #fff;
+		    border-left: 1px solid #ccc !important;
+		}
+		
+		.control-label {
+		    text-align: left !important;
+		}
+	</style>
+
+</head>
+<body th:with="rightMenu='profile-complaint'">
+
+	<section layout:fragment="top-header" class="page-header">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<ul class="breadcrumb">
+						<li>
+							<a href="#">صفحه نخست</a>
+						</li>
+
+						<li class="active">ثبت شکایت</li>
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<h1>ثبت شکایت</h1>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="content" layout:fragment="content">
+		<form id="activateForm">
+			<div class="callout callout-danger hide">
+				<h4></h4>
+			</div>
+			<div class="container">
+				<div class="col-sm-8 col-lg-offset-2">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<div class="row">
+									<h2>ثبت شکایت</h2>
+									<div class="modal-form-content">
+										<form class="form-horizontal" role="form" id="createComplaintForm" method="post">
+											<div class="callout callout-danger hide">
+												<h4></h4>
+											</div>
+											<div class="form-group ">
+												<label class="col-sm-2 control-label" for="category.id" th:inline="text">[[#{complaint.complaintCategory}]]
+													<span class="reqired"> *</span>
+												</label>
+												<div class="col-sm-8">
+													<input class="form-control validate[notempty]" type="hidden" name="category.id" id="categoryidCreate" data-bv-notempty="true" 
+														   th:attr="data-bv-notempty-message=#{error-required(#{complaint.complaintCategory})}"/>
+												</div>
+											</div>
+											<div class="form-group ">
+												<label class="col-sm-2 control-label" for="email" th:text="#{complaint.email}">ایمیل</label>
+												<div class="col-sm-8">
+													<input class="form-control " id="emailCreate" name="email" type="text" />
+												</div>
+											</div>
+											<div class="form-group ">
+												<label class="col-sm-2 control-label" for="tel" th:inline="text">[[#{complaint.tel}]]
+													<span class="reqired"> *</span>
+												</label>
+												<div class="col-sm-8">
+													<input class="form-control " id="telCreate" name="tel" type="text" data-bv-notempty="true" 
+														   th:attr="data-bv-notempty-message=#{error-required(#{complaint.tel})}"/>
+												</div>
+											</div>
+											<div class="form-group ">
+												<label class="col-sm-2 control-label" for="subject" th:inline="text">[[#{complaint.subject}]]
+													<span class="reqired"> *</span></label>
+												<div class="col-sm-8">
+													<input class="form-control " id="subjectCreate" name="subject" type="text" data-bv-notempty="true" 
+														   th:attr="data-bv-notempty-message=#{error-required(#{complaint.subject})}"/>
+												</div>
+											</div>
+											<div class="form-group ">
+												<label class="col-sm-2 control-label" for="attachment" th:text="#{complaint.attachment}">ضمیمه</label>
+												<div class="col-sm-8">
+													<input class="form-control file-loading" id="attachmentCreate" name="attachment" type="file" data-show-upload="false" />
+												</div>
+											</div>
+											<div class="form-group ">
+												<label class="col-sm-2 control-label" for="description" th:inline="text" th:text="#{complaint.description}">[[#{complaint.description}]]
+													<span class="reqired"> *</span></label>
+												<div class="col-sm-8">
+													<textarea class="form-control " id="descriptionCreate" name="description" data-bv-notempty="true" 
+														   th:attr="data-bv-notempty-message=#{error-required(#{complaint.description})}"></textarea>
+												</div>
+											</div>
+										</form>
+									</div>
+									<div class="split-right">
+										<button class="btn btn-success" id="createComplaintBtn" th:text="#{button.save}">ذخیره</button>
+									</div>
+								</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</form>
+	</section>
+	<th:block layout:fragment="javascripts">
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+           jQuery(document).ready(function(){
+
+               $('#categoryidCreate').select2({
+				placeholder: 'انتخاب کنید'
+				,formatResult: function(aaData){return aaData.code;}
+				,id: function(obj) {return obj.id}
+				,formatSelection: function(aaData){return aaData.code}
+				,allowClear: true
+				,ajax: {
+					 url: '/siteservices-web/profile/user/complaintcategories',
+					 transport: transportFunction,
+					 dataType: 'json',
+					 params: {contentType: 'application/json;charset=utf-8', statusCode: {404: function(){showError('404');},403: function(){showError('403');},503: function(){showError('503');}}},
+					 quietMillis: 200,
+					 data: function (term, page) {
+					 	return {
+								'columns[1][data]': 'id'
+								,start: (page - 1) * 20
+								,length: 20
+								,'order[1][column]': 1
+								,'order[1][dir]': 'asc'
+								,term: term
+			 			};
+					 },
+					 results: function (data, page) {
+					 	var more = (page * 20) < data.recordsFiltered;
+					 	return {results: data.data, more: more}
+					 }
+				}
+				,initSelection: function(element, callback) {
+						var id=$(element).val();
+						if(id !== ''){
+							$.ajax('/siteservices-web/profile/user/complaintcategory', {
+					 		data: {id: id},
+							dataType: 'json'
+						}).done(function(data) { callback(data); });
+					}
+				}
+				
+				}
+				).change(function() {
+				$('#createComplaintForm').data('bootstrapValidator').updateStatus('category.id', 'NOT_VALIDATED', null).validateField('category.id');
+				});
+
+
+               $("#attachmentCreate").fileinput({
+                   browseClass: "btn btn-default",
+                   browseLabel: "",
+                   browseIcon: "<i class='fa fa-folder-open'></i> ",
+                   removeClass: "btn btn-danger",
+                   removeLabel: "",
+                   removeIcon: "<i class='fa fa-trash'></i> "
+               });
+            /*]]>*/
+               $('#createComplaintBtn').click(function(event){
+            		var $btn = $(this);
+            		var isInMultipleMode = $('#createComplaint-create-another').is(':checked');
+            		$('#createComplaintForm').find('.callout').text('').addClass('hide');
+            		$('#createComplaintForm').data('bootstrapValidator').validate();
+            		if($('#createComplaintForm').data('bootstrapValidator').isValid()){
+            			
+            			$btn.attr('disabled', true);
+            			$.post('/siteservices-web/profile/user/complaints', $('#createComplaintForm').serialize()).done(function(data) {
+            				if(data.status == 'success') {
+            					try{createComplaintAfterSaveSuccess()}catch(error){}
+            					showTopleftGrowl('success', 'Create', 'Create Successful');
+            					try{oTable_ComplaintTable.ajax.reload();}catch(error){}
+            					if(isInMultipleMode){
+            						resetCreateForm($('#createComplaintModal'));
+            					} else {
+            						$('#createComplaintModal').modal('hide');
+            					}
+            				} else if(data.status == 'ValidationException'){
+            					$('#createComplaintForm').find('.callout').text(data.invalidField +  [[#{invalid-value}]]).removeClass('hide');
+            				} else if(data.status == 'ObjectExistsException'){
+            					$('#createComplaintForm').find('.callout').text((data.invalidField ? data.invalidField : 'data') + ' ??already-exists_fa??').removeClass('hide');
+            				} else if(data.status == 'ErrorCode'){
+            					if(data.errorMessage){
+            						$('#createComplaintForm').find('.callout').text(data.errorMessage).removeClass('hide');
+            					} else {
+            						$('#createComplaintForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+            					}
+            				} else {
+            					console.debug(data.status);
+            					$('#createComplaintForm').find('.callout').text((data.message ? data.message : [[#{save.failed}]])).removeClass('hide');
+            				}
+            				$btn.attr('disabled', false);
+            			}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'createComplaintBtn')});
+            		}
+            		return false;
+            	});
+			});
+
+ 
+	</script>
+</th:block>
+</body>
+</html>

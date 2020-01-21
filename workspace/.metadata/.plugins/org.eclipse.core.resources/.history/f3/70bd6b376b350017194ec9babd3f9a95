@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>View WaybillNumber</title>
+
+<style>
+
+.select-device-modal .form-control {
+	width: auto;
+}
+
+.select-device-modal table.dataTable td {
+	padding: 1px 10px;
+}
+
+.select-device-modal .dataTables_filter label {
+	margin-bottom: 5px;
+}
+
+.limited {
+    white-space: nowrap;          
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tooltip-inner {
+    max-width: 500px;
+}
+
+</style>
+</head>
+
+<body th:with="rightMenu='waybillnumber-detail'">
+	<section layout:fragment="top-header" class="fixed-header">
+		<div class="ui-header-image pull-left">
+			<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/stock2-web/resources/images/stack.png" th:src="@{/resources/images/stack.png}" style="width: 48px; height: 48px;" />
+		</div>
+		<div class="ui-header-title">
+			<div class="split-left">
+				<div class="input-group" style="position:absolute; margin-top:10px; width:15%;">
+		          <input id="waybillNumberFilter" th:value="*{waybillNumber}" type="text" class="form-control" th:placeholder="#{waybillNumber}" />
+	              <span id="submitLink" class="input-group-btn">
+	                <button type="button" onclick="go();" class="btn btn-primary btn-flat"><i class="fa fa-search"></i></button>
+	                <a href="" style="display: none;"><span></span></a>
+	              </span>
+		        </div>
+			</div>
+			<div class="split-right">
+				<a type="button" class="btn btn-default" id="returnBtn" th:text="#{button.return}" th:href="@{'/waybillNumber'}">Return</a>
+			</div>
+		</div>
+	</section>
+
+	<!-- Main content -->
+	<!-- BODY -->
+	<section class="content" layout:fragment="content">
+		<div class="box box-primary">
+			<div class="box-header">
+				<strong th:if="${waybillNumberDisplayDto}">
+					<h3 class="box-title" th:text="${waybillNumberDisplayDto.formattedWaybillNumber}"></h3>
+				</strong>
+			</div>
+			<div class="box-body no-padding">
+				<table id="WaybillNumberCommandTable" class="table table-hover table-bordered table-striped table-condensed drop-shadow">
+					<thead>
+						<tr>
+							<th class="text-center" width="30px">#</th>
+							<th class="text-center" >UUID</th>
+							<th class="text-center" >محتوا</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+		</div>
+	</section>
+
+	<th:block layout:fragment="javascripts">
+		<script th:inline="javascript">
+		
+				function domesticRender(entity, type, full){
+					
+					if(full.waybillNumberCommandType == 'Generate'){
+						if(full.viewWaybillNumberGenerateCommand.domestic){
+							return '<div class="text-center"><span class="label bg-navy" th:text="#{waybillNumber.domestic}"></span></div>';
+						}else if(!full.viewWaybillNumberGenerateCommand.domestic){
+							return '<div class="text-center"><span class="label bg-purple" th:text="#{waybillNumber.international}"></span></div>';
+						}
+					}
+					if(full.waybillNumberCommandType == 'Update'){
+						if(full.waybillNumberUpdateCommand.domestic){
+							return '<div class="text-center"><span class="label bg-navy" th:text="#{waybillNumber.domestic}"></span></div>';
+						}else if(!full.waybillNumberUpdateCommand.domestic){
+							return '<div class="text-center"><span class="label bg-purple" th:text="#{waybillNumber.international}"></span></div>';
+						}
+					}
+				}	
+
+				function waybillNumberTypeRender(entity, type, full){
+					
+					if(entity == 'ELECTRONIC'){
+						return '<div class="text-center"><span class="label label-info" th:text="#{waybillNumber.electronic}"></span></div>';
+					}else if(entity == 'PRINT'){
+						return '<div class="text-center"><span class="label bg-maroon" th:text="#{waybillNumber.print}"></span></div>';
+					}			
+				}
+
+				function currentStateRender(entity, type, full) {
+
+					if(full.waybillNumberCommandType == 'Void'){
+						return '<div class="text-center"><span class="label label-danger">VOIDED</span></div>';
+					}
+					if(full.waybillNumberCommandType == 'ReturnToStock'){
+						return '<div class="text-center"><span class="label btn-github">NEW</span></div>';
+					}
+					if(full.waybillNumberCommandType == 'Use'){
+						return '<div class="text-center"><span class="label label-success">USE</span></div>';
+					}
+					if(full.waybillNumberCommandType == 'ChangeState'){
+
+						var state = full.waybillNumberChangeStateCommand.newState;
+						if (state == 'USED') {
+							return '<div class="text-center"><span class="label label-success">'+state+'</span></div>';
+						}
+						if (state == 'NEW') {
+							return '<div class="text-center"><span class="label btn-github">'+state+'</span></div>';
+						}
+						if (state == 'VOIDED') {
+							return '<div class="text-center"><span class="label label-danger">'+state+'</span></div>';
+						}
+						if (state == 'BLOCKED') {
+							return '<div class="text-center"><span class="label label-warning">'+state+'</span></div>';
+						}					
+					}
+				}
+				
+				/*<![CDATA[*/
+				function remarksRender(entity, type, full){
+					if(full.waybillNumberCommandType == 'Generate' && full.viewWaybillNumberGenerateCommand.remarks != null){
+						return '<div class="limited" style="width: 80px;"><span>'+full.viewWaybillNumberGenerateCommand.remarks+'</span></div>';
+					}
+					if(full.waybillNumberCommandType == 'Update' && full.waybillNumberUpdateCommand.remarks != null){
+						return '<div class="limited" style="width: 80px;"><span>'+full.waybillNumberUpdateCommand.remarks+'</span></div>';
+					}
+					if(full.waybillNumberCommandType == 'ChangeAssignee' && full.viewWaybillNumberChangeAssigneeCommand.remarks != null){
+						return '<div class="limited" style="width: 80px;"><span>'+full.viewWaybillNumberChangeAssigneeCommand.remarks+'</span></div>';
+					}
+					if(full.waybillNumberCommandType == 'ChangeState' && full.waybillNumberChangeStateCommand.remarks != null){
+						return '<div class="limited" style="width: 80px;"><span>'+full.waybillNumberChangeStateCommand.remarks+'</span></div>';
+					}	
+					if(full.waybillNumberCommandType == 'AssignToSubAgent' && full.viewWaybillNumberChangeAssigneeCommand.remarks != null){
+						return '<div class="limited" style="width: 80px;"><span>'+full.viewWaybillNumberChangeAssigneeCommand.remarks+'</span></div>';
+					}
+					if(full.waybillNumberCommandType == 'ReturnToParentAgent' && full.viewWaybillNumberChangeAssigneeCommand.remarks != null){
+						return '<div class="limited" style="width: 80px;"><span>'+full.viewWaybillNumberChangeAssigneeCommand.remarks+'</span></div>';
+					}				
+				}
+				
+				$(document).ready(function(){
+		    		$("#waybillNumberFilter").focus()
+		    	});
+			    $("#waybillNumberFilter").keyup(function (e) {
+				    if (e.keyCode == 13) {
+				    	go();
+				    }
+				});
+			    function go() {
+				    var waybillNumber = $('#waybillNumberFilter').val().trim();
+				    if (waybillNumber !== '') {
+					    $('#submitLink a').attr('href', '/stock2-web/waybillNumber/detail/' + waybillNumber);
+					    $('#submitLink a span').trigger('click');
+				    }
+			    }
+								
+				 $(document).on('mouseenter', ".limited", function () {
+				     var $this = $(this);
+				         $this.tooltip({
+				             title: $this.text(),
+				             placement: "bottom"
+				         });
+				         $this.tooltip('show');				     
+				 });
+				
+				 var oTable_WaybillNumberCommandTable;
+				 var oTable_WaybillNumberCommandTable_params = {
+				     "scrollCollapse": true,
+				     
+				     "columns": [{
+				         "defaultContent": "",
+				     },{
+				         "defaultContent": "",
+				         "data": "waybillNumberCommandType",
+				     },{
+				         "defaultContent": "",
+				         "data": "dateTime",
+				     },{
+				         "defaultContent": "",
+				         "data": "userName",
+				     },{
+				         "defaultContent": "",
+				         "data": "viewWaybillNumberGenerateCommand.prefix",
+				     },{
+				         "defaultContent": "",
+				         "data": "viewWaybillNumberGenerateCommand.from",
+				     },{
+				         "defaultContent": "",
+				         "data": "viewWaybillNumberGenerateCommand.to",
+				     },{
+				         "defaultContent": "",
+				         "data": "viewWaybillNumberGenerateCommand.incrementStep",
+				     },{
+				         "defaultContent": "",
+				         "data": "viewWaybillNumberGenerateCommand.waybillNumberGroupCode",
+				     },{
+				         "defaultContent": "",
+				         "data": "viewWaybillNumberGenerateCommand.format",
+				     },{
+				         "defaultContent": "",
+				         "data": "viewWaybillNumberGenerateCommand.waybillNumberType",
+				         "render": waybillNumberTypeRender
+				     },{
+				         "defaultContent": "",
+				         "render": domesticRender
+				     },{
+				         "defaultContent": "",
+				         "render": remarksRender
+				     },{
+				         "defaultContent": "",
+				         "render": currentStateRender
+				     },{
+				         "defaultContent": "",
+				         "data": "viewWaybillNumberChangeAssigneeCommand.newAgentName"
+				     }],
+				     "searching": false,
+				     "paginate" : false,
+				     "info" :false,
+				     "initComplete": function(settings, json) {
+				         oTable_WaybillNumberCommandTable.columns.adjust().draw();
+				     },
+				     "serverSide": true,
+				     "autoWidth": false,
+				     "processing": true,
+				     "lengthChange": true,
+				     "drawCallback": function(settings) {
+				         myCustomDrawCallback(settings);
+				     }
+				 };
+				 
+				 $(document).ready(function() {
+				     oTable_WaybillNumberCommandTable_params.ajax = getWaybillNumberCommandExtraParams();
+				     oTable_WaybillNumberCommandTable_params.ajax.url = '/stock2-web/waybillNumber/commands/paging';
+				     oTable_WaybillNumberCommandTable_params.ajax.dataSrc = 'data';
+				     oTable_WaybillNumberCommandTable = $('#WaybillNumberCommandTable').DataTable(oTable_WaybillNumberCommandTable_params);
+				 });
+
+				function getWaybillNumberCommandExtraParams(aoData) {
+					return {
+			    	    "data" : function(data){
+					    	customPush(data, 'waybillNumber',$('#waybillNumberFilter').val());				    	
+			    	    }
+			    	};
+				}
+
+				function doSearch() {
+					try{
+					oTable_WaybillNumberCommandTable.ajax.reload();
+					} catch(Error){console.debug(Error);}
+				}
+				
+				function myCustomDrawCallback(settings){
+					var classMap = [];
+					for ( var i=0, iLen=settings.aoColumns.length ; i<iLen ; i++ ){
+						if(settings.aoColumns[i].nTh.className.indexOf('responsiveCol') > -1)
+							classMap.push(i);
+					}
+					var iStart = settings._iDisplayStart+1;
+					for ( var i=0, iLen=settings.aiDisplay.length ; i<iLen ; i++ )
+					{
+						for ( var j=0; j<classMap.length ; j++ ){
+							$('td:eq('+classMap[j]+')', settings.aoData[ settings.aiDisplay[i] ].nTr ).addClass('responsiveCol');
+						}
+						$('td:eq(0)', settings.aoData[ settings.aiDisplay[i] ].nTr ).html( iStart + i );
+					}
+					$('#WaybillNumberCommandTable input[type=checkbox], #WaybillNumberCommandTable input[type=radio]').iCheck({checkboxClass: "icheckbox_minimal",radioClass: "iradio_minimal"});
+					$('#WaybillNumberCommandTable input[type=checkbox], #WaybillNumberCommandTable input[type=radio]').on('ifChanged', function(event){$(this).trigger('change');});
+					return false;
+				}			
+					           
+				/*]]>*/
+			</script>
+	</th:block>
+</body>
+</html>

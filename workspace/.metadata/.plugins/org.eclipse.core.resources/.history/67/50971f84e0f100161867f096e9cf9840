@@ -1,0 +1,338 @@
+package com.parvanpajooh.taskmanagement.domain.model;
+
+import java.io.Serializable;
+import java.io.StringReader;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Table;
+import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskAttachmentCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskChangeAssigneeCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskChangeStateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCommentCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCreateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskRelationCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskUpdateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.ViewTaskRelationCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType;
+
+@Entity
+@Table(name = "taskCommand_tbl")
+public class TaskCommand implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Version
+	private Integer version;
+
+	private String userUuid;
+
+	private String userName;
+
+	@Column(insertable = true, updatable = false)
+	private String localDateTime;
+
+	@Enumerated(EnumType.STRING)
+	private TaskCommandType taskCommandType;
+
+	@NotNull
+	@NotEmpty
+	@Lob
+	@Column(length = 10000)
+	private String commandBody;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version
+	 *            the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	/**
+	 * @return the userUuid
+	 */
+	public String getUserUuid() {
+		return userUuid;
+	}
+
+	/**
+	 * @param userUuid
+	 *            the userUuid to set
+	 */
+	public void setUserUuid(String userUuid) {
+		this.userUuid = userUuid;
+	}
+
+	/**
+	 * @return the commandBody
+	 */
+	public String getCommandBody() {
+		return commandBody;
+	}
+
+	/**
+	 * @param commandBody
+	 *            the commandBody to set
+	 */
+	public void setCommandBody(String commandBody) {
+		this.commandBody = commandBody;
+	}
+
+	/**
+	 * @return the userName
+	 */
+	public String getUserName() {
+		return userName;
+	}
+
+	/**
+	 * @param userName
+	 *            the userName to set
+	 */
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	/**
+	 * @return the localDateTime
+	 */
+	public String getLocalDateTime() {
+		return localDateTime;
+	}
+
+	/**
+	 * @param localDateTime
+	 *            the localDateTime to set
+	 */
+	public void setLocalDateTime(String localDateTime) {
+		this.localDateTime = localDateTime;
+	}
+
+	/**
+	 * @return the taskCommandType
+	 */
+	public TaskCommandType getTaskCommandType() {
+		return taskCommandType;
+	}
+
+	/**
+	 * @param taskCommandType
+	 *            the taskCommandType to set
+	 */
+	public void setTaskCommandType(TaskCommandType taskCommandType) {
+		this.taskCommandType = taskCommandType;
+	}
+
+	public TaskCommandDto toDto() throws ParvanServiceException {
+
+		TaskCommandDto taskCommandDto = null;
+
+		try {
+			switch (this.getTaskCommandType()) {
+
+			case Create:
+				// Creating an Unmarshaller
+				JAXBContext createJaxbContext;
+
+				createJaxbContext = JAXBContext.newInstance(TaskCreateCommandDto.class);
+
+				Unmarshaller createJaxbUnmarshaller = createJaxbContext.createUnmarshaller();
+				StringReader createJStr = new StringReader(this.getCommandBody());
+
+				TaskCreateCommandDto taskCreateCommandDto = (TaskCreateCommandDto) createJaxbUnmarshaller.unmarshal(createJStr);
+				taskCreateCommandDto.setTaskCommandType(TaskCommandType.Create);
+				taskCreateCommandDto.setId(this.getId());
+				taskCreateCommandDto.setUserName(this.getUserName());
+
+				taskCommandDto = taskCreateCommandDto;
+
+				break;
+
+			case Update:
+				// Creating an Unmarshaller
+				JAXBContext updateJaxbContext = JAXBContext.newInstance(TaskUpdateCommandDto.class);
+				Unmarshaller updateJaxbUnmarshaller = updateJaxbContext.createUnmarshaller();
+				StringReader updateStr = new StringReader(this.getCommandBody());
+
+				TaskUpdateCommandDto taskUpdateCommandDto = (TaskUpdateCommandDto) updateJaxbUnmarshaller.unmarshal(updateStr);
+				taskUpdateCommandDto.setTaskCommandType(TaskCommandType.Update);
+				taskUpdateCommandDto.setId(this.getId());
+				taskUpdateCommandDto.setUserName(this.getUserName());
+
+				taskCommandDto = taskUpdateCommandDto;
+
+				break;
+
+			case ChangeState:
+				// Creating an Unmarshaller
+				JAXBContext changeStateJaxbContext = JAXBContext.newInstance(TaskChangeStateCommandDto.class);
+				Unmarshaller changeStateJaxbUnmarshaller = changeStateJaxbContext.createUnmarshaller();
+				StringReader changeStateStr = new StringReader(this.getCommandBody());
+
+				TaskChangeStateCommandDto taskChangeStateCommandDto = (TaskChangeStateCommandDto) changeStateJaxbUnmarshaller.unmarshal(changeStateStr);
+				taskChangeStateCommandDto.setTaskCommandType(TaskCommandType.ChangeState);
+				taskChangeStateCommandDto.setId(this.getId());
+				taskChangeStateCommandDto.setUserName(this.getUserName());
+
+				taskCommandDto = taskChangeStateCommandDto;
+
+				break;
+
+			case ChangeAssignee:
+				// Creating an Unmarshaller
+				JAXBContext changeAssigneeJaxbContext = JAXBContext.newInstance(TaskChangeAssigneeCommandDto.class);
+				Unmarshaller changeAssigneeJaxbUnmarshaller = changeAssigneeJaxbContext.createUnmarshaller();
+				StringReader changeAssigneeStr = new StringReader(this.getCommandBody());
+
+				TaskChangeAssigneeCommandDto changeAssigneeCommandDto = (TaskChangeAssigneeCommandDto) changeAssigneeJaxbUnmarshaller
+						.unmarshal(changeAssigneeStr);
+				changeAssigneeCommandDto.setTaskCommandType(TaskCommandType.ChangeAssignee);
+				changeAssigneeCommandDto.setId(this.getId());
+				changeAssigneeCommandDto.setUserName(this.getUserName());
+
+				taskCommandDto = changeAssigneeCommandDto;
+
+				break;
+
+			case Comment:
+				// Creating an Unmarshaller
+				JAXBContext commentJaxbContext = JAXBContext.newInstance(TaskCommentCommandDto.class);
+				Unmarshaller commentJaxbUnmarshaller = commentJaxbContext.createUnmarshaller();
+				StringReader commentStr = new StringReader(this.getCommandBody());
+
+				TaskCommentCommandDto commentCommandDto = (TaskCommentCommandDto) commentJaxbUnmarshaller.unmarshal(commentStr);
+				commentCommandDto.setTaskCommandType(TaskCommandType.Comment);
+				commentCommandDto.setId(this.getId());
+				commentCommandDto.setUserName(this.getUserName());
+
+				taskCommandDto = commentCommandDto;
+
+				break;
+
+			case Relation:
+				// Creating an Unmarshaller
+				JAXBContext relationJaxbContext = JAXBContext.newInstance(TaskRelationCommandDto.class);
+				Unmarshaller relationJaxbUnmarshaller = relationJaxbContext.createUnmarshaller();
+				StringReader relationStr = new StringReader(this.getCommandBody());
+
+				TaskRelationCommandDto relationCommandDto = (TaskRelationCommandDto) relationJaxbUnmarshaller.unmarshal(relationStr);
+				ViewTaskRelationCommandDto viewRelationCommandDto = new ViewTaskRelationCommandDto();
+				viewRelationCommandDto.setTaskIdTo(relationCommandDto.getTaskIdTo());
+				viewRelationCommandDto.setRemarks(relationCommandDto.getRemarks());
+				viewRelationCommandDto.setType(relationCommandDto.getType());
+				relationCommandDto.setTaskCommandType(TaskCommandType.Relation);
+				relationCommandDto.setId(this.getId());
+				relationCommandDto.setUserName(this.getUserName());
+
+				taskCommandDto = viewRelationCommandDto;
+
+				break;
+				
+			case Attachment:
+				// Creating an Unmarshaller
+				JAXBContext attachmentJaxbContext = JAXBContext.newInstance(TaskAttachmentCommandDto.class);
+				Unmarshaller attachmentJaxbUnmarshaller = attachmentJaxbContext.createUnmarshaller();
+				StringReader attachmentStr = new StringReader(this.getCommandBody());
+
+				TaskAttachmentCommandDto attachmentCommandDto = (TaskAttachmentCommandDto) attachmentJaxbUnmarshaller.unmarshal(attachmentStr);
+				attachmentCommandDto.setTaskCommandType(TaskCommandType.Attachment);
+				attachmentCommandDto.setId(this.getId());
+				attachmentCommandDto.setUserName(this.getUserName());
+
+				taskCommandDto = attachmentCommandDto;
+
+				break;
+
+			default:
+				break;
+			}
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		taskCommandDto.setLocalDateTime(this.getLocalDateTime());
+		return taskCommandDto;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof TaskCommand)) {
+			return false;
+		}
+
+		final TaskCommand obj = (TaskCommand) o;
+
+		return new EqualsBuilder().append(this.id, obj.getId()).isEquals();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(-970989579, 1884842917).append(this.id).toHashCode();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "TaskCommand [id=" + id + ", version=" + version + ", userUuid=" + userUuid + ", userName=" + userName + ", taskCommandType=" + taskCommandType
+				+ ", commandBody=" + commandBody + "]";
+	}
+}

@@ -1,0 +1,145 @@
+package com.parvanpajooh.stock2.domain.service.Impl;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.stock2.domain.adapter.AgentManagementServiceAdapter;
+import com.parvanpajooh.stock2.domain.model.dto.GeneralAgentDto;
+import com.parvanpajooh.stock2.domain.service.AgentManagementService;
+
+/**
+ * @author mehrdad
+ *
+ */
+@Stateless
+public class AgentManagementServiceImpl implements AgentManagementService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(AgentManagementServiceImpl.class);
+
+	@Inject
+	private AgentManagementServiceAdapter agentManagementServiceAdapter;
+
+	@Override
+	public Map<Long, String> getAgentNamesByIds(Long[] ids) throws ParvanServiceException {
+		Map<Long, String> agentNames = null;
+		try {
+			agentNames = agentManagementServiceAdapter.getAgentNamesByIds(ids);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting a map of agentNames and ids by their ids.", e);
+		}
+		return agentNames;
+	}
+	
+	@Override
+	public List<GeneralAgentDto> findDirectSubAgentsByParentId(Long parentAgentId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findDirectSubAgentsByParentId( parentAgentId={})", parentAgentId);
+		
+		List<GeneralAgentDto> agentDtos = null;
+
+		try {
+
+			agentDtos = agentManagementServiceAdapter.findDirectSubAgentsByParentId(parentAgentId);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting agents by its parentId:" + parentAgentId, e);
+		}
+
+		// LOG
+		log.debug("Leaving findDirectSubAgentsByParentId(): ret={}", (agentDtos != null) ? agentDtos.size() : "NULL");
+		
+		return agentDtos;
+	}
+	
+	@Override
+	public GeneralAgentDto getAgent(Long id) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findDirectSubAgentsByParentId( parentAgentId={})", id);
+		
+		GeneralAgentDto generalAgentDto = null;
+
+		try {
+
+			generalAgentDto = agentManagementServiceAdapter.getAgent(id);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting agents by its id:" + id, e);
+		}
+
+		// LOG
+		log.debug("Leaving findDirectSubAgentsByParentId(): ret={}", generalAgentDto);
+		
+		return generalAgentDto;
+	}
+	
+/*	@Inject
+	private IdentityManagement2ServiceAdapter identityManagement2ServiceAdapter;
+	
+	@Override
+	public List<GeneralAgentDto> getAllSubAgentsByParentId(Long parentAgentId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering loadAgentsByParentId( parentAgentId={})", parentAgentId);
+		
+		List<GeneralAgentDto> agentDtos = null;
+
+		try {
+
+			agentDtos = agentManagementServiceAdapter.getAllSubAgentsByParentId(parentAgentId);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting agents by its parentId:" + parentAgentId, e);
+		}
+
+		// LOG
+		log.debug("Leaving loadAgentsByParentId(): ret={}", (agentDtos != null) ? agentDtos.size() : "NULL");
+		
+		return agentDtos;
+	}
+
+	@Override
+	public EmployeeDto findEmployeeByUsername(String employeeUserName) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findEmployeeByUsername( employeeUserName={})", employeeUserName);
+		EmployeeDto employeeDto = null;
+
+		try {
+
+			employeeDto = agentManagementServiceAdapter.findEmployeeByUsername(employeeUserName);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting employee by its username:" + employeeUserName, e);
+		}
+
+		// LOG
+		log.debug("Leaving loadEmployeeByUsername(): ret={}", employeeDto);
+		return employeeDto;
+	}
+
+	@Override
+	public UserDto loadUserByUsername(String username) throws ParvanServiceException {
+		log.debug("Entering loadUserByUsername( username={})", username);
+		UserDto dto = null;
+		try {
+			dto = identityManagement2ServiceAdapter.loadUserByUsername(username);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while loadUserByUsername :" + username , e);
+		}
+		log.debug("Leaving loadUserByUsername(): ret={}", dto);
+		return dto;
+	}*/
+}

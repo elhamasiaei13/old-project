@@ -1,0 +1,207 @@
+package com.parvanpajooh.agentmanagement.mvc;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.accounting.AccountingProtos;
+import com.parvanpajooh.agentmanagement.common.AccountingService;
+import com.parvanpajooh.agentmanagement.model.GeneralAgent;
+import com.parvanpajooh.agentmanagement.model.criteria.AccountNumberCriteria;
+import com.parvanpajooh.agentmanagement.model.criteria.GeneralAgentCriteria;
+import com.parvanpajooh.agentmanagement.model.vo.AccountNumberVO;
+import com.parvanpajooh.agentmanagement.model.vo.GeneralAgentVO;
+import com.parvanpajooh.agentmanagement.mvc.base.AmAbstractController;
+import com.parvanpajooh.agentmanagement.service.GeneralAgentService;
+import com.parvanpajooh.common.security.OauthHelper;
+import com.parvanpajooh.common.util.ParamUtil;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.GenericService;
+import com.parvanpajooh.commons.platform.ejb.service.ServiceGenerator;
+
+import retrofit2.Call;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Controller
+@RequestMapping("/generalAgent")
+public class GeneralAgentController extends AmAbstractController<GeneralAgent, GeneralAgentVO, GeneralAgentCriteria> {
+
+	@EJB(mappedName = "java:global/agentmanagement-ear/agentmanagement-ejb/GeneralAgentServiceImpl")
+	private GeneralAgentService generalAgentService;
+
+	@Override
+	protected GenericService<GeneralAgent, Long> getService() {
+		return generalAgentService;
+	}
+
+	@Override
+	protected String getName() {
+		return "generalAgents";
+	}
+
+	@Autowired
+	private MessageSource messageSource;
+
+	@RequestMapping(value = "/{id}/employees/add", method = RequestMethod.GET)
+	public String addEmployees(@PathVariable Long id, Model model) {
+		log.debug("Entering addEmployees (generalAgentId={})", id);
+
+		model.addAttribute("generalAgentId", id);
+		return "addEmployees";
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @param model
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/{id}/detail", method = RequestMethod.GET)
+	public String agentDetail(@PathVariable Long id, Model model, HttpServletRequest request) {
+		log.debug("Entering agentDetail (generalAgentId={})", id);
+		Map<String, Object> result = new HashMap<String, Object>();
+		GeneralAgentVO gaVO = null;
+
+		try {
+			gaVO = (GeneralAgentVO) generalAgentService.get(getUserInfo(request), id);
+
+			result.put("status", "success");
+			result.put("result", gaVO);
+		} catch (Exception e) {
+
+			proccessException(e, result);
+		}
+		model.addAttribute("generalAgentId", id);
+		model.addAttribute("generalAgentVO", gaVO);
+		return "agentDetail";
+	}
+
+	@RequestMapping(value = "/createEmployee", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> createEmployee(Long id, HttpServletRequest request) {
+		log.debug("Entering createEmployee(id={})", id);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		String[] userUuids = ParamUtil.getParameterValues(request, "employee.userUuid");
+		String remarks = ParamUtil.getString(request, "employee.remarks", null);
+
+		try {
+			GeneralAgentVO agentVO = generalAgentService.attachEmployee(getUserInfo(request), id, userUuids, remarks);
+
+			result.put("status", "success");
+			result.put("result", agentVO);
+
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+
+		return result;
+	}
+
+	@RequestMapping(value = "/paging_Accounts", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<AccountNumberVO> pagingAccounts(@DatatablesParams DatatablesCriterias criterias, AccountNumberCriteria criteria,
+			HttpServletRequest request,String accountNameOrCode) {
+		log.debug("Entering pagingByIdm2(criteria={})", criteria);
+
+		DataSet<AccountNumberVO> dataSet = null;
+
+		try {
+
+			int firstResult = criterias.getStart();
+			int size = criterias.getLength();
+			int page = (firstResult / size) + 1;
+
+			UserInfo userInfo = getUserInfo(request);
+
+			OauthHelper helper = OauthHelper.getInstance();
+			String accessToken = helper.getAccessToken().getValue();
+
+			AccountingService accountingService = ServiceGenerator.createService(AccountingService.class, "http://localhost:8080/accounting-rest/",
+					accessToken);
+
+			Call<AccountingProtos.AccountList> call = accountingService.findAccounts(userInfo.getUserName(), userInfo.getIp(),accountNameOrCode);
+	    	
+	    	AccountingProtos.AccountList accountList = call.execute().body();
+	    	
+	    	List<AccountingProtos.Account> list = accountList.getAccountsList();
+
+
+	    	List<AccountNumberVO> result = new ArrayList<>();
+	    	for(AccountingProtos.Account account :list){
+	    		AccountNumberVO accountVO = new AccountNumberVO();
+	    		accountVO.setId(account.getId());
+	    		accountVO.setAccountNumber(account.getAccountNumber());
+	    		accountVO.setRemarks(account.getDescription());
+	    		
+	    		result.add(accountVO);
+	    	}
+	    	
+	    	long totalRecords = accountList.getTotal();
+	    	dataSet = new DataSet<AccountNumberVO>(result, (long) result.size(), totalRecords);
+
+		} catch (Exception e) {
+			log.error("Error occurred while getEntity.", e);
+		}
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+
+	@RequestMapping(value = "/pagingDropDown", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<BaseVO> pagingDropDown(@DatatablesParams DatatablesCriterias criterias, GeneralAgentCriteria criteria,
+			HttpServletRequest request) {
+		log.debug("Entering paging(criteria={})", criteria);
+
+		int firstResult = 0;
+		int maxResults = 10;
+		ColumnDef columnDef = new ColumnDef();
+
+		columnDef.setSortDirection(SortDirection.DESC);
+		SortDirectionEnum sortDirection = getDefaultSortDirection();
+		String sortCriterion = columnDef.getName();
+
+		if ("0".equals(sortCriterion)) {
+			sortCriterion = getDefaultSortCriterion();
+		}
+
+		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+			sortDirection = SortDirectionEnum.Descending;
+		}
+
+		DataSet<BaseVO> dataSet;
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			List<BaseVO> rows = getService().findByCriteria(userInfo, criteria, firstResult, maxResults, sortDirection, sortCriterion);
+			long totalRecords = getService().countByCriteria(userInfo, criteria);
+			dataSet = new DataSet<BaseVO>(rows, (long) rows.size(), totalRecords);
+		} catch (Exception e) {
+			log.error("error occured in record paging...", e);
+			e.printStackTrace();
+			dataSet = new DataSet<BaseVO>(new ArrayList<BaseVO>(), 0l, 0l);
+		}
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+}

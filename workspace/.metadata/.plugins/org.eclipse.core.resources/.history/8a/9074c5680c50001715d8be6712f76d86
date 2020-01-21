@@ -1,0 +1,13 @@
+package com.parvanpajooh.complaintmanagement.domain.repository.jpa;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.repository.jpa.GenericRepositoryJpa;
+import com.parvanpajooh.complaintmanagement.domain.model.ComplaintCategory;
+import com.parvanpajooh.complaintmanagement.domain.repository.ComplaintCategoryRepository;
+
+public class ComplaintCategoryReposirotyJpa extends GenericRepositoryJpa<ComplaintCategory, Long>
+		implements ComplaintCategoryRepository {
+
+}

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>Register</title>
+
+	<style>
+		.col-sm-3 {
+			float: right !important;
+			padding-left: 5px !important;
+			padding-right: 5px !important;
+			direction: ltr;
+		}
+		
+		.col-md-6 {
+			float: right !important;
+			padding-left: 30px !important;
+		}
+		
+		.has-feedback .form-control {
+			padding-right: 0px !important;
+		}
+		
+		.form-control-feedback {
+			right: 350px !important;
+		}
+		
+		.page-header {
+			padding: 20px 0 !important;
+			border-bottom: 5px solid #CCC !important;
+			margin: 0px !important;
+		}
+		
+		.input-group .input-group-addon {
+		    border-radius: 0;
+		    border-color: #d2d6de;
+		    background-color: #fff;
+		    border-left: 1px solid #ccc !important;
+		}
+		
+		.form-horizontal .control-label {
+		    text-align: left !important;
+		}
+	</style>
+</head>
+<body>
+
+	<section layout:fragment="top-header" class="page-header">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<ul class="breadcrumb">
+						<li>
+							<a href="#">صفحه نخست</a>
+						</li>
+
+						<li class="active">اطلاعات بازدیدکنندگان</li>
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<h1>اطلاعات بازدیدکنندگان</h1>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="content" layout:fragment="content">
+		<div class="container">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<form id="createVisitorForm" class="form-horizontal" role="form" method="post" th:object="${visitor}">
+						<input type="hidden" name="uuid" />
+						<div class="callout callout-danger hide"><h4></h4></div>
+
+						<!-- VISITORS ############################################################################### -->
+						<div id="visitorsFragment" novalidate="novalidate" class="bv-form" style="display: block;">
+                                <div class="row">
+                                    <!-- column 1 ################################################################################# -->                                    
+                                     <div class="col-md-9">
+
+                                        <div class="form-group has-feedback">
+                                            <label class="col-sm-3 control-label">نام سازمان<span class="reqired"> *</span></label>
+                                            <div class="col-sm-7">
+                                                <input class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="نام سازمان مورد نیاز است" id="organizationName" name="organizationName" data-bv-field="organizationName" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group has-feedback">
+                                            <label class="col-sm-3 control-label">نام نماینده سازمان<span class="reqired"> *</span></label>
+                                            <div class="col-sm-7">
+												<div class="col-sm-3" style="padding-right: 0px;">
+													<select class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="جنسیت مورد نیاز است" id="gender" name="gender" data-bv-field="gender" >
+													<option value=""></option>												
+													<option value="FEMALE">خانم</option>
+													<option value="MALE">آقای</option>
+													</select>
+												</div>
+                                                <input class="col-sm-9 validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="نام نماینده سازمان مورد نیاز است" id="agentName" name="agentName" data-bv-field="agentName" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group has-feedback">
+                                            <label class="col-sm-3 control-label">سمت نماینده سازمان</label>
+                                            <div class="col-sm-7">
+                                                <input class="form-control validate[notempty]" id="agentPosition" name="agentPosition" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group has-feedback">
+                                            <label class="col-sm-3 control-label">تلفن<span class="reqired"> *</span></label>
+                                            <div class="col-sm-7">
+                                                <input class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="تلفن مورد نیاز است" id="phone" name="phone" data-bv-field="phone" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group has-feedback">
+                                            <label class="col-sm-3 control-label">موبایل</label>
+                                            <div class="col-sm-7">
+                                                <input class="form-control validate[notempty]" id="mobile" name="mobile" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group has-feedback">
+                                            <label class="col-sm-3 control-label" >ایمیل</label>
+                                            <div class="col-sm-7">
+                                                 <input type ="email" style="direction: LTR;" data-bv-emailaddress-message="ایمیل نا معتبر است" class="form-control" id="email" name="email" data-bv-field="email"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group has-feedback">
+											<label class="col-sm-3 control-label">میانگین تعداد مرسولات روزانه<span class="reqired"> *</span></label>
+											<div class="col-sm-7">
+                                                <input class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="میانگین تعداد مرسولات روزانه مورد نیاز است" id="averageDailyCouriers" name="averageDailyCouriers" data-bv-field="averageDailyCouriers" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group has-feedback">
+                                            <label class="col-sm-3 control-label">میانگین وزن مرسولات</label>
+                                            <div class="col-sm-7">
+                                                <input class="form-control validate[notempty]" data-bv-notempty-message="میانگین وزن مرسولات مورد نیاز است" id="averageCouriersWeight" name="averageCouriersWeight" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group has-feedback">
+                                            <label class="col-sm-3 control-label">مقاصد ارسال<span class="reqired"> *</span></label>
+                                            <div class="col-sm-7">
+                                                <input type="hidden" class="form-control validate[notempty]" data-bv-notempty="true" data-bv-notempty-message="مقاصد ارسال مورد نیاز است" id="sendDestinations" name="sendDestinations" data-bv-field="sendDestinations">
+                                                </input>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group has-feedback">
+                                            <label class="col-sm-3 control-label">مبدا ارسال</label>
+                                            <div class="col-sm-7">
+                                                <input type="hidden" class="form-control validate[notempty]" id="originDestination" name="originDestination">
+                                                </input>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group has-feedback">
+                                            <label class="col-sm-3 control-label">نیاز به پرداخت در محل دریافت-COD</label>
+                                            <div class="col-sm-7">
+                                                <select class="form-control validate[notempty]" id="COD" name="COD">
+													<option value=""></option>
+													<option value="بله">بله</option>
+													<option value="خیر">خیر</option>
+												</select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group has-feedback">
+                                            <label class="col-sm-3 control-label">توضیحات</label>
+                                            <div class="col-sm-7">
+                                                <textarea rows="4" class="form-control" id="remarks" name="remarks" ></textarea>                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+						<!-- END   ################################################################################# -->
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
+
+
+	<th:block layout:fragment="javascripts">
+		<script th:inline="javascript">
+
+			var destinations = [
+       			{
+		            id: 'THR',
+		            text: 'تهران'
+		        },
+		        {
+		            id: 'CENTERS',
+		            text: 'مراکز استان'
+		        },
+		        {
+		            id: 'SATELLITE',
+		            text: 'شهر‌های اقماری'
+		        }
+    		];
+	
+	    var currentPersonId = null;
+	
+	    function resetVisitorsFragment($legalPersonFragment) {
+	        $legalPersonFragment.find('input,select, textarea').val('');
+	        $legalPersonFragment.find('input:radio, input:checkbox').iCheck('uncheck');
+	        try {
+	            $('#originDestination').select2('val', '');
+	        } catch (Erro) {}
+	        try {
+	            $('#sendDestinations').select2('val', '');
+	        } catch (Erro) {}
+	        try {
+	            $('#gender').select2('val', '');
+	        } catch (Erro) {}
+	        try {
+	            $('#COD').select2('val', '');
+	        } catch (Erro) {}
+	    }
+
+	
+	    $(document).ready(function() {
+			
+			$(window).keydown(function(event){
+			  if(event.keyCode == 13) {
+				event.preventDefault();
+				return false;
+			  }
+		    });
+	
+	        $('#sendDestinations').select2({
+	            id: function(obj) {
+	                return obj.text;
+	            },
+	            placeholder: '\u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F',
+	            allowClear: true,
+	            data: destinations,
+	            multiple: true,
+	            formatSelection: function(item) {
+	                return item.text
+	            },
+	            formatResult: function(item) {
+	                return item.text
+	            }
+	        }).change(function() {
+	            $('#sendDestinations').data('bootstrapValidator').updateStatus('sendDestinations', 'NOT_VALIDATED', null).validateField('sendDestinations');
+	        });
+	        
+			$('#originDestination').select2({
+	            id: function(obj) {
+	                return obj.text;
+	            },
+	            placeholder: '\u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F',
+	            allowClear: true,
+	            data: destinations,
+	            multiple: true,
+	            formatSelection: function(item) {
+	                return item.text
+	            },
+	            formatResult: function(item) {
+	                return item.text
+	            }
+	        }).change(function() {
+	            $('#originDestination').data('bootstrapValidator').updateStatus('originDestination', 'NOT_VALIDATED', null).validateField('originDestination');
+	        });
+	
+	
+	        $("#gender ,#COD").select2({
+	            placeholder: '\u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F',
+	            allowClear: true
+	        });
+	
+	        /*<![CDATA[*/
+
+	
+	        function generateUUID() {
+	            var d = new Date().getTime();
+	            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+	                var r = (d + Math.random() * 16) % 16 | 0;
+	                d = Math.floor(d / 16);
+	                return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+	            });
+	            return uuid;
+	        };
+	
+	        $('#createPersonBtn').click(function() {
+	
+	            var uuid = generateUUID();
+	            var $btn = $(this);
+	            var isValidForm = false;
+	            var $visitorsFragment = $('#visitorsFragment');
+	            $('#createPersonForm').find('.callout').text('').addClass('hide');
+	            $('#visitorsFragment').data('bootstrapValidator').validate();
+	            isValidForm = $('#visitorsFragment').data('bootstrapValidator').isValid();
+	
+	            if (isValidForm) {
+	                $btn.attr('disabled', true);
+	                localStorage.setItem(uuid, $('#createPersonForm').serialize());
+	                showTopleftGrowl('success', 'Create', 'Create Successful');
+	
+	                resetVisitorsFragment($visitorsFragment);
+					$visitorsFragment.bootstrapValidator('destroy');
+	                $visitorsFragment.bootstrapValidator({
+	                    excluded: [':disabled'],
+	                    feedbackIcons: {
+	                        valid: 'fa fa-check',
+	                        invalid: 'fa fa-times',
+	                        validating: 'fa fa-refresh'
+	                    }
+	                });
+	                $btn.attr('disabled', false);
+	            }
+	            return false;
+	        });
+	
+	    });
+	    /*]]>*/
+  		</script>
+	</th:block>
+
+</body>
+</html>

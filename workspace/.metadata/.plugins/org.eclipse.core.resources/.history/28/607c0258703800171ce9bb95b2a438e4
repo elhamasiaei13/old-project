@@ -1,0 +1,177 @@
+package com.parvanpajooh.transportationmanagement.model.vo;
+
+import java.time.LocalTime;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+
+@XmlRootElement
+public class BulkEditTransportationScheduleVO extends BaseVO {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1969640010304599430L;
+
+	private String remarksBulkEdit;
+	
+	private LocalTime departureTimeBulkEdit;
+	
+	private Integer arrivalDateBulkEdit;
+	
+	private LocalTime arrivalTimeBulkEdit;
+	
+	private Double totalWeightBulkEdit;
+	
+	private Double reservableWeightBulkEdit;
+	
+	private String uldInfoBulkEdit;
+	
+	private Long vehicleBulkEditId;
+	
+//	private VehicleVO vehicleBulkEdit;
+
+	/**
+	 * @return the remarksBulkEdit
+	 */
+	public String getRemarksBulkEdit() {
+		return remarksBulkEdit;
+	}
+
+	/**
+	 * @param remarksBulkEdit the remarksBulkEdit to set
+	 */
+	public void setRemarksBulkEdit(String remarksBulkEdit) {
+		this.remarksBulkEdit = remarksBulkEdit;
+	}
+
+	/**
+	 * @return the arrivalDateBulkEdit
+	 */
+	public Integer getArrivalDateBulkEdit() {
+		return arrivalDateBulkEdit;
+	}
+
+	/**
+	 * @param arrivalDateBulkEdit the arrivalDateBulkEdit to set
+	 */
+	public void setArrivalDateBulkEdit(Integer arrivalDateBulkEdit) {
+		this.arrivalDateBulkEdit = arrivalDateBulkEdit;
+	}
+	
+	/**
+	 * @return the departureTimeBulkEdit
+	 */
+	public LocalTime getDepartureTimeBulkEdit() {
+		return departureTimeBulkEdit;
+	}
+
+	/**
+	 * @param departureTimeBulkEdit the departureTimeBulkEdit to set
+	 */
+	public void setDepartureTimeBulkEdit(LocalTime departureTimeBulkEdit) {
+		this.departureTimeBulkEdit = departureTimeBulkEdit;
+	}
+
+	/**
+	 * @return the arrivalTimeBulkEdit
+	 */
+	public LocalTime getArrivalTimeBulkEdit() {
+		return arrivalTimeBulkEdit;
+	}
+
+	/**
+	 * @param arrivalTimeBulkEdit the arrivalTimeBulkEdit to set
+	 */
+	public void setArrivalTimeBulkEdit(LocalTime arrivalTimeBulkEdit) {
+		this.arrivalTimeBulkEdit = arrivalTimeBulkEdit;
+	}
+
+	/**
+	 * @return the totalWeightBulkEdit
+	 */
+	public Double getTotalWeightBulkEdit() {
+		return totalWeightBulkEdit;
+	}
+
+	/**
+	 * @param totalWeightBulkEdit the totalWeightBulkEdit to set
+	 */
+	public void setTotalWeightBulkEdit(Double totalWeightBulkEdit) {
+		this.totalWeightBulkEdit = totalWeightBulkEdit;
+	}
+
+	/**
+	 * @return the reservableWeightBulkEdit
+	 */
+	public Double getReservableWeightBulkEdit() {
+		return reservableWeightBulkEdit;
+	}
+
+	/**
+	 * @param reservableWeightBulkEdit the reservableWeightBulkEdit to set
+	 */
+	public void setReservableWeightBulkEdit(Double reservableWeightBulkEdit) {
+		this.reservableWeightBulkEdit = reservableWeightBulkEdit;
+	}
+
+	/**
+	 * @return the uldInfoBulkEdit
+	 */
+	public String getUldInfoBulkEdit() {
+		return uldInfoBulkEdit;
+	}
+
+	/**
+	 * @param uldInfoBulkEdit the uldInfoBulkEdit to set
+	 */
+	public void setUldInfoBulkEdit(String uldInfoBulkEdit) {
+		this.uldInfoBulkEdit = uldInfoBulkEdit;
+	}
+	
+
+//	/**
+//	 * @return the vehicleBulkEdit
+//	 */
+//	public VehicleVO getVehicleBulkEdit() {
+//		return vehicleBulkEdit;
+//	}
+//
+//	/**
+//	 * @param vehicleBulkEdit the vehicleBulkEdit to set
+//	 */
+//	public void setVehicleBulkEdit(VehicleVO vehicleBulkEdit) {
+//		this.vehicleBulkEdit = vehicleBulkEdit;
+//	}
+
+	/**
+	 * @return the vehicleBulkEditId
+	 */
+	public Long getVehicleBulkEditId() {
+		return vehicleBulkEditId;
+	}
+
+	/**
+	 * @param vehicleBulkEditId the vehicleBulkEditId to set
+	 */
+	public void setVehicleBulkEditId(Long vehicleBulkEditId) {
+		this.vehicleBulkEditId = vehicleBulkEditId;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "BulkEditTransportationScheduleVO [remarksBulkEdit="
+				+ remarksBulkEdit + ", departureTimeBulkEdit="
+				+ departureTimeBulkEdit + ", arrivalDateBulkEdit="
+				+ arrivalDateBulkEdit + ", arrivalTimeBulkEdit="
+				+ arrivalTimeBulkEdit + ", totalWeightBulkEdit="
+				+ totalWeightBulkEdit + ", reservableWeightBulkEdit="
+				+ reservableWeightBulkEdit + ", uldInfoBulkEdit="
+				+ uldInfoBulkEdit 
+				+ "]";
+	}
+}

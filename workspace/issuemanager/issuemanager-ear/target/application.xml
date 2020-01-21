@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/application_7.xsd" version="7">
+  <display-name>issuemanager-ear</display-name>
+  <module>
+    <web>
+      <web-uri>issuemanager-web.war</web-uri>
+      <context-root>/issuemanager-web</context-root>
+    </web>
+  </module>
+  <module>
+    <ejb>issuemanager-ejb.jar</ejb>
+  </module>
+  <library-directory>lib</library-directory>
+</application>

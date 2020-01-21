@@ -1,0 +1,30 @@
+package com.parvanpajooh.sample.dao;
+
+import java.util.List;
+
+import com.parvanpajooh.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.ecourier.dao.GenericDao;
+import com.parvanpajooh.sample.model.Membership;
+
+
+/**
+ * 
+ * @author ali
+ *
+ */
+public interface MembershipDao extends GenericDao<Membership, Long> {
+	/* (non-Javadoc)
+	 * @see com.parvanpajooh.ecourier.dao.GenericDao#findAll()
+	 */
+	@Override
+	public List<Membership> findAll() throws ParvanDaoException;
+	
+	
+	/* (non-Javadoc)
+	 * @see com.parvanpajooh.ecourier.dao.GenericDao#save(java.lang.Object)
+	 */
+	
+	public void saveMembership(Membership membership) throws ParvanDaoException;
+	
+
+}

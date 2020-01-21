@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;CityInfoVO.java&apos; to &apos;routemanagement-ejb/src/main/java/com.parvanpajooh.routemanagement.model.vo&apos;&#x0A;- Original project: &apos;personmanagement-ejb&apos;&#x0A;- Destination element: &apos;routemanagement-ejb/src/main/java/com.parvanpajooh.routemanagement.model.vo&apos;&#x0A;- Original element: &apos;com.parvanpajooh.personmanagement.model.vo.CityInfoVO.java&apos;" description="Copy compilation unit" destination="=routemanagement-ejb/src\/main\/java&lt;com.parvanpajooh.routemanagement.model.vo" element1="/src\/main\/java&lt;com.parvanpajooh.personmanagement.model.vo{CityInfoVO.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1493449804233" units="1" version="1.0"/>
+</session>

@@ -1,0 +1,192 @@
+package com.parvanpajooh.stock2.domain.model.dto;
+
+import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.parvanpajooh.stock2.domain.model.enums.WaybillNumberFormat;
+import com.parvanpajooh.stock2.domain.model.enums.WaybillNumberType;
+
+@SuppressWarnings("serial")
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(Include.NON_NULL)
+public class WaybillNumberGenerateCommandDto  implements Serializable {
+
+	private Long id;
+
+	private Integer version;
+	
+	private String prefix;
+	
+	private long from;
+	
+	private long to;
+	
+	private int incrementStep;
+	
+	private WaybillNumberType waybillNumberType;
+	
+	private boolean domestic;
+	
+	private WaybillNumberFormat format;
+	
+	private Long waybillNumberGroupId;
+	
+	private String remarks;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	/**
+	 * @return the prefix
+	 */
+	public String getPrefix() {
+		return prefix;
+	}
+
+	/**
+	 * @param prefix the prefix to set
+	 */
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
+	}
+
+	/**
+	 * @return the from
+	 */
+	public long getFrom() {
+		return from;
+	}
+
+	/**
+	 * @param from the from to set
+	 */
+	public void setFrom(long from) {
+		this.from = from;
+	}
+
+	/**
+	 * @return the to
+	 */
+	public long getTo() {
+		return to;
+	}
+
+	/**
+	 * @param to the to to set
+	 */
+	public void setTo(long to) {
+		this.to = to;
+	}
+
+	/**
+	 * @return the incrementStep
+	 */
+	public int getIncrementStep() {
+		return incrementStep;
+	}
+
+	/**
+	 * @param incrementStep the incrementStep to set
+	 */
+	public void setIncrementStep(int incrementStep) {
+		this.incrementStep = incrementStep;
+	}
+
+	/**
+	 * @return the waybillNumberType
+	 */
+	public WaybillNumberType getWaybillNumberType() {
+		return waybillNumberType;
+	}
+
+	/**
+	 * @param waybillNumberType the waybillNumberType to set
+	 */
+	public void setWaybillNumberType(WaybillNumberType waybillNumberType) {
+		this.waybillNumberType = waybillNumberType;
+	}
+
+	/**
+	 * @return the domestic
+	 */
+	public boolean isDomestic() {
+		return domestic;
+	}
+
+	/**
+	 * @param domestic the domestic to set
+	 */
+	public void setDomestic(boolean domestic) {
+		this.domestic = domestic;
+	}
+
+	/**
+	 * @return the format
+	 */
+	public WaybillNumberFormat getFormat() {
+		return format;
+	}
+
+	/**
+	 * @param format the format to set
+	 */
+	public void setFormat(WaybillNumberFormat format) {
+		this.format = format;
+	}
+
+	/**
+	 * @return the waybillNumberGroupId
+	 */
+	public Long getWaybillNumberGroupId() {
+		return waybillNumberGroupId;
+	}
+
+	/**
+	 * @param waybillNumberGroupId the waybillNumberGroupId to set
+	 */
+	public void setWaybillNumberGroupId(Long waybillNumberGroupId) {
+		this.waybillNumberGroupId = waybillNumberGroupId;
+	}
+
+	/**
+	 * @return the remarks
+	 */
+	public String getRemarks() {
+		return remarks;
+	}
+
+	/**
+	 * @param remarks the remarks to set
+	 */
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}	
+	
+}

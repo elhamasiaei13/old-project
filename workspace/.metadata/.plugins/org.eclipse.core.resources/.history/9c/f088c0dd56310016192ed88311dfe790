@@ -1,0 +1,22 @@
+package com.parvanpajooh.accounting.dao.jpa;
+
+import javax.ejb.Stateless;
+import com.parvanpajooh.accounting.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.accounting.dao.VoucherRowDao;
+import com.parvanpajooh.accounting.model.VoucherRow;
+
+/**
+ * 
+ * @author moosa
+ *
+ */
+@Stateless
+public class VoucherRowDaoJpa extends GenericDaoJpa<VoucherRow, Long> implements VoucherRowDao {
+
+	public VoucherRowDaoJpa() {
+		super(VoucherRow.class);
+	}
+	
+	
+	
+}

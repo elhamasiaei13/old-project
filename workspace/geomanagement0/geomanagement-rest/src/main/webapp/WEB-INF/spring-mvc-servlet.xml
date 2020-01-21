@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:s="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/mvc
+                           http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+                           http://www.springframework.org/schema/security/oauth2
+                           http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd
+                           http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="locations">
+		    <list>
+			    <value>classpath:config.properties</value>
+				<value>file:${user.home}/config-ext.properties</value>
+		    </list>
+		</property>
+	</bean>
+	
+	<!-- **************************************************************** -->
+  	<!--  RESOURCE FOLDERS CONFIGURATION                                  -->
+  	<!--  Dispatcher configuration for serving static resources           -->
+  	<!-- **************************************************************** -->
+  	
+  	<!-- **************************************************************** -->
+  	<!--  SPRING ANNOTATION PROCESSING                                    -->
+  	<!-- **************************************************************** -->
+	<context:component-scan base-package="com.parvanpajooh.geomanagement.rest,com.parvanpajooh.agentmanagement.auth,com.parvanpajooh.common.formatter,com.parvanpajooh.common.convertor"/>
+	<mvc:annotation-driven conversion-service="formattingConverters">
+   		<mvc:message-converters>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="objectMapper" ref="customJacksonObjectMapper" />
+            </bean>
+        </mvc:message-converters>
+	</mvc:annotation-driven>
+</beans>

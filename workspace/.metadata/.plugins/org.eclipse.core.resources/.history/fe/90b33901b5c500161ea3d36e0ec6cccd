@@ -1,0 +1,355 @@
+package com.parvanpajooh.accounting.dao.jpa;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.persistence.Query;
+import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.accounting.dao.VoucherRowDao;
+import com.parvanpajooh.accounting.model.Account;
+import com.parvanpajooh.accounting.model.Account_;
+import com.parvanpajooh.accounting.model.FiscalYear;
+import com.parvanpajooh.accounting.model.FiscalYear_;
+import com.parvanpajooh.accounting.model.Group;
+import com.parvanpajooh.accounting.model.Group_;
+import com.parvanpajooh.accounting.model.Voucher;
+import com.parvanpajooh.accounting.model.VoucherRow;
+import com.parvanpajooh.accounting.model.VoucherRow_;
+import com.parvanpajooh.accounting.model.Voucher_;
+import com.parvanpajooh.accounting.model.criteria.VoucherRowCriteria;
+import com.parvanpajooh.accounting.model.vo.AccountBalanceVO;
+import com.parvanpajooh.accounting.model.vo.AccountVO;
+import com.parvanpajooh.accounting.model.vo.VoucherVO;
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class VoucherRowDaoJpa extends GenericDaoJpa<VoucherRow, Long>implements VoucherRowDao {
+
+	public VoucherRowDaoJpa() {
+		super(VoucherRow.class);
+	}
+	
+	@Override
+	public List<AccountBalanceVO> getDebitAccountsBalanceReportByGroupId(long accountGroupId, int firstResult, int maxResults) throws ParvanDaoException {
+
+		// LOG
+		log.trace("Entering getDebitsAccountBalanceReportByGroup accountGroupId={},firstResult={} , maxResults={} ", accountGroupId, firstResult, maxResults);
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+		List<AccountBalanceVO> list = null;
+
+		// make criteria-builder
+		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+
+		// make criteria
+		Metamodel metamodel = getEntityManager().getMetamodel();
+		EntityType<VoucherRow> voucherRowMM_ = metamodel.entity(VoucherRow.class);
+		
+		CriteriaQuery<Tuple> criteria = builder.createTupleQuery();
+		
+		Root<VoucherRow> root = criteria.from(voucherRowMM_);
+
+		// accountCodeList
+		if (Validator.isNotNull(accountGroupId)) {
+
+			Join<VoucherRow, Account> accountJoin = root.join(VoucherRow_.account);
+			
+			Join<Account, Group> GroupJoin = accountJoin.join(Account_.group);
+
+			Predicate groupPredicate = builder.equal(GroupJoin.<Long> get(Group_.id), accountGroupId);
+			Predicate debitPredicate = builder.notEqual(root.<BigDecimal> get(VoucherRow_.debit), 0);
+			predicateList.add(groupPredicate);			
+			predicateList.add(debitPredicate);						
+			
+			criteria.multiselect(
+					accountJoin.<String> get(Account_.accountNumber).alias("accountCode"),
+					accountJoin.<String> get(Account_.name).alias("accountName"), 
+					builder.sum(root.<BigDecimal> get(VoucherRow_.debit)).alias("debitSum"),
+					builder.sum(root.<BigDecimal> get(VoucherRow_.credit)).alias("creditSum"));
+
+			criteria.where( builder.and( predicateList.toArray( new Predicate[ predicateList.size()])));
+
+			criteria.groupBy(accountJoin.<String> get(Account_.accountNumber));
+
+			criteria.orderBy(builder.asc(root.get("id")));
+		}
+
+		// create query
+		TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);		
+		q.setFirstResult(firstResult);
+		q.setMaxResults(maxResults);
+
+		// execute query
+		List<Tuple> tupleList = q.getResultList();
+		
+		list = new ArrayList<AccountBalanceVO>();
+
+		for (Tuple tuple : tupleList) {
+
+			AccountBalanceVO accountBalanceVO = new AccountBalanceVO();
+			accountBalanceVO.setAccountNumber((String) tuple.get("accountCode"));
+			accountBalanceVO.setAccountName((String) tuple.get("accountName"));
+			accountBalanceVO.setDebitSum((BigDecimal) tuple.get("debitSum"));
+			accountBalanceVO.setCreditSum((BigDecimal) tuple.get("creditSum"));
+
+			list.add(accountBalanceVO);
+		}
+		
+		// LOG
+		log.trace("Entering getAccountBalanceReport accountGroupId={},firstResult={} , maxResults={} ", accountGroupId, firstResult, maxResults);
+
+		return list;
+
+	}
+	
+	@Override
+	public List<AccountBalanceVO> getAccountBalanceReport(List<String> accountCodeList, int firstResult, int maxResults) throws ParvanDaoException {
+
+		// LOG
+		log.trace("Entering getAccountBalanceReport accountCodeList={},firstResult={} , maxResults={} ", accountCodeList, firstResult, maxResults);
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+		List<AccountBalanceVO> list = null;
+
+		// make criteria-builder
+		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+
+		// make criteria
+		Metamodel metamodel = getEntityManager().getMetamodel();
+		EntityType<VoucherRow> voucherRowMM_ = metamodel.entity(VoucherRow.class);
+		CriteriaQuery<Tuple> criteria = builder.createTupleQuery();
+		Root<VoucherRow> root = criteria.from(voucherRowMM_);
+
+		// accountCodeList
+		if (Validator.isNotNull(accountCodeList)) {
+
+			Join<VoucherRow, Account> accountJoin = root.join(VoucherRow_.account);
+
+			predicateList.add(accountJoin.<String> get(Account_.accountNumber).in(accountCodeList));
+
+			criteria.multiselect(
+					accountJoin.<String> get(Account_.accountNumber).alias("accountCode"),
+					accountJoin.<String> get(Account_.name).alias("accountName"), 
+					builder.sum(root.<BigDecimal> get(VoucherRow_.debit)).alias("debitSum"),
+					builder.sum(root.<BigDecimal> get(VoucherRow_.credit)).alias("creditSum"));
+
+			criteria.where(predicateList.get(0));
+
+			criteria.groupBy(accountJoin.<String> get(Account_.accountNumber));
+
+			criteria.orderBy(builder.asc(root.get("id")));
+		}
+
+		// create query
+		TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);
+		q.setFirstResult(firstResult);
+		q.setMaxResults(maxResults);
+
+		// execute query
+		List<Tuple> tupleList = q.getResultList();
+
+		list = new ArrayList<AccountBalanceVO>();
+
+		for (Tuple tuple : tupleList) {
+
+			AccountBalanceVO accountBalanceVO = new AccountBalanceVO();
+			accountBalanceVO.setAccountNumber((String) tuple.get("accountCode"));
+			accountBalanceVO.setAccountName((String) tuple.get("accountName"));
+			accountBalanceVO.setDebitSum((BigDecimal) tuple.get("debitSum"));
+			accountBalanceVO.setCreditSum((BigDecimal) tuple.get("creditSum"));
+
+			list.add(accountBalanceVO);
+		}
+
+		// LOG
+		log.trace("Entering getAccountBalanceReport accountCodeList={},firstResult={} , maxResults={} ", accountCodeList, firstResult, maxResults);
+
+		return list;
+
+	}
+
+	@Override
+	public int countAccountBalanceReport(List<String> accountCodeList) throws ParvanDaoException{
+
+		// LOG
+		log.debug("Entering countAccountBalanceReport( accountCodeList={})", accountCodeList);
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+		int count = 0;
+
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+
+			// make criteria
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			EntityType<VoucherRow> voucherRowMM_ = metamodel.entity(VoucherRow.class);
+			CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+			Root<VoucherRow> root = criteria.from(voucherRowMM_);
+
+			// accountCodeList
+			if (Validator.isNotNull(accountCodeList)) {
+
+				
+				Join<VoucherRow, Account> accountJoin = root.join(VoucherRow_.account);
+
+				predicateList.add(accountJoin.<String> get(Account_.accountNumber).in(accountCodeList));
+
+				criteria.where(predicateList.get(0));
+
+				criteria.groupBy(accountJoin.<String> get(Account_.accountNumber));
+				
+				criteria.select(builder.coalesce(builder.countDistinct(accountJoin), 0l));
+			}
+
+			// create query
+			Query q = getEntityManager().createQuery(criteria);
+
+			// execute query
+			Long countLong = (Long) q.getSingleResult();
+			count = countLong.intValue();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting count of AccountBalanceReport.", e);
+		}
+
+		// LOG
+		log.debug("Leaving countAccountBalanceReport(): ret={}", count);
+
+		return count;
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<VoucherRow> root, Map<String, Join> joins)
+			throws ParvanException {
+
+		// LOG
+		log.debug("Entering buildPredicateList( ... )");
+
+		VoucherRowCriteria voucherRowCriteria = (VoucherRowCriteria) cri;
+		String description = voucherRowCriteria.getDescription();
+		Long voucherId = voucherRowCriteria.getVoucherId();
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+		Boolean active = voucherRowCriteria.getActive();
+		VoucherVO voucher = voucherRowCriteria.getVoucher();
+		AccountVO account = voucherRowCriteria.getAccount();
+
+		// ----------------------------------------------------------------
+		// Active
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(active)) {
+			Predicate predicate = builder.equal(root.<Boolean> get(VoucherRow_.active), active);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Description
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(description)) {
+
+			Predicate predicate = builder.like(root.<String> get(VoucherRow_.description), "%" + description + "%");
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Voucher
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(voucherId)) {
+			Join<VoucherRow, Voucher> join = root.join(VoucherRow_.voucher, JoinType.LEFT);
+
+			joins.put("voucherId", join);
+
+			Predicate predicate = builder.equal(join.<Long> get(Voucher_.id), voucherId);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// FiscalYear
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(voucher) && Validator.isNotNull(voucher.getFiscalYear()) && Validator.isNotNull(voucher.getFiscalYear().getId())) {
+
+			Join<VoucherRow, Voucher> voucherJoin = root.join("voucher");
+			Join<Voucher, FiscalYear> fiscalYearJoin = voucherJoin.join("fiscalYear");
+			if (Validator.isNotNull(voucher.getFiscalYear().getId())) {
+
+				Predicate predicate = builder.equal(fiscalYearJoin.<Long> get(FiscalYear_.id), voucher.getFiscalYear().getId());
+				predicateList.add(predicate);
+			}
+		}
+
+		// ----------------------------------------------------------------
+		// Account
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(account) && Validator.isNotNull(account.getAccountNumber())) {
+
+			Join<VoucherRow, Account> accountJoin = root.join("account");
+
+			Predicate predicate = builder.equal(accountJoin.<String> get(Account_.accountNumber), account.getAccountNumber());
+			predicateList.add(predicate);
+
+		}
+
+		basePredicate((BaseCriteria) voucherRowCriteria, builder, root, predicateList);
+
+		// LOG
+		log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<VoucherRow> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateTo());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateTo());
+			predicateList.add(predicate);
+		}
+	}
+}

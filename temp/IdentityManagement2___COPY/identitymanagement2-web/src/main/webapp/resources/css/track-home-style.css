@@ -1,0 +1,156 @@
+body{
+	background: url(images/mapBg.png) no-repeat,
+				url(images/Klous_1920x1080.jpg) repeat-y;
+	background-size:cover;
+	background-position:center top;
+	margin:0;
+	font-family: calibri, Verdana, Geneva, sans-serif ,"Arial Black", Gadget, sans-serif;
+}
+img{
+	border:none;
+	outline:none;
+}
+.mainDiv{
+	width:600px;
+	border-radius:5px;
+	margin:150px auto 20px;
+	background:rgba(255,255,255,0.5);
+	border-top:solid rgba(255,255,255,0.5) 1px;
+	padding-bottom:10px;
+	box-shadow:0 5px 8px rgba(0,0,0,0.2);
+}
+.center{
+	margin-left:auto;
+	margin-right:auto;
+}
+.block{
+	display:block;
+}
+.clear{
+	clear:both;
+}
+.aboveSearchbox{
+	text-align:center;
+	font-family: calibri, Verdana, Geneva, sans-serif ,"Arial Black", Gadget, sans-serif;
+	color: #fff;
+	font-size: 17px;
+	margin-top:30px;
+	margin-bottom:10px;
+}
+.logo{
+	margin-top:50px;
+	margin-bottom:10px;
+}
+.searchBox{
+	width:500px;
+	height:40px;
+	margin-bottom:20px;
+}
+.searchBox input[type="text"]{
+	width:390px;
+	height:40px;
+	background:rgba(255,255,255,0.6);
+	border-radius:5px 0 0 5px;
+	border:none;
+	margin:0;
+	float:left;
+	color:#1a1a1a;
+	font-family: calibri, Verdana, Geneva, sans-serif ,"Arial Black", Gadget, sans-serif;
+	padding:0 10px;
+	outline:none;
+	font-size:17px;
+}
+.searchBox input[type="button"]{
+	width:90px;
+	height:40px;
+	background:rgba(37,76,42,0.54);
+	border-radius:0 5px 5px 0;
+	border:none;
+	margin:0;
+	float:left;
+	font-family: calibri, Verdana, Geneva, sans-serif ,"Arial Black", Gadget, sans-serif;
+	color:#fff;
+	outline:none;
+	cursor:pointer;
+	font-size:17px;
+	transition:all 200ms;
+}
+.searchBox input[type="button"]:hover{
+	background:rgba(37,76,42,0.8);
+	transition:all 200ms;
+}
+.reportTable{
+	border-radius:5px 0 5px 5px;
+	position:relative;
+	background:rgba(0,0,0,0.5);
+	padding:10px 10px 20px;
+	width:555px;
+	margin-top:40px;
+}
+.reportTable .title{
+	position:absolute;
+	background:rgba(0,0,0,0.5);
+	border-radius:5px 5px 0 0;
+	right:0;
+	top:-22px;
+	height:22px;
+	font-family: calibri, Verdana, Geneva, sans-serif ,"Arial Black", Gadget, sans-serif;
+	color:#f6ab2a;
+	font-size:12px;
+	font-weight:bold;
+	line-height:22px;
+	text-align:center;
+	padding:0 5px;
+}
+.reportTable table{
+	padding:0;
+	margin:0;
+}
+.reportTable table td, .reportTable table th{
+	border-bottom:solid rgba(255,255,255,0.3) 1px;
+	height:40px;
+	padding:0;
+	margin:0;
+	vertical-align:middle;
+	text-align:center;
+	font-family: calibri, Verdana, Geneva, sans-serif ,"Arial Black", Gadget, sans-serif;
+}
+.reportTable table th{
+	font-weight:bold;
+	font-size:14px;
+}
+.reportTable table td{
+	color:#fff;
+	font-weight:normal;
+	font-size:12px;
+	
+}
+.reportTable table tr td:first-child{
+	color:#000;
+	font-weight:bold;
+}
+.reportTable table tr:last-child td{
+	border-bottom:none;
+}
+.status{
+	width:480px;
+	clear:both;
+	margin-top:20px;
+}
+.status span{
+	color:#3a3a3a;
+}
+.delivered{
+	color:#1f941a !important;
+	padding:0 22px 0 13px;
+	background:url(images/delivered.png) right center no-repeat;
+}
+.notdelivered{
+	color:#ff0000 !important;
+	padding:0 22px 0 13px;
+	background:url(images/notdelivered.png) right center no-repeat;
+}
+.location{
+	color:#e86d00 !important;
+	padding:0 22px 0 13px;
+}

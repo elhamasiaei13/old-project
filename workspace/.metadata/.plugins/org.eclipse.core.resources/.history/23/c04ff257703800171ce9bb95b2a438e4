@@ -1,0 +1,224 @@
+package com.parvanpajooh.transportationmanagement.model.vo;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.parvanpajooh.client.carriermanagement.model.CarrierMsg;
+import com.parvanpajooh.client.logesticmanagement.model.LogesticManagementEnums;
+import com.parvanpajooh.client.logesticmanagement.model.VehicleMsg;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.transportationmanagement.model.enums.VehicleType;
+
+@XmlRootElement
+public class VehicleVO extends BaseVO {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1969640010304599430L;
+	
+	private String manufacturer;
+	
+	private String manufacturerModel;
+	
+	private Double weight;
+	
+	private Double volume;
+	
+	private Boolean cargoOnly;
+	
+	private String carrierCode;
+	
+	private String carrierRegister;
+	
+	private String remarks;
+	
+	private String uldInfo;
+	
+	private VehicleType type;
+	
+	private boolean active;
+
+	/**
+	 * @return the manufacturer
+	 */
+	public String getManufacturer() {
+		return manufacturer;
+	}
+
+	/**
+	 * @param manufacturer the manufacturer to set
+	 */
+	public void setManufacturer(String manufacturer) {
+		this.manufacturer = manufacturer;
+	}
+
+	/**
+	 * @return the manufacturerModel
+	 */
+	public String getManufacturerModel() {
+		return manufacturerModel;
+	}
+
+	/**
+	 * @param manufacturerModel the manufacturerModel to set
+	 */
+	public void setManufacturerModel(String manufacturerModel) {
+		this.manufacturerModel = manufacturerModel;
+	}
+
+	/**
+	 * @return the weightInKg
+	 */
+	public Double getWeight() {
+		return weight;
+	}
+
+	/**
+	 * @param weight the weight to set
+	 */
+	public void setWeight(Double weight) {
+		this.weight = weight;
+	}
+
+	/**
+	 * @return the volume
+	 */
+	public Double getVolume() {
+		return volume;
+	}
+
+	/**
+	 * @param volumeInCBM the volumeInCBM to set
+	 */
+	public void setVolume(Double volume) {
+		this.volume = volume;
+	}
+
+	/**
+	 * @return the cargoOnly
+	 */
+	public Boolean getCargoOnly() {
+		return cargoOnly;
+	}
+
+	/**
+	 * @param cargoOnly the cargoOnly to set
+	 */
+	public void setCargoOnly(Boolean cargoOnly) {
+		this.cargoOnly = cargoOnly;
+	}
+
+	/**
+	 * @return the carrierCode
+	 */
+	public String getCarrierCode() {
+		return carrierCode;
+	}
+
+	/**
+	 * @param carrierCode the carrierCode to set
+	 */
+	public void setCarrierCode(String carrierCode) {
+		this.carrierCode = carrierCode;
+	}
+
+	/**
+	 * @return the carrierRegister
+	 */
+	public String getCarrierRegister() {
+		return carrierRegister;
+	}
+
+	/**
+	 * @param carrierRegister the carrierRegister to set
+	 */
+	public void setCarrierRegister(String carrierRegister) {
+		this.carrierRegister = carrierRegister;
+	}
+
+	/**
+	 * @return the remarks
+	 */
+	public String getRemarks() {
+		return remarks;
+	}
+
+	/**
+	 * @param remarks the remarks to set
+	 */
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public VehicleType getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(VehicleType type) {
+		this.type = type;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the uldInfo
+	 */
+	public String getUldInfo() {
+		return uldInfo;
+	}
+
+	/**
+	 * @param uldInfo the uldInfo to set
+	 */
+	public void setUldInfo(String uldInfo) {
+		this.uldInfo = uldInfo;
+	}
+	
+	public void fromMsg(VehicleMsg msg){
+		
+		this.setId(msg.getId());
+		this.manufacturer = msg.getManufacturer();
+		this.manufacturerModel = msg.getManufacturerModel();
+		this.weight = msg.getWeight();
+		this.volume = msg.getVolume();
+		this.cargoOnly = msg.getCargoOnly();
+		this.carrierCode = msg.getCarrierCode();
+		this.carrierRegister = msg.getCarrierRegister();
+		this.remarks = msg.getRemarks();
+		this.uldInfo = msg.getUldInfo();
+		this.type = VehicleType.valueOf(msg.getType().toString());
+		this.active = msg.isActive();
+			
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "VehicleVO [id=" + getId() + ", manufacturer=" + manufacturer
+				+ ", manufacturerModel=" + manufacturerModel + ", weight="
+				+ weight + ", volume=" + volume + ", cargoOnly=" + cargoOnly
+				+ ", carrierCode=" + carrierCode + ", carrierRegister="
+				+ carrierRegister + ", remarks=" + remarks + ", uldInfo="
+				+ uldInfo + ", active=" + active + "]";
+	}
+}

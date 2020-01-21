@@ -1,0 +1,17 @@
+package com.parvanpajooh.agentmanagement.common;
+
+
+import com.parvanpajooh.acc.AccountingProtos;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
+
+public interface AccountingService {
+	
+
+	
+	@GET("v1/accounts")
+	public Call<AccountingProtos.AccountList> findAccounts(@Query("request") request,@Query("userName") String userName, @Query("ip") String ip);
+	
+}

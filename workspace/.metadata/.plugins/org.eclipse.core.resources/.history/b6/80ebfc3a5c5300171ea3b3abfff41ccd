@@ -1,0 +1,354 @@
+package com.parvanpajooh.transportationmanagement2.rest;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.parvanpajooh.client.transportationmanagement2.model.TransportationScheduleMsg;
+import com.parvanpajooh.common.auth.BaseRestController;
+import com.parvanpajooh.common.convertor.JacksonObjectMapperProvider;
+import com.parvanpajooh.common.formatter.DateProperyEditor;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.util.DateUtilV2;
+import com.parvanpajooh.transportationmanagement2.model.criteria.TransportationScheduleCriteria;
+import com.parvanpajooh.transportationmanagement2.model.vo.TransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement2.service.TransportationScheduleService;
+
+@RestController
+@RequestMapping("/v1")
+public class TransportationManagementRestController extends BaseRestController {
+	
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+	
+//	@EJB(mappedName="java:global/identityManagment-ear/identityManagment-ejb/IdmServiceFacadeImpl!com.parvanpajooh.idm.service.IdmServiceFacade") 
+//	private IdmServiceFacade idmServiceFacade;
+	
+//	@EJB(mappedName="java:global/transportationmanagement2-ear/transportationmanagement2-ejb/UldServiceImpl") 
+//	private UldService uldService;
+//	
+//	@EJB(mappedName="java:global/transportationmanagement2-ear/transportationmanagement2-ejb/TransportationServiceImpl")
+//	private TransportationService transportationService;
+	
+	@EJB(mappedName="java:global/transportationmanagement2-ear/transportationmanagement2-ejb/TransportationScheduleServiceImpl")
+	private TransportationScheduleService transportationScheduleService;
+	
+	@Autowired
+	private JacksonObjectMapperProvider mapperProvider;
+	
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		binder.registerCustomEditor(LocalDate.class, new DateProperyEditor(false, true));
+		binder.registerCustomEditor(LocalDateTime.class, new DateProperyEditor(true, true));
+	}
+	
+//	@RequestMapping(value = "/ulds", method = RequestMethod.GET)
+//	public List<BaseVO> findUlds(@Context HttpServletRequest request,
+//			@RequestHeader String userName,
+//			@RequestParam(value = "searchTerm") String term,
+//			@RequestParam(value = "from") int from,
+//			@RequestParam(value = "to") int to,
+//			@RequestParam(value = "sortDirection") String sortDirection,
+//			@RequestParam(value = "sortColumn") String sortColumn) {
+//		
+//		List<BaseVO> result = null;
+//		
+//		try {
+//			EcourierUserInfo ecUserInfo = loadUserInfo(request, userName);
+//			UldCriteria criteria = new UldCriteria();
+//			
+//			criteria.setCode(term);
+//			criteria.setActive(true);
+//			criteria.setTenantId(ecUserInfo.getTenantId());
+//			
+//			SortDirectionEnum direction = SortDirectionEnum.valueOf(sortDirection);
+//			
+//			result = uldService.findByCriteria(ecUserInfo, criteria, from, to, direction, sortColumn);
+//			
+//		} catch (Exception e) {
+//			log.error("error in findUlds", e);
+//		}
+//		return result;
+//	}
+	
+//	@RequestMapping(value = "/ulds/{code}", method = RequestMethod.GET)
+//	public UldVO findUld(@Context HttpServletRequest request,
+//			@RequestHeader String userName,
+//			@PathVariable String code) {
+//		
+//		UldVO uld = null;
+//		
+//		try {
+//			EcourierUserInfo ecUserInfo = loadUserInfo(request, userName);
+//			uld = uldService.findByCode(code, ecUserInfo);
+//			
+//		} catch (Exception e) {
+//			log.error("error in findUld", e);
+//		}
+//		return uld;
+//	}
+	
+	@RequestMapping(value = "transportationSchedule/find/vehicleRegNo", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> findVehicleRegNo(@Context HttpServletRequest request,
+			@RequestHeader String userName,
+			@RequestHeader String ip,
+			@RequestParam(value = "transportationNumber") String transportationNumber,
+			@RequestParam(value = "departureDateInUtc") String departureDateInUtc) {
+		
+		Map<String, Object> vehicleRegNo = new HashMap<String, Object>(1); 
+		
+//		try {
+//			UserInfo ecUserInfo = loadUserInfo(userName, ip);
+//			
+//			TransportationScheduleCriteria criteria = new TransportationScheduleCriteria();
+//			TransportationVO transportation = new TransportationVO();
+//			transportation.setTransportationNumber(transportationNumber);
+//			criteria.setTransportation(transportation);
+//			departureDateInUtc = departureDateInUtc.replace("-", "");
+//			criteria.setDepartureDateInUtc(Integer.parseInt(departureDateInUtc));
+//			
+//			List<BaseVO> baseVOs = transportationScheduleService.findByCriteria(ecUserInfo, criteria);
+//			
+//			if (Validator.isNotNull(baseVOs)) {
+//				if (baseVOs.size() == 1) {
+//					TransportationScheduleVO tsVO = (TransportationScheduleVO) baseVOs.get(0);
+//					if (Validator.isNotNull(tsVO.getVehicle())) {
+//						VehicleVO vehicle = tsVO.getVehicle();
+//						vehicleRegNo.put("vehicleRegNo", vehicle.getCarrierRegister());
+//					}
+//				}
+//			}
+//			
+//			
+//		} catch (Exception e) {
+//			log.error("error in findVehicleRegNo", e);
+//		}
+		
+		return vehicleRegNo;
+	}
+	
+	@RequestMapping(value = "transportationSchedule/find/flightInfo", method = RequestMethod.GET)
+	public TransportationScheduleMsg findFlightInfo(@Context HttpServletRequest request,
+			@RequestHeader String userName,
+			@RequestHeader String ip,
+			@RequestParam(value = "carrierCode") String carrierCode,
+			@RequestParam(value = "routeNumber") String routeNumber,
+			@RequestParam(value = "departureDateInUtc") String strUtcDepartureDateInUtc,
+			@Context HttpServletResponse response)  throws ParvanServiceException {
+		
+		
+		UserInfo ecUserInfo = loadUserInfo(userName, ip);
+
+		TransportationScheduleCriteria criteria = new TransportationScheduleCriteria();		
+		
+		criteria.setCarrierRouteNumber(routeNumber);
+		criteria.setCarrierCode(carrierCode);
+		criteria.setDepartureDateInUtc(DateUtilV2.convertStringDateToInteger(strUtcDepartureDateInUtc));
+		// TODO: criteria.setCarrierCode(carrierCode);
+
+		TransportationScheduleVO transportationVO = transportationScheduleService.findTransportationSchedule(ecUserInfo, criteria);		
+
+		TransportationScheduleMsg transportationMsg = transportationVO.toMsg();
+		
+		return transportationMsg;
+	}
+	
+	@RequestMapping(value = "transportationSchedules", method = RequestMethod.GET)
+	public List<TransportationScheduleMsg> findTransportationSchedulesBy(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "node_code") String nodeCode,
+			@RequestParam(value = "date") String date,
+			@Context HttpServletResponse response)  throws ParvanServiceException {
+		
+		List<TransportationScheduleMsg> scheduleMsgs = null;
+		UserInfo userInfo = loadUserInfo(userName, ip);
+
+		LocalDateTime localDateTime = DateUtilV2.convertStringDateTimeToLocalDateTime(date);
+		List<TransportationScheduleVO>  scheduleVOs = transportationScheduleService.findTransportationSchedulesBy(userInfo, nodeCode,date);
+		
+		scheduleMsgs = new ArrayList<TransportationScheduleMsg>();
+		for(TransportationScheduleVO transportationScheduleVO: scheduleVOs){
+			TransportationScheduleMsg scheduleMsg = new TransportationScheduleMsg();
+			scheduleMsg = transportationScheduleVO.toMsg();
+			
+			scheduleMsgs.add(scheduleMsg);
+		}
+
+		
+		return transportationMsg;
+	}
+	
+//	@RequestMapping(value = "/transportations", method = RequestMethod.GET)
+//	public @ResponseBody Map<String, Object> findTransportations(@Context HttpServletRequest request,
+//			@RequestHeader String userName,
+//			@RequestParam(value = "searchTerm") String term,
+//			@RequestParam(value = "from") int from,
+//			@RequestParam(value = "to") int to,
+//			@RequestParam(value = "sortDirection") String sortDirection,
+//			@RequestParam(value = "sortColumn") String sortColumn) {
+//		
+//		Map<String, Object> response = new HashMap<>(2);
+//		List<BaseVO> result = null;
+//		
+//		try {
+//			UserInfo ecUserInfo = loadUserInfo(request, userName);
+//			TransportationCriteria criteria = new TransportationCriteria(); 
+//			
+//			criteria.setCanonicalSearch(term);
+//			criteria.setActive(true);
+//			criteria.setTenantId(ecUserInfo.getTenantId());
+//			
+//			SortDirectionEnum direction = SortDirectionEnum.valueOf(sortDirection);
+//			
+//			result = transportationService.findByCriteria(ecUserInfo, criteria, from, to, direction, sortColumn);
+//			int count = transportationService.countByCriteria(ecUserInfo, criteria);
+//			
+//			response.put("result", result);
+//			response.put("total", count);
+//		} catch (Exception e) {
+//			log.error("error in findTransportations", e);
+//		}
+//		return response;
+//	}
+	
+//	@RequestMapping(value = "/transportations/{transportationNumber}", method = RequestMethod.GET)
+//	public TransportationVO findTransportation(@Context HttpServletRequest request,
+//			@RequestHeader String userName,
+//			@PathVariable String transportationNumber) {
+//		
+//		TransportationVO transportation = null;
+//		
+//		try {
+//			EcourierUserInfo ecUserInfo = loadUserInfo(request, userName);
+//			transportation = transportationService.findByTransportationNumber(transportationNumber, ecUserInfo);
+//			
+//		} catch (Exception e) {
+//			log.error("error in findTransportation", e);
+//		}
+//		return transportation;
+//	}
+//	
+//	private EcourierUserInfo loadUserInfo(HttpServletRequest request, String userName) throws Exception{
+//		UserVO userVO = idmServiceFacade.loadUserByUsername(userName);
+//		
+//		String ip = IpUtils.getIpFromRequest(request);
+//		
+//		String tenantId = TenantUtil.getTenantId(request);
+//		
+//		// temp ecUserInfo
+//		EcourierUserInfo ecUserInfo = EcourierUserInfo.getDefaultUserInfo(userVO.getId(), userVO.getUserName(),
+//				userVO.getFirstName(), userVO.getLastName(), ip,
+//				request.getContextPath(), null, null, tenantId, userVO.getAgent(), new HashSet<String>(), false, false, userVO.getLocale(), userVO.getZoneId(), userVO.getCalendar());
+//
+//		Long agentId = null;
+//		Set<Long> agentIds = null;
+//		
+//		if(Validator.isNotNull(userVO.getAgent())){
+//			
+//			loadAgentChildrens(ecUserInfo, userVO);
+//			
+//			AgentVO agentVO = userVO.getAgent();
+//			
+//			agentId = agentVO.getId();
+//			agentIds = agentVO.getAgentIds();
+//		}
+//		
+//		if (agentIds == null) {
+//			agentIds = new HashSet<Long>(0);
+//		}
+//		
+//		List<RoleVO> roleVOs = userVO.getRoles();
+//		
+//		boolean isAgent = false;
+//		boolean isCourier = false;
+//		
+//		Set<String> roleNames = new HashSet<String>();
+//		
+//		for (RoleVO roleVO : roleVOs) {
+//			String roleName = roleVO.getRoleName();
+//			
+//			if(roleName.equals(RoleNames.ROLE_AGENT.name())){
+//				isAgent = true;
+//			}
+//			else if(roleName.equals(RoleNames.ROLE_COURIER.name())){
+//				isCourier = true;
+//			}
+//			
+//			roleNames.add(roleName);
+//		}
+//
+//		ecUserInfo = EcourierUserInfo.getDefaultUserInfo(userVO.getId(), userVO.getUserName(),
+//				userVO.getFirstName(), userVO.getLastName(), ip,
+//				request.getContextPath(), agentId, agentIds, tenantId, userVO.getAgent(), roleNames, isAgent, isCourier, userVO.getLocale(), userVO.getZoneId(), userVO.getCalendar());
+//		
+//		return ecUserInfo;
+//	}
+	
+//	private void loadAgentChildrens(EcourierUserInfo ecUserInfo, UserVO userVO) throws ParvanServiceException{
+//		log.debug("loadAgentChildrens userVO={}", userVO);
+//		
+//		AgentVO agentVO = userVO.getAgent();
+//		
+//		if (Validator.isNotNull(agentVO)) {
+//			
+//			/*Long nodeId = agentVO.getNodeId();
+//			if(Validator.isNotNull(nodeId)){
+//				NodeVO nodeVO = rateAndRouteServiceFacade.getNode(ecUserInfo, nodeId);
+//				agentVO.setNodeName(nodeVO.getName());
+//			}*/
+//			
+//			agentVO = loadAgentFull(ecUserInfo, userVO);
+//			Long agentId = agentVO.getId();
+//			List<AgentVO> agentChildren = idmServiceFacade.findAgentChildren(ecUserInfo, agentId, null);
+//			
+//			Set<Long> agentChildrenIds = new HashSet<Long>();
+//			
+//			if (Validator.isNotNull(agentChildren)) {
+//				for (AgentVO agent : agentChildren) {
+//					agentChildrenIds.add(agent.getId());
+//				}
+//				
+//				agentVO.setChildren(agentChildren);
+//			}
+//			
+//			agentVO.setAgentIds(agentChildrenIds);
+//		}
+//		
+//		userVO.setAgent(agentVO);
+//	}
+	
+//	private AgentVO loadAgentFull(EcourierUserInfo ecUserInfo, UserVO userVO) throws ParvanServiceException{
+//		log.debug("loadAgentFull userVO={}", userVO);
+//		
+//		AgentVO agentVO = userVO.getAgent();
+//		
+//		if (Validator.isNotNull(agentVO)) {
+//			
+//			Long agentId = agentVO.getId();
+//			agentVO = idmServiceFacade.getAgent(ecUserInfo, agentId);
+//		}
+//		return agentVO;
+//	}
+}
+	

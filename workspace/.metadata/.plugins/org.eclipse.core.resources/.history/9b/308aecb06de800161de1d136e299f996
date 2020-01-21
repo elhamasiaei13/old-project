@@ -1,0 +1,122 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.accounting;
+
+import java.util.List;
+
+import com.parvanpajooh.client.accounting.model.AccountBalanceMsg;
+import com.parvanpajooh.client.accounting.model.AccountMsg;
+import com.parvanpajooh.client.accounting.model.VoucherMsg;
+import com.parvanpajooh.client.accounting.model.VoucherRowMsg;
+import com.parvanpajooh.client.accounting.service.AccountingApi;
+import com.parvanpajooh.client.common.GenericRestClient;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+
+import retrofit2.Call;
+
+/**
+ * @author MO
+ * @author dev-03
+ *
+ */
+public class AccountingApiRestClient extends GenericRestClient<AccountingApi> {
+
+	private static final String ENDPOINT = "localhost/accounting-rest/";
+
+	private AccountingApi accountingApi;
+
+	public AccountingApiRestClient() {
+		super(ENDPOINT);
+		accountingApi = super.createRestClient();
+	}
+
+	/**
+	 * 
+	 * @param voucherMsg
+	 * @throws ParvanClientException
+	 */
+	public void saveTransaction(VoucherMsg voucherMsg) throws ParvanClientException {
+		Call<Void> call = accountingApi.saveTransaction(voucherMsg);
+		executeCall(call);
+	}
+
+	/**
+	 * 
+	 * @param accountCode
+	 * @param clientAppCode
+	 * @param fromDate
+	 * @param toDate
+	 * @param page
+	 * @param size
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public PageList<VoucherRowMsg> findVoucherRows(String accountCode, String clientAppCode, String fromDate, String toDate, int page, int size) throws ParvanClientException {
+		Call<List<VoucherRowMsg>> call = accountingApi.findVoucherRows(accountCode,clientAppCode, fromDate, toDate, page, size);
+		return executePageCall(call);
+	}
+
+	/**
+	 * 
+	 * @param clientAppCode
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public List<AccountMsg> findAccountsByAppCode(String clientAppCode) throws ParvanClientException {
+		Call<List<AccountMsg>> call = accountingApi.findAccountsByAppCode(clientAppCode);
+		return executeCall(call);
+	}
+
+	/**
+	 * 
+	 * @param accountCodes
+	 * @param page
+	 * @param size
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public PageList<AccountBalanceMsg> getAccountBalanceReport(List<String> accountNumbers, int page, int size) throws ParvanClientException {
+		Call<List<AccountBalanceMsg>> call = accountingApi.getAccountBalanceReport(accountNumbers, page, size);
+		return executePageCall(call);
+	}
+
+	/**
+	 * 
+	 * @param clientAppCode
+	 * @param accountGroupId
+	 * @param name
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public List<AccountMsg> findAccountsByNameOrAccountNumber(String clientAppCode,long accountGroupId, String term) throws ParvanClientException {
+		Call<List<AccountMsg>> call = accountingApi.findAccountsByNameOrAccountNumber(clientAppCode, accountGroupId, term);
+		return executeCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param accountNumber
+	 * @param clientAppCode
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public AccountMsg findAccountByAccountNumberAndClientAppCode(String accountNumber,String clientAppCode) throws ParvanClientException {
+		Call<AccountMsg> call = accountingApi.findAccountByAccountNumberAndClientAppCode(accountNumber, clientAppCode);
+		return executeCall(call);
+	}
+	
+	/**
+	 * 
+	 * @param accountGroupId
+	 * @param page
+	 * @param size
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public PageList<AccountBalanceMsg> getDebitAccountsBalanceReport(long accountGroupId, int page, int size) throws ParvanClientException {
+		Call<List<AccountBalanceMsg>> call = accountingApi.getDebitAccountsBalanceReport(accountGroupId, page, size);
+		return executePageCall(call);
+	}
+}

@@ -1,0 +1,113 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.geomanagement.model;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.common.BaseMsg;
+
+/**
+ * @author mehrdad
+ *
+ */
+public class OptionalServiceMsg extends BaseMsg {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6832794302026806251L;
+	
+	private Long id ;
+	
+	private String code;
+	
+	private String nameFa;
+	
+	private String nameEn;
+	
+	private String description;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the nameFa
+	 */
+	public String getNameFa() {
+		return nameFa;
+	}
+
+	/**
+	 * @param nameFa the nameFa to set
+	 */
+	public void setNameFa(String nameFa) {
+		this.nameFa = nameFa;
+	}
+
+	/**
+	 * @return the nameEn
+	 */
+	public String getNameEn() {
+		return nameEn;
+	}
+
+	/**
+	 * @param nameEn the nameEn to set
+	 */
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("id", getId())
+			.add("code", code)
+			.add("nameFa", nameFa)
+			.add("nameEn", nameEn)
+			.add("description", description)
+			.toString();
+	}
+	
+	
+
+}

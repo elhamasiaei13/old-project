@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>Task Details</title>
+</head>
+
+<body>
+  <section class="content" layout:fragment="content">
+  		   <div class="jumbotron">
+             <h2 > تغییر وضعیت</h2>
+   		   </div>
+	 <div id="section">		
+			<form  class="form-inline"  method="post" th:action="@{save}" th:object="${taskAssignment}">
+		               
+					<div id="commentInputId">  
+				        <br></br> <br></br>
+				       <label for="status" th:text="#{table_column_status}"></label>
+						<br></br>
+		        		<select id="statusId" name="statusName">
+		        		 	 <option th:text="#{lookup_option}"></option>
+		          	    	 <option th:each="s : ${status}" th:value="${s.id}" th:text="${s.name}" >name</option>
+		          	    </select>
+		          	    <br></br>
+		          	     <label for="status">یادداشت</label>
+		          	      <br></br>
+		          	     <input name="changeAssignToComment" />
+		          	    <br></br>    							
+					</div>
+			
+					<br></br>
+					
+		  			<div id="outer">
+					<div class="inner" >
+					<button class="btn btn-default btn-sm" th:text="#{btn_add}"></button>
+					</div>
+					<div class="inner" >
+                    	<a class="btn btn-default btn-sm" th:text="#{btn_return}" th:href="@{'/taskDetails/' + ${taskId}}"></a>
+                    </div>
+					</div>
+
+		  </form>	
+	  </div>
+  </section>
+</body>
+</html>

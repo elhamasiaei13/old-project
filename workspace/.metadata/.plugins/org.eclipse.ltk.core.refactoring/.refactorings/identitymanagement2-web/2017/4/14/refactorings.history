@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;GlobalExceptionController.java&apos; to &apos;stock2-web/src/main/java/com.parvanpajooh.stock2.mvc&apos;&#x0A;- Original project: &apos;identitymanagement2-web&apos;&#x0A;- Destination element: &apos;stock2-web/src/main/java/com.parvanpajooh.stock2.mvc&apos;&#x0A;- Original element: &apos;com.parvanpajooh.identitymanagement2.mvc.GlobalExceptionController.java&apos;" description="Copy compilation unit" destination="=stock2-web/src\/main\/java&lt;com.parvanpajooh.stock2.mvc" element1="/src\/main\/java&lt;com.parvanpajooh.identitymanagement2.mvc{GlobalExceptionController.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1491288808117" units="1" version="1.0"/>
+</session>

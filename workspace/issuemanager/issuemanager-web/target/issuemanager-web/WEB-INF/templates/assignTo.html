@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>Task Details</title>
+</head>
+
+<body>
+  <section class="content" layout:fragment="content">
+	   <div class="jumbotron">
+         <h2 > انتساب عضو</h2>
+	   </div>
+	   
+	 <div id="section">
+		
+			<form  class="form-inline"  method="post" th:action="@{/taskAssignment/save}" th:object="${taskAssignmentVO}">
+		               
+					<div id="commentInputId">  
+				        <br></br> <br></br>
+	               	<div class="form-group required">
+	         		  <div class="form-group">
+				        <label for="members" th:text="#{members_list}"></label>
+			            </div>
+			            </div>
+			            <br></br>
+			            <select id="memberId" name="member.id">
+			            	 <option th:text="#{lookup_option}"></option>
+			                 <option th:each="member : ${members}" th:value="${member.id}" th:text="${member.firstName}+${member.lastName}" ></option>
+			            </select>
+			            <br></br>
+			            <br></br>
+			             <label for="members" > یادداشت انتساب</label>
+			            <br></br>
+			             <input  name="taskId" th:value="${taskId}" hidden="hidden"/>
+			             <input name="comment" th:field="*{comment}" />
+			            <br></br>		    
+			            <br></br> <br></br>
+	            	  <div class="form-group required">
+	         		   <div class="form-group">
+				       <label for="status" th:text="#{table_column_status}"></label>
+				       </div>
+				       </div>
+						<br></br>						
+						
+		        		<select id="statusId" name="taskStatusEnum">
+		        		 	 <option th:text="#{lookup_option}"></option>
+		          	    	 <option th:each="s : ${T(com.parvanpajooh.issuemanager.model.enums.TaskStatusEnum).values()}" th:value="${s}" th:text="${s.value}" >name</option>
+		          	    </select>
+		          	    <br></br>
+		          	    <br></br>
+		          	     <label for="status">یادداشت تغییر وضعیت</label>
+		          	      <br></br>
+		          	     <input name="changeStatusComment" th:field="*{changeStatusComment}"/>
+		          	    <br></br>    								
+					</div>
+			
+					<br></br>
+					
+					<div id="outer">
+					<div class="inner" >
+					<button class="btn btn-lg btn-default" th:text="#{btn_add}" th:onclick="${'memberSelected()'}"></button>
+					</div>
+					<div class="inner" >
+                    	<a class="btn btn-lg btn-default" th:text="#{btn_return}" th:href="@{'/taskDetails/' + ${taskId}}"></a>
+                    </div>
+					</div>
+
+		  </form>	
+		  <script>
+			function memberSelected(){
+
+				  	var choose =  "انتخاب کنید";
+					var e = document.getElementById("memberId").value;
+					if(e != choose){						
+						$('#memberId').val(e);
+					}
+					else{
+						$('#memberId').val(null);
+					}	
+
+					var e = document.getElementById("statusId").value;
+					if(e != choose){						
+						$('#statusId').val(e);
+					}
+					else{
+						$('#statusId').val(null);
+					}						
+			}
+		</script>
+	  </div>
+  </section>
+</body>
+</html>

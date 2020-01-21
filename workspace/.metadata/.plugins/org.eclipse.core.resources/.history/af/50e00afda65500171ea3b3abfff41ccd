@@ -1,0 +1,231 @@
+package com.parvanpajooh.client.routemanagement.model;
+
+import java.util.List;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.routemanagement.model.enums.RouteEnums;
+import com.parvanpajooh.client.routemanagement.model.enums.RouteEnums.FreightNodeType;
+
+/**
+ * 
+ * @author mehrdad
+ *
+ */
+
+public class NodeMsg extends BaseMsg {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1304277576944253813L;
+	
+	private Long id;
+	
+	private String codeName;
+	
+	private String name;
+	
+	private String otherNames;
+	
+	private RouteEnums.FreightNodeType freightType;
+	
+	private Boolean active;
+	
+	private ZoneMsg zone;
+	
+	private String geoEntityCode;
+	
+	private Double geoLat;
+	
+	private Double geoLng;
+	
+	private CityInfoMsg cityInfoMsg;
+	
+	private List<String> tags;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the codeName
+	 */
+	public String getCodeName() {
+		return codeName;
+	}
+
+	/**
+	 * @param codeName the codeName to set
+	 */
+	public void setCodeName(String codeName) {
+		this.codeName = codeName;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the freightType
+	 */
+	public FreightNodeType getFreightType() {
+		return freightType;
+	}
+
+	/**
+	 * @param freightType the freightType to set
+	 */
+	public void setFreightType(FreightNodeType freightType) {
+		this.freightType = freightType;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+	
+	/**
+	 * @return the zone
+	 */
+	public ZoneMsg getZone() {
+		return zone;
+	}
+
+	/**
+	 * @param zone the zone to set
+	 */
+	public void setZone(ZoneMsg zone) {
+		this.zone = zone;
+	}
+
+	/**
+	 * @return the geoEntityCode
+	 */
+	public String getGeoEntityCode() {
+		return geoEntityCode;
+	}
+
+	/**
+	 * @param geoEntityCode the geoEntityCode to set
+	 */
+	public void setGeoEntityCode(String geoEntityCode) {
+		this.geoEntityCode = geoEntityCode;
+	}
+
+	/**
+	 * @return the geoLat
+	 */
+	public Double getGeoLat() {
+		return geoLat;
+	}
+
+	/**
+	 * @param geoLat the geoLat to set
+	 */
+	public void setGeoLat(Double geoLat) {
+		this.geoLat = geoLat;
+	}
+
+	/**
+	 * @return the geoLng
+	 */
+	public Double getGeoLng() {
+		return geoLng;
+	}
+
+	/**
+	 * @param geoLng the geoLng to set
+	 */
+	public void setGeoLng(Double geoLng) {
+		this.geoLng = geoLng;
+	}
+
+	/**
+	 * @return the cityInfoMsg
+	 */
+	public CityInfoMsg getCityInfoMsg() {
+		return cityInfoMsg;
+	}
+
+	/**
+	 * @param cityInfoMsg the cityInfoMsg to set
+	 */
+	public void setCityInfoMsg(CityInfoMsg cityInfoMsg) {
+		this.cityInfoMsg = cityInfoMsg;
+	}
+
+	/**
+	 * @return the tags
+	 */
+	public List<String> getTags() {
+		return tags;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(List<String> tags) {
+		this.tags = tags;
+	}
+	
+	/**
+	 * @return the otherNames
+	 */
+	public String getOtherNames() {
+		return otherNames;
+	}
+
+	/**
+	 * @param otherNames the otherNames to set
+	 */
+	public void setOtherNames(String otherNames) {
+		this.otherNames = otherNames;
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("id", id)
+			.add("codeName", codeName)
+			.add("name", name)
+			.add("otherNames", otherNames)
+			.add("freightType", freightType)
+			.add("active", active)
+			.add("zone", zone)
+			.add("geoEntityCode", geoEntityCode)
+			.add("geoLat", geoLat)
+			.add("geoLng", geoLng)
+			.add("cityInfoMsg", cityInfoMsg)
+			.toString();
+	}
+}

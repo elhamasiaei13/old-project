@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+	<section class="content" layout:fragment="content">
+		<div th:fragment="search (action , disable , waybillNumberCriteria)">
+
+			<input type="hidden" id="action" th:value="${action}" />
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="waybillNumberFromFilter" th:text="#{waybillNumberCriteria.waybillNumberFrom}">شماره بارنامه از</label>
+				<div class="col-sm-7">
+					<input class="form-control " id="waybillNumberFromFilter" type="text" style="width: 200px" th:readonly="${disable}"
+						th:value="${waybillNumberCriteria != 'Null'} ? *{waybillNumberCriteria.waybillNumberFrom}"
+						th:attr="name = ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.waybillNumberFrom' : 'waybillNumberFrom'}" />
+				</div>
+			</div>
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="waybillNumberToFilter" th:text="#{waybillNumberCriteria.waybillNumberTo}">شماره بارنامه تا</label>
+				<div class="col-sm-7">
+					<input class="form-control " id="waybillNumberToFilter" th:readonly="${disable}" th:value="${waybillNumberCriteria != 'Null'} ? *{waybillNumberCriteria.waybillNumberTo}"
+						th:attr="name = ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.waybillNumberTo' : 'waybillNumberTo'}" type="text" width="200" style="width: 200px" />
+				</div>
+			</div>
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="generateDateTimeFromFilter" th:text="#{waybillNumberDisplay.generatDateTimeFrom}">تاریخ ایجاد از</label>
+				<div class="col-sm-7">
+					<input class="form-control datePicker" id="generateDateTimeFromFilter" th:readonly="${disable}"
+						parvan:inputDate="${waybillNumberCriteria != 'Null'} ? *{waybillNumberCriteria.generateDateTimeFrom}"
+						th:attr="name = ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.generateDateTimeFrom' : 'generateDateTimeFrom'}" type="text" style="width: 200px" />
+				</div>
+
+			</div>
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="generateDateTimeToFilter" th:text="#{waybillNumberDisplay.generatDateTimeTo}">تاریخ ایجاد تا</label>
+				<div class="col-sm-7">
+					<input class="form-control datePicker" id="generateDateTimeToFilter" th:readonly="${disable}" parvan:inputDate="${waybillNumberCriteria != 'Null'} ? *{waybillNumberCriteria.generateDateTimeTo}"
+						th:attr="name = ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.generateDateTimeTo' : 'generateDateTimeTo'}" type="text" style="width: 200px" />
+				</div>
+			</div>
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="lastUpdateDateTimeFromFilter" th:text="#{waybillNumberDisplay.lastUpdateDateTimeFrom}">تاریخ ویرایش از</label>
+				<div class="col-sm-7">
+					<input class="form-control datePicker" id="lastUpdateDateTimeFromFilter" th:readonly="${disable}"
+						parvan:inputDate="${waybillNumberCriteria != 'Null'} ? *{waybillNumberCriteria.lastUpdateDateTimeFrom}"
+						th:attr="name = ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.lastUpdateDateTimeFrom' : 'lastUpdateDateTimeFrom'}" type="text" style="width: 200px" />
+				</div>
+			</div>
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="lastUpdateDateTimeToFilter" th:text="#{waybillNumberDisplay.lastUpdateDateTimeTo}">تاریخ ویرایش تا</label>
+				<div class="col-sm-7">
+					<input class="form-control datePicker" id="lastUpdateDateTimeToFilter" th:readonly="${disable}"
+						parvan:inputDate="${waybillNumberCriteria != 'Null'} ? *{waybillNumberCriteria.lastUpdateDateTimeTo}"
+						th:attr="name = ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.lastUpdateDateTimeTo' : 'lastUpdateDateTimeTo'}" type="text" style="width: 200px" />
+				</div>
+			</div>
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="currentStatesFilter" th:text="#{waybillNumberDisplay.currentState}">وضعیت</label>
+				<div class="col-sm-7">
+					<select class="form-control " id="currentStatesFilter" th:attr="name = ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.currentStates' : 'currentStates'}" style="width: 200px">
+						<option value=""></option>
+						<option th:each="state : ${T(com.parvanpajooh.stock2.domain.model.enums.WaybillNumberState).values()}" th:value="${state}" th:text="${state.value}"
+							th:selected="${waybillNumberCriteria != 'Null'} and ${#arrays.contains(waybillNumberCriteria.currentStates,state)}"></option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="waybillNumberTypesFilter" th:text="#{waybillNumberDisplay.waybillNumberType}">نوع عدد</label>
+				<div class="col-sm-7">
+					<select id="waybillNumberTypesFilter" th:attr="name= ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.waybillNumberTypes' : 'waybillNumberTypes'}" class="form-control"
+						style="width: 200px">
+						<option value=""></option>
+						<option th:each="type : ${T(com.parvanpajooh.stock2.domain.model.enums.WaybillNumberType).values()}" th:value="${#strings.toString(type)}" th:text="${type.value}"
+							th:selected="${waybillNumberCriteria != 'Null'} and ${#arrays.contains(waybillNumberCriteria.waybillNumberTypes,type)}"></option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="domesticFilter" th:text="#{waybillNumberDisplay.domestic}">داخلی/خارجی</label>
+				<div class="col-sm-7">
+					<select class="form-control " id="domesticFilter" th:attr="name = ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.domestic' : 'domestic'}" style="width: 200px">
+						<option value=""></option>
+						<option value="True" th:text="#{waybillNumber.domestic}" th:selected="${waybillNumberCriteria != 'Null'} and ${'true' == #strings.toString(waybillNumberCriteria.domestic)}"></option>
+						<option value="False" th:text="#{waybillNumber.international}" th:selected="${waybillNumberCriteria != 'Null'} and ${'false' == #strings.toString(waybillNumberCriteria.domestic)}"></option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="formatFilter" th:text="#{waybillNumberDisplay.format}">فرمت استاندارد</label>
+				<div class="col-sm-7">
+					<select class="form-control " id="formatFilter" th:attr="name = ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.format' : 'format'}" style="width: 200px">
+						<option value=""></option>
+						<option th:each="f : ${T(com.parvanpajooh.stock2.domain.model.enums.WaybillNumberFormat).values()}" th:value="${f}" th:text="${f.value}"
+							th:selected="${waybillNumberCriteria != 'Null'} and ${#strings.toString(f) == waybillNumberCriteria.format}"></option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="hasAgentFilter" th:text="#{waybillNumberCriteria.hasAgent}">با/بدون نمایندگی</label>
+				<div class="col-sm-7">
+					<select class="form-control " id="hasAgentFilter" onchange="doReadOnly()" th:attr="name = ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.hasAgent' : 'hasAgent'}" style="width: 200px">
+						<option value=""></option>
+						<option value="True" th:text="#{waybillNumber.withAgent}" th:selected="${waybillNumberCriteria != 'Null'} and ${'true' == #strings.toString(waybillNumberCriteria.hasAgent)}"></option>
+						<option value="False" th:text="#{waybillNumber.withoutAgent}" th:selected="${waybillNumberCriteria != 'Null'} and ${'false' == #strings.toString(waybillNumberCriteria.hasAgent)}"></option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="currentAssigneeAgentIdFilter" th:text="#{waybillNumberDisplay.currentAssigneeAgentId}">نمایندگی</label>
+				<div class="col-sm-7">
+					<select class="form-control " id="currentAssigneeAgentIdFilter" th:attr="name = ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.currentAssigneeAgentIds' : 'currentAssigneeAgentIds'}"
+						style="width: 200px">
+						<option value=""></option>
+						<option th:each="agent : ${session.childrenAgent}" th:value="${agent.id}" th:text="${agent.name}"
+							th:selected="${waybillNumberCriteria != 'Null'} and ${waybillNumberCriteria.currentAssigneeAgentIds != null} and ${#arrays.contains(waybillNumberCriteria.currentAssigneeAgentIds, agent.id)}">
+						</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group ">
+				<label class="col-sm-2 control-label" for="ownerAgentIdFilter" th:text="#{waybillNumberDisplay.ownerAgentId}">owner</label>
+				<div class="col-sm-7">
+					<select class="form-control " id="ownerAgentIdFilter" th:attr="name = ${waybillNumberCriteria != 'Null' ? 'waybillNumberCriteria.ownerAgentIds' : 'ownerAgentIds'}" style="width: 200px">
+						<option value=""></option>
+						<option th:each="agent : ${session.childrenAgent}" th:value="${agent.id}" th:text="${agent.name}"
+							th:selected="${waybillNumberCriteria != 'Null'} and ${waybillNumberCriteria.ownerAgentIds != null} and ${#arrays.contains(waybillNumberCriteria.ownerAgentIds, agent.id)}"></option>
+					</select>
+				</div>
+			</div>
+
+
+			<script>
+
+					function domesticRender(entity, type, full,meta){
+						if(entity){
+							return '<div class="text-center"><span class="label label-primary" th:text="#{waybillNumber.domestic}"></span></div>';
+						}
+						return '<div class="text-center"><span class="label label-danger" th:text="#{waybillNumber.international}"></span></div>';
+					}
+		
+					function waybillNumberTypeRender(entity, type, full){
+						
+						if(entity == 'ELECTRONIC'){
+							return '<div class="text-center"><span class="label label-info" th:text="#{waybillNumber.electronic}"></span></div>';
+						}else{
+							return '<div class="text-center"><span class="label label-warning" th:text="#{waybillNumber.print}"></span></div>';
+						}					
+					}
+		
+					function currentStateRender(entity, type, full){
+						return '<div class="text-center"><span class="label label-default">'+entity+'</span></div>';								
+					}
+			
+			    /*<![CDATA[*/
+				    jQuery(document).ready(function() {
+
+					    	$('#currentStatesFilter').select2({			                
+					                allowClear: true
+				
+				            });
+				    		$('#waybillNumberTypesFilter').select2({			                
+				                allowClear: true
+				            });
+				            $('#domesticFilter').select2({			              
+				                allowClear: true
+			
+				            });
+				            $('#formatFilter').select2({			                
+				                allowClear: true
+			
+				            });
+				            $('#currentAssigneeAgentIdFilter').select2({			                
+				                allowClear: true
+			
+				            });
+				            $('#hasAgentFilter').select2({			                
+				                allowClear: true
+			
+				            });
+				            $('#ownerAgentIdFilter').select2({			                
+				                allowClear: true
+			
+				            });
+
+				    	if(document.getElementById('waybillNumberFromFilter').readOnly){
+				    	    	$("#currentStatesFilter").select2("readonly", true);
+					            $("#waybillNumberTypesFilter").select2("readonly", true);
+					            $("#domesticFilter").select2("readonly", true);
+					            $("#formatFilter").select2("readonly", true);
+					            $('#hasAgentFilter').select2("readonly", true);
+					            $("#currentAssigneeAgentIdFilter").select2("readonly", true);
+					            $("#ownerAgentIdFilter").select2("readonly", true);
+				    	}				    	
+				    	
+				        $('.modal').on('shown.bs.modal', function() {
+				            $('.modal .modal-body').css('overflow-y', 'auto');
+				            $('.modal .modal-body').css('max-height', $(window).height() * 0.7);
+				        });
+				        try {
+				            $('[data-inputmask]').inputmask();
+				        } catch (Error) {}
+				    });	
+
+			     	function doReadOnly(){
+			     		if(document.getElementById('hasAgentFilter').value == 'False'){
+				            $("#currentAssigneeAgentIdFilter").select2("readonly", true);
+				    	}else{
+				    		$("#currentAssigneeAgentIdFilter").select2("readonly", false);
+				    	}
+			     	}
+			    /*]]>*/
+			</script>
+
+		</div>
+
+		<div th:fragment="list">
+			<div class="box-body table-responsive">
+				<dy:table entity="WaybillNumberDisplay" table="list" customSearch="true" customObjectActions="true" />
+			</div>
+
+			<script>
+
+			 	var titleModify = '<span class="label label-info"  th:remove="tag">Update !</span>';
+	            var titleDelete = '<span class="label label-info"  th:remove="tag">Delete !</span>';  
+	            
+			    /*<![CDATA[*/	
+			    
+
+
+					function getWaybillNumberDisplayExtraParams(aoData) {
+						return {
+				    	    "data" : function(data){
+				    	    	customPush(data, 'currentStates', $('#currentStatesFilter').val());
+						    	customPush(data, 'waybillNumberFrom', $('#waybillNumberFromFilter').val());
+						    	customPush(data, 'waybillNumberTo', $('#waybillNumberToFilter').val());
+						    	customPush(data, 'generateDateTimeFrom', $('#generateDateTimeFromFilter').val());
+						    	customPush(data, 'generateDateTimeTo', $('#generateDateTimeToFilter').val());
+						    	customPush(data, 'lastUpdateDateTimeFrom', $('#lastUpdateDateTimeFromFilter').val());
+						    	customPush(data, 'lastUpdateDateTimeTo', $('#lastUpdateDateTimeToFilter').val());
+						    	customPush(data, 'waybillNumberTypes', $('#waybillNumberTypesFilter').val());
+						    	customPush(data, 'domestic', $('#domesticFilter').val());
+						    	customPush(data, 'format', $('#formatFilter').val());
+						    	customPush(data, 'hasAgent', $('#hasAgentFilter').val());
+						    	customPush(data, 'currentAssigneeAgentIds', $('#currentAssigneeAgentIdFilter').val());
+						    	customPush(data, 'ownerAgentIds', $('#ownerAgentIdFilter').val());
+				    	    }
+				    	};
+					}
+					
+		            function waybillNumberDisplayRowActions(data, type, full) {
+
+		                var d = '<div style="width: 100px;"><a class="btn btn-xs btn-primary" title="' + titleModify + '" onclick="modifyWaybillNumberDisplay(' + full.id + ')" href="javascript:;"><i class="fa fa-pencil"></i></a> ';
+		                d += '<a class="btn btn-xs btn-danger" title="' + titleDelete + '" onclick="deleteWaybillNumberDisplay(' + full.id + ')" href="javascript:;"><i class="fa fa-times"></i></a> ';
+		                d += '</div>';
+		                return d;
+		            }
+					
+			    /*]]>*/
+			</script>
+
+		</div>
+
+		<div th:fragment="searchButtons">
+			<div class="form-group">
+				<div class="col-sm-4 col-sm-offset-2 col-md-offset-1">
+					<button class="btn btn-primary" type="submit">
+						<i class="fa fa-search"></i>
+						<span>جستجو </span>
+					</button>
+					<a class="btn btn-warning" onclick="resetSearch();">
+						<i class="fa fa-refresh"></i>
+						<span>از نو</span>
+					</a>
+				</div>
+			</div>
+			<script>
+ 
+			    /*<![CDATA[*/	 		   		   
+			
+				    function resetSearch() {
+				    	$('#frmWaybillNumberDisplaySearch').trigger('reset');
+				    	$('#waybillNumberFromFilter').val('');
+				    	$('#waybillNumberToFilter').val('');
+				    	$('#generateDateTimeToFilter').val('');
+				    	$('#generateDateTimeFromFilter').val('');
+				    	$('#lastUpdateDateTimeFromFilter').val('');
+				    	$('#lastUpdateDateTimeToFilter').val('');
+				    	try{$('#currentStatesFilter').select2('val', '');}catch(Erro){}
+				    	try{$('#waybillNumberTypesFilter').select2('val', '');}catch(Erro){}
+				    	try{$('#domesticFilter').select2('val', '');}catch(Erro){}
+				    	try{$('#formatFilter').select2('val', '');}catch(Erro){}
+				    	try{$('#hasAgentFilter').select2('val', '');}catch(Erro){}
+				    	try{$('#currentAssigneeAgentIdFilter').select2('val', '');}catch(Erro){}
+				    	try{$('#ownerAgentIdFilter').select2('val', '');}catch(Erro){}				    					    	
+				    	doSearch();
+				    }
+					
+			    /*]]>*/
+			</script>
+
+		</div>
+	</section>
+</body>
+
+</html>
+
+

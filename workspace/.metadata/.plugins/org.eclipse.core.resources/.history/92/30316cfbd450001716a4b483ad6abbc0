@@ -1,0 +1,91 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.service.adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.agentmanagement.model.EmployeeMsg;
+import com.parvanpajooh.client.agentmanagement.model.GeneralAgentMsg;
+import com.parvanpajooh.client.agentmanagement.model.AgentManagementEnums.EmployeeGroup;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.complaintmanagement.ComplaintManagementApiRestClient;
+import com.parvanpajooh.client.complaintmanagement.model.ComplaintMsg;
+import com.parvanpajooh.client.personmanagement.PersonManagementApiRestClient;
+import com.parvanpajooh.client.personmanagement.model.PersonMsg;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.logesticmng.model.vo.GeneralAgentVO;
+import com.parvanpajooh.siteservices.model.vo.ComplaintVO;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+import com.parvanpajooh.taskmanagement.domain.model.dto.EmployeeDto;
+
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class ComplaintManagementServiceAdapterRest implements ComplaintManagementServiceAdapter {
+
+	private ComplaintManagementApiRestClient complaintManagementApiRestClient;
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	public ComplaintManagementServiceAdapterRest() {
+		this.complaintManagementApiRestClient = new ComplaintManagementApiRestClient();
+	}
+
+
+	@Override
+	public ComplaintVO getComplaint(Long id) throws ParvanServiceException {
+		ComplaintVO complaintVO = null;
+
+		try {
+			GeneralAgentMsg generalAgentMsg = complaintManagementApiRestClient.get
+
+			complaintVO = new ComplaintVO();
+			complaintVO.fromMsg(generalAgentMsg);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting agent by its id: " + id, e);
+		}
+
+		return generalAgentDto;
+
+	}
+
+
+	@Override
+	public List<ComplaintVO> findComplaintsBy(String term, int page, int size) throws ParvanServiceException {
+
+		List<ComplaintVO> complaintVOs = null;
+		ComplaintVO complaintVO = null;
+
+		try {
+
+			PageList<ComplaintMsg> complaintMsgPageList = complaintManagementApiRestClient.findComplaintsBy(term, page, size);
+
+			complaintVOs = new ArrayList<ComplaintVO>();
+			for (ComplaintMsg complaintMsg : complaintMsgPageList.getElements()) {
+				complaintVO = new ComplaintVO();
+				complaintVO.fromMsg(complaintMsg);
+
+				complaintVOs.add(complaintVO);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while finding all employees", e);
+		}
+
+		return employeeDtoList;
+	}
+
+}

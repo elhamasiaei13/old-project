@@ -1,0 +1,95 @@
+package com.parvanpajooh.common.auth;
+
+import java.util.List;
+
+import com.parvanpajooh.client.agentmanagement.AgentManagementApiRestClient;
+import com.parvanpajooh.client.agentmanagement.model.EmployeeMsg;
+import com.parvanpajooh.client.agentmanagement.model.GeneralAgentMsg;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.common.ResourceNotFoundClientException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+
+/**
+ * @author mehrdad
+ *
+ */
+public class AgentManagementServiceAdapterRest {
+
+	private AgentManagementApiRestClient agentManagementApiRestClient;
+
+	public AgentManagementServiceAdapterRest() {
+		this.agentManagementApiRestClient = new AgentManagementApiRestClient();
+	}
+	
+	/**
+	 * 
+	 * @param username
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public GeneralAgentMsg initLoginLoadAgentByUsername(String username) throws ParvanServiceException {
+		GeneralAgentMsg generalAgentMsg = null;
+		try {
+			// load agent 
+			generalAgentMsg = agentManagementApiRestClient.initLoginFindAgentByEmployeeUserName(username);
+			
+		} catch (ParvanClientException e) {
+			String code = e.getCode();
+			if (code == null || !code.equals(String.valueOf(ErrorCode.OBJECT_NOT_FOUND.toValue()))){
+				throw new ParvanServiceException("Unknown clientException occurred while initLoginFindEmployeeByUsername", e);				
+			}
+			
+		} catch (Exception e) {
+			throw new ParvanServiceException(e);
+		}
+		return generalAgentMsg;
+	}
+	
+	/**
+	 * 
+	 * @param employeeUserName
+	 * @return
+	 * @throws ParvanClientException
+	 */
+	public EmployeeMsg initLoginFindEmployeeByUsername(String employeeUserName) throws ParvanServiceException {
+		EmployeeMsg employeeMsg = null;
+		try {
+			// load agent 
+			employeeMsg = agentManagementApiRestClient.initLoginFindEmployeeByUsername(employeeUserName);
+			
+		} catch (ParvanClientException e) {
+			String code = e.getCode();
+			if (code == null || !code.equals(String.valueOf(ErrorCode.OBJECT_NOT_FOUND.toValue()))){
+				throw new ParvanServiceException("Unknown clientException occurred while initLoginFindEmployeeByUsername", e);				
+			}
+			
+		} catch (Exception e) {
+			throw new ParvanServiceException(e);
+		}
+		
+		return employeeMsg;
+	}
+
+	/**
+	 * 
+	 * @param parentAgentId
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public List<GeneralAgentMsg> initLoginGetAllSubAgentsByParentId(long parentAgentId) throws ParvanServiceException {
+		List<GeneralAgentMsg> list = null;
+		try {
+			
+			// load subAgents 
+			list = agentManagementApiRestClient.initLoginFindAllSubAgentsByParentId(parentAgentId);			
+			
+		} catch (ResourceNotFoundClientException e) {
+			// do nothing. only return null
+			
+		} catch (Exception e) {
+			throw new ParvanServiceException(e);
+		}
+		return list;
+	}
+}

@@ -1,0 +1,226 @@
+package com.parvanpajooh.client.geomanagement.model.criteria;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.ProductMsg;
+import com.parvanpajooh.client.rateandroute.model.RateTypeMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RateDisplayType;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RateDueType;
+
+public class RateTypeCriteriaMsg extends BaseMsg {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7240289780498224634L;
+	
+	private Boolean userDefined;
+	
+	private String code;
+	
+	private String nameFa;
+	
+	private String nameEn;
+	
+	private String allNames;
+	
+	private Boolean editable;
+	
+	private Integer displayOrder;
+	
+	private RateDisplayType displayType;
+	
+	private Boolean optional;
+	
+	private RateDueType[] rateDue;
+	
+	private RateTypeMsg dependsOn;
+	
+	private ProductMsg product;
+	
+	/**
+	 * @return the userDefined
+	 */
+	public Boolean getUserDefined() {
+		return userDefined;
+	}
+
+	/**
+	 * @param userDefined the userDefined to set
+	 */
+	public void setUserDefined(Boolean userDefined) {
+		this.userDefined = userDefined;
+	}
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the nameFa
+	 */
+	public String getNameFa() {
+		return nameFa;
+	}
+
+	/**
+	 * @param nameFa the nameFa to set
+	 */
+	public void setNameFa(String nameFa) {
+		this.nameFa = nameFa;
+	}
+
+	/**
+	 * @return the nameEn
+	 */
+	public String getNameEn() {
+		return nameEn;
+	}
+
+	/**
+	 * @param nameEn the nameEn to set
+	 */
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
+	}
+
+	/**
+	 * @return the editable
+	 */
+	public Boolean getEditable() {
+		return editable;
+	}
+	
+	/**
+	 * @return the displayOrder
+	 */
+	public Integer getDisplayOrder() {
+		return displayOrder;
+	}
+
+	/**
+	 * @param displayOrder the displayOrder to set
+	 */
+	public void setDisplayOrder(Integer displayOrder) {
+		this.displayOrder = displayOrder;
+	}
+
+	/**
+	 * @param editable the editable to set
+	 */
+	public void setEditable(Boolean editable) {
+		this.editable = editable;
+	}
+
+	/**
+	 * @return the allNames
+	 */
+	public String getAllNames() {
+		return allNames;
+	}
+
+	/**
+	 * @param allNames the allNames to set
+	 */
+	public void setAllNames(String allNames) {
+		this.allNames = allNames;
+	}
+
+	/**
+	 * @return the displayType
+	 */
+	public RateDisplayType getDisplayType() {
+		return displayType;
+	}
+
+	/**
+	 * @param displayType the displayType to set
+	 */
+	public void setDisplayType(RateDisplayType displayType) {
+		this.displayType = displayType;
+	}
+
+	/**
+	 * @return the optional
+	 */
+	public Boolean getOptional() {
+		return optional;
+	}
+
+	/**
+	 * @param optional the optional to set
+	 */
+	public void setOptional(Boolean optional) {
+		this.optional = optional;
+	}
+
+	/**
+	 * @return the rateDue
+	 */
+	public RateDueType[] getRateDue() {
+		return rateDue;
+	}
+
+	/**
+	 * @param rateDue the rateDue to set
+	 */
+	public void setRateDue(RateDueType[] rateDue) {
+		this.rateDue = rateDue;
+	}
+
+	/**
+	 * @return the dependsOn
+	 */
+	public RateTypeMsg getDependsOn() {
+		return dependsOn;
+	}
+
+	/**
+	 * @param dependsOn the dependsOn to set
+	 */
+	public void setDependsOn(RateTypeMsg dependsOn) {
+		this.dependsOn = dependsOn;
+	}
+	
+	/**
+	 * @return the product
+	 */
+	public ProductMsg getProduct() {
+	    return product;
+	}
+
+	/**
+	 * @param product the product to set
+	 */
+	public void setProduct(ProductMsg product) {
+	    this.product = product;
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("userDefined", userDefined)
+			.add("code", code)
+			.add("nameFa", nameFa)
+			.add("nameEn", nameEn)
+			.add("allNames", allNames)
+			.add("editable", editable)
+			.add("displayOrder", displayOrder)
+			.add("displayType", displayType)
+			.add("optional", optional)
+			.add("rateDue", rateDue)
+			.add("dependsOn", dependsOn)
+			.toString();
+	}
+	
+}

@@ -1,0 +1,53 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericServiceImpl;
+import com.parvanpajooh.shipment.model.PackingItem;
+import com.parvanpajooh.shipment.model.PackingItemState;
+import com.parvanpajooh.shipment.model.PackingItemStateHistory;
+import com.parvanpajooh.shipment.model.vo.PackingItemStateHistoryVO;
+import com.parvanpajooh.shipment.service.PackingItemLocalService;
+import com.parvanpajooh.shipment.service.PackingItemStateLocalService;
+import com.parvanpajooh.shipment.service.PackingItemStateService;
+
+/**
+ * @author MO
+ *
+ */
+@Stateless
+public class PackingItemStateServiceImpl extends GenericServiceImpl<PackingItemState, Long> implements PackingItemStateService {
+	
+	static final Logger log = LoggerFactory.getLogger(PackingItemStateServiceImpl.class);
+    
+    @Inject
+	private PackingItemStateLocalService packingItemStateLocalService;
+    
+    @Inject
+    public void setPackingItemStateLocalService(PackingItemStateLocalService packingItemStateLocalService) {
+    	this.packingItemStateLocalService = packingItemStateLocalService;
+    	this.localService = packingItemStateLocalService;
+    }
+
+	@Override
+	public List<PackingItemStateHistoryVO> findAllStateHistories(UserInfo userInfo, Long packingItemId)
+			throws ParvanServiceException {
+		List<PackingItemStateHistory> pishs = packingItemStateLocalService.findAllStateHistories(packingItemId);
+		List<PackingItemStateHistoryVO> pishvos = new ArrayList<>(pishs.size());
+		pishs.forEach(pish -> pishvos.add(pish.toVOLite()));
+		return pishvos;
+	} 
+    
+}

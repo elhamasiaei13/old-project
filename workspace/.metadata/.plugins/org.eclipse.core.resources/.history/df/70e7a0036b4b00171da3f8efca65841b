@@ -1,0 +1,128 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.model.vo;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+
+/**
+ * @author dev-03
+ *
+ */
+public class PackingItemActionVO extends BaseVO {
+	
+	private static final long serialVersionUID = -2517904704540636315L;
+
+	private String code;
+	
+	private String title;
+	
+	private String style;
+	
+	private int actionOrder;
+	
+	private boolean locationSensitive ;
+	
+	private boolean asButton;
+	
+	private String buttonType;
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * @param title the title to set
+	 */
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	/**
+	 * @return the style
+	 */
+	public String getStyle() {
+		return style;
+	}
+
+	/**
+	 * @param style the style to set
+	 */
+	public void setStyle(String style) {
+		this.style = style;
+	}
+
+	/**
+	 * @return the actionOrder
+	 */
+	public int getActionOrder() {
+		return actionOrder;
+	}
+
+	/**
+	 * @param actionOrder the actionOrder to set
+	 */
+	public void setActionOrder(int actionOrder) {
+		this.actionOrder = actionOrder;
+	}
+
+	/**
+	 * @return the locationSensitive
+	 */
+	public boolean isLocationSensitive() {
+		return locationSensitive;
+	}
+
+	/**
+	 * @param locationSensitive the locationSensitive to set
+	 */
+	public void setLocationSensitive(boolean locationSensitive) {
+		this.locationSensitive = locationSensitive;
+	}
+
+	/**
+	 * @return the asButton
+	 */
+	public boolean isAsButton() {
+		return asButton;
+	}
+
+	/**
+	 * @param asButton the asButton to set
+	 */
+	public void setAsButton(boolean asButton) {
+		this.asButton = asButton;
+	}
+
+	/**
+	 * @return the buttonType
+	 */
+	public String getButtonType() {
+		return buttonType;
+	}
+
+	/**
+	 * @param buttonType the buttonType to set
+	 */
+	public void setButtonType(String buttonType) {
+		this.buttonType = buttonType;
+	}
+	
+}

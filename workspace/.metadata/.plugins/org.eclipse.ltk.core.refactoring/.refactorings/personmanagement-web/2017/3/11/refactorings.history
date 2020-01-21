@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;personmanagement-web/src/main/webapp/WEB-INF/templates/customSearch.html&apos; to &apos;person-type-fragment.html&apos;" description="Rename resource &apos;customSearch.html&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/main/webapp/WEB-INF/templates/customSearch.html" name="person-type-fragment.html" stamp="1489653785512" updateReferences="true"/>
+</session>

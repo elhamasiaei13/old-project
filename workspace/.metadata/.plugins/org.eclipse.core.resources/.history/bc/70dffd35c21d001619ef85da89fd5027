@@ -1,0 +1,94 @@
+package com.parvanpajooh.issuemanager.dao.jpa;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.Query;
+
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.issuemanager.dao.AggregatedHistoryDao;
+import com.parvanpajooh.issuemanager.dao.TaskAttachmentDao;
+import com.parvanpajooh.issuemanager.model.AggregatedHistory;
+import com.parvanpajooh.issuemanager.model.Task;
+import com.parvanpajooh.issuemanager.model.TaskAssignmentHistory;
+import com.parvanpajooh.issuemanager.model.TaskAttachment;
+import com.parvanpajooh.issuemanager.model.enums.TableNameEnum;
+
+
+
+
+/**
+ * 
+ * @author 
+ * 
+ */
+@Stateless
+public class TaskAttachmentDaoJpa extends GenericDaoJpa<TaskAttachment, Long> implements TaskAttachmentDao {
+
+	
+	public AggregatedHistoryDao aggregatedHistoryDao;
+	
+	@Inject
+	public void setAggregatedHistoryDao(AggregatedHistoryDao aggregatedHistoryDao) {
+		this.aggregatedHistoryDao = aggregatedHistoryDao;
+	}
+	
+	public TaskAttachmentDaoJpa() {
+		super(TaskAttachment.class);
+	}
+	
+	public List<TaskAttachment> findByTaskId(Long id) throws ParvanDaoException {
+		Query query = getEntityManager().createQuery("from TaskAttachment where taskId = ? AND ACTIVE = ?");
+		query.setParameter(1, id);
+		query.setParameter(2, true);
+		List<TaskAttachment> taskStatusHistory = query.getResultList();
+
+		if (taskStatusHistory != null && taskStatusHistory.size() > 0) {
+			return taskStatusHistory;
+		} else {
+			return null;
+		}
+	}
+	
+	@Override
+	public TaskAttachment save(TaskAttachment taskAttachment) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering save(taskAttachment={})", taskAttachment);
+		
+		TaskAttachment savedTaskAttachment = null;
+		try {
+
+			// save taskAttachment object
+			savedTaskAttachment = super.save(taskAttachment);
+			
+			// serialize to JSON
+			String serializedStr = TaskAttachment.mapToJson(savedTaskAttachment);
+		
+			// save a new Aggregated record
+			AggregatedHistory aggregatedHistory = new AggregatedHistory();
+			aggregatedHistory.setActive(true);
+			aggregatedHistory.setBody(serializedStr);
+			aggregatedHistory.setTaskAttachment(savedTaskAttachment);
+			aggregatedHistory.setType(TableNameEnum.valueOf("TaskAttachment"));
+			aggregatedHistory.setTask(savedTaskAttachment.getTask());
+			
+			aggregatedHistoryDao.save(aggregatedHistory);			
+			
+
+		} catch (ParvanDaoException e) {
+			throw e;
+			
+		} catch (IOException e) {
+			log.error("error occurred while serializing to JSON", e);
+			throw new ParvanDaoException("error occurred while serializing to JSON", e);
+		}
+		
+		// LOG
+		log.debug("Leaving exists(): {}", savedTaskAttachment.getId());
+
+		return savedTaskAttachment;
+	}
+}

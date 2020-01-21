@@ -1,0 +1,71 @@
+package com.parvanpajooh.identitymanagement2.model.criteria;
+
+import java.time.LocalDateTime;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+
+public class RoleCriteria extends BaseCriteria {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6692696276170013041L;
+
+	private String code;
+
+	private String email;
+	
+	private String mobile;
+	
+	private LocalDateTime expireDate;
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	/**
+	 * @return the mobile
+	 */
+	public String getMobile() {
+		return mobile;
+	}
+
+	/**
+	 * @param mobile the mobile to set
+	 */
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "RoleCriteria [code=" + code + ", email=" + email + ", mobile=" + mobile + "]";
+	}
+}

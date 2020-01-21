@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout">
+
+	<body>
+		<section th:fragment="error-content">
+			<div th:if="${result['status'] != 'success'}" class="callout callout-danger" style="color:red;">
+				<div th:switch="${result['status']}" th:remove="tag">
+					<h4 th:case="${'ValidationException'}" th:text="#{error-not-valid(${result['invalidField']})}">error</h4>
+					<h4 th:case="${'ObjectExistsException'}" th:text="${(result['invalidField'] != null ? '__#{error-x-already-exist(${result['invalidField']})}__' : '__#{error-already-exist}__')}">error</h4>
+					<div th:case="${'ErrorCode'}" th:remove="tag">
+						<h4 th:if="${result['errorMessage'] != null}" th:text="${result['errorMessage']}">error</h4>
+						<h4 th:if="${result['errorMessage'] == null}" th:text="#{'errorCode.' + ${result['errorCode']}}">error</h4>
+					</div>
+					<h4 th:case="*" th:text="${(result['message'] != null ? result['message'] : 'failed')}">error</h4>
+				</div>
+			</div>
+		</section>
+	</body>
+
+</html>

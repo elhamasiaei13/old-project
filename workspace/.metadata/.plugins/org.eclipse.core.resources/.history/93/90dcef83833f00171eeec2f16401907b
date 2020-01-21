@@ -1,0 +1,113 @@
+package com.parvanpajooh.client.geomanagement.model;
+
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.DiscountEvalInvalidResolutionType;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.DiscountEvalResultType;
+
+/**
+ * 
+ * @author mehrdad
+ *
+ */
+
+public class DiscountEvalResultMsg extends BaseMsg {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1203566569659875533L;
+
+	private String code;
+	
+	private String action;
+	
+	private RateTypeMsg asRateTypeMsg;
+	
+	private RateAndRouteEnums.DiscountEvalResultType discountEvalResultType;
+	
+	private RateAndRouteEnums.DiscountEvalInvalidResolutionType discountEvalInvalidResolutionType;
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the action
+	 */
+	public String getAction() {
+		return action;
+	}
+
+	/**
+	 * @param action the action to set
+	 */
+	public void setAction(String action) {
+		this.action = action;
+	}
+
+	/**
+	 * @return the asRateTypeMsg
+	 */
+	public RateTypeMsg getAsRateTypeMsg() {
+		return asRateTypeMsg;
+	}
+
+	/**
+	 * @param asRateTypeMsg the asRateTypeMsg to set
+	 */
+	public void setAsRateTypeMsg(RateTypeMsg asRateTypeMsg) {
+		this.asRateTypeMsg = asRateTypeMsg;
+	}
+
+	/**
+	 * @return the discountEvalResultType
+	 */
+	public DiscountEvalResultType getDiscountEvalResultType() {
+		return discountEvalResultType;
+	}
+
+	/**
+	 * @param discountEvalResultType the discountEvalResultType to set
+	 */
+	public void setDiscountEvalResultType(DiscountEvalResultType discountEvalResultType) {
+		this.discountEvalResultType = discountEvalResultType;
+	}
+
+	/**
+	 * @return the discountEvalInvalidResolutionType
+	 */
+	public DiscountEvalInvalidResolutionType getDiscountEvalInvalidResolutionType() {
+		return discountEvalInvalidResolutionType;
+	}
+
+	/**
+	 * @param discountEvalInvalidResolutionType the discountEvalInvalidResolutionType to set
+	 */
+	public void setDiscountEvalInvalidResolutionType(DiscountEvalInvalidResolutionType discountEvalInvalidResolutionType) {
+		this.discountEvalInvalidResolutionType = discountEvalInvalidResolutionType;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "DiscountVO [code=" + code + 
+				", action=" + action + 
+				", asRateTypeMsg=" + asRateTypeMsg + 
+				", discountEvalResultType=" + discountEvalResultType + 
+				", discountEvalInvalidResolutionType=" + discountEvalInvalidResolutionType + "]";
+	}
+
+}

@@ -1,0 +1,215 @@
+package com.parvanpajooh.issuemanager.service.impl;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.common.CurrentContext;
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.issuemanager.common.exceptions.ErrorCode;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.issuemanager.common.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.issuemanager.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.issuemanager.dao.MemberDao;
+import com.parvanpajooh.issuemanager.model.Group;
+import com.parvanpajooh.issuemanager.model.Member;
+import com.parvanpajooh.issuemanager.model.Task;
+import com.parvanpajooh.issuemanager.model.TaskAssignment;
+import com.parvanpajooh.issuemanager.model.vo.MemberVO;
+import com.parvanpajooh.issuemanager.service.MemberLocalService;
+
+@Stateless
+public class MemberLocalServiceImpl extends GenericLocalServiceImpl<Member, Long> implements MemberLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(MemberLocalServiceImpl.class);
+
+	public MemberDao memberDao;
+
+	@Inject
+	public void setMemberDao(MemberDao memberDao) {
+		this.dao = memberDao;
+		this.memberDao = memberDao;
+	}
+
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		MemberVO memberVO = (MemberVO) baseVO;
+
+		try {
+
+			String firstName = memberVO.getFirstName();
+			String lastName = memberVO.getLastName();
+			String userName = memberVO.getUsername();
+			String password = memberVO.getPassword();
+			String fileImage = memberVO.getFileImageBase64();
+
+			if (Validator.isNull(firstName) || Validator.isNull(lastName) || Validator.isNull(userName) || Validator.isNull(password) || Validator.isNull(fileImage)) {
+				log.debug("feild is empty.");
+				throw new ParvanRecoverableException(ErrorCode.FEILDS_IS_EMPTY);
+			}
+
+			Member member = null;
+
+			if (Validator.isNull(memberVO.getId())) {
+				member = new Member();
+				member.fromVO(memberVO);
+			} else {
+				member = memberDao.get(memberVO.getId());
+				member.fromVO(memberVO);
+			}
+
+			// save entity
+			member = save(member, userInfo);
+
+			memberVO = (MemberVO) member.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+
+		return memberVO;
+	}
+
+	private boolean hasAccess(MemberVO MemberVO) {
+
+		// get current userInfo
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+
+		Set<String> userRoles = userInfo.getRoleNames();
+
+		boolean hasAccess = false;
+		return hasAccess;
+	}
+
+	/**
+	 * 
+	 * @param members
+	 * @return
+	 */
+	private List<MemberVO> convertToTree(List<Member> members) {
+
+		List<MemberVO> result = new ArrayList<MemberVO>();
+		Map<Long, MemberVO> map = new HashMap<Long, MemberVO>();
+
+		Iterator<Member> iterator = members.iterator();
+		while (iterator.hasNext()) {
+			Member thisMember = iterator.next();
+			// if (thisMember.getId() == null) {
+			MemberVO memberVO = thisMember.toVOLite();
+
+			// check permission
+			if (true/* hasAccess(memberVO) */) {
+				// MemberVO.setChildren(new ArrayList<MemberVO>());
+				result.add(memberVO);
+			}
+
+			map.put(thisMember.getId(), memberVO);
+			iterator.remove();
+			// } else {
+			// // MemberVO parentMemberVO =
+			// // map.get(thisMember.getParent().getId());
+			//
+			// MemberVO memberVO = thisMember.toVOLite();
+			// map.put(thisMember.getId(), memberVO);
+			// iterator.remove();
+			// }
+
+		}
+
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param sample
+	 * @param parent
+	 * @return
+	 */
+	private boolean _isParentValid(Member sample, Member parent) {
+		if (sample.equals(parent)) {
+			return false;
+		}
+
+		// Member parentOfParent = parent.getParent();
+		//
+		// if (Validator.isNotNull(parentOfParent)) {
+		// if (!_isParentValid(sample, parentOfParent)) {
+		// return false;
+		// }
+		// }
+
+		return true;
+	}
+
+	@Override
+	public MemberVO searchMemberByUsernamePass(String username, String pass) throws ParvanServiceException {
+
+		MemberVO memberVO = null;
+		try {
+			Member member = memberDao.searchByUsernamePass(username, pass);
+			memberVO = member.toVOLite();
+
+		} catch (Exception e) {
+			if (Validator.isNull(memberVO)) {
+				log.debug("username and password is not correct.");
+				throw new ParvanRecoverableException(ErrorCode.ERROR_LOGIN_USER_PASS_NOT_CORRECT);
+			} else {
+				log.error("error occurred while searchMemberByUsernamPass members", e);
+				throw new ParvanUnrecoverableException("error occurred while searchMemberByUsernamPass members", e);
+			}
+		}
+
+		return memberVO;
+	}
+
+	@Override
+	public void editMember(MemberVO memberVO) throws ParvanServiceException, ParvanDaoException {
+		try {
+
+			String firstName = memberVO.getFirstName();
+			String lastName = memberVO.getLastName();
+			String password = memberVO.getPassword();
+			String userName = memberVO.getUsername();
+
+			if (Validator.isNull(firstName) || Validator.isNull(lastName) || Validator.isNull(password) || Validator.isNull(userName)) {
+				log.debug("feild is empty.");
+				throw new ParvanRecoverableException(ErrorCode.FEILDS_IS_EMPTY);
+			}
+
+			Member member = null;
+
+			member.fromVO(memberVO);
+
+			// refresh entity
+			memberDao.refresh(member);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+
+	}
+}

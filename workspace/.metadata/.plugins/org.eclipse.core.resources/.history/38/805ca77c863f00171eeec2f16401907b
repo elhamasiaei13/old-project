@@ -1,0 +1,45 @@
+package com.parvanpajooh.siteservices.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.rateandroute.service.RateAndRouteApi;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.ddd.application.AbstractApplicationServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.ddd.application.AbstractServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.siteservices.model.vo.CityInfoVO;
+import com.parvanpajooh.siteservices.service.GeoManagementLocalService;
+import com.parvanpajooh.siteservices.service.RateAndRouteService;
+
+/**
+ * @author MO
+ */
+@Stateless
+public class RateAndRouteServiceImpl extends AbstractApplicationServiceImpl implements RateAndRouteService {
+
+	static final Logger log = LoggerFactory.getLogger(RateAndRouteServiceImpl.class);
+
+	private GeoManagementLocalService localService;
+
+	@Inject
+	public void setCityInfoLocalService(GeoManagementLocalService cityInfoLocalService) {
+		localService = cityInfoLocalService;
+	}
+
+	@Override
+	public CityInfoVO getCityByShortCode(UserInfo userInfo, String shortCode) throws ParvanServiceException {
+		return localService.getCityByShortCode(shortCode);
+	}
+
+	@Override
+	public PageList<CityInfoVO> findCityByNameOrShortCode(UserInfo userInfo, String term, int firstResult, int maxResults,
+			SortDirectionEnum sortDirection, String sortCriterion) throws ParvanServiceException {
+		return localService.findCityByNameOrShortCode(term, firstResult, maxResults, sortDirection, sortCriterion);
+	}
+}

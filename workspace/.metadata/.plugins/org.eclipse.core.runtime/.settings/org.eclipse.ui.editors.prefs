@@ -1,0 +1,11 @@
+AbstractTextEditor.Color.SelectionBackground=245,252,112
+AbstractTextEditor.Color.SelectionBackground.SystemDefault=false
+AbstractTextEditor.Color.SelectionForeground=26,26,26
+AbstractTextEditor.Color.SelectionForeground.SystemDefault=false
+eclipse.preferences.version=1
+occurrenceIndicationColor=156,255,247
+overviewRuler_migration=migrated_3.1
+quickdiff.nowarn.before.switch=always
+quickdiff.quickDiff=false
+redhatTextOccurrenceIndication=false
+redhatTextOccurrenceIndicationColor=255,255,0

@@ -1,0 +1,88 @@
+package com.parvanpajooh.creditcustomer.service.impl;
+
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.platform.ejb.ddd.application.AbstractServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.creditcustomer.model.vo.ObjectAccessScopeVO;
+import com.parvanpajooh.creditcustomer.model.vo.PersonVO;
+import com.parvanpajooh.creditcustomer.model.vo.UserVO;
+import com.parvanpajooh.creditcustomer.service.UserLocalService;
+import com.parvanpajooh.creditcustomer.service.UserService;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class UserServiceImpl extends AbstractServiceImpl implements UserService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
+	@Inject
+	private UserLocalService userLocalService;
+	
+
+	@Override
+	public PageList<UserVO> findUsers(UserInfo userInfo, String query, int page, int size) throws ParvanServiceException {
+		log.debug("Entering findUsers( userInfo={},query={},page={},size={})", userInfo, query, page, size);
+		PageList<UserVO> userListVO = null;
+		try {
+			userListVO = userLocalService.findUsers(query, page, size);
+		} catch (ParvanServiceException e) {
+			throw new ParvanUnrecoverableException("Error occurred while finding users", e);
+		}
+		log.debug("Leaving findUsers: ret={}", (userListVO != null) ? userListVO.getTotal() : "NULL");
+		return userListVO;
+	}
+
+
+	@Override
+	public UserVO loadUserByUsername(String username) throws ParvanServiceException {
+		log.debug("Entering loadUserByUsername( username={})", username);
+		UserVO vo = null;
+		try {
+			vo = userLocalService.loadUserByUsername(username);
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while loadUserByUsername :" + username , e);
+		}
+		log.debug("Leaving loadUserByUsername(): ret={}", vo);
+		return vo;
+	}
+
+
+	@Override
+	public List<ObjectAccessScopeVO> loadScopes(UserInfo userInfo) throws ParvanServiceException {
+		log.debug("Entering loadScopes( userInfo={})", userInfo);
+		List<ObjectAccessScopeVO> list = null;
+		try {
+			list = userLocalService.loadScopes();
+		} catch (ParvanServiceException e) {
+			throw new ParvanUnrecoverableException("Error occurred while loadScopes", e);
+		}
+		log.debug("Leaving loadScopes: ret={}", (list != null) ? list.size() : "NULL");
+		return list;
+		
+	}
+
+
+	@Override
+	public List<PersonVO> getPersonsByCriteria(int page, int size) throws ParvanServiceException {
+		// TODO Auto-generated method stub
+		return null;
+		
+	}
+	
+}

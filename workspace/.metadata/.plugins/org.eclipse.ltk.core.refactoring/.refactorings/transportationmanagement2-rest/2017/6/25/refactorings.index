@@ -1,0 +1,4 @@
+1497857175790	Change method 'findByFromNodeCodeAndDepartureDate'
+1497857326433	Change method 'findByToNodeCodeAndArrivalDate'
+1498026434627	Change method 'findByFromNode'
+1498026496357	Change method 'findByToNode'

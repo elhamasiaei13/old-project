@@ -1,0 +1,11 @@
+package com.parvanpajooh.client.complaintmanagement.model;
+
+public final class ComplaintManagementEnums {
+	
+	public enum ComplaintStatus {
+
+		NEW, CLOSED
+		
+	}
+
+}

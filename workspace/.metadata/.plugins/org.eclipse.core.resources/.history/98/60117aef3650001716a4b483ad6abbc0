@@ -1,0 +1,22 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.service.adapter;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+import com.parvanpajooh.siteservices.model.vo.RegisterVO;
+
+/**
+ * @author dev-03
+ *
+ */
+public interface ComplaintManagementServiceAdapter {
+
+	public ComplaintVO createPerson(RegisterVO registerVO) throws ParvanServiceException;
+
+	public ComplaintVO getPerson(String uuid) throws ParvanServiceException;
+	
+	public void deletePerson(String uuid) throws ParvanServiceException;
+	
+}

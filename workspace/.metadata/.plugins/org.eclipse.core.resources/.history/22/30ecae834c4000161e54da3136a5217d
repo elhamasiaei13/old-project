@@ -1,0 +1,48 @@
+package com.parvanpajooh.common.convertor;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
+import org.springframework.context.i18n.LocaleContextHolder;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+
+public class DateJsonSerializer extends JsonSerializer<Object> {
+
+    private static final String dateFormat = ("yyyy-MM-dd HH:mm");
+
+    //private static Logger logger = LoggerFactory.getLogger(JodaDateTimeJsonSerializer.class);
+
+    @Override
+    public void serialize(Object date, JsonGenerator json, SerializerProvider provider)
+            throws IOException, JsonProcessingException {
+    	
+    	Locale locale = LocaleContextHolder.getLocale();
+    	
+    	if("fa".equals(locale.getLanguage())){
+    		/*Calendar cal = Calendar.getInstance();
+    		cal.setTime((Date)date);
+    		
+        	YearMonthDate mDate = new YearMonthDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_YEAR));
+        	YearMonthDate pDate = JalaliCalendar.gregorianToJalali(mDate);
+        	
+        	json.writeString(pDate.getYear() + "/" + pDate.getMonth() + "/" + pDate.getDate());*/
+    		SimpleDateFormat format = new SimpleDateFormat(dateFormat);
+    		
+    		String formattedDate = format.format(date);
+    		
+    		json.writeString(formattedDate);
+    	}
+    	else {
+    		SimpleDateFormat format = new SimpleDateFormat(dateFormat);
+    		
+    		String formattedDate = format.format(date);
+    		json.writeString(formattedDate);
+    	}
+    	
+    }
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>ShowMembers</title>
+</head>
+
+<body>
+	<section class="content" layout:fragment="content">
+		<h2 th:text="#{groups_list}"></h2>
+		<br></br>
+		
+		<table>
+			<tr>
+				<th th:text="#{table_column_id}"></th>
+				<th th:text="#{table_column_name}"></th>
+				<th th:text="#{table_column_description}"></th>
+			</tr>
+
+			<tr th:each="group,rowStat : *{allGroups}">
+			
+				<td style="padding: 0 15px 0 15px;" th:text="${group.id}"></td>
+				<td style="padding: 0 15px 0 15px;" th:text="${group.name}"></td>
+				<td style="padding: 0 15px 0 15px;" th:text="${group.description}"></td>
+				<td style="padding: 0 15px 0 15px;">
+					<img th:src="@{/resources/images/GDelete.png}" th:onclick="${'deleteGroup(' + group.id + ')'}"></img>
+				</td>
+				<td style="padding: 0 15px 0 15px;">
+					<img th:src="@{/resources/images/GEdit.png}" th:onclick="@{'document.location.href=\'/issuemanager-web/editGroup/' + ${allGroups[__${rowStat.index}__].id} + '\''}"></img>
+				</td>
+				<td style="padding: 0 15px 0 15px;">
+					<img th:src="@{/resources/images/GAdd.png}" th:onclick="@{'document.location.href=\'/issuemanager-web/addMembership/' + ${allGroups[__${rowStat.index}__].id} + '\''}"></img>
+				</td>
+				<td style="padding: 0 15px 0 15px;">
+					<img th:src="@{/resources/images/GRemove.png}" th:onclick="@{'document.location.href=\'/issuemanager-web/deleteMembership/' + ${allGroups[__${rowStat.index}__].id} + '\''}"></img>
+				</td>
+			</tr>
+		</table>
+
+		<br></br> 
+		<br></br>
+		<button th:onclick="@{'document.location.href=\'/issuemanager-web/addGroup/'}+'\''" th:text="#{btn_add}"></button>
+
+		<form th:action="@{/removeGroup}" method="post" id="deleteGroupForm">
+			<input name="id" type="hidden" id="deleteGroupId" />
+		</form>
+
+		<script>
+		function deleteGroup(id){
+			if(confirm('Are you sure you want to delete this item?')){
+
+				$('#deleteGroupId').val(id);
+				$('#deleteGroupForm').submit();
+			}
+		}
+		</script>
+	</section>
+</body>
+</html>

@@ -1,0 +1,16 @@
+breadcrumb.generalagent.detail = Agent Detail
+breadcrumb.generalagents.view  = View Agents
+breadcrumb.home                = Home
+
+button.cancel = Close
+button.delete = Delete
+button.save   = Save
+
+create-another = Create another
+
+login.paragraph = This module is used to demonstrate the power of thymeleaf template engine which can be used as a complete replacement of JSP (view) in Spring MVC.
+login.welcome   = Contact Manager
+
+personOrganizationId = Clients Database
+
+title.application = E-Contact Application

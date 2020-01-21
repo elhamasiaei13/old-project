@@ -1,0 +1,23 @@
+package com.parvanpajooh.transportationmanagement.model.enums;
+
+public enum VehicleType {
+	AIRCRAFT ("AIRCRAFT"),
+	SHIP ("SHIP"),
+	VAN ("VAN"),
+	TRUCK ("TRUCK"),
+	PICKUP_TRUCK ("PICKUP_TRUCK"),
+	MINI_TRUCK ("MINI_TRUCK"),
+	MOTORCYCLE ("MOTORCYCLE"),
+	TRAIN ("TRAIN");
+	
+	private String name;
+
+	private VehicleType(String name) {
+		this.name = name;
+	}
+
+	@Override
+    public String toString() {
+        return name;
+    }
+}

@@ -1,0 +1,38 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.complaintmanagement.model;
+
+import com.parvanpajooh.client.common.BaseMsg;
+
+/**
+ * @author MO
+ *
+ */
+public class ComplaintCategoryMsg extends BaseMsg {
+
+	private static final long serialVersionUID = 3658162831820553422L;
+	
+	private String shortCode;
+	private String nameEn;
+	private String nameFa;
+	
+	public String getShortCode() {
+		return shortCode;
+	}
+	public void setShortCode(String shortCode) {
+		this.shortCode = shortCode;
+	}
+	public String getNameEn() {
+		return nameEn;
+	}
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
+	}
+	public String getNameFa() {
+		return nameFa;
+	}
+	public void setNameFa(String nameFa) {
+		this.nameFa = nameFa;
+	}
+}

@@ -1,0 +1,60 @@
+{
+    "bundle" : "theme",
+  	"assets": [
+
+    	{
+            "type": "js",
+      		"locations": {
+        		"webapp": "/resources/js/custom.js"
+      		}
+    	},
+    	{
+            "type": "js",
+      		"locations": {
+        		"webapp": "/resources/js/theme.init.js"
+      		}
+    	},
+    	{
+            "type": "js",
+      		"locations": {
+        		"webapp": "/resources/js/theme.js"
+      		}
+    	},
+        {
+            "type": "css",
+            "locations": {
+                "webapp": "/resources/css/AdminLTE.min.css"
+            }
+    	},
+        {
+            "type": "css",
+            "locations": {
+                "webapp": "/resources/css/skin-black.min.css"
+            }
+    	},
+        {
+            "type": "css",
+            "locations": {
+                "webapp": "/resources/css/style.css"
+            }
+        },
+        {
+            "type": "css",
+            "locations": {
+                "webapp": "/resources/css/custom.css"
+            }
+        },
+        {
+            "type": "css",
+            "locations": {
+                "webapp": "/resources/css/rtl-theme-elements.css"
+            }
+        },
+        {
+            "type": "css",
+            "locations": {
+                "webapp": "/resources/css/rtl-theme.css"
+            }
+        }
+  ]
+}

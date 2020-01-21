@@ -1,0 +1,122 @@
+package com.parvanpajooh.accounting.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.accounting.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.accounting.common.exceptions.ErrorCode;
+import com.parvanpajooh.accounting.common.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.accounting.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.accounting.common.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.accounting.dao.AccountDao;
+import com.parvanpajooh.accounting.dao.GroupDao;
+import com.parvanpajooh.accounting.model.Account;
+import com.parvanpajooh.accounting.model.Group;
+import com.parvanpajooh.accounting.model.vo.AccountVO;
+import com.parvanpajooh.accounting.service.AccountLocalService;
+
+/**
+ * 
+ * @author ali
+ * @author mehrdad
+ * @author moosa
+ *
+ */
+@Stateless
+public class AccountLocalServiceImpl extends GenericLocalServiceImpl<Account, Long>implements AccountLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(AccountLocalServiceImpl.class);
+
+	public AccountDao accountDao;
+	public GroupDao groupDao;
+
+	@Inject
+	public void setAccountDao(AccountDao accountDao) {
+		this.dao = accountDao;
+		this.accountDao = accountDao;
+	}
+
+	@Inject
+	public void setGroupDao(GroupDao groupDao) {
+		this.groupDao = groupDao;
+	}
+
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		AccountVO accountVO = (AccountVO) baseVO;
+
+		try {
+
+			Account account = null;
+			Group group = null;
+			AccountType = null;
+
+			if (Validator.isNull(accountVO.getId())) {
+				account = new Account();
+				account.fromVO(accountVO);
+				account.setActive(true);
+
+			} else {
+				account = accountDao.get(accountVO.getId());
+				group = groupDao.get(accountVO.getGroup().getId());
+				account.fromVO(accountVO);
+				account.setGroup(group);
+			}
+
+			if (Validator.isNull(account.getAccountType()) || Validator.isNull(account.getName()) || Validator.isNull(account.getDescription())
+					|| Validator.isNull(account.getGroup())) {
+
+				throw new ParvanRecoverableException(ErrorCode.FEILDS_IS_EMPTY);
+			}
+
+			// save entity
+			account = save(account, userInfo);
+
+			accountVO = (AccountVO) account.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+
+		return accountVO;
+	}
+
+	@Override
+	public void delete(Long id, UserInfo userInfo) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering delete( id={})", id);
+
+		try {
+			Account account = get(id);
+			account.setActive(false);
+
+
+			// delete entity
+			account = save(account, userInfo);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while delete object.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method delete()");
+	}
+
+}

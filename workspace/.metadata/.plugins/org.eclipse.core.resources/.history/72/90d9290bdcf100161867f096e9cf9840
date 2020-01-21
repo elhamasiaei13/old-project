@@ -1,0 +1,87 @@
+package com.parvanpajooh.taskmanagement.domain.model.dto;
+
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.parvanpajooh.taskmanagement.domain.model.enums.RelationType;
+
+
+/**
+ * @author dev-03
+ *
+ */
+@XmlRootElement
+public class ViewTaskRelationCommandDto extends TaskCommandDto {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6061009678492785961L;
+
+	private String taskSubjectFrom;
+	
+	private String taskSubjectTo;
+	
+	@Enumerated(EnumType.STRING)
+	private RelationType type;
+	
+	private String remarks;
+	
+	
+	/**
+	 * @return the taskSubjectFrom
+	 */
+	public String getTaskSubjectFrom() {
+		return taskSubjectFrom;
+	}
+
+	/**
+	 * @param taskSubjectFrom the taskSubjectFrom to set
+	 */
+	public void setTaskSubjectFrom(String taskSubjectFrom) {
+		this.taskSubjectFrom = taskSubjectFrom;
+	}
+
+	/**
+	 * @return the taskSubjectTo
+	 */
+	public String getTaskSubjectTo() {
+		return taskSubjectTo;
+	}
+
+	/**
+	 * @param taskSubjectTo the taskSubjectTo to set
+	 */
+	public void setTaskSubjectTo(String taskSubjectTo) {
+		this.taskSubjectTo = taskSubjectTo;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public RelationType getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(RelationType type) {
+		this.type = type;
+	}
+
+	/**
+	 * @return the remarks
+	 */
+	public String getRemarks() {
+		return remarks;
+	}
+
+	/**
+	 * @param remarks the remarks to set
+	 */
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+}

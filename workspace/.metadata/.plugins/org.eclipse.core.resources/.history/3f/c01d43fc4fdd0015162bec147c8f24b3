@@ -1,0 +1,8 @@
+package com.parvanpajooh.sample.mvc;
+
+import org.springframework.web.bind.annotation.ControllerAdvice;
+
+@ControllerAdvice
+public class GlobalController {
+	
+}

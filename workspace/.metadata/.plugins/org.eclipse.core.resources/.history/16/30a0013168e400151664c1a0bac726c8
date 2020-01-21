@@ -1,0 +1,85 @@
+package com.parvanpajooh.sample.model.vo;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.parvanpajooh.common.vo.BaseVO;
+
+@XmlRootElement
+public class MembershipVO extends BaseVO {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5971686629027277987L;
+
+	private Long id;
+
+	private String type;
+
+	private MemberVO memberId;
+
+	private GroupVO groupId;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @param type
+	 *            the type to set
+	 */
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	/**
+	 * @return the memberId
+	 */
+	@XmlElement(name = "memberId")
+	public MemberVO getMemberID() {
+		return memberId;
+	}
+
+	/**
+	 * @param memberId
+	 *            the memberId to set
+	 */
+	public void setMemberId(MemberVO memberId) {
+		this.memberId = memberId;
+	}
+
+	/**
+	 * @return the groupId
+	 */
+	@XmlElement(name = "groupId")
+	public GroupVO getGroupID() {
+		return groupId;
+	}
+
+	/**
+	 * @param groupId
+	 *            the groupId to set
+	 */
+	public void setGroupId(GroupVO groupId) {
+		this.groupId = groupId;
+	}
+}

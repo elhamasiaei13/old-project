@@ -1,0 +1,58 @@
+package com.parvanpajooh.taskmanagement.domain.repository.jpa;
+
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroupCounter;
+import com.parvanpajooh.taskmanagement.domain.repository.TaskGroupCounterRepository;
+
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class TaskGroupCounterRepositoryJpa extends GenericDaoJpa<TaskGroupCounter, Long> implements TaskGroupCounterRepository {
+
+	public TaskGroupCounterRepositoryJpa() {
+		super(TaskGroupCounter.class);
+	}
+
+	@PersistenceContext(unitName = "ApplicationEntityManager")
+	private EntityManager entityManager;
+
+	@Override
+	public TaskGroupCounter getTaskGroupCounterByTaskGroupKey(String taskGroupKey) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering getTaskGroupCounterByTaskGroupKey( taskGroupKey={})", taskGroupKey);
+
+		TaskGroupCounter taskGroupCounter = null;
+
+		try {
+			// Make query
+			TypedQuery<TaskGroupCounter> q = getEntityManager().createQuery("from TaskGroupCounter obj where obj.taskGroupKey = ?" , TaskGroupCounter.class);
+
+			q.setParameter(1, taskGroupKey);
+
+			List<TaskGroupCounter> list = q.getResultList();
+
+			if (list != null && list.size() > 0) {
+				taskGroupCounter = list.get(0);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting taskGroupCounter with taskGroupKey: " + taskGroupKey, e);
+		}
+
+		return taskGroupCounter;
+	}
+
+}

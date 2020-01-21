@@ -1,0 +1,199 @@
+package com.parvanpajooh.client.geomanagement.model.criteria;
+
+import java.util.Set;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.NodeMsg;
+import com.parvanpajooh.client.rateandroute.model.ProductMsg;
+import com.parvanpajooh.client.rateandroute.model.RateTypeMsg;
+import com.parvanpajooh.client.rateandroute.model.RouteMsg;
+import com.parvanpajooh.client.rateandroute.model.RuleActionMsg;
+import com.parvanpajooh.client.rateandroute.model.RuleConditionMsg;
+import com.parvanpajooh.client.rateandroute.model.ZoneMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RateRuleOwnerType;
+
+public class RateRuleCriteriaMsg extends BaseMsg {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6810373410828153210L;
+
+	private RateTypeMsg[] rateTypes;
+	
+	private RateRuleOwnerType[] rateRuleOwnerType;
+	
+	private Boolean directlyHasNotNodeAndZoneAndRoute;
+	
+	private RouteMsg route;
+	
+	private NodeMsg node;
+	
+	private ZoneMsg zone;
+	
+	private ProductMsg product;
+	
+	private RuleConditionMsg ruleCondition;
+	
+	private RuleActionMsg ruleAction;
+	
+	private Set<Object> orObjects ;
+	
+	/**
+	 * @return the rateTypes
+	 */
+	public RateTypeMsg[] getRateTypes() {
+		return rateTypes;
+	}
+
+	/**
+	 * @param rateTypes the rateTypes to set
+	 */
+	public void setRateTypes(RateTypeMsg[] rateTypes) {
+		this.rateTypes = rateTypes;
+	}
+
+	/**
+	 * @return the rateRuleOwnerType
+	 */
+	public RateRuleOwnerType[] getRateRuleOwnerType() {
+		return rateRuleOwnerType;
+	}
+
+	/**
+	 * @param rateRuleOwnerType the rateRuleOwnerType to set
+	 */
+	public void setRateRuleOwnerType(RateRuleOwnerType[] rateRuleOwnerType) {
+		this.rateRuleOwnerType = rateRuleOwnerType;
+	}
+
+	/**
+	 * @return the directlyHasNotNodeAndZoneAndRoute
+	 */
+	public Boolean getDirectlyHasNotNodeAndZoneAndRoute() {
+		return directlyHasNotNodeAndZoneAndRoute;
+	}
+
+	/**
+	 * @param directlyHasNotNodeAndZoneAndRoute the directlyHasNotNodeAndZoneAndRoute to set
+	 */
+	public void setDirectlyHasNotNodeAndZoneAndRoute(Boolean directlyHasNotNodeAndZoneAndRoute) {
+		this.directlyHasNotNodeAndZoneAndRoute = directlyHasNotNodeAndZoneAndRoute;
+	}
+
+	/**
+	 * @return the route
+	 */
+	public RouteMsg getRoute() {
+		return route;
+	}
+
+	/**
+	 * @param route the route to set
+	 */
+	public void setRoute(RouteMsg route) {
+		this.route = route;
+	}
+
+	/**
+	 * @return the NodeMsg
+	 */
+	public NodeMsg getNode() {
+		return node;
+	}
+
+	/**
+	 * @param nodeId the nodeId to set
+	 */
+	public void setNode(NodeMsg NodeMsg) {
+		this.node = NodeMsg;
+	}
+
+	/**
+	 * @return the zone
+	 */
+	public ZoneMsg getZone() {
+		return zone;
+	}
+
+	/**
+	 * @param zone the zone to set
+	 */
+	public void setZone(ZoneMsg zone) {
+		this.zone = zone;
+	}
+
+	/**
+	 * @return the product
+	 */
+	public ProductMsg getProduct() {
+		return product;
+	}
+
+	/**
+	 * @param product the product to set
+	 */
+	public void setProduct(ProductMsg product) {
+		this.product = product;
+	}
+
+	/**
+	 * @return the ruleCondition
+	 */
+	public RuleConditionMsg getRuleCondition() {
+		return ruleCondition;
+	}
+
+	/**
+	 * @param ruleCondition the ruleCondition to set
+	 */
+	public void setRuleCondition(RuleConditionMsg ruleCondition) {
+		this.ruleCondition = ruleCondition;
+	}
+
+	/**
+	 * @return the ruleAction
+	 */
+	public RuleActionMsg getRuleAction() {
+		return ruleAction;
+	}
+
+	/**
+	 * @param ruleAction the ruleAction to set
+	 */
+	public void setRuleAction(RuleActionMsg ruleAction) {
+		this.ruleAction = ruleAction;
+	}
+
+	/**
+	 * @return the orObjects
+	 */
+	public Set<Object> getOrObjects() {
+		return orObjects;
+	}
+
+	/**
+	 * @param orObjects the orObjects to set
+	 */
+	public void setOrObjects(Set<Object> orObjects) {
+		this.orObjects = orObjects;
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("rateTypes", rateTypes)
+			.add("rateRuleOwnerType", rateRuleOwnerType)
+			.add("directlyHasNotNodeAndZoneAndRoute", directlyHasNotNodeAndZoneAndRoute)
+			.add("route", route)
+			.add("node", node)
+			.add("zone", zone)
+			.add("product", product)
+			.add("ruleCondition", ruleCondition)
+			.add("ruleAction", ruleAction)
+			.add("orObjects", orObjects)
+			.toString();
+	}
+
+}

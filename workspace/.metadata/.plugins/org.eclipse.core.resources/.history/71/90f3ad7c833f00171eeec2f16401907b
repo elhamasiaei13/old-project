@@ -1,0 +1,83 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.geomanagement.model;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RuleConditionType;
+
+/**
+ * @author mehrdad
+ *
+ */
+public class RuleConditionMsg extends BaseMsg {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	private Long id;
+	
+	private RateAndRouteEnums.RuleConditionType type;
+	
+	private String ruleCondition;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public RuleConditionType getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(RuleConditionType type) {
+		this.type = type;
+	}
+
+	/**
+	 * @return the ruleCondition
+	 */
+	public String getRuleCondition() {
+		return ruleCondition;
+	}
+
+	/**
+	 * @param ruleCondition the ruleCondition to set
+	 */
+	public void setRuleCondition(String ruleCondition) {
+		this.ruleCondition = ruleCondition;
+	}
+	
+	@Override
+	public String toString() {
+		ToStringBuilder sb = new ToStringBuilder(this,
+				ToStringStyle.DEFAULT_STYLE)
+				.append("id", getId())
+				.append("type", this.type)
+				.append("ruleCondition", this.ruleCondition)
+				;
+
+		return sb.toString();
+	}
+}

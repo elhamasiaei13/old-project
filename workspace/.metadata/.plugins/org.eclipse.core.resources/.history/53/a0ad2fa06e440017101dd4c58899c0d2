@@ -1,0 +1,53 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.dao.jpa;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.siteservices.dao.RecoveryCodeDao;
+import com.parvanpajooh.siteservices.model.RecoveryCode;
+
+/**
+ * @author ali
+ *
+ */
+public class RecoveryCodeDaoJpa extends GenericDaoJpa<RecoveryCode, Long> implements RecoveryCodeDao {
+
+	/**
+	 * Entity manager, injected by Spring using @PersistenceContext annotation
+	 * on setEntityManager()
+	 */
+	@PersistenceContext(unitName = PERSISTENCE_UNIT_NAME)
+	private EntityManager entityManager;
+	
+	public RecoveryCodeDaoJpa() {
+		super(RecoveryCode.class);
+	}
+
+	
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<RecoveryCode> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("expireDate"), cri.getCreateDateFrom());
+			predicateList.add(predicate);
+		}
+	}
+
+
+	@Override
+	public void deactivateRecoveryCode(Long userId) {
+		// TODO Auto-generated method stub
+		
+	}
+}

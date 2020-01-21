@@ -1,0 +1,857 @@
+package com.parvanpajooh.personmanagement.service.impl;
+
+import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanPrincipalException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.personmanagement.dao.PersonDao;
+import com.parvanpajooh.personmanagement.model.ContactInfo;
+import com.parvanpajooh.personmanagement.model.Organization;
+import com.parvanpajooh.personmanagement.model.Person;
+import com.parvanpajooh.personmanagement.model.Relation;
+import com.parvanpajooh.personmanagement.model.criteria.PersonCriteria;
+import com.parvanpajooh.personmanagement.model.criteria.RelationCriteria;
+import com.parvanpajooh.personmanagement.model.enums.Gender;
+import com.parvanpajooh.personmanagement.model.enums.PersonType;
+import com.parvanpajooh.personmanagement.model.enums.RelationType;
+import com.parvanpajooh.personmanagement.model.vo.CityInfoVO;
+import com.parvanpajooh.personmanagement.model.vo.ContactInfoVO;
+import com.parvanpajooh.personmanagement.model.vo.OrganizationVO;
+import com.parvanpajooh.personmanagement.model.vo.PersonGroupVO;
+import com.parvanpajooh.personmanagement.model.vo.PersonVO;
+import com.parvanpajooh.personmanagement.model.vo.RelationVO;
+import com.parvanpajooh.personmanagement.model.vo.UserVO;
+import com.parvanpajooh.personmanagement.service.ContactInfoLocalService;
+import com.parvanpajooh.personmanagement.service.OrganizationLocalService;
+import com.parvanpajooh.personmanagement.service.PersonLocalService;
+import com.parvanpajooh.personmanagement.service.RelationLocalService;
+import com.parvanpajooh.personmanagement.service.adapter.IdentityManagement2ServiceAdapterRest;
+import com.parvanpajooh.personmanagement.service.adapter.RateAndRouteAdapter;
+
+/**
+ * @author ali
+ * @author MO
+ * 
+ */
+@Stateless
+public class PersonLocalServiceImpl extends GenericLocalServiceImpl<Person, Long> implements PersonLocalService {
+	
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(PersonLocalServiceImpl.class);
+
+	@Inject
+	private ContactInfoLocalService contactInfoLocalService;
+	
+	@Inject
+	private RelationLocalService relationLocalService;
+	
+	@Inject
+	private OrganizationLocalService organizationLocalService;
+	
+	private PersonDao personDao;
+
+	@Inject
+	public void setPersonDao(PersonDao personDao) {
+		this.dao = personDao;
+		this.personDao = personDao;
+	}
+	
+	@Inject
+	private RateAndRouteAdapter rateAndRouteAdapter;
+	
+	@Override
+	public List<Person> findByCriteria(BaseCriteria criteria, int firstResult, int maxResults, SortDirectionEnum sortDirection, String sortCriterion)
+			throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findByCriteria( criteria={}, firstResult={}, maxResults={}, sortDirection={}, sortCriterion={})", criteria, firstResult, maxResults,
+				sortDirection, sortCriterion);
+
+		List<Person> list = null;
+		PersonCriteria personCriteria = (PersonCriteria) criteria;
+
+		try {
+
+			// set orgId and orgChildrenIds
+			_setAllowedOrganizationIds(personCriteria);
+
+			// find by criteria
+			list = super.findByCriteria(personCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+
+		} catch (ParvanServiceException e) {
+			throw new ParvanServiceException(e.getMessage());
+		}
+
+		return list;
+	}
+
+	@Override
+	public Person getByUuid(String uuid) throws ParvanServiceException {
+		log.debug("Entering findByUuid(uuid={})", uuid);
+		try {
+			return personDao.getByUuid(uuid);
+			
+		} catch(ObjectNotFoundException e) {
+			throw new ParvanRecoverableException(e);
+			
+		} catch(ParvanDaoException e) {
+			throw new ParvanUnrecoverableException(e);
+		}
+	}
+	
+	@Override
+	public PersonVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		log.debug("Entering save(personVO={}, userInfo={})", baseVO, userInfo);
+		
+		PersonVO personVO = (PersonVO) baseVO;
+		Long assignedOrganizationId = null;
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		Long orgId = userInfoWrapper.getAgentAllowedOrgId();
+		
+		try {
+			
+			Pattern pattern = Pattern.compile("^(شرکت|موسسه|مؤسسه|دفتر|اداره|سازمان|وزارتخانه|نمایندگی|آزمایشگاه|بیمارستان|کلینیک|درمانگاه|اتحادیه|انجمن|تعاونی|بانک|پادگان) ");
+			
+			String firstNameLocal = personVO.getFirstNameLocal();
+    		if(Validator.isNull(firstNameLocal)){
+				throw new ParvanRecoverableException("person.firstNameLocal", ErrorCode.FIELD_IS_EMPTY);
+    		}
+    		
+    		String nationalId = personVO.getNationalId();
+    		if(Validator.isNull(nationalId)){
+				throw new ParvanRecoverableException("person.nationalId", ErrorCode.FIELD_IS_EMPTY);
+    		}
+    		
+    		ContactInfoVO contactInfoVO = personVO.getPrimaryContactInfo();
+    		if(Validator.isNull(contactInfoVO)){
+				throw new ParvanRecoverableException("person.contactInfoVO", ErrorCode.FIELD_IS_EMPTY);
+    		}
+    		
+			String lastNameLocal = personVO.getLastNameLocal();
+			if (personVO.getType().equals(PersonType.REAL) && Validator.isNull(lastNameLocal)) {
+				throw new ParvanRecoverableException("person.lastNameLocal", ErrorCode.FIELD_IS_EMPTY);
+			}
+
+			if (pattern.matcher(firstNameLocal).find()) {
+				throw new ParvanRecoverableException("person.firstNameLocal", ErrorCode.DATA_IS_INVALID);
+			}
+
+			if (personVO.getType().equals(PersonType.REAL) && pattern.matcher(lastNameLocal).find()) {
+				throw new ParvanRecoverableException("person.lastNameLocal", ErrorCode.DATA_IS_INVALID);
+			}
+			
+			OrganizationVO organizationVO = personVO.getOrganization();
+			if (Validator.isNull(organizationVO)) {
+				throw new ParvanRecoverableException("organization", ErrorCode.FIELD_IS_EMPTY);
+			}
+			
+			Long organizationId = organizationVO.getId();
+			if (Validator.isNull(organizationId)) {
+				throw new ParvanRecoverableException("organization", ErrorCode.FIELD_IS_EMPTY);
+			}
+			
+			String prefix = personVO.getPrefix();
+			if (personVO.getType().equals(PersonType.LEGAL) && Validator.isNull(prefix)) {
+				throw new ParvanRecoverableException("person.prefix", ErrorCode.FIELD_IS_EMPTY);
+			}
+			
+			Gender gender= personVO.getGender();
+			if (personVO.getType().equals(PersonType.REAL) && Validator.isNull(gender)) {
+				throw new ParvanRecoverableException("person.gender", ErrorCode.FIELD_IS_EMPTY);
+			}
+    		
+    		//nationalId required for client
+			/*if(Validator.isNull(personVO.getNationalId())) {
+				throw new ParvanRecoverableException("person.nationalId" ,ErrorCode.FIELD_IS_EMPTY);
+			}*/
+    		
+			Person person = null;
+			
+    		// nationalId must be unique
+    		if(Validator.isNotNull(nationalId) && Validator.isNotNull(organizationId)) {
+	    		person = personDao.findPersonByOrganizationIdAndNationalId(nationalId,organizationId);
+	    		if( Validator.isNotNull(person) ) {
+	    			if( ! person.getId().equals(personVO.getId()) ) {
+	    				throw new ParvanRecoverableException("person.nationalId" ,ErrorCode.DATA_DUPLICATE);
+	    			}
+	    		}
+    		}
+			
+			boolean isNew = Validator.isNull(personVO.getId());
+			
+			if(isNew){
+				person = new Person();
+				person.fromVO(personVO);
+				person.setActive(true);
+				person.setUuid(UUID.randomUUID().toString());
+				
+			}
+			else {
+				person = get(personVO.getId());
+				String uuid = person.getUuid();
+				String appId = person.getAppId();
+				String appWideUniqueId = person.getAppWideUniqueId();
+				
+				person.fromVO(personVO);
+				
+				person.setUuid(uuid);
+				person.setAppId(appId);
+				person.setAppWideUniqueId(appWideUniqueId);
+				
+			}
+			
+			String nameLocal = (Validator.isNotNull(person.getFirstNameLocal()) ? person.getFirstNameLocal() + StringPool.SPACE : StringPool.BLANK) + 
+					(Validator.isNotNull(person.getMiddleNameLocal()) ? person.getMiddleNameLocal() + StringPool.SPACE : StringPool.BLANK)
+					+ (Validator.isNotNull(person.getLastNameLocal()) ? person.getLastNameLocal() : StringPool.BLANK);
+			
+			String nameEn = (Validator.isNotNull(person.getFirstNameEn()) ? person.getFirstNameEn() + StringPool.SPACE : StringPool.BLANK) + 
+					(Validator.isNotNull(person.getMiddleNameEn()) ? person.getMiddleNameEn() + StringPool.SPACE : StringPool.BLANK)
+					+ (Validator.isNotNull(person.getLastNameEn()) ? person.getLastNameEn() : StringPool.BLANK);
+			
+			person.setNameLocal(nameLocal);
+			person.setNameEn(nameEn);
+			person.setCanonicalSearchNameLocal(nameLocal.replaceAll("\\s", StringPool.BLANK));
+			person.setCanonicalSearchNameEn(nameEn.replaceAll("\\s", StringPool.BLANK));
+			
+			if(Validator.isNull(person.getAppWideUniqueId()) && Validator.isNotNull(person.getNationalId())){
+				person.setAppWideUniqueId(person.getNationalId());
+			}
+			
+			if (Validator.isNotNull(personVO.getOrganization())) {
+				assignedOrganizationId = personVO.getOrganization().getId();
+				if (Validator.isNotNull(assignedOrganizationId)) {
+					//check if selected organization does not exist in subOrganization List
+					Organization org = new Organization();
+					org.setId(orgId);
+					Set<Long> allSubOrganizationIds = new HashSet<Long>();
+					_loadSubOrganizationIds(allSubOrganizationIds, org);
+					allSubOrganizationIds.add(assignedOrganizationId);
+					boolean found = false;
+					for (Long subOrgId : allSubOrganizationIds) {
+						if (subOrgId.equals(assignedOrganizationId)){
+							found = true;
+							break;
+						}
+					}
+					if(!found){
+						throw new ParvanUnrecoverableException("selected organization does not exist in sub organization list");
+					}
+					
+					Organization organization = organizationLocalService.get(assignedOrganizationId);
+					person.setOrganization(organization);
+				}
+			} else {
+				throw new ParvanRecoverableException("User's Agent has no assigned Client Directory (OrganizationId)");
+			}
+			
+			
+			if( Validator.isNotNull(contactInfoVO) ) {
+				
+	    		String tel = contactInfoVO.getTel();
+	    		if(Validator.isNull(tel)){
+					throw new ParvanRecoverableException("contactInfo.tel", ErrorCode.FIELD_IS_EMPTY);
+	    		}
+	    		
+	    		String address = contactInfoVO.getAddress();
+	    		if(Validator.isNull(address)){
+					throw new ParvanRecoverableException("contactInfo.address", ErrorCode.FIELD_IS_EMPTY);
+	    		}
+	    		
+	    		String mobile = contactInfoVO.getMobile();
+	    		if(personVO.getType().equals(PersonType.REAL) && Validator.isNull(mobile)){
+					throw new ParvanRecoverableException("contactInfo.mobile", ErrorCode.FIELD_IS_EMPTY);
+	    		}
+	    		
+	    		String postalCode = contactInfoVO.getPostalCode();
+	    		if(personVO.getType().equals(PersonType.LEGAL) && Validator.isNull(postalCode)){
+					throw new ParvanRecoverableException("contactInfo.postalCode", ErrorCode.FIELD_IS_EMPTY);
+	    		}
+	    		
+	    		//email must be unique
+	    		if(Validator.isNotNull(contactInfoVO.getEmail())) {
+		    		Person loadedPerson = personDao.findPersonByEmail(contactInfoVO.getEmail());
+		    		if( Validator.isNotNull(loadedPerson) ) {
+		    			if( ! loadedPerson.getId().equals(personVO.getId()) ) {
+		    				throw new ParvanRecoverableException("contactInfo.email" ,ErrorCode.DATA_DUPLICATE);
+		    			}
+		    		}
+	    		}
+    			
+				ContactInfo contactInfo = null;
+    			
+    			if( Validator.isNull(contactInfoVO.getId()) ) {
+    				contactInfo = new ContactInfo();
+    			}
+    			else {
+    				contactInfo = contactInfoLocalService.get(contactInfoVO.getId());
+    			}
+
+    			contactInfo.fromVO(contactInfoVO);
+    			contactInfo.setPrimary(true);
+    			
+    			if(Validator.isNull(contactInfoVO.getCityCode())){
+    				throw new ParvanRecoverableException("contactInfo.city", ErrorCode.FIELD_IS_EMPTY);
+    			}
+    			
+    			CityInfoVO city = rateAndRouteAdapter.getCityByShortCode(contactInfoVO.getCityCode());
+    			
+    			contactInfo.setCityCode(city.getShortCode());
+    			contactInfo.setCityNameEn(city.getNameEn());
+    			contactInfo.setCityNameFa(city.getNameFa());
+    			contactInfo.setProvinceCode(city.getProvinceShortCode());
+    			contactInfo.setProvinceNameEn(city.getProvinceNameEn());
+    			contactInfo.setProvinceNameFa(city.getProvinceNameFa());
+    			contactInfo.setCountryCode(city.getCountryShortCode());
+    			contactInfo.setCountryNameEn(city.getCountryNameEn());
+    			contactInfo.setCountryNameFa(city.getCountryNameFa());
+    			
+    			contactInfo = contactInfoLocalService.save(contactInfo, userInfo);
+    			
+    			//FIXME : dev-03 clear and add allContactInfos
+    			person.getContactInfos().clear();
+    			person.getContactInfos().add(contactInfo);
+    		}
+			
+			person = super.save(person, userInfo);
+			
+			personVO = person.toVO();
+			
+		} catch (ParvanServiceException e) {
+			log.error("error in save person", e);
+			throw e;
+			
+		} catch (ParvanDaoException e) {
+			log.error("error in save person", e);
+			throw new ParvanServiceException("error in save person", ErrorCode.SAVE_ERROR);
+			
+		} catch (Exception e) {
+			log.error("error in save person", e);
+			throw new ParvanUnrecoverableException("error in save person", ErrorCode.SAVE_ERROR);
+		}
+		
+		log.debug("Leaving save(personVO={}, userInfo={})", baseVO, userInfo);
+		
+		return personVO;
+	}
+	
+	@Override
+	public void delete(Person person, UserInfo userInfo) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering delete(person={})", person);
+
+		try {
+			
+			// check for as person's relation
+			RelationCriteria relationCriteria = new RelationCriteria();
+			relationCriteria.setFromPersonId(person.getId());
+			
+			int count = relationLocalService.countByCriteria(relationCriteria);
+			
+			if(count > 0){
+				throw new ParvanRecoverableException(ErrorCode.OBJECT_USED);
+			}
+			
+			relationCriteria = new RelationCriteria();
+			relationCriteria.setToPersonId(person.getId());
+			
+			count = relationLocalService.countByCriteria(relationCriteria);
+			
+			if(count > 0){
+				throw new ParvanRecoverableException(ErrorCode.OBJECT_USED);
+			}
+			
+			// delete entity
+			super.delete(person, userInfo);
+
+		} catch (ParvanServiceException e) {
+			log.error("error in delete person");
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while delete person.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method delete()");
+	}
+	
+	@Override
+	public void importPersons(InputStream excelIS) throws ParvanServiceException {
+		
+		log.debug("Entering importPersons(excelIS=...)");
+		
+		try {
+			
+			UserInfo ecUserInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+			
+			DecimalFormat decimalFormat = new DecimalFormat("#");
+			
+			// ----------------------------------------------
+    		// read input-stream of .xlsx files 
+    		// ----------------------------------------------
+    		
+    		// Get the workbook instance for XLS file 
+    		XSSFWorkbook workbook = new XSSFWorkbook ( excelIS);
+    		 
+    		// Get first sheet from the workbook
+    		XSSFSheet sheet = workbook.getSheetAt( 0);
+    		 
+    		// Get iterator to all the rows in current sheet
+    		Iterator<Row> rowIterator = sheet.iterator();
+    		
+    		int row = 0;
+    		
+    		// ----------------------------------------------
+    		// read first row: colNames 
+    		// ----------------------------------------------
+    		Map<Integer, String> fieldNamesMap = new HashMap<Integer, String>(); 
+    		
+    		// LOG
+    		log.debug( "read colNames...");
+    		log.debug( "");
+    		
+    		if ( rowIterator.hasNext()) {
+    			//LOG
+    			log.debug( "row:{}", row);
+    			
+    			Row thisRow = rowIterator.next();
+    	        
+    	        // For each row, iterate through each columns
+				Iterator<Cell> cellIterator = thisRow.cellIterator();
+				
+				// read column names
+				while (cellIterator.hasNext()) {
+					
+					Cell thisCell = cellIterator.next();
+					String thisCellValue = thisCell.getStringCellValue();
+					
+					fieldNamesMap.put( thisCell.getColumnIndex(), thisCellValue);	
+					
+					// LOG
+					log.debug( "	colName:[{}]", thisCellValue);
+				}
+    			
+    			row++;
+    		}
+    		
+    		// ----------------------------------------------
+    		// skip second row 
+    		// ----------------------------------------------
+    		if ( rowIterator.hasNext()) {
+    			rowIterator.next();    			
+    		}
+    		
+    		// ----------------------------------------------
+    		// read data
+    		// ----------------------------------------------
+    		
+    		// LOG
+    		log.debug( "");
+    		log.debug( "read data...");
+    		
+    		PersonVO newPersonVO;
+    		ContactInfoVO contactInfoVO;
+    		while ( rowIterator.hasNext()) {
+    			
+    			log.info( "");
+    			log.info( "row:{}", row);
+    			
+    			Row thisRow = rowIterator.next();
+    	        
+    			// initialize personVO object
+    			newPersonVO = new PersonVO();
+    			contactInfoVO = new ContactInfoVO();
+    			newPersonVO.setPrimaryContactInfo(contactInfoVO);
+    			
+    			// For each row, iterate through each columns
+				Iterator<Cell> cellIterator = thisRow.cellIterator();
+				
+				// read field data
+				while (cellIterator.hasNext()) {
+					
+					Cell thisCell = cellIterator.next();
+					
+					String thisCellStrValue = "";
+					int thisCellColumnIndex = thisCell.getColumnIndex();
+					int thisCellType = thisCell.getCellType();
+					
+					// LOG
+					log.debug( "	cellColumnIndex: [" + thisCellColumnIndex + "]");
+					
+					switch (thisCellType) {
+					case Cell.CELL_TYPE_STRING:
+						thisCellStrValue = thisCell.getStringCellValue();
+						break;
+					
+					case Cell.CELL_TYPE_BOOLEAN:
+						boolean thisCellBooleanValue = thisCell.getBooleanCellValue();
+						thisCellStrValue = Boolean.toString(thisCellBooleanValue);
+						break;
+						
+					case Cell.CELL_TYPE_NUMERIC:
+						double thisCellNumericValue = thisCell.getNumericCellValue();
+						thisCellStrValue = decimalFormat.format(thisCellNumericValue); // String.format("%12f", thisCellNumericValue)  ;
+						if (thisCellStrValue.endsWith(".0")) {
+							thisCellStrValue = thisCellStrValue.substring(0, thisCellStrValue.length() - 2);
+						}
+						break;
+						
+					case Cell.CELL_TYPE_BLANK:
+						thisCellStrValue = "";
+						break;
+						
+					case Cell.CELL_TYPE_ERROR:
+						throw new ParvanRecoverableException("Invalid cell-type: CELL_TYPE_ERROR");
+						
+					case Cell.CELL_TYPE_FORMULA:
+						throw new ParvanRecoverableException("Invalid cell-type: CELL_TYPE_FORMULA");
+						
+
+					default:
+						break;
+					}
+					
+					// LOG
+					
+					String thisFieldName = fieldNamesMap.get(thisCellColumnIndex);
+					String thisFieldValue = thisCellStrValue;
+					
+					log.debug( "		thisFieldName : [" + thisFieldName + "]");
+					log.debug( "		thisFieldValue: [" + thisCellStrValue + "]");
+					
+					if (Validator.isNull( thisFieldName)) {
+						// ignore
+						continue;
+					}
+			        
+					PersonType personType;
+					if (thisFieldName.equals("personType")) {
+						personType = PersonType.valueOf(thisFieldValue);
+						newPersonVO.setType(personType);
+						
+					} else {
+						BeanUtils.setProperty( 
+								newPersonVO, 
+								thisFieldName, 
+								thisFieldValue);
+					
+					} 
+					
+				}
+    			
+				newPersonVO.setActive(true);
+				if (Validator.isNull(newPersonVO.getFirstNameEn())) {
+					newPersonVO.setFirstNameEn(newPersonVO.getFirstNameLocal());
+				}
+				
+				if (Validator.isNull(newPersonVO.getFirstNameLocal())) {
+					newPersonVO.setFirstNameLocal(newPersonVO.getFirstNameEn());
+				}
+    			
+    			// save	
+				this.save(newPersonVO, ecUserInfo);
+			
+				//LOG
+				log.info( "new Person was created. newPersonVO:[{}]", newPersonVO);
+			
+    			// 
+    			row = row + 1;
+    		}
+    		workbook.close();
+		} catch (ParvanServiceException e) {
+			log.error("error in importing persons", e);
+			throw e;
+			
+		} catch (Exception e) {
+			log.error("error in importing persons", e);
+			throw new ParvanUnrecoverableException(	"error in importing persons", ErrorCode.SAVE_ERROR);
+		}
+		
+		log.debug("Leaving importPersons(excelIS=...)");
+	}
+
+	@Override
+	public PageList<Person> searchActivePeopleInOrganization(Long organizationId, String term, Integer start,
+			Integer length, SortDirectionEnum sortDirection, String sortCriterion) throws ParvanServiceException {
+		PageList<Person> returnValue;
+		try {
+			returnValue = personDao.searchActivePeopleInOrganization(organizationId, term, start, length, sortDirection, sortCriterion);
+		} catch (ParvanDaoException e) {
+			throw new ParvanRecoverableException(e);
+		}
+		return returnValue;
+	}
+
+	@Override
+	public void index() throws ParvanServiceException {
+		try {
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+			UserInfoWrapper uiw = new UserInfoWrapper(userInfo);
+			if (uiw.hasAdminPrivilege()) {
+				personDao.index();
+			} else {
+				throw new ParvanPrincipalException(ErrorCode.ACCESS_DENIDE);
+			}
+		} catch (ParvanDaoException e) {
+			throw new ParvanRecoverableException(e);
+		}
+	}
+	
+	@Override
+	public Map<String, String> getPersonsByUuids(List<String> uuids) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering getPersonsByUuids(uuids={})", uuids);
+		Map<String, String> personMap = null;
+
+		try {
+
+			personMap = personDao.getByUuids(uuids);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting persons with their uuids", e);
+		}
+
+		return personMap;
+	}
+
+	@Override
+	public JSONObject createPerson(JSONObject data) throws ParvanServiceException {
+		log.debug("Entering createPerson(data={})", data);
+		JSONObject result = new JSONObject();
+
+		try {
+			UserInfo userInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+			
+			ObjectMapper mapper = new ObjectMapper();
+			
+			PersonVO personVO = mapper.readValue(data.toString(), PersonVO.class);
+			
+			List<RelationVO> relatesTo = new ArrayList<RelationVO>();
+			List<RelationVO> relatesFrom = new ArrayList<RelationVO>();
+			List<PersonGroupVO> personGroups = new ArrayList<PersonGroupVO>();
+			List<ContactInfoVO> contactInfos = new ArrayList<ContactInfoVO>();
+			
+			personVO.setRelatesTo(relatesTo);
+			personVO.setRelatesFrom(relatesFrom);
+			personVO.setPersonGroups(personGroups);
+			personVO.setContactInfos(contactInfos);
+			personVO.setActive(true);
+			
+			// save person
+			personVO = save(personVO, userInfo);
+			
+			// create user
+			IdentityManagement2ServiceAdapterRest adapterRest = new IdentityManagement2ServiceAdapterRest();
+			
+			String userName = data.getString("userName");
+			String email = personVO.getPrimaryContactInfo().getEmail();
+			String firstName = personVO.getFirstNameLocal();
+			String lastName = personVO.getLastNameLocal();
+			String displayName = firstName + " " + lastName;
+			String locale = data.getString("locale");
+			String zoneId = data.getString("zoneId");
+			String calendar = data.getString("calendar");
+			
+			UserVO userVO = new UserVO();
+			//userVO.setId();
+			userVO.setUserName(userName);
+			userVO.setFirstName(firstName);
+			userVO.setLastName(lastName);
+			userVO.setDisplayName(displayName);
+			userVO.setLocale(locale);
+			userVO.setZoneId(zoneId);
+			userVO.setCalendar(calendar);
+			userVO.setEmail(email);
+			userVO.setPersonUuid(personVO.getUuid());
+			
+//			Map<String, Object> returnValue = adapterRest.createUser(userVO);
+			userVO = adapterRest.createUser(userVO);
+			
+			String personJsonStr = mapper.writeValueAsString(personVO);
+//			String userJsonStr = mapper.writeValueAsString(returnValue);
+			
+			JSONObject personJson = new JSONObject(personJsonStr);
+//			JSONObject userJson = new JSONObject(userJsonStr);
+			
+			result.put("user", userVO);
+			result.put("person", personJson);
+
+		} catch (ParvanServiceException e) {
+			log.error("Error occurred while create person with json data", e);
+			throw e;
+			
+		} catch (Exception e) {
+			log.error("Error occurred while create person with json data", e);
+			throw new ParvanUnrecoverableException("Error occurred while create person with json data", e);
+		}
+
+		return result;
+	}
+
+	@Override
+	public JSONObject findPersonAndUserByUuid(String uuid) throws ParvanServiceException {
+		log.debug("Entering findPersonAndUserByUuid(uuid={})", uuid);
+		JSONObject result = new JSONObject();
+
+		try {
+			
+			Person person;
+			
+			try {
+				person = personDao.getByUuid(uuid);
+			} catch (ObjectNotFoundException e) {
+				throw new ParvanServiceException(ErrorCode.OBJECT_NOT_FOUND);
+			}
+			
+			// create user
+			IdentityManagement2ServiceAdapterRest adapterRest = new IdentityManagement2ServiceAdapterRest();
+						
+			UserVO userVO = adapterRest.findUserByPersonUuid(person.getUuid());
+			
+			ObjectMapper mapper = new ObjectMapper();
+			String personJsonStr = mapper.writeValueAsString(person.toVO());
+			
+			JSONObject personJson = new JSONObject(personJsonStr);
+			result.put("person", personJson);
+			
+			if(userVO != null){
+				String userJsonStr = mapper.writeValueAsString(userVO);
+				JSONObject userJson = new JSONObject(userJsonStr);
+				
+				result.put("user", userJson);
+			}
+
+		} catch (ParvanServiceException e) {
+			log.error("Error occurred while create person with json data", e);
+			throw e;
+			
+		} catch (Exception e) {
+			log.error("Error occurred while create person with json data", e);
+			throw new ParvanUnrecoverableException("Error occurred while create person with json data", e);
+		}
+
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param generalAgentCriteria
+	 * @throws ParvanServiceException 
+	 */
+	private void _setAllowedOrganizationIds(PersonCriteria personCriteria) throws ParvanServiceException {
+
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		Long orgId = userInfoWrapper.getAgentAllowedOrgId();
+		Organization parentOrg = new Organization();
+		parentOrg.setId(orgId);
+		
+		Set<Long> allowedOrgIds = new HashSet<Long>();
+		if (Validator.isNotNull(orgId)) {
+			
+			_loadSubOrganizationIds(allowedOrgIds, parentOrg);
+			allowedOrgIds.addAll(allowedOrgIds);
+			allowedOrgIds.add(orgId);
+		}
+		
+		personCriteria.setOrganizationIds(allowedOrgIds);
+	}
+	
+	/**
+	 * 
+	 * @param allowedOrgIds
+	 * @param parentOrg
+	 * @throws ParvanServiceException 
+	 */
+	private void _loadSubOrganizationIds(Set<Long> allowedOrgIds, Organization parentOrg) throws ParvanServiceException {
+		
+		if (parentOrg != null) {
+			Long parentOrgId = parentOrg.getId();
+			
+			List<Organization> subOrgs = organizationLocalService.findByParentOrg(parentOrgId);
+			for (Organization thisSubOrg : subOrgs) {
+				allowedOrgIds.add(thisSubOrg.getId());
+				
+				_loadSubOrganizationIds(allowedOrgIds, thisSubOrg);
+			}
+		}
+	}
+
+	@Override
+	public List<Person> findRelatedFrom(String personUuid, RelationType type, String allowedOrgId, String term) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findRelatedFrom( personUuid={}, type={}, term={})", personUuid, type, term);
+
+		List<Person> persons = null;
+
+		try {
+
+			persons = personDao.findRelatedFrom(personUuid, type, term);
+
+		} catch (ParvanDaoException e) {
+			throw new ParvanServiceException(e.getMessage());
+		}
+		return persons;
+	}
+	
+	@Override
+	public List<Person> findRelatedTo(String personUuid, RelationType type, String allowedOrgId, String term) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findRelatedTo( personUuid={}, type={}, term={})", personUuid, type, term);
+
+		List<Person> persons = null;
+
+		try {
+
+			persons = personDao.findRelatedTo(personUuid, type, term);
+
+		} catch (ParvanDaoException e) {
+			throw new ParvanServiceException(e.getMessage());
+		}
+		return persons;
+	}
+}

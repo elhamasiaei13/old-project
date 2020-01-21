@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete element from project &apos;siteservices&apos;&#x0A;- Original project: &apos;siteservices&apos;&#x0A;- Original element: &apos;datatables.json&apos;" description="Delete element" element1="siteservices-web/src/main/resources/dandelion/vendor/datatables.json" elements="0" flags="589830" id="org.eclipse.jdt.ui.delete" resources="1" stamp="1497514001212" subPackages="false" version="1.0"/>
+</session>

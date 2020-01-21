@@ -1,0 +1,572 @@
+package com.parvanpajooh.agentmanagement.rest;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.parvanpajooh.agentmanagement.model.criteria.EmployeeCriteria;
+import com.parvanpajooh.agentmanagement.model.criteria.GeneralAgentCriteria;
+import com.parvanpajooh.agentmanagement.model.enums.EmployeeGroup;
+import com.parvanpajooh.agentmanagement.model.vo.EmployeeVO;
+import com.parvanpajooh.agentmanagement.model.vo.GeneralAgentVO;
+import com.parvanpajooh.agentmanagement.service.EmployeeService;
+import com.parvanpajooh.agentmanagement.service.GeneralAgentService;
+import com.parvanpajooh.agentmanagement.service.UserService;
+import com.parvanpajooh.client.agentmanagement.model.EmployeeMsg;
+import com.parvanpajooh.client.agentmanagement.model.GeneralAgentMsg;
+import com.parvanpajooh.common.auth.BaseRestController;
+import com.parvanpajooh.common.convertor.JacksonObjectMapperProvider;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+
+@RestController
+@RequestMapping("/v1")
+public class AgentManagementRestController extends BaseRestController {
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	@EJB(mappedName = "java:global/agentmanagement-ear/agentmanagement-ejb/GeneralAgentServiceImpl")
+	private GeneralAgentService generalAgentService;
+
+	@EJB(mappedName = "java:global/agentmanagement-ear/agentmanagement-ejb/EmployeeServiceImpl")
+	private EmployeeService employeeService;
+
+	@EJB(mappedName = "java:global/agentmanagement-ear/agentmanagement-ejb/UserServiceImpl")
+	private UserService userService;
+
+	@Autowired
+	protected JacksonObjectMapperProvider mapperProvider;
+
+	@RequestMapping(value = "/initlogin/all_subagents_by_parent_id", method = RequestMethod.GET)
+	public List<GeneralAgentMsg> initLoginFindAllSubAgentsByParentId(
+			@RequestParam(value = "parentAgentId") Long parentAgentId) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering initLoginFindAllSubAgentsByParentId(parentAgentId={})", parentAgentId);
+
+		List<GeneralAgentMsg> generalAgentMsgs = null;
+
+		List<GeneralAgentVO> generalAgentVOs = generalAgentService.initLoginFindAllSubAgentsByParentId(parentAgentId);
+
+		generalAgentMsgs = new ArrayList<GeneralAgentMsg>();
+
+		for (GeneralAgentVO generalAgentVO : generalAgentVOs) {
+			
+			generalAgentMsgs.add(generalAgentVO.toMsg());
+		}
+			
+		// LOG
+		log.debug("Leaving initLoginFindAllSubAgentsByParentId(): ret={}", (generalAgentMsgs != null) ? generalAgentMsgs.size() : "NULL");
+		return generalAgentMsgs;
+	}
+	
+	@RequestMapping(value = "/all_subagents_by_parent_id", method = RequestMethod.GET)
+	public List<GeneralAgentMsg> findAllSubAgentsByParentId(
+			HttpServletRequest request, 
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip, 
+			@RequestParam(value = "parentAgentId") Long parentAgentId,
+			@Context HttpServletResponse response) throws ParvanServiceException {
+
+		// LOG
+		List<GeneralAgentMsg> generalAgentMsgs = null;
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+
+		List<GeneralAgentVO> generalAgentVOs = generalAgentService.findAllSubAgentsBy(userInfo, parentAgentId);
+
+		generalAgentMsgs = new ArrayList<GeneralAgentMsg>();
+
+		for (GeneralAgentVO generalAgentVO : generalAgentVOs) {
+			
+			generalAgentMsgs.add(generalAgentVO.toMsg());
+
+		}
+			
+		// LOG
+		return generalAgentMsgs;
+	}
+	
+	@RequestMapping(value = "/all_subagents_by", method = RequestMethod.GET)
+	public List<GeneralAgentMsg> findAllSubAgentsBy(
+			HttpServletRequest request, 
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip, 
+			@RequestParam(value = "parentId") Long parentId,
+			@RequestParam(value = "term") String term) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findAllSubAgentsBy(userName={} , ip={}, parentId={} , term={})", userName, ip, parentId, term);
+
+		List<GeneralAgentMsg> generalAgentMsgs = null;
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+
+		List<GeneralAgentVO> generalAgentVOs = generalAgentService.findAllSubAgentsBy(userInfo, parentId, term);
+
+		generalAgentMsgs = new ArrayList<GeneralAgentMsg>();
+
+		for (GeneralAgentVO generalAgentVO : generalAgentVOs) {
+			
+			generalAgentMsgs.add(generalAgentVO.toMsg());
+
+		}
+			
+		// LOG
+		log.debug("Leaving findAllSubAgentsByParentId(): ret={}", (generalAgentMsgs != null) ? generalAgentMsgs.size() : "NULL");
+		return generalAgentMsgs;
+	}
+	
+	@RequestMapping(value = "/agents/direct_subagents/{id}", method = RequestMethod.GET)
+	public List<GeneralAgentMsg> findDirectSubAgents(
+			HttpServletRequest request, 
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip, 
+			@PathVariable Long id) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findAgentDirectSubAgents(userName={} , ip={}, id={})", userName, ip, id);
+
+		List<GeneralAgentMsg> generalAgentMsgs = null;
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+
+		List<GeneralAgentVO> generalAgentVOs = generalAgentService.findAgentDirectSubAgents(userInfo, id);
+
+		generalAgentMsgs = new ArrayList<GeneralAgentMsg>();
+
+		for (GeneralAgentVO generalAgentVO : generalAgentVOs) {
+			
+			generalAgentMsgs.add(generalAgentVO.toMsg());
+
+		}
+			
+		// LOG
+		log.debug("Leaving findAgentDirectSubAgents(): ret={}", (generalAgentMsgs != null) ? generalAgentMsgs.size() : "NULL");
+		return generalAgentMsgs;
+	}
+	
+	@RequestMapping(value = "/agents/all_branch_subagents/{id}", method = RequestMethod.GET)
+	public List<GeneralAgentMsg> findAllBranchSubAgents(
+			HttpServletRequest request, 
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip, 
+			@PathVariable Long id) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findAllBranchSubAgents(userName={} , ip={}, id={})", userName, ip, id);
+
+		List<GeneralAgentMsg> generalAgentMsgs = null;
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+
+		List<GeneralAgentVO> generalAgentVOs = generalAgentService.findAllBranchSubAgents(userInfo, id);
+
+		generalAgentMsgs = new ArrayList<GeneralAgentMsg>();
+
+		for (GeneralAgentVO generalAgentVO : generalAgentVOs) {
+			
+			generalAgentMsgs.add(generalAgentVO.toMsg());
+
+		}
+			
+		// LOG
+		log.debug("Leaving findAgentDirectSubAgents(): ret={}", (generalAgentMsgs != null) ? generalAgentMsgs.size() : "NULL");
+		return generalAgentMsgs;
+	}
+
+	@RequestMapping(value = "/initlogin/employee_by_username", method = RequestMethod.GET)
+	public EmployeeMsg initLoginFindEmployeeByUsername(
+			HttpServletRequest request, 
+			@RequestParam(value = "employeeUserName") String employeeUserName) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering initLoginFindEmployeeByUsername(employeeUserName={})", employeeUserName);
+		EmployeeMsg employeeMsg = null;
+
+		EmployeeVO employeeVO = employeeService.findByUsernameWhileLogin(employeeUserName);
+		
+		if (employeeVO == null) {
+			throw new ParvanRecoverableException(
+					String.format("employee not found by  userNamne [%s]", employeeUserName),
+					ErrorCode.OBJECT_NOT_FOUND);
+		}
+		
+		employeeMsg = employeeVO.toMsg(); 
+
+		// LOG
+		log.debug("Leaving findEmployeeByUsername(): ret={}", employeeMsg);
+		return employeeMsg;
+	}
+
+	@RequestMapping(value = "/agentNames_by_ids", method = RequestMethod.GET)
+	public Map<Long, String> getAgentNamesByIds(
+			HttpServletRequest request, 
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "ids") Long[] ids) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering loadAgentNamesByIds(userName={} , ip={} , ids={})", userName, ip, ids);
+		Map<Long, String> agentNames = null;
+		List<Long> idsList = Arrays.asList(ids);
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		agentNames = generalAgentService.getAgentNamesByIds(userInfo, idsList);
+
+		return agentNames;
+	}
+	
+	@RequestMapping(value = "/agents/cityShortCode", method = RequestMethod.GET)
+	public List<GeneralAgentMsg> findAgentsByCityShortCode(
+			HttpServletRequest request, 
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "cityShortCode") String cityShortCode,
+			@RequestParam(required = false, value = "tag") String tag,
+			@RequestParam(required = false, value = "term") String term) throws ParvanServiceException {
+		log.debug("Entering findAgentsByCityShortCode(userName={} , ip={} , cityShortCode={}, tag={}, term={})", userName, ip, cityShortCode, tag, term);
+		
+		List<GeneralAgentMsg> generalAgentMsgs = null;
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		List<GeneralAgentVO> generalAgentVOs = generalAgentService.findByCityShortCode(userInfo, cityShortCode, tag, term);
+
+		generalAgentMsgs = new ArrayList<GeneralAgentMsg>();
+
+		for (BaseVO baseVO : generalAgentVOs) {
+			GeneralAgentVO vo = (GeneralAgentVO) baseVO;
+			generalAgentMsgs.add(vo.toMsg());
+		}
+
+
+		log.debug("Leaving findAgentsByCityShortCode(): ret={}", generalAgentMsgs);
+		return generalAgentMsgs;
+	}
+	
+	@RequestMapping(value = "/agents", method = RequestMethod.GET)
+	public List<GeneralAgentMsg> findAgentsBy(
+			HttpServletRequest request, 
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "page") int page, 
+			@RequestParam(value = "size") int size, 
+			@RequestParam(required = false,value = "active") Boolean active,
+			@RequestParam(required = false,value = "name") String name,
+			@RequestParam(required = false,value = "nodeCode") String nodeCode,
+			@RequestParam(required = false,value = "nodeId") String nodeId,
+			@Context HttpServletResponse response) throws ParvanServiceException {
+
+		log.debug("Entering findAgentsByCriteria(userName={} , ip={} ,active={}, name={}, nodeCode={}, nodeId)", userName, ip, active, name, nodeCode, nodeId);
+
+		List<GeneralAgentMsg> generalAgentMsgs = null;
+
+		if (page > 0) {
+			page = page - 1;// my pagination is zero based, but rest
+							// pagination best practice is 1-based
+		}
+
+		if (size == 0) {
+			size = 20;// it's default page size
+		}
+
+		int firstResult = (page * size);
+		int maxResults = size;
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = "id";
+
+		GeneralAgentCriteria agentCriteria = new GeneralAgentCriteria();
+		
+		agentCriteria.setActive(active);
+		agentCriteria.setCanonicalSearchName(name);
+		agentCriteria.setNodeCode(nodeCode);
+		agentCriteria.setNodeId(nodeId);
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+
+		List<BaseVO> baseVOs = generalAgentService.findByCriteria(userInfo, agentCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+		int count = generalAgentService.countByCriteria(userInfo, agentCriteria);
+
+		generalAgentMsgs = new ArrayList<GeneralAgentMsg>();
+
+		for (BaseVO baseVO : baseVOs) {
+
+			GeneralAgentVO vo = (GeneralAgentVO) baseVO;
+			generalAgentMsgs.add(vo.toMsg());
+		}
+
+		response.addIntHeader("total", count);
+
+
+		log.debug("Leaving findAgentsByCriteria(): ret={}", (generalAgentMsgs != null) ? generalAgentMsgs.size() : "NULL");
+		return generalAgentMsgs;
+	}
+
+	@RequestMapping(value = "/agents/{id}", method = RequestMethod.GET)
+	public GeneralAgentMsg getAgent(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable Long id, 
+			HttpServletRequest request) throws ParvanServiceException, ObjectNotFoundException {
+
+		// LOG
+		log.debug("Entering getAgent(userName={} , ip={} , id={})", userName, ip, id);
+
+		GeneralAgentMsg generalAgentMsg = null;
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		BaseVO baseVO = generalAgentService.get(userInfo, id);
+		if (baseVO == null) {
+			throw new ObjectNotFoundException("No Agent with id : " + id);
+		}
+		GeneralAgentVO vo = (GeneralAgentVO) baseVO;
+		generalAgentMsg = vo.toMsg();
+
+		return generalAgentMsg;
+	}
+	
+	@RequestMapping(value = "/agents/node/{nodeId}", method = RequestMethod.GET)
+	public GeneralAgentMsg findAgentByNodeId(
+			HttpServletRequest request,
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable Long nodeId) throws ParvanServiceException, ObjectNotFoundException {
+
+		log.debug("Entering getAgentByNodeId(userName={} , ip={} , nodeId={})", userName, ip, nodeId);
+
+		GeneralAgentMsg generalAgentMsg = null;
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		GeneralAgentVO agentVO = generalAgentService.findByNodeId(userInfo, nodeId);
+		if (agentVO != null) {
+			generalAgentMsg = agentVO.toMsg();
+		}
+		return generalAgentMsg;
+	}
+
+	@RequestMapping(value = "initlogin/agents/by_employee_username", method = RequestMethod.GET)
+	public GeneralAgentMsg initLoginFindAgentByEmployeeUserName(
+			@RequestParam(value = "userName") String empUserName,
+			HttpServletRequest request) throws ParvanServiceException {
+
+		log.debug("Entering initLoginFindAgentByEmployeeUserName(empUserName={})", empUserName);
+		GeneralAgentMsg generalAgentMsg = null;
+		GeneralAgentVO vo = null;
+		try {
+			vo = generalAgentService.findByEmployeeUserNameWhileLogin(empUserName);
+		} catch (Exception e) {
+			log.error("error in findAgentByEmployeeUserName", e);
+		}
+		if (vo == null) {
+			throw new ParvanRecoverableException(
+					String.format("agent not found by employee userName [%s]", empUserName),
+					ErrorCode.OBJECT_NOT_FOUND);
+		}
+		generalAgentMsg = vo.toMsg();
+		return generalAgentMsg;
+	}
+	
+	@RequestMapping(value = "/agents/{id}/employees", method = RequestMethod.GET)
+	public List<EmployeeMsg> getAllAgentEmployees(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable(value = "id") long agentId,
+			HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+		
+		List<EmployeeMsg> returnValue = null;
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		List<EmployeeVO> result = employeeService.findByAgentId(userInfo, agentId);
+		returnValue = new ArrayList<>(result.size());
+		for (EmployeeVO vo : result) {
+			returnValue.add( vo.toMsg() );
+		}
+		
+		return returnValue;
+	}
+	
+	@RequestMapping(value = "/agents/employees", method = RequestMethod.GET)
+	public List<EmployeeMsg> getAllEmployeesOfAgents(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "ids") Long[] agentIds,
+			HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+		
+		List<EmployeeMsg> returnValue = null;
+		
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		List<EmployeeVO> result = employeeService.findByAgentIds(userInfo, Arrays.asList(agentIds));
+		returnValue = new ArrayList<>(result.size());
+		for (EmployeeVO vo : result) {
+			returnValue.add( vo.toMsg() );
+		}
+		
+		return returnValue;
+	}
+	
+	@RequestMapping(value = "/agents_by_iatacode/{iataCode}", method = RequestMethod.GET)
+	public GeneralAgentMsg findAgentByIataCode(
+			HttpServletRequest request,
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable String iataCode) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findAgentByIataCode(userName={} , ip={} , iataCode={})", userName, ip, iataCode);
+
+		GeneralAgentMsg generalAgentMsg = null;
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		GeneralAgentVO agentVO = generalAgentService.findByIataCode(userInfo, iataCode);
+		
+		generalAgentMsg = agentVO.toMsg();
+
+
+		// LOG
+		log.debug("Leaving findAgentByIataCode(): ret={}", generalAgentMsg);
+		
+		return generalAgentMsg;
+	}
+	
+	@RequestMapping(value = "/agents_by_accountnumber/{accountNumber}", method = RequestMethod.GET)
+	public GeneralAgentMsg findAgentByAccountNumber(
+			HttpServletRequest request,
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable String accountNumber) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findAgentByAccountNumber(userName={} , ip={} , accountNumber={})", userName, ip, accountNumber);
+
+		GeneralAgentMsg generalAgentMsg = null;
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		GeneralAgentVO agentVO = generalAgentService.findByAccountNumber(userInfo, accountNumber);
+		
+		generalAgentMsg = agentVO.toMsg();
+
+		// LOG
+		log.debug("Leaving findAgentByAccountNumber(): ret={}", generalAgentMsg);
+		
+		return generalAgentMsg;
+	}
+	
+	@RequestMapping(value = "/agents_by_ids", method = RequestMethod.GET)
+	public List<GeneralAgentMsg> getAgentsByIds(
+			HttpServletRequest request,
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "ids") Long[] ids) throws ParvanServiceException {
+
+		log.debug("Entering findAgentsByIds(userName={} , ip={} , ids={})", userName, ip, ids);
+		
+		List<GeneralAgentMsg> list = null;
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		List<BaseVO> baseVOs = generalAgentService.findByIds(userInfo, Arrays.asList(ids));
+		list = new ArrayList<GeneralAgentMsg>();
+		for (BaseVO baseVO : baseVOs) {
+			GeneralAgentVO vo = (GeneralAgentVO) baseVO;
+			list.add(vo.toMsg());
+		}
+		
+		return list;
+	}
+	
+	
+	@RequestMapping(value = "/employees", method = RequestMethod.GET)
+	public List<EmployeeMsg> findEmployeesBy(
+			HttpServletRequest request,
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "page") int page, 
+			@RequestParam(value = "size") int size, 
+			@RequestParam(required = false,value = "active") Boolean active,
+			@RequestParam(required = false,value = "agentIds") Long[] agentIds,
+			@RequestParam(required = false,value = "fullName") String fullName,
+			@RequestParam(required = false,value = "groups") EmployeeGroup[] groups,
+			@Context HttpServletResponse response) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findEmployeeBy(userName={} , ip={} , active={}, agentIds={}, fullName={}, groups={})", userName, ip, active, agentIds, fullName, groups);
+		
+		List<EmployeeMsg> employeeMsgs = null;
+
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		
+		EmployeeCriteria employeeCriteria = new EmployeeCriteria();
+		employeeCriteria.setActive(active);
+		employeeCriteria.setFullName(fullName);
+		if (Validator.isNotNull(agentIds)) {
+			employeeCriteria.setAllowedAgentIds(new HashSet<Long>(Arrays.asList(agentIds)));
+		}
+		employeeCriteria.setGroups(groups);
+		
+		List<BaseVO> baseVOs = employeeService.findByCriteria(userInfo, employeeCriteria);
+		int count = employeeService.countByCriteria(userInfo, employeeCriteria);
+
+		employeeMsgs = new ArrayList<EmployeeMsg>();
+
+		for (BaseVO baseVO : baseVOs) {
+
+			EmployeeVO vo = (EmployeeVO) baseVO;
+			employeeMsgs.add(vo.toMsg());
+		}
+
+		response.addIntHeader("total", count);
+
+		// LOG
+		log.debug("Leaving findEmployeeBy(): ret={}", (employeeMsgs != null) ? employeeMsgs.size() : "NULL");
+		
+		return employeeMsgs;
+	}
+
+	/*private UserInfo loadUserInfo(HttpServletRequest request, String userName, String tenantId) throws Exception {
+		UserVO user = userService.loadUserByUsername(userName);
+		if (user == null) {
+			throw new ObjectNotFoundException("user is not valid");
+		}
+		Set<String> roleNames = new HashSet<String>();
+		Set<RoleVO> roles = user.getRoles();
+		if (roles != null) {
+			for (RoleVO role : roles) {
+				roleNames.add(role.getName());
+			}
+		}
+		String ip = IpUtils.getIpFromRequest(request);
+		String contextPath = request.getContextPath();
+		UserInfo userInfo = AmUserInfo.getDefaultUserInfo(
+				user.getId(), 
+				user.getUserName(),
+				user.getFirstName(), 
+				user.getLastName(), 
+				ip, 
+				contextPath, 
+				tenantId, 
+				roleNames, 
+				user.getLocale(),
+				user.getZoneId(),
+				user.getCalendar());
+		return userInfo;
+	}*/
+}

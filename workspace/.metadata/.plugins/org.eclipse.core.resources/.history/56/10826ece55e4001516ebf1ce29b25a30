@@ -1,0 +1,73 @@
+package com.parvanpajooh.sample.mvc;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.sample.model.Member;
+import com.parvanpajooh.sample.model.vo.MemberVO;
+import com.parvanpajooh.sample.service.SampleService;
+
+@Controller
+@RequestMapping("/")
+public class UserController {
+
+	@EJB(mappedName = "java:global/sample-ear/sample-ejb/SampleServiceImpl")
+	private SampleService sampleService;
+
+	@RequestMapping(value = "/showUsers", method = RequestMethod.GET)
+	// @RequestMapping(method = RequestMethod.GET)
+	public String showUsers(HttpServletRequest request, Model model)
+			throws ParvanServiceException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+
+		List<MemberVO> list = sampleService.loadSamples(userInfo);
+
+		model.addAttribute("allUsers", list);
+		return "showUsers";
+	}
+
+	@RequestMapping(value = "/addUser", method = RequestMethod.GET)
+	public String showAddPage(HttpServletRequest request, Model model)
+			throws ParvanServiceException {
+		model.addAttribute("user", new Member());
+		return "addUser";
+	}
+
+	@RequestMapping(value = "/addUser/add", method = { RequestMethod.POST,
+			RequestMethod.GET })
+	public String addUser(@ModelAttribute Member user, Model model)
+			throws ParvanServiceException, ParvanDaoException {
+
+		UserInfo userInfo = new UserInfo(1L, "userName", "firstName",
+				"lastName", "ip", "context", 1L, null, null, null, null, true,
+				false);
+
+		List<String> roles = Arrays.asList("roll1", "roll2");
+		user.setId(2L);
+		user.setActive(true);
+		user.setIndexInParent(1);
+		user.setLink("link");
+		user.setRoles(roles);
+		user.setTitle("title");
+		user.setTitleEn("titleEn");
+
+		sampleService.saveUser(userInfo, user);
+		return "congrats";
+	}
+}

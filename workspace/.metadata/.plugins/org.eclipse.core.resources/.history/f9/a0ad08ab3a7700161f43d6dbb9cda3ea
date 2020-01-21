@@ -1,0 +1,37 @@
+package com.parvanpajooh.agentmanagement.common;
+
+import java.util.Map;
+
+import com.parvanpajooh.idm.IdmProtos;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+public interface IdmService {
+	
+	@GET("v1/check")
+	public Call<PermissionResult> check(@Query("userName") String userName, @Query("ip") String ip, @Query("scopeId") Long scopeId, @Query("uri") String uri, @Query("actionId") String actionId);
+	
+	@GET("v1/scopebased")
+	public Call<Boolean> isScopeBased(@Query("uri") String uri, @Query("actionId") String actionId);
+	
+	@GET("v1/resourceavailable")
+	public Call<Boolean> isResourceAvailable(@Query("uri") String uri);
+	
+	@GET("v1/resourceactionavailable")
+	public Call<Boolean> isResourceActionAvailable(@Query("uri") String uri, @Query("actionId") String actionId);
+	
+	@GET("v1/users/{username}")
+	public Call<Map<String, Object>> loadUserByUsername(@Path("username") String username);
+	
+	@GET("v1/scopes")
+	public Call<IdmProtos.ObjectAccessScopeList> loadScopes(@Query("userName") String userName, @Query("ip") String ip);
+	
+	@GET("v1/users")
+	public Call<IdmProtos.UserList> loadUsers(@Query("userName") String userName, @Query("ip") String ip, @Query("q") String query, @Query("page") int page, @Query("size") int size);
+	
+	@GET("v1/users_by_uuid/{uuid}")
+	public Call<IdmProtos.User> loadUserByUuid(@Path("uuid") String uuid);
+}

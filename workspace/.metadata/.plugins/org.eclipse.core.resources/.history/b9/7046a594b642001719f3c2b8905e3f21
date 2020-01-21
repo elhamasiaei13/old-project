@@ -1,0 +1,16 @@
+package com.parvanpajooh.siteservices.service;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.siteservices.model.vo.PersonVO;
+import com.parvanpajooh.siteservices.model.vo.UserVO;
+
+public interface IdentityManagement2Service {
+
+//	public UserVO createUser(UserInfo userInfo ,PersonVO personVO) throws ParvanServiceException;
+
+	public UserVO getUserByUuid(UserInfo userInfo, String uuid) throws ParvanServiceException;
+
+//	public void activateUserAndSetPassword(UserInfo userInfo, Long id, String password) throws ParvanServiceException;
+
+}

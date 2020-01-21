@@ -1,0 +1,179 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.model.vo;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.shipment.model.enums.ShipmentValidationType;
+
+/**
+ * @author Mohammad
+ *
+ */
+public class PackingItemActionVO extends BaseVO implements Comparable<PackingItemActionVO> {
+	
+	private static final long serialVersionUID = -2517904704540636315L;
+
+	private String  code;
+	
+	private ShipmentValidationType shipmentValidationType;
+	
+	private String title;
+	
+	private String style;
+	
+	private int actionOrder;
+	
+	private boolean locationSensitive;
+	
+	private boolean asButton;
+	
+	private String buttonType;
+	
+	private boolean financialTransaction;
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the shipmentValidationType
+	 */
+	public ShipmentValidationType getShipmentValidationType() {
+		return shipmentValidationType;
+	}
+
+	/**
+	 * @param shipmentValidationType the shipmentValidationType to set
+	 */
+	public void setShipmentValidationType(ShipmentValidationType shipmentValidationType) {
+		this.shipmentValidationType = shipmentValidationType;
+	}
+
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * @param title the title to set
+	 */
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	/**
+	 * @return the style
+	 */
+	public String getStyle() {
+		return style;
+	}
+
+	/**
+	 * @param style the style to set
+	 */
+	public void setStyle(String style) {
+		this.style = style;
+	}
+
+	/**
+	 * @return the actionOrder
+	 */
+	public int getActionOrder() {
+		return actionOrder;
+	}
+
+	/**
+	 * @param actionOrder the actionOrder to set
+	 */
+	public void setActionOrder(int actionOrder) {
+		this.actionOrder = actionOrder;
+	}
+
+	/**
+	 * @return the asButton
+	 */
+	public boolean isAsButton() {
+		return asButton;
+	}
+
+	/**
+	 * @param asButton the asButton to set
+	 */
+	public void setAsButton(boolean asButton) {
+		this.asButton = asButton;
+	}
+
+	/**
+	 * @return the locationSensitive
+	 */
+	public boolean isLocationSensitive() {
+		return locationSensitive;
+	}
+
+	/**
+	 * @param locationSensitive the locationSensitive to set
+	 */
+	public void setLocationSensitive(boolean locationSensitive) {
+		this.locationSensitive = locationSensitive;
+	}
+
+	/**
+	 * @return the buttonType
+	 */
+	public String getButtonType() {
+		return buttonType;
+	}
+
+	/**
+	 * @param buttonType the buttonType to set
+	 */
+	public void setButtonType(String buttonType) {
+		this.buttonType = buttonType;
+	}
+	
+	/**
+	 * @return the financialTransaction
+	 */
+	public boolean isFinancialTransaction() {
+		return financialTransaction;
+	}
+
+	/**
+	 * @param financialTransaction the financialTransaction to set
+	 */
+	public void setFinancialTransaction(boolean financialTransaction) {
+		this.financialTransaction = financialTransaction;
+	}
+
+	@Override
+	public int compareTo(PackingItemActionVO o) {
+		if (this.actionOrder == o.actionOrder) {
+			return 0;
+		}
+		return (this.actionOrder > o.actionOrder) ? 1 : -1;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "ShipmentActionVO [id=" + getId() + ", code=" + code + ", shipmentValidationType=" + shipmentValidationType
+				+ ", title=" + title + ", style=" + style + ", actionOrder=" + actionOrder + ", locationSensitive="
+				+ locationSensitive + ", asButton=" + asButton + ", buttonType=" + buttonType + "]";
+	}
+	
+}

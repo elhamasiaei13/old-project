@@ -1,0 +1,441 @@
+package com.parvanpajooh.identitymanagement2.service.impl;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.cloudfoundry.identity.uaa.api.UaaConnectionFactory;
+import org.cloudfoundry.identity.uaa.api.common.UaaConnection;
+import org.cloudfoundry.identity.uaa.api.user.UaaUserOperations;
+import org.cloudfoundry.identity.uaa.scim.ScimUser;
+import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
+import org.springframework.security.oauth2.common.AuthenticationScheme;
+
+import com.parvanpajooh.commons.config.Config;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.util.permission.PermissionChecker;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.identitymanagement2.dao.UserDao;
+import com.parvanpajooh.identitymanagement2.dao.UserGroupDao;
+import com.parvanpajooh.identitymanagement2.model.Role;
+import com.parvanpajooh.identitymanagement2.model.User;
+import com.parvanpajooh.identitymanagement2.model.UserGroup;
+import com.parvanpajooh.identitymanagement2.model.enums.CalendarEnum;
+import com.parvanpajooh.identitymanagement2.model.vo.RoleVO;
+import com.parvanpajooh.identitymanagement2.model.vo.UserVO;
+import com.parvanpajooh.identitymanagement2.service.RoleLocalService;
+import com.parvanpajooh.identitymanagement2.service.UserLocalService;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+@Stateless
+public class UserLocalServiceImpl extends GenericLocalServiceImpl<User, Long>implements UserLocalService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(UserLocalServiceImpl.class);
+
+	private UserDao userDao;
+	private UserGroupDao userGroupDao;
+
+	@Inject
+	private RoleLocalService roleLocalService;
+
+	@Inject
+	private PermissionChecker permissionCheckerAdaptor;
+
+	private static BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+	@Inject
+	public void setUserGroupDao(UserGroupDao userGroupDao) {
+		this.userGroupDao = userGroupDao;
+	}
+
+	@Inject
+	public void setUserDao(UserDao userDao) {
+		this.dao = userDao;
+		this.userDao = userDao;
+	}
+
+	@Override
+	public UserVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		log.trace("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		UserVO userVO = (UserVO) baseVO;
+
+		try {
+
+			User user = null;
+
+			// validate firstName and lastName and userName and UserGroup
+			String firstName = userVO.getFirstName();
+			if (Validator.isNull(firstName)) {
+				throw new ParvanRecoverableException("user.firstName", ErrorCode.FIELD_IS_EMPTY);
+			}
+
+			String lastName = userVO.getLastName();
+			if (Validator.isNull(lastName)) {
+				throw new ParvanRecoverableException("user.lastName", ErrorCode.FIELD_IS_EMPTY);
+			}
+
+			String userName = userVO.getUserName();
+			if (Validator.isNull(userName)) {
+				throw new ParvanRecoverableException("user.userName", ErrorCode.FIELD_IS_EMPTY);
+			}
+
+			Long userGroupId = userVO.getUserGroup().getId();
+			if (Validator.isNull(userGroupId)) {
+				throw new ParvanRecoverableException("user.userGroup", ErrorCode.FIELD_IS_EMPTY);
+			}
+
+			// email must be unique
+			if (Validator.isNotNull(userVO.getEmail())) {
+				user = userDao.findUserByEmail(userVO.getEmail());
+				if (Validator.isNotNull(user)) {
+					if (!user.getId().equals(userVO.getId())) {
+						throw new ParvanRecoverableException("user.email", ErrorCode.DATA_DUPLICATE);
+					}
+				}
+			}
+
+			boolean isNew = Validator.isNull(userVO.getId());
+
+			String planePassword = userVO.getPassword();
+
+			if (isNew) {
+				boolean isUserNameAvailable = userDao.isUserNameAvailable(userVO.getUserName());
+
+				if (!isUserNameAvailable) {
+					throw new ParvanRecoverableException(ErrorCode.OBJECT_EXIST);
+				}
+
+				user = new User();
+				user.fromVO(userVO);
+				user.setActive(true);
+
+				if (Validator.isNotNull(userVO.getPassword())) {// ECD-308
+																// client does
+																// not have
+																// password
+					user.setPassword(passwordEncoder.encode(userVO.getPassword()));
+				}
+
+			} else {
+				user = userDao.get(userVO.getId());
+
+				user.setId(userVO.getId());
+				// user.setUserName(userVO.getUserName());
+				// user.setPassword(userVO.getPassword());
+				user.setFirstName(userVO.getFirstName());
+				user.setLastName(userVO.getLastName());
+				user.setEmail(userVO.getEmail());
+				user.setVersion(userVO.getVersion());
+				user.setLocale(userVO.getLocale());
+				user.setZoneId(userVO.getZoneId());
+				user.setCalendar(CalendarEnum.fromValue(userVO.getCalendar()));
+				user.setActive(userVO.isActive());
+				user.setObjectAccessScopeId(userVO.getObjectAccessScopeId());
+
+				user.setCreateUserId(userVO.getCreateUserId());// TODO
+				user.setUpdateUserId(userVO.getUpdateUserId());// TODO
+
+			}
+
+			if (Validator.isNull(userVO.getRoles()) && Validator.isNull(user.getRoles())) {
+				// Role defaultRole = roleLocalService.getDefaultRole();//TODO
+
+				// user.addRole(defaultRole);
+			} else if (Validator.isNotNull(userVO.getRoles())) {
+				List<Long> roleIds = new ArrayList<Long>();
+
+				List<RoleVO> roleVOs = userVO.getRoles();
+				for (RoleVO roleVO : roleVOs) {
+					roleIds.add(roleVO.getId());
+				}
+
+				List<Role> roles = roleLocalService.findByIds(roleIds);
+
+				user.getRoles().clear();
+				user.getRoles().addAll(roles);
+			}
+
+			UserGroup userGroup = userGroupDao.get(userVO.getUserGroup().getId());
+
+			user.setUserGroup(userGroup);
+
+			// save entity
+			user = save(user, userInfo);
+
+			userVO = (UserVO) user.toVO();
+
+			if (Validator.isNotNull(user.getUserName())) {// it's a user, not a
+															// client
+
+				ClientCredentialsResourceDetails credentials = new ClientCredentialsResourceDetails();
+				credentials.setAccessTokenUri(Config.getProperty("accessTokenUri"));
+				credentials.setClientAuthenticationScheme(AuthenticationScheme.header);
+				credentials.setClientId(Config.getProperty("serviceClientId"));
+				credentials.setClientSecret(Config.getProperty("serviceClientSecret"));
+
+				URL uaaHost = new URL(Config.getProperty("uaaHost"));
+				UaaConnection connection = UaaConnectionFactory.getConnection(uaaHost, credentials);
+				UaaUserOperations operations = connection.userOperations();
+
+				if (isNew) {
+
+					ScimUser oldUser = operations.getUserByName(userVO.getUserName());
+
+					if (oldUser != null) {
+						operations.deleteUser(oldUser.getId());
+					}
+
+					ScimUser newUser = new ScimUser();
+					newUser.setUserName(userVO.getUserName());
+					newUser.setName(new ScimUser.Name(userVO.getFirstName(), userVO.getLastName()));
+					newUser.setLocale(user.getLocale());
+
+					ScimUser.Email email = new ScimUser.Email();
+					email.setValue(userVO.getEmail());
+
+					newUser.setEmails(Collections.singletonList(email));
+
+					ScimUser.PhoneNumber phone = new ScimUser.PhoneNumber();
+					// phone.setValue(userVO.getContact().getTel());
+					newUser.setPhoneNumbers(Collections.singletonList(phone));
+					newUser.setPassword(planePassword);
+					newUser.setExternalId(String.valueOf(userVO.getId()));
+					newUser.setActive(userVO.isActive());
+
+					newUser.setZoneId("uaa");
+
+					ScimUser createdUser = operations.createUser(newUser);
+					if (createdUser.getId() == null) {
+						throw new ParvanServiceException(ErrorCode.UAA_PROBLEM);
+					}
+
+				} else {
+					ScimUser oldUser = operations.getUserByName(userVO.getUserName());
+
+					oldUser.setName(new ScimUser.Name(userVO.getFirstName(), userVO.getLastName()));
+
+					ScimUser.Email email = new ScimUser.Email();
+					email.setValue(userVO.getEmail());
+
+					oldUser.setEmails(Collections.singletonList(email));
+
+					ScimUser.PhoneNumber phone = new ScimUser.PhoneNumber();
+					// phone.setValue(userVO.getContact().getTel());
+					oldUser.setPhoneNumbers(Collections.singletonList(phone));
+					oldUser.setExternalId(String.valueOf(userVO.getId()));
+					oldUser.setLocale(user.getLocale());
+					oldUser.setActive(userVO.isActive());
+					// oldUser.setPassword(userVO.getPassword());
+
+					// oldUser.setZoneId("uaa");
+
+					ScimUser modifiedUser = operations.updateUser(oldUser);
+					if (modifiedUser.getId() == null) {
+						throw new ParvanServiceException(ErrorCode.UAA_PROBLEM);
+					}
+				}
+			}
+
+			userVO = (UserVO) user.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+
+		return userVO;
+	}
+
+	@Override
+	public void changeRoles(long userId, long[] roleIds, UserInfo userInfo) throws ParvanServiceException {
+		log.trace("Entering changeRoles(userId={}, roleIds={}, userInfo={})", userId, roleIds, userInfo);
+
+		try {
+
+			User user = userDao.get(userId);
+
+			List<Long> list = new ArrayList<>();
+			for (long roleId : roleIds) {
+				list.add(roleId);
+			}
+
+			List<Role> roles = roleLocalService.findByIds(list);
+
+			user.getRoles().clear();
+			user.getRoles().addAll(roles);
+
+			// save entity
+			user = save(user, userInfo);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while change user roles.", e);
+		}
+	}
+
+	@Override
+	public void changePass(String newPassword, String confirmNewPassword, String currentPassword, UserInfo userInfo) throws ParvanServiceException {
+		log.trace("Entering save(id={}, newPassword={}, confirmNewPassword={},currentPassword={}, userInfo={})", userInfo.getUserId(), newPassword,
+				confirmNewPassword, currentPassword, userInfo);
+
+		try {
+
+			if (passwordEncoder.matches(newPassword, confirmNewPassword)) {
+				User user = userDao.get(userInfo.getUserId());
+
+				// check password policy
+				if (Validator.isNull(newPassword)) {
+					throw new ParvanServiceException(ErrorCode.FIELD_IS_EMPTY);
+				}
+
+				// set new password
+				user.setPassword(passwordEncoder.encode(newPassword));
+
+				// save
+				save(user, userInfo);
+
+				ClientCredentialsResourceDetails credentials = new ClientCredentialsResourceDetails();
+				credentials.setAccessTokenUri(Config.getProperty("accessTokenUri"));
+				credentials.setClientAuthenticationScheme(AuthenticationScheme.header);
+				credentials.setClientId(Config.getProperty("serviceClientId"));
+				credentials.setClientSecret(Config.getProperty("serviceClientSecret"));
+
+				URL uaaHost = new URL(Config.getProperty("uaaHost"));
+				UaaConnection connection = UaaConnectionFactory.getConnection(uaaHost, credentials);
+				UaaUserOperations operations = connection.userOperations();
+
+				ScimUser scimUser = operations.getUserByName(user.getUserName());
+
+				credentials = new ClientCredentialsResourceDetails();
+				credentials.setAccessTokenUri(Config.getProperty("accessTokenUri"));
+				credentials.setClientAuthenticationScheme(AuthenticationScheme.header);
+				credentials.setClientId("login");
+				credentials.setClientSecret("loginsecret");
+
+				uaaHost = new URL(Config.getProperty("uaaHost"));
+				connection = UaaConnectionFactory.getConnection(uaaHost, credentials);
+				operations = connection.userOperations();
+
+				operations.changeUserPassword(scimUser.getId(), newPassword);
+			} else {
+				throw new ParvanServiceException(ErrorCode.DATA_IS_INVALID);
+			}
+		} catch (ParvanDaoException e) {
+			throw new ParvanServiceException(ErrorCode.OBJECT_NOT_FOUND);
+		} catch (MalformedURLException e) {
+			throw new ParvanServiceException(ErrorCode.UAA_PROBLEM);
+		}
+
+		// LOG
+		log.debug("Leaving method changePassword()");
+
+	}
+
+	@Override
+	public void resetPassword(Long id, String newPassword, UserInfo ecUserInfo) throws ParvanServiceException {
+		// LOG
+		log.debug("Entering resetPassword( id={}, userInfo={})", id, ecUserInfo);
+
+		try {
+			User user = userDao.get(id);
+
+			// check password policy
+			if (Validator.isNull(newPassword)) {
+				// newPassword = user.getUserName();// FIXME it's not safe
+				throw new ParvanServiceException(ErrorCode.FIELD_IS_EMPTY);
+			}
+
+			// set new password
+			user.setPassword(passwordEncoder.encode(newPassword));
+
+			// save
+			save(user, ecUserInfo);
+
+			ClientCredentialsResourceDetails credentials = new ClientCredentialsResourceDetails();
+			credentials.setAccessTokenUri(Config.getProperty("accessTokenUri"));
+			credentials.setClientAuthenticationScheme(AuthenticationScheme.header);
+			credentials.setClientId(Config.getProperty("serviceClientId"));
+			credentials.setClientSecret(Config.getProperty("serviceClientSecret"));
+
+			URL uaaHost = new URL(Config.getProperty("uaaHost"));
+			UaaConnection connection = UaaConnectionFactory.getConnection(uaaHost, credentials);
+			UaaUserOperations operations = connection.userOperations();
+
+			ScimUser scimUser = operations.getUserByName(user.getUserName());
+
+			credentials = new ClientCredentialsResourceDetails();
+			credentials.setAccessTokenUri(Config.getProperty("accessTokenUri"));
+			credentials.setClientAuthenticationScheme(AuthenticationScheme.header);
+			credentials.setClientId("login");
+			credentials.setClientSecret("loginsecret");
+
+			uaaHost = new URL(Config.getProperty("uaaHost"));
+			connection = UaaConnectionFactory.getConnection(uaaHost, credentials);
+			operations = connection.userOperations();
+
+			operations.changeUserPassword(scimUser.getId(), newPassword);
+
+		} catch (ParvanDaoException e) {
+			throw new ParvanServiceException(ErrorCode.OBJECT_NOT_FOUND);
+		} catch (MalformedURLException e) {
+			throw new ParvanServiceException(ErrorCode.UAA_PROBLEM);
+		}
+
+		// LOG
+		log.debug("Leaving method resetPassword()");
+	}
+
+	@Override
+	public User loadUserByUsername(String username) throws ObjectNotFoundException {
+		log.trace("Entering loadUserByUsername( username={})", username);
+
+		User user;
+		try {
+			user = userDao.loadUserByUsername(username);
+			Hibernate.initialize(user.getRoles());
+
+		} catch (Exception e) {
+			log.error("no user exust with username:" + username, e);
+			throw new ObjectNotFoundException();
+		}
+
+		log.trace("Leaving method loadUserByUsername()");
+
+		return user;
+	}
+
+	@Override
+	protected PermissionChecker getPermissionCheckerAdaptor() {
+		return permissionCheckerAdaptor;
+	}
+
+}

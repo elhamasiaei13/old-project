@@ -1,0 +1,235 @@
+package com.parvanpajooh.accounting.model;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.parvanpajooh.accounting.model.enums.AccountTypeNatureEnum;
+import com.parvanpajooh.accounting.model.vo.AccountTypeVO;
+import com.parvanpajooh.accounting.model.vo.AccountVO;
+import com.parvanpajooh.accounting.model.vo.GroupVO;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.ecourier.model.BaseModel;
+
+/**
+ * @author moosa
+ *
+ */
+@Entity
+@XmlRootElement
+@Table(name = "accounttype_tbl")
+public class AccountType extends BaseModel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4036378126742804100L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@NotNull
+	@NotEmpty
+	@Column(unique = true)
+	private String name;
+	
+
+	@Enumerated(EnumType.STRING)
+	private AccountTypeNatureEnum nature;
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "accountType")
+	private Set<Account> account;
+
+	private boolean active;
+
+	@Version
+	private Integer version;
+
+	@Override
+	public AccountTypeVO toVOLite() {
+		AccountTypeVO vo = new AccountTypeVO();
+
+		vo.setId(this.id);
+		vo.setName(name);
+		vo.setActive(this.active);
+		vo.setVersion(this.version);
+		vo.setNature(this.nature.value);
+
+		setAuditToVO(vo);
+
+		return vo;
+	}
+
+	@Override
+	public AccountTypeVO toVO() {
+
+		AccountTypeVO accountTypeVO = (AccountTypeVO) toVOLite();
+		
+		if (Validator.isNotNull(this.account)) {
+
+			List<AccountVO> list = new ArrayList<AccountVO>();
+
+			for (Account account : this.account) {
+				list.add(account.toVOLite());
+			}
+			accountTypeVO.setAccount(list);
+		}
+
+		return accountTypeVO;
+	}
+
+	@Override
+	public void fromVO(BaseVO baseVO) {
+
+		AccountTypeVO vo = (AccountTypeVO) baseVO;
+
+		this.id = vo.getId();
+		this.name = vo.getName();
+		this.nature = AccountTypeNatureEnum.fromValue(vo.getNature());
+
+		getAuditFromVO(vo);
+	}
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}	
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the nature
+	 */
+	public AccountTypeNatureEnum getNature() {
+		return nature;
+	}
+
+	/**
+	 * @param nature the nature to set
+	 */
+	public void setNature(AccountTypeNatureEnum nature) {
+		this.nature = nature;
+	}
+
+	/**
+	 * @return the account
+	 */
+	public Set<Account> getAccount() {
+		return account;
+	}
+
+	/**
+	 * @param account the account to set
+	 */
+	public void setAccount(Set<Account> account) {
+		this.account = account;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version
+	 *            the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * @param active
+	 *            the active to set
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "AccountType [id=" + id + ", active=" + active + ", version=" + version + "]";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof AccountType)) {
+			return false;
+		}
+
+		final AccountType obj = (AccountType) o;
+
+		return new EqualsBuilder().append(this.id, obj.getId()).isEquals();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(-970989579, 1884842917).append(this.id).toHashCode();
+	}
+
+}

@@ -1,0 +1,2720 @@
+package com.parvanpajooh.shipment.rest;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.ejb.EJB;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
+import javax.ws.rs.WebApplicationException;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import org.thymeleaf.extras.springsecurity4.auth.AuthUtils;
+
+import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Result;
+import com.ibm.icu.math.BigDecimal;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.common.auth.BaseRestController;
+import com.parvanpajooh.common.util.IpUtils;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.DateUtil;
+import com.parvanpajooh.commons.util.LocaleUtil;
+import com.parvanpajooh.commons.util.StringUtil;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.commons.util.ZoneIdUtil;
+import com.parvanpajooh.ecourier.android.model.DashboardDTO;
+import com.parvanpajooh.ecourier.android.model.ManifestDTO;
+import com.parvanpajooh.ecourier.android.model.PackingItemDTO;
+import com.parvanpajooh.ecourier.android.model.PackingItemStateDTO;
+import com.parvanpajooh.ecourier.android.model.PaymentMethodDTO;
+import com.parvanpajooh.ecourier.android.model.PickupShipmentDTO;
+import com.parvanpajooh.ecourier.android.model.ShipmentDTO;
+import com.parvanpajooh.ecourier.android.model.UldDTO;
+import com.parvanpajooh.ecourier.model.criteria.EcCarrierCriteria;
+import com.parvanpajooh.ecourier.model.criteria.EcProductCriteria;
+import com.parvanpajooh.ecourier.model.enums.EcProductStatus;
+import com.parvanpajooh.ecourier.model.enums.EcRoleNames;
+import com.parvanpajooh.ecourier.model.vo.EcAgentVO;
+import com.parvanpajooh.ecourier.model.vo.EcCarrierVO;
+import com.parvanpajooh.ecourier.model.vo.EcGeoEntityVO;
+import com.parvanpajooh.ecourier.model.vo.EcProductVO;
+import com.parvanpajooh.ecourier.model.vo.EcUserVO;
+import com.parvanpajooh.shipment.model.criteria.ManifestCriteria;
+import com.parvanpajooh.shipment.model.criteria.PackingItemCriteria;
+import com.parvanpajooh.shipment.model.criteria.PaymentMethodCriteria;
+import com.parvanpajooh.shipment.model.criteria.ShipmentCriteria;
+import com.parvanpajooh.shipment.model.enums.AttachmentType;
+import com.parvanpajooh.shipment.model.enums.ChargeParty;
+import com.parvanpajooh.shipment.model.enums.ManifestState;
+import com.parvanpajooh.shipment.model.enums.ManifestType;
+import com.parvanpajooh.shipment.model.enums.PickupState;
+import com.parvanpajooh.shipment.model.vo.AttachmentVO;
+import com.parvanpajooh.shipment.model.vo.DeliveryVO;
+import com.parvanpajooh.shipment.model.vo.DeviceVO;
+import com.parvanpajooh.shipment.model.vo.GunnyVO;
+import com.parvanpajooh.shipment.model.vo.ManifestVO;
+import com.parvanpajooh.shipment.model.vo.PackingItemStateVO;
+import com.parvanpajooh.shipment.model.vo.PackingItemVO;
+import com.parvanpajooh.shipment.model.vo.PaymentMethodVO;
+import com.parvanpajooh.shipment.model.vo.PickupScheduleVO;
+import com.parvanpajooh.shipment.model.vo.PickupVO;
+import com.parvanpajooh.shipment.model.vo.ShipmentStateHistoryVO;
+import com.parvanpajooh.shipment.model.vo.ShipmentStateVO;
+import com.parvanpajooh.shipment.model.vo.ShipmentTrackInfoVO;
+import com.parvanpajooh.shipment.model.vo.ShipmentVO;
+import com.parvanpajooh.shipment.service.DeviceService;
+import com.parvanpajooh.shipment.service.EcAgentAndUserService;
+import com.parvanpajooh.shipment.service.EcRateAndRouteService;
+import com.parvanpajooh.shipment.service.ManifestService;
+import com.parvanpajooh.shipment.service.PackingItemService;
+import com.parvanpajooh.shipment.service.PaymentMethodService;
+import com.parvanpajooh.shipment.service.PickupScheduleService;
+import com.parvanpajooh.shipment.service.ShipmentService;
+import com.parvanpajooh.shipment.service.ShipmentStateService;
+
+@RestController
+@RequestMapping("/rest")
+public class AppRestController extends BaseRestController {
+	
+	protected final Logger log = LoggerFactory.getLogger(getClass());
+
+	@EJB(mappedName="java:global/ecourier-ear/shipment-ejb/PaymentMethodServiceImpl") 
+	private PaymentMethodService paymentMethodService;
+	
+	@EJB(mappedName="java:global/ecourier-ear/shipment-ejb/ShipmentStateServiceImpl") 
+	private ShipmentStateService shipmentStateService;
+	
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/EcRateAndRouteServiceImpl")
+	private EcRateAndRouteService ecRateAndRouteService;
+	
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/ShipmentServiceImpl")
+	private ShipmentService shipmentService;
+	
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/PackingItemServiceImpl")
+	private PackingItemService packingItemService;
+	
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/PickupScheduleServiceImpl")
+	private PickupScheduleService pickupScheduleService;
+	
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/ManifestServiceImpl")
+	private ManifestService manifestService;
+	
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/DeviceServiceImpl")
+	private DeviceService deviceService;
+	
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/EcAgentAndUserServiceImpl")
+	private EcAgentAndUserService ecAgentAndUserService;
+	
+	@Autowired
+	private MessageSource messageSource;
+	
+	private final int minAppVersion = 173;
+	
+	// FIXME Mo: replace hard coded String
+	private final static String STATE_OUT_FOR_DELIVERY = "OUT_FOR_DELIVERY";
+	private final static String STATE_DELIVERED = "DELIVERED";
+	
+	private final static String ACTION_INSCAN = "IN_SCAN";
+	private final static String ACTION_COURIER_SCAN = "COURIER_SCAN";
+	
+	private final static String KEY_IMEI = "IMEI";
+	private final static String KEY_APP_VERSION = "appVersion";
+	private final static String KEY_GEO_LAT = "geoLat";
+	private final static String KEY_GEO_LNG = "geoLng";
+	
+	/*@RequestMapping(value="/version", method = RequestMethod.GET)
+	public Map<String, Object> getVersion(@Context HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		Map<String, Object> data = new HashMap<String, Object>();
+		
+		data.put("id", "1");
+		data.put("version", "1.1");
+		data.put("code", "11");
+		data.put("content", "just new");
+		data.put("time", "2014-12-23 12:01:45");
+		data.put("appType", "android-mobile");
+		data.put("downloadUrl", "http://192.168.0.7/ecourier-web/resources/apk/ecourier.apk");
+		
+		result.put("success", true);
+		result.put("error_desc", "");
+		result.put("data", data);
+			
+		return result;
+	}*/
+
+	@RequestMapping(value = "/paymentMethods", method = RequestMethod.GET)
+	public List<PaymentMethodDTO> getPaymentMethodList(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getPaymentMethodList(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<PaymentMethodDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			
+			UserInfo userInfo = getUserInfo(request);
+			
+			/*try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}*/
+			
+			PaymentMethodCriteria paymentMethodCriteria = new PaymentMethodCriteria();
+			paymentMethodCriteria.setActive(true);
+			
+			List<BaseVO> paymentMethodVOs = paymentMethodService.findByCriteria(userInfo, paymentMethodCriteria);
+			
+ 			if (paymentMethodVOs.isEmpty()) {
+ 				result = Collections.emptyList();
+ 			} else {
+ 				result = new ArrayList<>(paymentMethodVOs.size());
+ 				for (BaseVO baseVO : paymentMethodVOs) {
+ 					PaymentMethodVO pm = (PaymentMethodVO) baseVO;
+ 					result.add(_toPaymentMethodDTO(pm));
+ 				}
+ 			}
+			
+		} catch (Exception e) {
+			log.error("error in paymentMethods", e);
+			result = Collections.emptyList();
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/carriers", method = RequestMethod.GET)
+	public List<EcCarrierVO> getCarrierList(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getCarrierList(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<EcCarrierVO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			EcCarrierCriteria carrierCriteria = new EcCarrierCriteria();
+			
+			PageList<EcCarrierVO> pageList = ecRateAndRouteService.findCarrierByCriteria(getUserInfo(request), carrierCriteria, 0, Integer.MAX_VALUE, SortDirectionEnum.Ascending, null);
+			
+			result = pageList.getElements();
+			
+		} catch (Exception e) {
+			log.error("error in getCarrierList", e);
+			result = new ArrayList<>();
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/products", method = RequestMethod.GET)
+	public List<BaseVO> getProductList(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getProductList(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<BaseVO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			
+			UserInfo userInfo = getUserInfo(request);
+			
+			/*try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}*/
+			
+			EcProductCriteria productCriteria = new EcProductCriteria();
+			productCriteria.setActive(true);
+			productCriteria.setStatus(EcProductStatus.PUBLISHED);
+			
+			result = ecRateAndRouteService.findProductByCriteria(userInfo, productCriteria, 0, 100, SortDirectionEnum.Ascending, null);
+			
+		} catch (Exception e) {
+			log.error("error in getDashboard", e);
+			result = new ArrayList<>();
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/dashboard", method = RequestMethod.GET)
+	public DashboardDTO getDashboard(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getDashboard(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		DashboardDTO result = new DashboardDTO();
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			
+			UserInfo userInfo = getUserInfo(request);
+			UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+			
+			/*try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}*/
+			
+			Long currentAgentId = userInfoWrapper.getAgentId();
+			Long currentUserId = userInfo.getUserId();
+			
+			ManifestCriteria manifestCriteria = new ManifestCriteria();
+			
+			boolean isCourier = hasRole(EcRoleNames.ROLE_COURIER.name());
+			
+			if (isCourier) {
+				manifestCriteria.setAssignedCourierUserId(currentUserId);
+			} else {
+				manifestCriteria.setOriginAgentId(currentAgentId);
+				manifestCriteria.setDestinationAgentId(currentAgentId);
+				manifestCriteria.setAgentOrSearch(true);
+				if(Validator.isNotNull(userInfoWrapper.getAgentChildrenIds())){
+					manifestCriteria.setDestinationAgentChildrenIds(userInfoWrapper.getAgentChildrenIds());
+					manifestCriteria.setOriginAgentChildrenIds(userInfoWrapper.getAgentChildrenIds());
+				}
+			}
+			
+			manifestCriteria.setState(new ManifestState[]{ManifestState.ISSUED});
+			manifestCriteria.setType(new ManifestType[]{ManifestType.DELIVERY});
+			manifestCriteria.setActive(true);
+			
+			Integer assignedDeliverManifests = manifestService.countByCriteria(userInfo, manifestCriteria);
+			
+			/////////////////////////////////////////////////////////////////////
+			
+			manifestCriteria.setState(new ManifestState[]{ManifestState.COURIER_SCANNED});
+			manifestCriteria.setActive(null);
+			
+			PackingItemStateVO piState = new PackingItemStateVO();
+			piState.setCode(STATE_OUT_FOR_DELIVERY);
+			Set<PackingItemStateVO> piStates = new HashSet<>();
+			piStates.add(piState);
+			manifestCriteria.setPackingItemStates(piStates);
+			
+			Integer assignedDeliverPackingItems = manifestService.countPackingItems(userInfo, manifestCriteria).intValue();
+
+			/////////////////////////////////////////////////////////////////////
+
+			manifestCriteria.setPackingItemStates(null);
+			manifestCriteria.setType(new ManifestType[]{ManifestType.TRANSIT});
+			
+			Integer assignedTransitManifests = manifestService.countByCriteria(userInfo, manifestCriteria);
+			
+			/////////////////////////////////////////////////////////////////////
+			
+			manifestCriteria.setPackingItemStates(null);
+			manifestCriteria.setType(new ManifestType[]{ManifestType.PICK_UP});
+			
+			Integer assignedPickupManifests = manifestService.countByCriteria(userInfo, manifestCriteria);
+			
+			Integer assignedPickupShipments = 0;
+			
+			/////////////////////////////////////////////////////////////////////
+			
+			result.setAssignedDeliverManifests(assignedDeliverManifests);
+			result.setAssignedDeliverShipments(assignedDeliverPackingItems);
+			result.setAssignedTransitManifests(assignedTransitManifests);
+			result.setAssignedPickupManifests(assignedPickupManifests);
+			result.setAssignedPickupShipments(assignedPickupShipments);
+			
+			
+		} catch (Exception e) {
+			log.error("error in loading dashboard data", e);
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/shipments", method = RequestMethod.GET)
+	public List<ShipmentDTO> getShipmentList(HttpServletRequest request) throws IOException {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getShipmentList(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<ShipmentDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			ShipmentCriteria criteria = new ShipmentCriteria();
+			
+			// FIXME Mo: remove hard coded String
+			ShipmentStateVO draftState = new ShipmentStateVO();
+			ShipmentStateVO voidedState = new ShipmentStateVO();
+			ShipmentStateVO deliveredState = new ShipmentStateVO();
+			draftState.setCode("DRAFT");
+			voidedState.setCode("VOIDED");
+			deliveredState.setCode("DELIVERED");
+			List<ShipmentStateVO> shipmentStates = new ArrayList<ShipmentStateVO>();
+			shipmentStates.add(draftState);
+			shipmentStates.add(voidedState);
+			shipmentStates.add(deliveredState);
+			criteria.setNotCurrentState(shipmentStates);
+			
+			List<ShipmentVO> shipmentVOs = shipmentService.findFullByCriteria(userInfo, criteria, 0, 100, SortDirectionEnum.Descending, "shippingDate");
+			
+			ServletContext servletContext = request.getServletContext();
+			
+			Map<String, EcGeoEntityVO> countryGeoEntities = (Map<String, EcGeoEntityVO>) servletContext.getAttribute("countries");
+			Map<String, EcGeoEntityVO> stateGeoEntities = (Map<String, EcGeoEntityVO>) servletContext.getAttribute("states");
+			Map<String, EcGeoEntityVO> cityGeoEntities = (Map<String, EcGeoEntityVO>) servletContext.getAttribute("cities");
+			
+			String lang = request.getLocale().getLanguage();
+			
+			Map<Long, EcProductVO> productsMap = new HashMap<Long, EcProductVO>();
+			
+			result = new ArrayList<ShipmentDTO>(shipmentVOs.size());
+			for (ShipmentVO shipmentVO : shipmentVOs) {
+				
+				Long productId = shipmentVO.getProductId();
+	    		if (Validator.isNotNull(productId)) {
+	    			
+	    			EcProductVO product = productsMap.get(productId);
+	    			if(product == null){
+	    				product = ecRateAndRouteService.getProduct(userInfo, productId);
+	    				productsMap.put(productId, product);
+	    			}
+	    			
+	    			shipmentVO.setProductName(product.getName());
+	    		}
+				
+				shipmentVO.setShipperCountryName( _getGeoEntityName(countryGeoEntities, shipmentVO.getShipperCountryCode(), lang) );
+				shipmentVO.setShipperStateName( _getGeoEntityName(stateGeoEntities, shipmentVO.getShipperStateCode(), lang) );
+				shipmentVO.setShipperCityName( _getGeoEntityName(cityGeoEntities, shipmentVO.getShipperCityCode(), lang) );
+				
+				shipmentVO.setConsigneeCountryName( _getGeoEntityName(countryGeoEntities, shipmentVO.getConsigneeCountryCode(), lang) );
+				shipmentVO.setConsigneeStateName( _getGeoEntityName(stateGeoEntities, shipmentVO.getConsigneeStateCode(), lang) );
+				shipmentVO.setConsigneeCityName( _getGeoEntityName(cityGeoEntities, shipmentVO.getConsigneeCityCode(), lang) );
+				
+				result.add(_toShipmentDTO(shipmentVO, userInfo));
+			}
+			
+		} catch (Exception e) {
+			log.error("error in getShipmentList", e);
+			result = new ArrayList<>();
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/deliveryShipments", method = RequestMethod.GET)
+	public List<ShipmentDTO> getDeliveryShipmentList(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getDeliveryShipmentList(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			List<ShipmentDTO> result;
+
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			Long currentUserId = userInfo.getUserId();
+			
+			PackingItemCriteria criteria = new PackingItemCriteria();
+			criteria.setCurrentAssignedUserId(currentUserId);
+			criteria.setCurrentStateCode(STATE_OUT_FOR_DELIVERY);
+			
+			List<BaseVO> baseVOs = packingItemService.findByCriteria(userInfo, criteria);
+			List<PackingItemVO> pis = new ArrayList<>(baseVOs.size());
+			
+			baseVOs.forEach( vo -> pis.add((PackingItemVO) vo) );
+			
+			Map<String, List<PackingItemVO>> pisPerWb = pis.stream()
+					.collect(Collectors.groupingBy(PackingItemVO::getWaybillNumber, Collectors.toList()));
+			
+			result = new ArrayList<>(pisPerWb.size());
+			pisPerWb.forEach((wb,v) -> {
+				try {
+					ShipmentDTO shipment = _toShipmentDTO( shipmentService.findByWaybillNumber(userInfo, wb), userInfo );
+					shipment.setCurrentStateCode(STATE_OUT_FOR_DELIVERY);
+					shipment.setTotalPieces(v.size());
+					List<PackingItemDTO> pidtos = new ArrayList<>(v.size());
+					v.forEach(p -> pidtos.add(_toPackingItemDTO(p)));
+					shipment.setPackingItems(pidtos);
+					result.add(shipment);
+				} catch (Exception e) {
+					log.error(e.getMessage());
+				}
+			});
+			return result;
+		} catch (Exception e) {
+			log.error("Error in loading shipments of deliver manifest", e);
+			return Collections.emptyList();
+		}
+	}
+	
+	@RequestMapping(value = "/notDeliveredShipments", method = RequestMethod.GET)
+	public List<ShipmentDTO> getNotDeliveredShipmentList(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getNotDeliveredShipmentList(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<ShipmentDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			
+			boolean isCourier = hasRole(EcRoleNames.ROLE_COURIER.name());
+			
+			if(!isCourier){
+				return new ArrayList<ShipmentDTO>();
+			}
+			
+			Long currentUserId = userInfo.getUserId();
+			
+			ShipmentStateVO state = new ShipmentStateVO();
+			state.setCode("NOT_DELIVERED");
+			
+			ShipmentCriteria criteria = new ShipmentCriteria();
+			criteria.setCurrentAssignedUserId(currentUserId);
+			criteria.setCurrentState(state);
+			
+			List<ShipmentVO> shipmentVOs = shipmentService.findFullByCriteria(userInfo, criteria, 0, 100, SortDirectionEnum.Ascending, "id");
+			if (shipmentVOs != null && !shipmentVOs.isEmpty()) {
+				result = new ArrayList<>(shipmentVOs.size());
+				for (ShipmentVO shipmentVO : shipmentVOs) {
+					result.add(_toShipmentDTO(shipmentVO, userInfo));
+				}
+			} else {
+				result = Collections.emptyList();
+			}
+			
+		} catch (Exception e) {
+			log.error("Error in loading not deliverd shipments", e);
+			result = new ArrayList<>();
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/unsettledShipments", method = RequestMethod.GET)
+	public List<ShipmentDTO> getUnsettledShipmentList(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getNotDeliveredShipmentList(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<ShipmentDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			boolean isCourier = hasRole(EcRoleNames.ROLE_COURIER.name());
+			
+			if(!isCourier){
+				return new ArrayList<ShipmentDTO>();
+			}
+			
+			List<ShipmentVO> shipmentVOs = shipmentService.findUnsettled(userInfo, userInfo.getUserId());
+			
+			result = new ArrayList<ShipmentDTO>(shipmentVOs.size());
+			for (ShipmentVO shipmentVO : shipmentVOs) {
+				ShipmentDTO dto = new ShipmentDTO();
+				dto.setId(shipmentVO.getId());
+				dto.setTotalAmount(shipmentVO.getTotalAmount());
+				dto.setChargeParty(shipmentVO.getChargeParty().name());
+				dto.setConsigneeAddress(shipmentVO.getConsigneeAddress());
+				dto.setConsigneeCityCode(shipmentVO.getConsigneeCityName());
+				dto.setConsigneeName(shipmentVO.getConsigneeName());
+				dto.setWaybillNumber(shipmentVO.getWaybillNumber());
+				dto.setCurrentStateCode(shipmentVO.getCurrentState().getCode());
+				
+				if(shipmentVO.getCurrentState().getCode().equals("PICKEDUP")){
+					dto.setConsigneeAddress(shipmentVO.getShipperAddress());
+					dto.setConsigneeCityCode(shipmentVO.getShipperCityName());
+					dto.setConsigneeName(shipmentVO.getShipperName());
+				}
+				
+				result.add(dto);
+			}
+			
+		} catch (Exception e) {
+			log.error("Error in loading Unsettled shipments", e);
+			result = new ArrayList<ShipmentDTO>();
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/pickupShipments", method = RequestMethod.GET)
+	public List<PickupShipmentDTO> getPickupShipmentList(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getPickupShipmentList(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<PickupShipmentDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			boolean isCourier = hasRole(EcRoleNames.ROLE_COURIER.name());
+			
+			if(!isCourier){
+				return new ArrayList<PickupShipmentDTO>();
+			}
+			
+			/*ManifestCriteria manifestCriteria = new ManifestCriteria();
+			manifestCriteria.setAssignedCourier(currentUserActor);
+			manifestCriteria.setType(new ManifestType[]{ManifestType.DELIVERY});
+			//manifestCriteria.setActive(true);
+			
+			// FIXME Mo: remove hard coded String
+			ShipmentStateVO state = new ShipmentStateVO();
+			state.setCode("OUT_FOR_DELIVERY");
+			List<ShipmentStateVO> shipmentStates = new ArrayList<ShipmentStateVO>();
+			shipmentStates.add(state);
+			manifestCriteria.setShipmentStates(shipmentStates);
+			
+			List<ShipmentVO> shipmentVOs = manifestService.findShipments(userInfo, manifestCriteria);*/
+			
+			Long currentUserId = userInfo.getUserId();
+			
+			ShipmentStateVO state = new ShipmentStateVO();
+			state.setCode("OUT_FOR_PICKUP");
+			
+			ShipmentCriteria criteria = new ShipmentCriteria();
+			criteria.setCurrentAssignedUserId(currentUserId);
+			criteria.setCurrentState(state);
+			
+			List<ShipmentVO> shipmentVOs = shipmentService.findFullByCriteria(userInfo, criteria, 0, 500, SortDirectionEnum.Ascending, "currentPickupSchedule.fromDateTime");
+			
+			if (shipmentVOs != null && !shipmentVOs.isEmpty()) {
+				result = new ArrayList<PickupShipmentDTO>(shipmentVOs.size());
+				for (ShipmentVO shipmentVO : shipmentVOs) {
+					result.add(_ToPickupShipmentDTO(shipmentVO, userInfo));
+				}
+			} else {
+				result = Collections.emptyList();
+			}
+			
+		} catch (Exception e) {
+			log.error("Error in loading pickup shipments", e);
+			result = new ArrayList<PickupShipmentDTO>();
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/pickedupShipments", method = RequestMethod.GET)
+	public List<PickupShipmentDTO> getPickedupShipmentList(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getPickedupShipmentList(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<PickupShipmentDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			boolean isCourier = hasRole(EcRoleNames.ROLE_COURIER.name());
+			
+			if(!isCourier){
+				return new ArrayList<PickupShipmentDTO>();
+			}
+			
+			Long currentUserId = userInfo.getUserId();
+			
+			ShipmentStateVO state = new ShipmentStateVO();
+			state.setCode("PICKEDUP");
+			
+			ShipmentCriteria criteria = new ShipmentCriteria();
+			criteria.setCurrentAssignedUserId(currentUserId);
+			criteria.setCurrentState(state);
+			
+			List<ShipmentVO> shipmentVOs = shipmentService.findFullByCriteria(userInfo, criteria, 0, 500, SortDirectionEnum.Ascending, "currentPickupSchedule.resolutionDate");
+			
+			if (shipmentVOs != null && !shipmentVOs.isEmpty()) {
+				result = new ArrayList<PickupShipmentDTO>(shipmentVOs.size());
+				for (ShipmentVO shipmentVO : shipmentVOs) {
+					result.add(_ToPickupShipmentDTO(shipmentVO, userInfo));
+				}
+			} else {
+				result = Collections.emptyList();
+			}
+			
+		} catch (Exception e) {
+			log.error("Error in loading pickedup shipments", e);
+			result = new ArrayList<PickupShipmentDTO>();
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/manifest/ready/master", method = RequestMethod.GET)
+	public List<ManifestDTO> getReadyToMasterManifests(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getReadyToMasterManifests(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<ManifestDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+			
+			ManifestCriteria criteria = new ManifestCriteria();
+			
+			boolean isCourier = hasRole(EcRoleNames.ROLE_COURIER.name());
+			
+			if(isCourier){
+				// if current user is a courier, only list manifests that are assigned to it.
+				criteria.setAssignedCourierId(userInfo.getUserId());
+				
+			}
+			else {
+				// if current user is not courier, list manifests that its originated from its Agent,
+				// or its children's Agents.
+				criteria.setOriginAgentId(userInfoWrapper.getAgentId());
+				if(Validator.isNotNull(userInfoWrapper.getAgentChildrenIds())){
+					criteria.setOriginAgentChildrenIds(userInfoWrapper.getAgentChildrenIds());
+				}
+			}
+			// only manifests in ISSUED state can be mastered.
+			criteria.setState(new ManifestState[] {ManifestState.ISSUED, ManifestState.OFFLOADED});
+			criteria.setType(new ManifestType[] {ManifestType.TRANSIT});
+			criteria.setActive(true);
+			
+			List<BaseVO> manifestVOs = manifestService.findByCriteria(userInfo, criteria, 0, 20, SortDirectionEnum.Descending, "createDate");
+			
+			result = new ArrayList<ManifestDTO>(manifestVOs.size());
+			
+			Map<Long, String> personNameCache = new HashMap<>();
+			
+			for (BaseVO baseVO : manifestVOs) {
+				ManifestVO manifestVO = (ManifestVO) baseVO;
+				String createUserName = _getUserName(userInfo.getUserName(), manifestVO.getCreateUserId(), personNameCache);
+				manifestVO.setCreateUserName(createUserName);
+				result.add(_toManifestDTO(manifestVO, userInfo));
+			}
+			
+		} catch (Exception e) {
+			log.error("error in loading manifest", e);
+			result = new ArrayList<ManifestDTO>();
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/manifest/ready/departure", method = RequestMethod.GET)
+	public List<ManifestDTO> getReadyToDepartureManifests(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getReadyToDepartureManifests(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<ManifestDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+			
+			ManifestCriteria criteria = new ManifestCriteria();
+			
+			boolean isCourier = hasRole(EcRoleNames.ROLE_COURIER.name());
+			
+			if(isCourier){
+				// if current user is a courier, only list manifests that are assigned to it.
+				criteria.setAssignedCourierId(userInfoWrapper.getAgentId());
+				
+			}
+			else {
+				// if current user is not courier, list manifests that its originated from its Agent,
+				// or its children's Agents.
+				criteria.setOriginAgentId(userInfoWrapper.getAgentId());
+				if(Validator.isNotNull(userInfoWrapper.getAgentChildrenIds())){
+					criteria.setOriginAgentChildrenIds(userInfoWrapper.getAgentChildrenIds());
+				}
+			}
+			// only manifests in MASTERED state can be Departed.
+			criteria.setState(new ManifestState[] {ManifestState.MASTERED});
+			criteria.setType(new ManifestType[] {ManifestType.TRANSIT});
+			criteria.setActive(true);
+			
+			List<BaseVO> manifestVOs = manifestService.findByCriteria(userInfo, criteria, 0, 20, SortDirectionEnum.Descending, "createDate");
+			
+			result = new ArrayList<>(manifestVOs.size());
+			
+			Map<Long, String> personNameCache = new HashMap<>();
+			
+			for (BaseVO baseVO : manifestVOs) {
+				ManifestVO manifestVO = (ManifestVO) baseVO;
+				String createUserName = _getUserName(userInfo.getUserName(), manifestVO.getCreateUserId(), personNameCache);
+				manifestVO.setCreateUserName(createUserName);
+				result.add(_toManifestDTO(manifestVO, userInfo));
+			}
+			
+		} catch (Exception e) {
+			log.error("error in loading manifest", e);
+			result = new ArrayList<>();
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/manifest/ready/receive", method = RequestMethod.GET)
+	public List<ManifestDTO> getReadyToReceiveManifests(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getReadyToReceiveManifests(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<ManifestDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+			
+			ManifestCriteria criteria = new ManifestCriteria();
+			
+			// list manifests that its destination agent is user's agent.
+			criteria.setDestinationAgentId(userInfoWrapper.getAgentId());
+			
+			// only manifests is in DEPARTED state and is of TRANSIT type and (obviously!) active
+			criteria.setState(new ManifestState[] {ManifestState.DEPARTED});
+			criteria.setType(new ManifestType[] {ManifestType.TRANSIT});
+			criteria.setActive(true);
+			
+			List<BaseVO> manifestVOs = manifestService.findByCriteria(userInfo, criteria, 0, 20, SortDirectionEnum.Descending, "createDate");
+			
+			result = new ArrayList<>(manifestVOs.size());
+			Map<Long, String> personNameCache = new HashMap<>();
+			for (BaseVO baseVO : manifestVOs) {
+				ManifestVO manifestVO = (ManifestVO) baseVO;
+				manifestVO = manifestService.getFullManifest(userInfo, manifestVO.getId());
+				
+				String createUserName = _getUserName(userInfo.getUserName(), manifestVO.getCreateUserId(), personNameCache);
+				manifestVO.setCreateUserName(createUserName);
+				
+				List<GunnyVO> gunnyVOs = manifestVO.getGunnies();
+				if(Validator.isNotNull(gunnyVOs)){
+					/*for (GunnyVO gunnyVO : gunnyVOs) {
+						List<ShipmentVO> shipmentVOs = gunnyVO.getShipments();
+						List<ShipmentVO> newShipmentVOs = new ArrayList<ShipmentVO>();
+						if(Validator.isNotNull(shipmentVOs)){
+							for (ShipmentVO shipmentVO : shipmentVOs) {
+								shipmentVO = shipmentService.getFullShipment(userInfo, shipmentVO.getId());
+								newShipmentVOs.add(shipmentVO);
+							}
+						}
+						gunnyVO.setShipments(newShipmentVOs);
+					}*/
+				}
+				
+				result.add(_toPickupManifestDTO(manifestVO, userInfo));
+			}
+			
+		} catch (Exception e) {
+			log.error("error in loading manifest", e);
+			result = new ArrayList<ManifestDTO>();
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/shipment/received", method = RequestMethod.GET)
+	public List<ShipmentDTO> getReceivedShipments(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getReceivedShipments(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<ShipmentDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			ShipmentStateVO state = new ShipmentStateVO();
+			state.setCode("RECEIVED");
+			
+			ShipmentCriteria criteria = new ShipmentCriteria();
+			//criteria.setCurrentAssignedUser(userActorVO);
+			criteria.setCurrentState(state);
+			
+			List<ShipmentVO> shipmentVOs = shipmentService.findCompleteByCriteria(userInfo, criteria);
+			
+			result = new ArrayList<>(shipmentVOs.size());
+			for (ShipmentVO shipmentVO : shipmentVOs) {
+				result.add(_toShipmentDTO(shipmentVO, userInfo));
+			}
+			
+		} catch (Exception e) {
+			log.error("Error in loading shipments of deliver manifest", e);
+			result = new ArrayList<>();
+		}
+		
+		return result;
+	}
+	
+	private String _getUserName(String userName, long userId, Map<Long, String> personNameCache) throws ParvanServiceException
+	{
+		String personName = null;
+		if (Validator.isNotNull(userId)) {
+			personName = personNameCache.get(userId);
+			if (personName == null) {
+				/* FIXME 2016-12-13 personName EcUserVO person = loadUserVOById(userName, userId);
+				if (person != null) {
+					String lastNameLocal = person.getLastName();
+					StringBuilder sb = new StringBuilder();
+					sb.append(person.getFirstName());
+					if (Validator.isNotNull(lastNameLocal)) {
+						sb.append(StringPool.SPACE);
+						sb.append(lastNameLocal);
+					}
+					personName = sb.toString();							
+				}
+				personNameCache.put(userId, personName);*/
+				personNameCache.put(userId, "FIXME 2016-12-13 personName");
+			}
+		}
+		return personName;
+	}
+	
+	@RequestMapping(value = "/manifest/{id}/master", method = RequestMethod.POST)
+	public Map<String, Object> masterManifest(
+			@PathVariable("id") Long manifestId, 
+			@RequestBody Map<String, Object> params,
+			HttpServletRequest request, 
+			HttpServletResponse response) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering masterManifest(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		log.debug("recieved data : {}", params);
+		_checkAppVersion(appVersion);
+		String flightNumber = params.get("flightNumber").toString();
+        Long carrierId = new Long( params.get("carrierId").toString() );
+        String masterNumber = params.get("masterNumber").toString();
+        Double masterWeight = new Double( params.get("masterWeight").toString() );
+		BigDecimal masterAmount = new BigDecimal( params.get("masterAmount").toString() );
+        Integer masterPieces = new Integer( params.get("masterPieces").toString() );
+        String masterDesc = params.get("masterDesc").toString();
+        
+        ManifestVO manifest = new ManifestVO();
+        manifest.setId(manifestId);
+        manifest.setFlightNumber(flightNumber);
+        manifest.setCarrierId(carrierId);
+        manifest.setMasterWaybillAmount(masterAmount.doubleValue());
+        manifest.setMasterWaybillNumber(masterNumber);
+        manifest.setMasterWaybillPackCount(masterPieces);
+        manifest.setMasterWaybillWeight(masterWeight);
+        manifest.setDescription(masterDesc);
+        
+        UserInfo userInfo;
+        Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, String> error;
+		try {
+			userInfo = getUserInfo(request);
+			manifestService.master(userInfo, manifest);
+		} catch (Exception e) {
+			e.printStackTrace();
+			error = new HashMap<String, String>();
+			error.put("code", "");
+			error.put("message", "Error Occured!");
+			error.put("detaile", e.getMessage());
+			result.put("error", error);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/manifest/{id}/departure", method = RequestMethod.POST)
+	public Map<String, Object> departureManifest(
+			@PathVariable("id") Long manifestId, 
+			@RequestBody Map<String, Object> params,
+			HttpServletRequest request, 
+			HttpServletResponse response) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering masterManifest(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		log.debug("recieved data : {}", params);
+		_checkAppVersion(appVersion);
+		String flightNumber = params.get("flightNumber").toString();
+		String strDateTime = params.get("dateTime").toString();
+		
+        UserInfo userInfo;
+        Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, String> error;
+		try {
+			userInfo = getUserInfo(request);
+			LocalDateTime departureDateTime = DateUtil.parseLocalDateTime(strDateTime, 
+					LocaleUtil.fromLanguageId(userInfo.getLocale()), 
+					ZoneIdUtil.getZoneId(userInfo.getZoneId()), 
+					userInfo.getCalendar());
+			manifestService.departure(userInfo, manifestId, flightNumber, departureDateTime);
+		} catch (Exception e) {
+			e.printStackTrace();
+			error = new HashMap<String, String>();
+			error.put("code", "");
+			error.put("message", "Error Occured!");
+			error.put("detaile", e.getMessage());
+			result.put("error", error);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/manifest/{id}/offload", method = RequestMethod.POST)
+	public Map<String, Object> offloadManifest(
+			@PathVariable("id") Long manifestId, 
+			HttpServletRequest request, 
+			HttpServletResponse response) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering masterManifest(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		_checkAppVersion(appVersion);
+        UserInfo userInfo;
+        Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, String> error;
+		try {
+			userInfo = getUserInfo(request);
+			manifestService.offload(userInfo, manifestId);
+		} catch (Exception e) {
+			e.printStackTrace();
+			error = new HashMap<String, String>();
+			error.put("code", "");
+			error.put("message", "Error Occured!");
+			error.put("detaile", e.getMessage());
+			result.put("error", error);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/manifest/{id}/receive", method = RequestMethod.POST)
+	public Map<String, Object> receiveManifest(
+			@PathVariable Long id, 
+			@RequestBody String[] waybillNumbers, 
+			HttpServletRequest request, 
+			HttpServletResponse response) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+
+		log.debug("Entering receiveManifest(imei={}, appVersion={}, geoLat={}, geoLng={}, id={}, waybillNumbers={})", imei, appVersion, geoLat, geoLng, id, waybillNumbers);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			List<String> scannedWaybillNumbers = new ArrayList<String>();
+			if(Validator.isNotNull(waybillNumbers)){
+				scannedWaybillNumbers = Arrays.asList(waybillNumbers);
+			}
+			
+			manifestService.receive(userInfo, id, scannedWaybillNumbers, false);
+			
+			result.put("status", "success");
+		} catch (Exception e) {
+			log.error("error in receiveManifest", e);
+			if(e instanceof ParvanRecoverableException){
+				ParvanRecoverableException recoverableException = (ParvanRecoverableException) e;
+				
+				if(recoverableException.getErrorCode().equals(ErrorCode.MANIFEST_NOT_MATCH_SHIPMENT_FOR_SCAN)){
+					
+					result.put("status", "notmatch");
+					result.put("desc", getMessage("inscan.confirm.desc", recoverableException.getMessage()));
+					
+					return result;
+				}
+			}
+			
+			proccessException(e, result);
+		}
+		return result;
+	}
+	
+	@RequestMapping(value = "/shipment/scan/courier/", method = RequestMethod.POST)
+	public Map<String, Object> setShipmentsAsOutForDelivery(
+			@RequestBody String[] waybillNumbers, 
+			HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+
+		log.debug("Entering receiveManifest(imei={}, appVersion={}, geoLat={}, geoLng={}, waybillNumbers={})", imei, appVersion, geoLat, geoLng, waybillNumbers);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			shipmentService.scan(userInfo, waybillNumbers, "COURIER_SCAN", "", geoLat, geoLng);
+			
+			result.put("status", "success");
+		} catch (Exception e) {
+			log.error("error in receiveManifest", e);
+			if(e instanceof ParvanRecoverableException){
+				ParvanRecoverableException recoverableException = (ParvanRecoverableException) e;
+				
+				if(recoverableException.getErrorCode().equals(ErrorCode.MANIFEST_NOT_MATCH_SHIPMENT_FOR_SCAN)){
+					
+					result.put("status", "notmatch");
+					result.put("desc", getMessage("inscan.confirm.desc", recoverableException.getMessage()));
+					
+					return result;
+				}
+			}
+			
+			proccessException(e, result);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/transitManifests", method = RequestMethod.GET)
+	public List<ManifestDTO> getTransitManifestList(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getTransitManifestList(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<ManifestDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			/*try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}*/
+			
+			ManifestCriteria criteria = new ManifestCriteria();
+			
+			boolean isCourier = hasRole(EcRoleNames.ROLE_COURIER.name());
+			
+			if(!isCourier){
+				return new ArrayList<ManifestDTO>();
+			}
+			
+			criteria.setAssignedCourierId(userInfo.getUserId());
+			
+			criteria.setActive(true);
+			criteria.setType(new ManifestType[]{ManifestType.TRANSIT});
+			
+			List<BaseVO> manifestVOs = manifestService.findByCriteria(userInfo, criteria, 0, 20, SortDirectionEnum.Ascending, "createDate");
+			
+			result = new ArrayList<ManifestDTO>(manifestVOs.size());
+			
+			for (BaseVO baseVO : manifestVOs) {
+				ManifestVO manifestVO = (ManifestVO) baseVO;
+				manifestVO = manifestService.getFullManifest(userInfo, manifestVO.getId());
+				
+				EcUserVO createUser = _loadUserVOById(userInfo, manifestVO.getCreateUserId());
+				String createUserName = createUser.getFirstName() + " " + createUser.getLastName();
+				manifestVO.setCreateUserName(createUserName);
+				
+				List<GunnyVO> gunnyVOs = manifestVO.getGunnies();
+				if(Validator.isNotNull(gunnyVOs)){
+					//TODO
+					/*for (GunnyVO gunnyVO : gunnyVOs) {
+						List<ShipmentVO> shipmentVOs = gunnyVO.getShipments();
+						List<ShipmentVO> newShipmentVOs = new ArrayList<ShipmentVO>();
+						if(Validator.isNotNull(shipmentVOs)){
+							for (ShipmentVO shipmentVO : shipmentVOs) {
+								shipmentVO = shipmentService.getFullShipment(userInfo, shipmentVO.getId());
+								newShipmentVOs.add(shipmentVO);
+							}
+						}
+						gunnyVO.setShipments(newShipmentVOs);
+					}*/
+				}
+				
+				result.add(_toManifestDTO(manifestVO, userInfo));
+			}
+			
+		} catch (Exception e) {
+			log.error("error in getTransitManifestList", e);
+			result = new ArrayList<>();
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/deliveryManifests", method = RequestMethod.GET)
+	public List<ManifestDTO> getDeliveryManifestList(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getDeliveryManifestList(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<ManifestDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+			
+			/*try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}*/
+			
+			ManifestCriteria manifestCriteria = new ManifestCriteria();
+			
+			boolean isCourier = hasRole(EcRoleNames.ROLE_COURIER.name());
+			
+			if(isCourier){
+				manifestCriteria.setAssignedCourierUserId(userInfo.getUserId());
+			} else {
+				manifestCriteria.setOriginAgentId(userInfoWrapper.getAgentId());
+				manifestCriteria.setDestinationAgentId(userInfoWrapper.getAgentId());
+				manifestCriteria.setAgentOrSearch(true);
+				
+				if(Validator.isNotNull(userInfoWrapper.getAgentChildrenIds())){
+					manifestCriteria.setDestinationAgentChildrenIds(userInfoWrapper.getAgentChildrenIds());
+					manifestCriteria.setOriginAgentChildrenIds(userInfoWrapper.getAgentChildrenIds());
+				}
+			}
+			
+			manifestCriteria.setState(new ManifestState[]{ManifestState.ISSUED});
+			manifestCriteria.setType(new ManifestType[]{ManifestType.DELIVERY});
+			
+			List<BaseVO> manifestVOs = manifestService.findByCriteria(userInfo, manifestCriteria, 0, 20, SortDirectionEnum.Ascending, "createDate");
+			
+			result = new ArrayList<>(manifestVOs.size());
+			
+			for (BaseVO baseVO : manifestVOs) {
+				ManifestVO manifestVO = (ManifestVO) baseVO;
+				manifestVO = manifestService.getFullManifest(userInfo, manifestVO.getId());
+				
+				//List<GunnyVO> gunnyVOs = manifestVO.getGunnies();
+				//if(Validator.isNotNull(gunnyVOs)){
+					//for (GunnyVO gunnyVO : gunnyVOs) {
+						//List<PackingItemVO> pivos = gunnyVO.getPackingItems();
+						/*List<PackingItemVO> newPi = new ArrayList<>();
+						if (Validator.isNotNull(pivos)) {
+							for (PackingItemVO pivo : pivos) {
+								pivo = packingItemService.pac
+								newPi.add(pivo);
+							}
+						}*/
+						//gunnyVO.setShipments(newPi);
+					//}
+				//}
+				
+				result.add(_toManifestDTO(manifestVO, userInfo));
+			}
+			
+		} catch (Exception e) {
+			log.error("error in loading delivery manifest", e);
+			result = new ArrayList<>();
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/pickupManifests", method = RequestMethod.GET)
+	public List<ManifestDTO> getPickupManifestList(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering getPickupManifestList(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		List<ManifestDTO> result = null;
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+			
+			/*try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}*/
+			
+			ManifestCriteria manifestCriteria = new ManifestCriteria();
+			
+			boolean isCourier = hasRole(EcRoleNames.ROLE_COURIER.name());
+			
+			if(isCourier){
+				
+				manifestCriteria.setAssignedCourierId(userInfo.getUserId());
+				
+			}
+			else {
+				manifestCriteria.setOriginAgentId(userInfoWrapper.getAgentId());
+				manifestCriteria.setDestinationAgentId(userInfoWrapper.getAgentId());
+				manifestCriteria.setAgentOrSearch(true);
+				
+				if(Validator.isNotNull(userInfoWrapper.getAgentChildrenIds())){
+					manifestCriteria.setDestinationAgentChildrenIds(userInfoWrapper.getAgentChildrenIds());
+					manifestCriteria.setOriginAgentChildrenIds(userInfoWrapper.getAgentChildrenIds());
+				}
+			}
+			
+			manifestCriteria.setState(new ManifestState[]{ManifestState.ISSUED});
+			manifestCriteria.setType(new ManifestType[]{ManifestType.PICK_UP});
+			
+			List<BaseVO> manifestVOs = manifestService.findByCriteria(userInfo, manifestCriteria, 0, 20, SortDirectionEnum.Ascending, "createDate");
+			
+			result = new ArrayList<>(manifestVOs.size());
+			
+			for (BaseVO baseVO : manifestVOs) {
+				ManifestVO manifestVO = (ManifestVO) baseVO;
+				manifestVO = manifestService.getFullManifest(userInfo, manifestVO.getId());
+				
+				/*List<GunnyVO> gunnyVOs = manifestVO.getGunnies();
+				if(Validator.isNotNull(gunnyVOs)){
+					for (GunnyVO gunnyVO : gunnyVOs) {
+						List<ShipmentVO> shipmentVOs = gunnyVO.getShipments();
+						List<ShipmentVO> newShipmentVOs = new ArrayList<ShipmentVO>();
+						if(Validator.isNotNull(shipmentVOs)){
+							for (ShipmentVO shipmentVO : shipmentVOs) {
+								shipmentVO = shipmentService.getFullShipment(userInfo, shipmentVO.getId());
+								newShipmentVOs.add(shipmentVO);
+							}
+						}
+						gunnyVO.setShipments(newShipmentVOs);
+					}
+				}*/
+				
+				result.add(_toPickupManifestDTO(manifestVO, userInfo));
+			}
+			
+		} catch (Exception e) {
+			log.error("error in loading pickup manifest", e);
+			result = new ArrayList<>();
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/in/manifest/{manifestId}/check/{partNumber}", method = RequestMethod.POST)
+	public Map<String, Object> validationInscanByPartNumber(
+			@PathVariable Long manifestId, 
+			@PathVariable String partNumber, 
+			HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering inscanValidationByPartNumber(imei={}, appVersion={}, geoLat={}, geoLng={}, manifestId={}, partNumber={})", 
+				imei, appVersion, geoLat, geoLng, manifestId, partNumber);
+
+		Map<String, Object> result = new HashMap<>();
+		_checkAppVersion(appVersion);
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			List<String> partNumbers = new ArrayList<>();
+			String actionCode = ACTION_INSCAN;
+			boolean isCourier = hasRole(EcRoleNames.ROLE_COURIER.name());
+			if (isCourier) {
+				actionCode = ACTION_COURIER_SCAN;
+			}
+			packingItemService.validateTransition(userInfo, partNumber, actionCode);
+			partNumbers.add(partNumber);
+			
+			result.put("status", "success");
+			result.put("result", partNumbers);
+				
+		} catch (Exception e) {
+			log.debug("error in scanCheck partNumber : {} ", partNumber);
+			result.put("status", "fail");
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/in/manifest/{id}", method = RequestMethod.POST)
+	public Map<String, Object> inscanManifest(
+			@PathVariable Long id, 
+			@RequestBody String[] waybillNumbers, 
+			HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+
+		log.debug("Entering inscanManifest(imei={}, appVersion={}, geoLat={}, geoLng={}, id={}, waybillNumbers={})", imei, appVersion, geoLat, geoLng, id, waybillNumbers);
+		Map<String, Object> result = new HashMap<>();
+		_checkAppVersion(appVersion);
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			List<String> partNumbers = new ArrayList<>();
+			if(Validator.isNotNull(waybillNumbers)){
+				partNumbers = Arrays.asList(waybillNumbers);
+			}
+			
+			boolean force = false;
+			manifestService.scan(userInfo, id, partNumbers, force);
+			result.put("status", "success");
+			
+		} catch (Exception e) {
+			log.error("error in inscanManifest", e);
+			if(e instanceof ParvanRecoverableException){
+				ParvanRecoverableException recoverableException = (ParvanRecoverableException) e;
+				
+				if(recoverableException.getErrorCode().equals(ErrorCode.MANIFEST_NOT_MATCH_SHIPMENT_FOR_SCAN)){
+					
+					result.put("status", "notmatch");
+					result.put("desc", getMessage("inscan.confirm.desc", recoverableException.getMessage()));
+					
+					return result;
+				}
+			}
+			
+			proccessException(e, result);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/{waybillNumber}/saveDelivery", method = RequestMethod.POST)
+	public Map<String, Object> saveDelivery(
+			@PathVariable String waybillNumber,
+			@RequestBody HashMap<String, Object> formData, 
+			HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering saveDelivery(imei={}, appVersion={}, geoLat={}, geoLng={}, waybillNumber={}, formData={})", 
+				imei, appVersion, geoLat, geoLng, waybillNumber, formData);
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			ShipmentVO shipmentVO = shipmentService.findByWaybillNumber(userInfo, waybillNumber);
+			if (shipmentVO.getCurrentState().getCode().equals(STATE_DELIVERED)) {
+				log.debug("waybillNumber {} is already delivered", waybillNumber);
+				result.put("status", "success");
+				
+				return result;
+			}
+			
+			String file = (String) ((ArrayList<?>) formData.get("file")).get(0);
+			file = file.replaceAll("\n", "");
+			String paymentMethodId = (String) ((ArrayList<?>) formData.get("paymentMethodId")).get(0);
+			String paymentReferenceInfo = (String) ((ArrayList<?>) formData.get("paymentReferenceInfo")).get(0);
+			geoLat = (String) ((ArrayList<?>) formData.get("geoLat")).get(0);
+			geoLng = (String) ((ArrayList<?>) formData.get("geoLng")).get(0);
+			String comment = (String) ((ArrayList<?>) formData.get("comment")).get(0);
+			List<String> tmp = (List<String>) ((ArrayList<?>) formData.get("partNumbers")).get(0);
+			Set<String> partNumbers = new HashSet<>(tmp);
+			
+			LocalDateTime deliveryDate = LocalDateTime.now();
+			try {
+				long time = (long) ((ArrayList<?>) formData.get("date")).get(0);
+				Date date = new Date(time);
+				deliveryDate = DateUtil.convertToLocalDateTime(date);
+			} catch (Exception e) {
+			}
+			
+			byte[] bytes = Base64.getDecoder().decode(file);
+			
+			AttachmentVO attachment = new AttachmentVO();
+			attachment.setMimeType("image/jpeg");
+			attachment.setSize(bytes.length);
+			attachment.setType(AttachmentType.CONSIGNEE_SIGNATURE);
+			attachment.setData(bytes);
+			
+			List<AttachmentVO> attachments = new ArrayList<AttachmentVO>();
+			attachments.add(attachment);
+			
+			DeliveryVO deliveryVO = new DeliveryVO();
+			deliveryVO.setAttachments(attachments);
+			deliveryVO.setDeliveryDate(deliveryDate);
+			deliveryVO.setGeoLat(geoLat);
+			deliveryVO.setGeoLng(geoLng);
+			if(Validator.isNotNull(paymentMethodId)){
+				deliveryVO.setPaymentMethodId(Long.valueOf(paymentMethodId));
+			}
+			deliveryVO.setPaymentReferenceInfo(paymentReferenceInfo);
+			deliveryVO.setComment(comment);
+			deliveryVO.setWaybillNumber(waybillNumber);
+			deliveryVO.setPartNumbers(partNumbers);
+			
+			shipmentService.deliverToCustomer(userInfo, deliveryVO);
+			
+			result.put("status", "success");
+		} catch (Exception e) {
+			log.error("error in saveDelivery", e);
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/{waybillNumber}/saveNotDeliver", method = RequestMethod.POST)
+	public Map<String, Object> saveNotDeliver(
+			@PathVariable String waybillNumber, 
+			@RequestBody Map<String, Object> formData, 
+			HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering saveDelivery(imei={}, appVersion={}, geoLat={}, geoLng={}, waybillNumber={}, formData={})", 
+				imei, appVersion, geoLat, geoLng, waybillNumber, formData);
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			ShipmentVO shipmentVO = shipmentService.findByWaybillNumber(userInfo, waybillNumber);
+			if(shipmentVO.getCurrentState().getCode().equals("DELIVERED")){
+				log.debug("waybillNumber {} is already delivered", waybillNumber);
+				result.put("status", "success");
+				
+				return result;
+			}
+			
+			if(shipmentVO.getCurrentState().getCode().equals("NOT_DELIVERED")){
+				log.debug("waybillNumber {} is already not delivered", waybillNumber);
+				result.put("status", "success");
+				
+				return result;
+			}
+			
+			geoLat = (String) ((ArrayList<?>) formData.get("geoLat")).get(0);
+			geoLng = (String) ((ArrayList<?>) formData.get("geoLng")).get(0);
+			String comment = (String) ((ArrayList<?>) formData.get("comment")).get(0);
+			String cause = (String) ((ArrayList<?>) formData.get("cause")).get(0);
+			long time = (long) ((ArrayList<?>) formData.get("date")).get(0);
+			
+			Date date = new Date(time);
+			
+			LocalDateTime deliveryDate = DateUtil.convertToLocalDateTime(date);
+			
+			cause = getMessage("not-delivered.cause." + cause, null);
+			
+			manifestService.notDeliverToCustomerBasedOnManifest(userInfo, waybillNumber, comment, cause, deliveryDate, geoLat, geoLng);
+			
+			result.put("status", "success");
+		} catch (Exception e) {
+			log.error("error in saveDelivery", e);
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/{waybillNumber}/savePickedup", method = RequestMethod.POST)
+	public Map<String, Object> savePickedup(
+			@PathVariable String waybillNumber, 
+			@RequestBody String formData, 
+			HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering savePickedup(imei={}, appVersion={}, geoLat={}, geoLng={}, waybillNumber={}, formData={})", 
+				imei, appVersion, geoLat, geoLng, waybillNumber, formData);
+		
+		JSONParser jsonParser = new JSONParser();
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			ShipmentVO shipmentVO = shipmentService.findByWaybillNumber(userInfo, waybillNumber);
+			if(shipmentVO.getCurrentState().getCode().equals("PICKEDUP")){
+				log.debug("waybillNumber {} is already pickedup", waybillNumber);
+				result.put("status", "success");
+				
+				return result;
+			}
+			
+			
+			JSONObject jsonObject = (JSONObject) jsonParser.parse(formData);
+			
+			String file = (String) ((JSONArray) jsonObject.get("file")).get(0);
+			String paymentMethodId = (String) ((JSONArray) jsonObject.get("paymentMethodId")).get(0);
+			String paymentReferenceInfo = (String) ((JSONArray) jsonObject.get("paymentReferenceInfo")).get(0);
+			geoLat = (String) ((JSONArray) jsonObject.get("geoLat")).get(0);
+			geoLng = (String) ((JSONArray) jsonObject.get("geoLng")).get(0);
+			String comment = (String) ((JSONArray) jsonObject.get("comment")).get(0);
+			String pickupNumber = (String) ((JSONArray) jsonObject.get("pickupNumber")).get(0);
+			long time = (long) ((JSONArray) jsonObject.get("date")).get(0);
+			String pickupState = (String) ((JSONArray) jsonObject.get("pickupState")).get(0);
+			
+			List<AttachmentVO> attachments = null;
+			
+			if(Validator.isNotNull(file)){
+				byte[] bytes = Base64.getDecoder().decode(file);
+				
+				AttachmentVO attachment = new AttachmentVO();
+				attachment.setMimeType("image/jpeg");
+				attachment.setSize(bytes.length);
+				attachment.setType(AttachmentType.SHIPPER_SIGNATURE);
+				attachment.setData(bytes);
+				
+				attachments = new ArrayList<AttachmentVO>();
+				attachments.add(attachment);
+			}
+			
+			PickupScheduleVO pickupScheduleVO = shipmentVO.getCurrentPickupSchedule();
+			
+			pickupScheduleVO = (PickupScheduleVO) pickupScheduleService.get(userInfo, pickupScheduleVO.getId());
+			
+			Long assignedCourierUserId = pickupScheduleVO.getAssignedUserId();
+			
+			if ( !assignedCourierUserId.equals(userInfo.getUserId()) ) {
+				throw new ParvanRecoverableException(ErrorCode.ACCESS_DENIDE);
+			}
+			
+			Date date = new Date(time);
+			LocalDateTime pickupDate = DateUtil.convertToLocalDateTime(date);
+			
+			PickupVO pickupVO = new PickupVO();
+			pickupVO.setAttachments(attachments);
+			pickupVO.setDate(pickupDate);
+			pickupVO.setGeoLat(geoLat);
+			pickupVO.setGeoLng(geoLng);
+			if(Validator.isNotNull(paymentMethodId)){
+				pickupVO.setPaymentMethodId(Long.valueOf(paymentMethodId));
+			}
+			pickupVO.setPaymentReferenceInfo(paymentReferenceInfo);
+			pickupVO.setComment(comment);
+			pickupVO.setWaybillNumber(waybillNumber);
+			pickupVO.setPickupNumber(pickupNumber);
+			pickupVO.setPickupState(PickupState.valueOf(pickupState));
+			
+			shipmentService.pickedupShipment(userInfo, pickupVO);
+			
+			result.put("status", "success");
+		} catch (Exception e) {
+			log.error("error in savePickedup", e);
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/{waybillNumber}/saveNotPickedup", method = RequestMethod.POST)
+	public Map<String, Object> saveNotPickedup(
+			@PathVariable String waybillNumber, 
+			@RequestBody String formData, 
+			HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering saveDelivery(imei={}, appVersion={}, geoLat={}, geoLng={}, waybillNumber={}, formData={})", 
+				imei, appVersion, geoLat, geoLng, waybillNumber, formData);
+		
+		JSONParser jsonParser = new JSONParser();
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		_checkAppVersion(appVersion);
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			ShipmentVO shipmentVO = shipmentService.findByWaybillNumber(userInfo, waybillNumber);
+			if(shipmentVO.getCurrentState().getCode().equals("PICKEDUP")){
+				log.debug("waybillNumber {} is already pickedup", waybillNumber);
+				result.put("status", "success");
+				
+				return result;
+			}
+			
+			if(shipmentVO.getCurrentState().getCode().equals("NOT_PICKEDUP")){
+				log.debug("waybillNumber {} is already not pickedup", waybillNumber);
+				result.put("status", "success");
+				
+				return result;
+			}
+			
+			JSONObject jsonObject = (JSONObject) jsonParser.parse(formData);
+			
+			geoLat = (String) ((JSONArray) jsonObject.get("geoLat")).get(0);
+			geoLng = (String) ((JSONArray) jsonObject.get("geoLng")).get(0);
+			String comment = (String) ((JSONArray) jsonObject.get("comment")).get(0);
+			String cause = (String) ((JSONArray) jsonObject.get("cause")).get(0);
+			long time = (long) ((JSONArray) jsonObject.get("date")).get(0);
+			//String pickupNumber = (String) ((JSONArray) jsonObject.get("pickupNumber")).get(0);
+			String pickupState = (String) ((JSONArray) jsonObject.get("pickupState")).get(0);
+			
+			Date date = new Date(time);
+			LocalDateTime pickupDate = DateUtil.convertToLocalDateTime(date);
+			
+			cause = getMessage("not-pickedup.cause." + cause, null);
+			
+			PickupVO pickupVO = new PickupVO();
+			//pickupVO.setAttachments(attachments);
+			pickupVO.setDate(pickupDate);
+			pickupVO.setGeoLat(geoLat);
+			pickupVO.setGeoLng(geoLng);
+			pickupVO.setComment(comment);
+			pickupVO.setCause(cause);
+			pickupVO.setWaybillNumber(waybillNumber);
+			//pickupVO.setPickupNumber(pickupNumber);
+			pickupVO.setPickupState(PickupState.valueOf(pickupState));
+			
+			shipmentService.notPickedupShipment(userInfo, pickupVO);
+			
+			result.put("status", "success");
+		} catch (Exception e) {
+			log.error("error in saveDelivery", e);
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	
+	@RequestMapping(value = "/track/search/{searchTerm}", method = RequestMethod.POST)
+	public Map<String, Object> trackShipment(
+			@PathVariable String searchTerm, 
+			HttpServletRequest request) {
+		
+		log.debug("Entering searchShipment(searchTerm={})", searchTerm);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			ShipmentTrackInfoVO shipmentTrackInfoVO = null;
+			
+			String firstThree = searchTerm.substring(0, Math.min(searchTerm.length(), 3));
+			if (firstThree.toUpperCase().equals("TRK")) {
+				searchTerm = StringUtil.trim(searchTerm);
+				
+				shipmentTrackInfoVO = shipmentService.getTrackInfoByTrackingNumber(null, searchTerm);
+				
+			} else {
+				try {
+					searchTerm = StringUtil.replace(searchTerm.toUpperCase(), "MED", StringPool.BLANK);
+					searchTerm = StringUtil.trim(searchTerm);
+					
+					shipmentTrackInfoVO = shipmentService.getTrackInfoByWaybillNumber(null, searchTerm);
+				} catch(ParvanRecoverableException e) {
+					shipmentTrackInfoVO = shipmentService.getTrackInfoByForwarderReferenceNumber(null, searchTerm);
+				}
+			}
+			
+			if (Validator.isNotNull(shipmentTrackInfoVO)) {
+				
+				Map<String, Object> shipmentTrackInfoMap = new HashMap<>();
+				shipmentTrackInfoMap.put("waybillNumber", shipmentTrackInfoVO.getWaybillNumber());
+				shipmentTrackInfoMap.put("trackingNumber", shipmentTrackInfoVO.getTrackingNumber());
+				shipmentTrackInfoMap.put("currentStateCode", shipmentTrackInfoVO.getCurrentStateCode());
+				shipmentTrackInfoMap.put("currentNodeName", shipmentTrackInfoVO.getCurrentNodeName());
+				shipmentTrackInfoMap.put("signBase64", shipmentTrackInfoVO.getSignBase64());
+				
+				List<Map<String, Object>> shipmentStateHistoryList = new ArrayList<>();
+				
+				List<ShipmentStateHistoryVO> shipmentStateHistoryVOs = shipmentTrackInfoVO.getShipmentStateHistoryVOs();
+				if(shipmentStateHistoryVOs != null && shipmentStateHistoryVOs.size() > 0){
+					for (ShipmentStateHistoryVO shipmentStateHistoryVO : shipmentStateHistoryVOs) {
+
+						Map<String, Object> toShipmentStateMap = new HashMap<>();
+						if(shipmentStateHistoryVO.getToShipmentState() != null){
+							toShipmentStateMap.put("code", shipmentStateHistoryVO.getToShipmentState().getCode());
+						}
+						
+						Map<String, Object> shipmentStateHistoryMap = new HashMap<>();
+						shipmentStateHistoryMap.put("date", shipmentStateHistoryVO.getDate());
+						shipmentStateHistoryMap.put("comment", shipmentStateHistoryVO.getComment());
+						shipmentStateHistoryMap.put("fromNodeName", shipmentStateHistoryVO.getFromNodeName());
+						shipmentStateHistoryMap.put("createDate", shipmentStateHistoryVO.getCreateDate());
+						shipmentStateHistoryMap.put("toShipmentState", toShipmentStateMap);
+						
+						shipmentStateHistoryList.add(shipmentStateHistoryMap);
+					}
+				}
+				
+				shipmentTrackInfoMap.put("shipmentStateHistoryVOs", shipmentStateHistoryList);
+				
+				result.put("status", "success");
+				result.put("shipment", shipmentTrackInfoMap);
+			}
+			
+			/*String firstThree = searchTerm.substring(0, Math.min(searchTerm.length(), 3));
+			if (firstThree.toUpperCase().equals("TRK")) {
+				foundShipment = shipmentService.findFullByTrackingNumber(null, searchTerm);
+			} else {
+				foundShipment = shipmentService.findFullByWaybillNumber(null, searchTerm);
+			}
+			if (Validator.isNotNull(foundShipment)) {
+				ShipmentTrack returnData = new ShipmentTrack();
+				returnData.fromShipmentVO(foundShipment);
+
+				UserInfo userInfo = super.getUserInfo(request);
+				// TODO: in future there must be a specific role like guest who
+				// can track
+				// List<String> userRoles = new ArrayList<String>();
+				// userRoles.add("guest");
+				List<TrackState> trackableStates = shipmentStateService.getTrackableStates(userInfo);
+				if (Validator.isNotNull(trackableStates)) {
+					for (ShipmentStateHistoryVO sh : returnData.getStateHistories()) {
+						for (TrackState trackState : trackableStates) {
+							if (!sh.getTrackState().equals(trackState)) {
+								returnData.getStateHistories().remove(sh);
+							}
+						}
+					}
+				}
+				result.put("status", "success");
+				result.put("shipment", returnData);
+			}*/
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		log.debug("Exiting searchShipment()");
+		return result;
+	}
+
+	@RequestMapping(value = "/gcmRegister", method = RequestMethod.POST)
+	public Map<String, Object> gcmRegister(
+			@RequestBody String formData, 
+			HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering gcmRegister(imei={}, appVersion={}, geoLat={}, geoLng={}, formData={})", imei, appVersion, geoLat, geoLng, formData);
+		
+		JSONParser jsonParser = new JSONParser();
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+			JSONObject jsonObject = (JSONObject) jsonParser.parse(formData);
+			
+			String gcmRegisterId = (String) jsonObject.get("gcmRegisterId");
+			
+			log.debug("gcmRegisterId={}", gcmRegisterId);
+			
+		    deviceService.updateGcmRegisterId(userInfo, imei, gcmRegisterId);
+		    
+		    result.put("status", "success");
+			
+		} catch (Exception e) {
+			log.error("error in gcmRegister", e);
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/gcmUnregister", method = RequestMethod.POST)
+	public Map<String, Object> gcmUnregister(HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering gcmUnregister(imei={}, appVersion={}, geoLat={}, geoLng={})", imei, appVersion, geoLat, geoLng);
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			try {
+			    deviceService.updateLocation(userInfo, imei, geoLat, geoLng, appVersion, null);
+			    
+			} catch (Exception e) {
+				log.warn("error in updateLocation", e);
+			}
+			
+		    deviceService.updateGcmRegisterId(userInfo, imei, StringPool.BLANK);
+		    
+		    result.put("status", "success");
+			
+		} catch (Exception e) {
+			log.error("error in gcmUnregister", e);
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/{imei}/sendMessage", method = RequestMethod.POST)
+	public Map<String, Object> sendMessage(
+			@PathVariable String imei, 
+			@RequestBody String formData, 
+			HttpServletRequest request) throws Exception {
+		
+		log.debug("Entering sendMessage()");
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			JSONParser jsonParser = new JSONParser();
+			JSONObject jsonObject = (JSONObject) jsonParser.parse(formData);
+			
+			String notification_id = (String) jsonObject.get("notification_id");
+			String message = (String) jsonObject.get("message");
+			String title = (String) jsonObject.get("title");
+			
+			DeviceVO device = deviceService.findByImei(userInfo, imei);
+			
+			String registrationId = device.getGcmRegisterId();
+			Message gcmMessage = new Message.Builder()
+				.addData("notification_id", notification_id)
+				.addData("message", message)
+				.addData("title", title)
+				.build();
+			log.debug(gcmMessage.toString());
+			Result gcmResult = SenderFactory.getSender().send(gcmMessage, registrationId, 5);
+		    
+		    result.put("status", "success");
+		    result.put("status", gcmResult);
+			
+		} catch (Exception e) {
+			log.error("error in sendMessage", e);
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "/updateLocation", method = RequestMethod.POST)
+	public Map<String, Object> updateLocation(
+			@RequestBody String formData, 
+			HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering updateLocation(imei={}, appVersion={}, geoLat={}, geoLng={}, formData={})", imei, appVersion, geoLat, geoLng, formData);
+		
+		JSONParser jsonParser = new JSONParser();
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			JSONObject jsonObject = (JSONObject) jsonParser.parse(formData);
+			
+			String provider = (String) jsonObject.get("provider");
+			Double latitude = (Double) jsonObject.get("latitude");
+			Double longitude = (Double) jsonObject.get("longitude");
+			Double altitude = (Double) jsonObject.get("altitude");
+			long time = (long) jsonObject.get("time");
+			try {
+				Double speed = (Double) jsonObject.get("speed");
+				Double bearing = (Double) jsonObject.get("bearing");
+				Double accuracy = (Double) jsonObject.get("accuracy");
+				
+				log.debug("provider={}, latitude={} longitude={}, altitude={}, speed={}, bearing={}, accuracy={}", provider, latitude, longitude, altitude, speed, bearing, accuracy);
+			} catch (Exception e) {
+				log.debug("provider={}, latitude={} longitude={}, altitude={}", provider, latitude, longitude, altitude);
+			}
+			
+			Date date = new Date(time);
+			
+			deviceService.updateLocation(userInfo, imei, String.valueOf(latitude), String.valueOf(longitude), appVersion, DateUtil.convertToLocalDateTime(date));
+		    
+		    result.put("status", "success");
+			
+		} catch (Exception e) {
+			log.error("error in updateLocation", e);
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/shipments/{id}", method = RequestMethod.PUT)
+	public Map<String, Object> updateShipment(
+			@PathVariable Long id, 
+			String formData,
+			HttpServletRequest request) {
+		
+		String imei = request.getHeader(KEY_IMEI);
+		String appVersion = request.getHeader(KEY_APP_VERSION);
+		String geoLat = request.getHeader(KEY_GEO_LAT);
+		String geoLng = request.getHeader(KEY_GEO_LNG);
+		
+		log.debug("Entering updateShipment(imei={}, appVersion={}, geoLat={}, geoLng={}, id={}, formData={})", 
+				imei, appVersion, geoLat, geoLng, id, formData);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			UserInfo userInfo = getUserInfo(request);
+			
+			ShipmentVO shipment = shipmentService.getFullShipment(userInfo, id);
+			
+			JSONParser jsonParser = new JSONParser();
+			JSONObject jsonObject = (JSONObject) jsonParser.parse(formData);
+			
+			String provider = (String) jsonObject.get("provider");
+			Double latitude = (Double) jsonObject.get("latitude");
+			Double longitude = (Double) jsonObject.get("longitude");
+			Double altitude = (Double) jsonObject.get("altitude");
+			float speed = (float) jsonObject.get("speed");
+			float bearing = (float) jsonObject.get("bearing");
+			float accuracy = (float) jsonObject.get("accuracy");
+			long time = (long) jsonObject.get("time");
+			
+			//result.put("priceItems", priceItems);
+			result.put("status", "success");
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		log.debug("Leaving calculatePrice()");
+		return result;
+	}
+
+	protected String getMessage(final String messageKey,
+			final Object... messageParameters) {
+
+		Locale locale = LocaleContextHolder.getLocale();
+
+		String result = null;
+		try {
+			result = messageSource.getMessage(messageKey, messageParameters, locale);
+		} catch (NoSuchMessageException e) {
+			result = messageKey;
+		}
+
+		return result;
+
+	}
+
+	protected UserInfo getUserInfo(HttpServletRequest request) throws Exception {
+		Authentication authentication = AuthUtils.getAuthenticationObject();
+		String userName = (String) authentication.getPrincipal();
+		String ip = IpUtils.getIpFromRequest(request);
+		return loadUserInfo(userName, ip);
+	}
+	
+	protected boolean hasRole(String role) {
+		Authentication authentication = AuthUtils.getAuthenticationObject();
+		@SuppressWarnings("unchecked")
+		List<GrantedAuthority> authorities = (List<GrantedAuthority>) authentication
+				.getAuthorities();
+
+		boolean hasRole = false;
+
+		for (GrantedAuthority grantedAuthority : authorities) {
+			if (grantedAuthority.getAuthority().equals(role)) {
+				hasRole = true;
+				break;
+			}
+		}
+
+		return hasRole;
+	}
+
+	protected void proccessException(Exception e, Map<String, Object> result) {
+
+		if (e instanceof ParvanRecoverableException) {
+			ParvanRecoverableException recoverableException = (ParvanRecoverableException) e;
+
+			Exception cause = (Exception) recoverableException.getCause();
+
+			if (recoverableException.getErrorCode().equals(
+					ErrorCode.DATA_IS_INVALID)) {
+				String invalidField = null;
+				if (cause != null
+						&& cause instanceof ConstraintViolationException) {
+					invalidField = ((ConstraintViolationException) cause)
+							.getConstraintViolations().iterator().next()
+							.getPropertyPath().toString();
+
+				} else {
+					invalidField = recoverableException.getMessage();
+				}
+				result.put("invalidField", invalidField);
+				result.put("status", "ValidationException");
+			} else if (recoverableException.getErrorCode().equals(
+					ErrorCode.OBJECT_EXIST)) {
+				result.put("status", "ObjectExistsException");
+			} else if (recoverableException.getErrorCode().equals(
+					ErrorCode.DATA_DUPLICATE)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error.data-duplicate", getMessage(recoverableException.getMessage(), (Object) null)));
+			} else if (recoverableException.getErrorCode().equals(
+					ErrorCode.FIELD_IS_EMPTY)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error-required", getMessage(recoverableException.getMessage(), (Object) null)));
+			} else if (recoverableException.getErrorCode().equals(
+					ErrorCode.SHIPMENT_INVALID_STATE_TRANSITION)) {
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorField", recoverableException.getMessage());
+				result.put("errorMessage", getMessage("error-invalid-shipment-state", getMessage("trackstate." + StringUtil.upperCase(recoverableException.getMessage()), (Object) null)));
+			} else {
+				String errorMessage = recoverableException.getMessage();
+				
+				if(Validator.isNull(errorMessage)){
+					errorMessage = getMessage("errorCode." + recoverableException.getErrorCode().toValue(), (Object) null);
+				}
+				
+				result.put("status", "ErrorCode");
+				result.put("errorCode", recoverableException.getErrorCode().toValue());
+				result.put("errorMessage", errorMessage);
+			}
+		} else {
+			log.error("error in proccessException", e);
+			result.put("status", "fail");
+		}
+	}
+	
+	private PackingItemDTO _toPackingItemDTO(PackingItemVO vo) {
+		PackingItemDTO dto = new PackingItemDTO();
+		
+		dto.setId(vo.getId());
+		dto.setPartNumber(vo.getPartNumber());
+		dto.setWaybillNumber(vo.getWaybillNumber());
+		dto.setGrossWeight(vo.getGrossWeight());
+		dto.setChargeableWeight(vo.getChargeableWeight());
+		dto.setHeight(vo.getHeight());
+		dto.setLength(vo.getLength());
+		dto.setWidth(vo.getWidth());
+		dto.setContents(vo.getContents());
+		dto.setPieces(vo.getPieces());
+		dto.setTotalCharge(vo.getTotalCharge());
+		dto.setRateOrCharge(vo.getRateOrCharge());
+		dto.setDeclaredValue(vo.getDeclaredValue());
+		dto.setCurrentAssignedAgentId(vo.getCurrentAssignedAgentId());
+		dto.setCurrentAssignedUserId(vo.getCurrentAssignedUserId());
+		dto.setCurrentNodeName(vo.getCurrentNodeName());
+		dto.setCurrentNodeId(vo.getCurrentNodeId());
+		
+		if (Validator.isNotNull(vo.getCurrentState())) {
+				dto.setCurrentState( _toPackingItemStateDTO( vo.getCurrentState() ) );
+		}
+		
+		return dto;
+	}
+	
+	private PackingItemStateDTO _toPackingItemStateDTO(PackingItemStateVO vo) {
+		PackingItemStateDTO dto = new PackingItemStateDTO();
+		
+		dto.setId(vo.getId());
+		dto.setKey(vo.getCode());
+		dto.setValue(vo.getCode());
+		
+		return dto;
+	}
+	
+	//XXX Hack: converts PackingItem to Shipment
+	private ShipmentDTO _toShipmentDTO(PackingItemVO vo) {
+		ShipmentDTO dto = new ShipmentDTO();
+		dto.setId(vo.getId());
+		dto.setWaybillNumber(vo.getPartNumber());
+		dto.setTotalGrossWeight(vo.getGrossWeight());
+		dto.setTotalPieces(vo.getPieces());
+		if (vo.getTotalCharge() != null) {
+			dto.setTotalAmount(vo.getTotalCharge());
+		}
+		if (vo.getCurrentState() != null) {
+			dto.setCurrentStateCode(vo.getCurrentState().getCode());
+		}
+		return dto;
+	}
+	
+	private ShipmentDTO _toShipmentDTO(ShipmentVO vo, UserInfo userInfo) throws ParvanServiceException{
+		ShipmentDTO dto = new ShipmentDTO();
+		dto.setId(vo.getId());
+		dto.setChargeParty(vo.getChargeParty().name());
+		dto.setConsigneeAddress(vo.getConsigneeAddress());
+		dto.setConsigneeCityCode(vo.getConsigneeCityName());
+		dto.setConsigneeName(vo.getConsigneeName());
+		dto.setContentDescription(vo.getContentDescription());
+		
+		if (vo.getIssuingAgentId() != null) {
+			EcAgentVO issuingAgent = ecAgentAndUserService.getAgent(userInfo, vo.getIssuingAgentId());
+			dto.setIssuingAgent(issuingAgent.getName());
+		}
+		
+		if(vo.getPackingList() != null){
+			dto.setPackingSize(vo.getPackingList().size());
+		}
+		
+		dto.setShipmentType(vo.getShipmentType().name());
+		dto.setTotalAmount(vo.getTotalAmount());
+		dto.setTotalGrossWeight(vo.getTotalGrossWeight());
+		dto.setTotalPieces(vo.getTotalPieces());
+		dto.setWaybillNumber(vo.getWaybillNumber());
+		dto.setCurrentStateCode(vo.getCurrentState().getCode());
+		
+		if(vo.getChargeParty().equals(ChargeParty.CONSIGNEE)){
+			List<String> clientPaymentMethodsCodes = null; 
+			if(Validator.isNotNull(vo.getConsigneeClientId())){
+				EcUserVO user = _findUserVOByClientId(userInfo.getUserName(), vo.getConsigneeClientId());
+				if (user != null && user.getContact() != null) {
+					clientPaymentMethodsCodes = user.getContact().getPaymentMethodCodesAsConsignee();
+				}
+			}
+			
+			PaymentMethodCriteria criteria = new PaymentMethodCriteria();
+			criteria.setActive(true);
+			
+			if(clientPaymentMethodsCodes != null && !clientPaymentMethodsCodes.isEmpty()){
+				criteria.setKeys(clientPaymentMethodsCodes.toArray(new String[clientPaymentMethodsCodes.size()]));
+			}
+			
+			List<BaseVO> paymentMethods = paymentMethodService.findByCriteria(userInfo, criteria);
+			if (paymentMethods != null) {
+				ArrayList<PaymentMethodDTO> pidtos = new ArrayList<>(paymentMethods.size());
+				paymentMethods.forEach(pm -> pidtos.add( _toPaymentMethodDTO( (PaymentMethodVO) pm ) ));
+				dto.setAvailablePaymentMethods(pidtos);
+			}
+		}
+		
+		return dto;
+	}
+	
+	private PickupShipmentDTO _ToPickupShipmentDTO(ShipmentVO vo, UserInfo userInfo) throws ParvanServiceException {
+		
+		PickupShipmentDTO dto = new PickupShipmentDTO();
+		dto.setId(vo.getId());
+		dto.setChargeParty(vo.getChargeParty().name());
+		dto.setConsigneeAddress(vo.getConsigneeAddress());
+		dto.setConsigneeCityCode(vo.getConsigneeCityName());
+		dto.setConsigneeName(vo.getConsigneeName());
+		dto.setContentDescription(vo.getContentDescription());
+		
+		if (vo.getIssuingAgentId() != null) {
+			EcAgentVO issuingAgent = ecAgentAndUserService.getAgent(userInfo, vo.getIssuingAgentId());
+			dto.setIssuingAgent(issuingAgent.getName());
+		}
+		
+		if(vo.getPackingList() != null){
+			dto.setPackingSize(vo.getPackingList().size());
+		}
+		
+		dto.setShipmentType(vo.getShipmentType().name());
+		dto.setTotalAmount(vo.getTotalAmount());
+		dto.setTotalGrossWeight(vo.getTotalGrossWeight());
+		dto.setTotalPieces(vo.getTotalPieces());
+		dto.setWaybillNumber(vo.getWaybillNumber());
+		dto.setCurrentStateCode(vo.getCurrentState().getCode());
+		
+		dto.setShipperAddress(vo.getShipperAddress());
+		dto.setShipperCityCode(vo.getShipperCityName());
+		dto.setShipperName(vo.getShipperName());
+		
+		if(vo.getCurrentPickupSchedule() != null){
+			
+			PickupScheduleVO pickupScheduleVO = vo.getCurrentPickupSchedule();
+			
+			dto.setPickupState(pickupScheduleVO.getState().name());
+			dto.setFromDateTime(DateUtil.getDate(pickupScheduleVO.getFromDateTime(), LocaleUtil.fromLanguageId(userInfo.getLocale()), userInfo.getCalendar(), ZoneIdUtil.getZoneId(userInfo.getZoneId())));
+			dto.setToDateTime(DateUtil.getDate(pickupScheduleVO.getToDateTime(), LocaleUtil.fromLanguageId(userInfo.getLocale()), userInfo.getCalendar(), ZoneIdUtil.getZoneId(userInfo.getZoneId())));
+			dto.setOperationNote(pickupScheduleVO.getOperationNote());
+		}
+		
+		return dto;
+	}
+	
+	private UldDTO _toUldDTO(GunnyVO vo) throws ParvanServiceException{
+		UldDTO dto = new UldDTO();
+		
+		double totalGrossWeight = 0;
+		int totalPieces = 0;
+		int totalPackingItems = 0;
+		
+		List<PackingItemVO> packingItemsVOs = vo.getPackingItems();
+		List<ShipmentDTO> shipments = null;
+		if (packingItemsVOs != null) {
+			totalPackingItems= packingItemsVOs.size();
+			shipments = new ArrayList<>(totalPackingItems);
+			for (PackingItemVO pivo : packingItemsVOs) {
+				shipments.add(_toShipmentDTO(pivo));
+				totalGrossWeight += pivo.getGrossWeight();
+				totalPieces += pivo.getPieces();
+			}
+		}
+		
+		dto.setBarcode(vo.getBarcode());
+		dto.setTotalGrossWeight(totalGrossWeight);
+		dto.setTotalPieces(totalPieces);
+		dto.setTotalShipment(totalPackingItems);
+		dto.setShipments(shipments);
+		
+		return dto;
+	}
+	
+
+	private UldDTO _toPickupUldDTO(GunnyVO vo, UserInfo userInfo) throws ParvanServiceException{
+		UldDTO dto = new UldDTO();
+		
+		//TODO
+		/*double totalGrossWeight = 0;
+		int totalPieces = 0;
+		int totalShipment = vo.getShipments().size();
+		
+		List<ShipmentVO> shipmentVOs = vo.getShipments();
+		List<ShipmentDTO> shipments = new ArrayList<ShipmentDTO>();
+		for (ShipmentVO shipmentVO : shipmentVOs) {
+			shipments.add(_ToPickupShipmentDTO(shipmentVO, userInfo));
+			
+			totalGrossWeight += shipmentVO.getTotalGrossWeight();
+			totalPieces += shipmentVO.getTotalPieces();
+		}
+		
+		dto.setBarcode(vo.getBarcode());
+		dto.setTotalGrossWeight(totalGrossWeight);
+		dto.setTotalPieces(totalPieces);
+		dto.setTotalShipment(totalShipment);
+		dto.setShipments(shipments);*/
+		
+		return dto;
+	}
+	
+	private ManifestDTO _toManifestDTO(ManifestVO vo, UserInfo userInfo) throws ParvanServiceException{
+		ManifestDTO dto = new ManifestDTO();
+		
+		double totalGrossWeight = 0;
+		int totalPieces = 0;
+		int totalShipment = 0;
+		int totalUld = 0;
+		
+		if ( vo.getGunnies() != null ) {
+			totalUld = vo.getGunnies().size();			
+		}
+		
+		List<GunnyVO> gunnyVOs = vo.getGunnies();
+		List<UldDTO> ulds = new ArrayList<>(gunnyVOs.size());
+		if ( gunnyVOs != null ) {
+			for (GunnyVO gunnyVO : gunnyVOs) {
+				UldDTO uldDTO = _toUldDTO(gunnyVO);
+				ulds.add(uldDTO);
+				
+				totalGrossWeight += uldDTO.getTotalGrossWeight();
+				totalPieces += uldDTO.getTotalPieces();
+				totalShipment += uldDTO.getTotalShipment();
+			}			
+		}
+		if (vo.getDestinationAgentId() != null) {
+			EcAgentVO destinationAgent = ecAgentAndUserService.getAgent(userInfo, vo.getDestinationAgentId());
+			dto.setDestinationAgent(destinationAgent.getName());
+		}
+		if (vo.getOriginAgentId() != null) {
+			EcAgentVO originAgent = ecAgentAndUserService.getAgent(userInfo, vo.getOriginAgentId());
+			dto.setOriginAgent(originAgent.getName());
+		}
+		dto.setCreateUserName(vo.getCreateUserName());
+		dto.setId(vo.getId());
+		dto.setTotalGrossWeight(totalGrossWeight);
+		dto.setTotalPieces(totalPieces);
+		dto.setTotalShipment(totalShipment);
+		dto.setTotalUld(totalUld);
+		dto.setType(vo.getType().name());
+		dto.setState(vo.getState().name());
+		dto.setUpdateDate(DateUtil.getDate(vo.getUpdateDate(), LocaleUtil.fromLanguageId(userInfo.getLocale()), userInfo.getCalendar(), ZoneIdUtil.getZoneId(userInfo.getZoneId())));
+		dto.setUlds(ulds);
+		
+		return dto;
+	}
+	
+	private ManifestDTO _toPickupManifestDTO(ManifestVO vo, UserInfo userInfo) throws ParvanServiceException{
+		ManifestDTO dto = new ManifestDTO();
+		
+		double totalGrossWeight = 0;
+		int totalPieces = 0;
+		int totalShipment = 0;
+		int totalUld = vo.getGunnies().size();
+		
+		List<GunnyVO> gunnyVOs = vo.getGunnies();
+		List<UldDTO> ulds = new ArrayList<UldDTO>();
+		for (GunnyVO gunnyVO : gunnyVOs) {
+			UldDTO uldDTO = _toPickupUldDTO(gunnyVO, userInfo);
+			ulds.add(uldDTO);
+			
+			totalGrossWeight += uldDTO.getTotalGrossWeight();
+			totalPieces += uldDTO.getTotalPieces();
+			totalShipment += uldDTO.getTotalShipment();
+		}
+		if (vo.getDestinationAgentId() != null) {
+			EcAgentVO destinationAgent = ecAgentAndUserService.getAgent(userInfo, vo.getDestinationAgentId());
+			dto.setDestinationAgent(destinationAgent.getName());
+		}
+		if (vo.getOriginAgentId() != null) {
+			EcAgentVO originAgent = ecAgentAndUserService.getAgent(userInfo, vo.getOriginAgentId());
+			dto.setOriginAgent(originAgent.getName());
+		}
+		dto.setCreateUserName(vo.getCreateUserName());
+		dto.setId(vo.getId());
+		dto.setTotalGrossWeight(totalGrossWeight);
+		dto.setTotalPieces(totalPieces);
+		dto.setTotalShipment(totalShipment);
+		dto.setTotalUld(totalUld);
+		dto.setType(vo.getType().name());
+		dto.setState(vo.getState().name());
+		dto.setUpdateDate(DateUtil.getDate(vo.getUpdateDate(), LocaleUtil.fromLanguageId(userInfo.getLocale()), userInfo.getCalendar(), ZoneIdUtil.getZoneId(userInfo.getZoneId())));
+		dto.setUlds(ulds);
+		
+		return dto;
+	}
+	
+	private String _getGeoEntityName(Map<String, EcGeoEntityVO> map, String code, String lang){
+		EcGeoEntityVO geoEntityVO = map.get(code);
+		
+		if(geoEntityVO != null){
+			if("fa".equals(lang)){
+				return geoEntityVO.getNameFa();
+			}
+			else {
+				return geoEntityVO.getNameEn();
+			}
+		}
+		else {
+			return null;
+		}
+	}
+	
+	private void _checkAppVersion(String appVersion) throws WebApplicationException{
+		
+		appVersion = appVersion.replaceAll("\\.", StringPool.BLANK);
+		
+		if(Integer.parseInt(appVersion) < minAppVersion){
+			log.error("Invalid app version minAppVersion={}, appVersion={}", minAppVersion, appVersion);
+			throw new WebApplicationException(403);
+		}
+	}
+	
+	private PaymentMethodDTO _toPaymentMethodDTO(PaymentMethodVO vo) {
+		PaymentMethodDTO dto = new PaymentMethodDTO();
+		dto.setId(vo.getId());
+		dto.setKey(vo.getKey());
+		dto.setValue(vo.getValue());		
+		return dto;
+	}
+	
+	private EcUserVO _loadUserVOById(UserInfo userInfo, long userId) throws ParvanServiceException{
+        
+		/*Map<String, Object> data = loadUserById(userName, userId);
+		
+		EcUserVO userVO = null;
+		
+		if(data != null){
+			ObjectMapper mapper = mapperProvider.getDefaultMapper();
+			userVO = mapper.convertValue(data, EcUserVO.class);
+		}*/
+        
+		EcUserVO userVO = ecAgentAndUserService.getUser(userInfo, userId);
+        return userVO;
+	}
+	
+	private EcUserVO _findUserVOByClientId(String userName, String clientId){
+		
+		EcUserVO userVO = new EcUserVO();
+		userVO.setFirstName("FIXME 2016-12-13 findUserVOByClientId");
+		
+		/* FIXME 2016-12-13 findUserVOByClientId
+		Map<String, Object> data = findUserByClientId(userName, clientId);
+		
+		if(data != null){
+			ObjectMapper mapper = mapperProvider.getDefaultMapper();
+			userVO = mapper.convertValue(data, EcUserVO.class);
+		}*/
+		
+		return userVO;
+	}
+}

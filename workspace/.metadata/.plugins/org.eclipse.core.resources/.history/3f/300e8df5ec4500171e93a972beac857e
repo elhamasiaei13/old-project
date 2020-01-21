@@ -1,0 +1,1987 @@
+
+ARRIVED_AT = Arrived At
+
+AbstractUserDetailsAuthenticationProvider.badCredentials = Invalid username or password
+
+CLEARANCE_PROCESSED = Clearence Process
+
+CUSTOM_INSPECTION = Custom Inspection
+
+DELIVERED = Delivered
+
+DEPARTED_FACILITY = Departed from Facility
+
+DNATA_FACILITY = Dnata Facility
+
+HELD_AT_OFFICE = Held at Office
+
+HWB.management = Waybill Management
+
+NO_CLEARANCE = No Clearence
+
+OFFLOAD = Offload
+
+OUT_FOR_DELIVERY = Out for Delivery
+
+OptionalService.create = Create New Option
+OptionalService.delete = Delete optional service
+OptionalService.modify = Edit Optional Service
+
+PICKED_UP = Pckup
+
+Prefix = Prefix
+
+access-denied = Access Denied
+
+actingAgent = Acting Agent
+
+action = Action
+
+actions = Actions
+
+agent = Agent
+
+agent.accountNumber          = Account Number
+agent.address                = Address
+agent.attachUser             = Select user for agent attachment
+agent.branch                 = Branch
+agent.create                 = Create Agent
+agent.delete                 = Delete Agent
+agent.delete.confirm         = Are you sure you want to remove agent?
+agent.detachUser             = Select user for agent detachment
+agent.email                  = Email
+agent.enabled                = Active
+agent.hesabCode              = Account Code
+agent.iataCode               = IATA Code
+agent.list                   = Agents List
+agent.logo                   = Agent Logo
+agent.logo.desc              = Agent logo should be 900 * 300 pixel
+agent.modify                 = Edit Agent
+agent.name                   = Name
+agent.parent                 = Parent
+agent.save-agent-logo-failed = Error in save agent logo
+agent.tel                    = Tel No.
+agent.uploadLogo             = Agent Logo
+
+agents = Agents
+
+all = All
+
+allAgents = All Agents
+
+already-exists = is already exists
+
+amount = Amount
+
+are.you.sure = Are you sure?
+
+assignedAgent = Assigned Agent
+
+backlog = Backlog
+
+barcode = Barcode
+
+batch.update = Batch Update
+
+batchChange = Batch update
+
+batchPrint = Batch print
+
+broker = Broker
+
+broker.nationalId = Broker's Nationl Id
+
+button.add      = Add
+button.cancel   = Cancel
+button.close    = Close
+button.continue = continue
+button.copy     = Copy
+button.create   = Create
+button.delete   = Delete
+button.edit     = Edit
+button.export   = Export
+button.no       = No
+button.ok       = OK
+button.reset    = reset
+button.return   = Return
+button.save     = Save
+button.search   = Search
+button.void     = Void
+button.yes      = Yes
+
+cancel = Cancel
+
+cargo = Cargo
+
+cargo-in = Cargo in
+
+cargo-out = Cargo out
+
+cargo-per-city = Cargo per city
+
+cargo.accountNumber                = Account Number
+cargo.address                      = Address
+cargo.agent                        = Agent
+cargo.assignedAgent                = Assigned Agent
+cargo.cancel                       = Cancel
+cargo.cargo                        = Shipment
+cargo.cargoActionCode              = Action
+cargo.cargoInfo                    = Shipment Info
+cargo.cargoStateHistory            = Change State
+cargo.cargoStateHistoryActingAgent = Acting Agent
+cargo.cargoStateHistoryCreateUser  = Acting User
+cargo.cargoStateHistoryDate        = Change State Date
+cargo.cargoStatus                  = Status
+cargo.cargoType                    = Shipment Type
+cargo.cargos                       = Shipments
+cargo.chargeTo                     = Charged To
+cargo.city                         = City
+cargo.client                       = Client
+cargo.clientId                     = Client ID
+cargo.close                        = Cancel
+cargo.collect                      = Collect Node
+cargo.collectDistribute            = Collect / Distribute
+cargo.company                      = Company
+cargo.confirm_req_pickup           = Request Pickup
+cargo.consignee                    = Consignee
+cargo.consigneeAddress             = Consignee Address
+cargo.consigneeCity                = Consignee City
+cargo.consigneeContactNumber       = Consignee Tel
+cargo.consigneeName                = Consignee
+cargo.consigneeSignature           = Consignee Signature
+cargo.consigneeState               = Consignee Province
+cargo.contactMobile                = Mobile Number
+cargo.contactNumber                = Contact Number
+cargo.contentDescription           = Content Description
+cargo.contents                     = Contents
+cargo.country                      = Country
+cargo.createCargo                  = Create Cargo
+cargo.createDate                   = Record Create Date
+cargo.createDateFrom               = Create Date From
+cargo.createDateTo                 = Create Date To
+cargo.createManifest               = Create Manifest
+cargo.createUserId                 = Record creator
+cargo.currentNode                  = Current Node
+cargo.currentState                 = Current state
+cargo.currentTrackState            = Current State
+cargo.declaredValue                = Declared Value
+cargo.delete                       = Delete
+cargo.deleteCargo                  = Delete Cargo
+cargo.deliveryDate                 = Delivery Date
+cargo.destination                  = Destination
+cargo.destinationHub               = Destination Hub
+cargo.destinationNode              = Destination
+cargo.detailes                     = Detailes
+cargo.distribute                   = Distribute Node
+cargo.editCargo                    = Edit Cargo
+cargo.expectedDeliveryDate         = Expected Delivery Date
+cargo.export                       = Export
+cargo.faxNumber                    = Fax No.
+cargo.forwarderReferenceNumber     = Forwarder Reference No.
+cargo.height                       = Height
+cargo.hold                         = Hold
+cargo.houseWaybillNumber           = HWB No.
+cargo.hub                          = Hub
+cargo.hubDepot                     = Hub / Depot
+cargo.hwbNumber                    = House Waybill Number
+cargo.issue                        = Issue
+cargo.issueDate                    = Issue Date
+cargo.issuedShipment               = Issue Shipment
+cargo.issuingAgent                 = Issuing Agent
+cargo.issuingDate                  = Issue Date
+cargo.issuingDateFrom              = Issue Date From
+cargo.issuingDateTo                = Issue Date To
+cargo.lastChangeStateDate          = Date of Changing to Current State
+cargo.length                       = Length
+cargo.mobileNumber                 = Mobile No.
+cargo.name                         = Name
+cargo.nationalId                   = National Id
+cargo.newCargo                     = New Cargo
+cargo.nodes                        = Nodes
+cargo.notCurrentState              = Not State
+cargo.note                         = Notes
+cargo.optionalServices             = Optional Services
+cargo.origin                       = Origin
+cargo.originHub                    = Origin Hub
+cargo.originNode                   = Origin
+cargo.packingContents              = Packing Contents
+cargo.packingItems                 = Packing Items
+cargo.paymentMethod                = Payment Method
+cargo.paymentReferenceInfo         = Payment Reference Code
+cargo.phoneNumber                  = Phone No.
+cargo.pickupNumber                 = Pickup Number
+cargo.pieces                       = Pieces
+cargo.postalCode                   = Postal Code
+cargo.priceItems                   = Invoice
+cargo.priceType                    = Price Type
+cargo.product                      = Product
+cargo.re_issue                     = Reissue
+cargo.release                      = Release
+cargo.save-success                 = Save Successful!
+cargo.saveDraft                    = Save Draft
+cargo.savePickup                   = Request For Pickup
+cargo.shipper                      = Shipper
+cargo.shipperAddress               = Shipper Address
+cargo.shipperCity                  = Shipper City
+cargo.shipperConsignee             = Shipper / Consignee
+cargo.shipperContactNumber         = Shipper Tel
+cargo.shipperName                  = Shipper
+cargo.shipperState                 = Shipper Province
+cargo.shippingDate                 = Issue Date
+cargo.state                        = State
+cargo.status                       = Current Status
+cargo.totalChargeableWeight        = Total Chargeable Weight
+cargo.totalDeclaredValue           = Total Declared Value
+cargo.totalGrossWeight             = Total Gross Weight
+cargo.totalVolumetricWeight        = Total Volumetric Weight
+cargo.trackingNumber               = Tracking Number
+cargo.type                         = Type
+cargo.updateDate                   = Record Update Date
+cargo.updateDateFrom               = Update Date From
+cargo.updateDateTo                 = Update Date To
+cargo.value                        = Value
+cargo.via                          = Via
+cargo.void                         = Void
+cargo.voidCargo                    = Void Cargo
+cargo.waybillNumber                = Waybill Number
+cargo.waybillNumberFrom            = Waybill Number From
+cargo.waybillNumberTo              = Waybill Number To
+cargo.weight                       = Weight
+cargo.width                        = Width
+
+cargoState.confirm_pickup_req = Pickup Requested
+cargoState.delivered          = Delivered
+cargoState.draft              = Draft
+cargoState.in_transit         = In Transit
+cargoState.in_warehouse       = In Warehouse
+cargoState.issued             = Issued
+cargoState.manifested         = Manifested
+cargoState.mastered           = Mastered
+cargoState.offloaded          = Offloaded
+cargoState.on_hold            = On Hold
+cargoState.out_for_delivery   = Out for delivery
+cargoState.returned           = Returned
+cargoState.voided             = Voided
+
+cargos = Cargos
+
+carrier = Carrier
+
+carrier.active         = Active
+carrier.code           = Code
+carrier.create         = Create Carrier
+carrier.delete         = Delete Carrier
+carrier.delete.confirm = Are you sure you want to remove carrier?
+carrier.list           = Carriers List
+carrier.modify         = Edit Carrier
+carrier.name           = Name
+
+carriers = Carriers
+
+cartable = Cartable
+
+cartable.delete = Delete
+cartable.modify = Edit
+
+changeAgent = Change Agent
+
+changeStatus = Change Status
+
+changelanguage = Change Language
+
+chargedParty = Charged Party
+
+chargedParty.consignee  = Consignee (Postpaid)
+chargedParty.shipper    = Shipper (Prepaid)
+chargedParty.thirdParty = Third Party
+
+chargedPartys = Charged Parties
+
+choose = Select...
+
+city = City
+
+client.legal = Legal
+client.real  = Real
+
+clients = Clients
+
+clone = Clone Shipment
+
+close-gunny = Close ULD
+
+colleagues = Colleagues
+
+confirm.acceptPickup       = Are you sure to confirm pickup?
+confirm.acceptPickup.title = Confirm Acceptance Pickup
+
+consignee = Consignee
+
+consignee.nationalId = Consignee's Nationl Id
+
+contact.accountNumber                 = Account Number
+contact.address                       = Address
+contact.birthDate                     = Birth Date
+contact.birthLocation                 = Birth Location
+contact.city                          = City
+contact.company                       = Company
+contact.contactPerson                 = Contact Person
+contact.country                       = Country
+contact.economicCode                  = code
+contact.email                         = Email
+contact.fax                           = Fax No.
+contact.firstName                     = Name
+contact.issueDate                     = Issue Date
+contact.issueId                       = Issue ID
+contact.issueLocation                 = Issue Location
+contact.jobTitle                      = Job Title
+contact.lastName                      = Last Name
+contact.legal.name                    = Name
+contact.legalNationalId               = National ID
+contact.legalNickName                 = Person name
+contact.middleName                    = Middle Name
+contact.mobile                        = Mobile No.
+contact.nationalId                    = National ID
+contact.nickName                      = Nick Name
+contact.note                          = Note
+contact.paymentMethodCodesAsConsignee = Payment Method Code As Post Paid
+contact.paymentMethodCodesAsShipper   = Payment Method Code As Pre Paid
+contact.postalCode                    = Postal Code
+contact.prefix                        = Prefix
+contact.productCodesAsConsignee       = Product Code As Consignee
+contact.productCodesAsShipper         = Product Code As Shipper
+contact.shsh                          = ID
+contact.state                         = State
+contact.suffix                        = Suffix
+contact.tel                           = Tel No.
+contact.type                          = type
+
+contactInfo.address                 = Address
+contactInfo.city                    = City
+contactInfo.contactPersonName       = Contact Person Name
+contactInfo.contactPersonNationalId = Contact Person National ID
+contactInfo.country                 = Country
+contactInfo.email                   = Email
+contactInfo.fax                     = Fax
+contactInfo.mobile                  = Mobile
+contactInfo.postalCode              = Postal Code
+contactInfo.province                = Province
+contactInfo.tel                     = Tel
+
+continuous = Continuous
+
+count = count
+
+country = Country
+
+courier = Courier
+
+courier.active          = Active
+courier.agent           = Agent
+courier.attachDevice    = Attach Device
+courier.create          = Create
+courier.delete          = Delete Courier
+courier.delete.confirm  = Are you sure to delete this courier?
+courier.detachDevice    = Detach Device
+courier.fullName        = Full Name
+courier.hasActiveDevice = Has Active Device
+courier.modify          = Edit Courier
+courier.user            = User
+courier.vehicle         = Vehicle
+
+couriers = Couriers
+
+create = Create
+
+create-another = Create another
+
+create-pickup-manifest = Create Pickup manifest
+
+create.date            = Create date
+
+createDate = Create date
+
+createDateFrom = Create-Date, From
+
+createDateTo = Create-Date, To
+
+createUser = Create User
+
+createUserId = Issueing user
+
+currency = Currency
+
+currency.create         = Create
+currency.delete         = Delete currency
+currency.delete.confirm = Are you sure to delete this currency?
+currency.modify         = Edit
+currency.name           = Name
+currency.number         = Number
+currency.symbol         = Symbol
+
+current.location            = Current location
+current.parcel.location.msg = Your Shipments current location
+current.parcel.status.msg   = Your Shipments current status
+current.status              = Current status
+
+currentAssignedAgent = Assigned Agent
+
+currentAssignedUser = Assigned User
+
+customer-delivery = Customer delivery
+
+customer.remark   = Customer Remark
+
+damageType.create         = Create new damage type
+damageType.delete         = Delete new damage type
+damageType.delete.confirm = Are you sure to delete this damage type?
+damageType.modify         = Edit new damage type
+damageType.titleEn        = Damage type in persian
+damageType.titleFa        = Damage type in english
+
+dashboard = Dashboard
+
+dashboard.deliveryManifest          = Delivery Manifest
+dashboard.inManifest                = In Manifest
+dashboard.inwarehouseAddressDeliver = In Warehouse for deliver in address
+dashboard.inwarehouseOfficeDeliver  = In Warehouse for deliver in office
+dashboard.inwarehouseShipments      = In Warehouse Shipments
+dashboard.inwarehouseTransfer       = In Warehouse for transfer to next agent
+dashboard.inwarehouseTransit        = In Warehouse for transfer to next city
+dashboard.outManifest               = Out Manifest
+dashboard.pickupManifest            = Pickup Manifest
+dashboard.showShipments             = show shipments
+dashboard.todayDelivered            = Today Delivered
+dashboard.todayInwarehouse          = Today In Warehouse
+dashboard.todayIssued               = Today Issued
+dashboard.todayManifested           = Today Manifested
+dashboard.todayStates               = Today states
+dashboard.transitManifest           = Transit Manifest
+
+date = Date
+
+dates = Dates
+
+delete = Delete
+
+delete-gunny = Remove ULD
+
+delete.confirm = Are you sure?
+delete.failed  = Delete failed
+
+delivery-info = Delivery Information
+
+deliveryOrder = Delivey Order
+
+deliveryOrder.amount               = Amount
+deliveryOrder.consignee            = Consignee
+deliveryOrder.create               = Create Delivery Order
+deliveryOrder.doConsignee          = Consignee
+deliveryOrder.edit                 = Edit delivery order
+deliveryOrder.issueDate            = Issue Date
+deliveryOrder.payment              = Payment
+deliveryOrder.paymentReferenceInfo = Payment Reference Code
+deliveryOrder.remarks              = description
+deliveryOrder.status               = status
+deliveryOrder.status.issued        = Issued
+deliveryOrder.status.voided        = Voided
+deliveryOrder.tax                  = tax
+deliveryOrder.totalAmount          = total amount
+deliveryOrder.view                 = View Delivery Order
+deliveryOrder.void                 = Void Delivery Order
+deliveryOrder.void.confirm         = Are you sure to void this delivery order?
+
+dependsOn = Depend On
+
+detail = Detail
+
+device.active         = Active
+device.appVersion     = Version
+device.create         = Create Device
+device.delete         = Delete device
+device.delete.confirm = Are you sure to delete this device?
+device.imei           = Serial
+device.lastGeoLat     = Last Geo Lan
+device.lastGeoLng     = Last Geo Lat
+device.lastOnlineDate = Last Online Date
+device.location       = Location
+device.modify         = Modify Device
+device.name           = Name
+device.type           = Type
+
+dimensions = Dimensions
+
+discount.action            = action
+discount.agentCode         = Agent code
+discount.code              = code
+discount.create            = Create Discount
+discount.date              = Date
+discount.dateFrom          = Date from
+discount.dateTo            = Date to
+discount.delete            = Delete
+discount.delete.confirm    = Are you sure to delete this discount?
+discount.fromNode          = From Node
+discount.modify            = Edit
+discount.status            = Status
+discount.toNode            = To Node
+discount.waybillNumber     = Waybill number
+discount.waybillNumberFrom = Waybill number from
+discount.waybillNumberTo   = Waybill number to
+discount.weight            = Weight
+discount.weightFrom        = Weight from
+discount.weightTo          = Weight to
+
+discountCode = Discount Code
+
+domestic = Domestic/International
+
+edit = Edit
+
+edit-gunny = Edit ULD
+
+employee.remark = Employee Remark
+
+entryDate = Entry time
+
+error-already-exist = already exist
+
+error-email = The email address is not valid
+
+error-emailaddress = Invalid email address
+
+error-invalid-agent = Invalid agent
+
+error-invalid-date = The value is not a valid date
+
+error-invalid-daterange = The date is not in the range
+
+error-invalid-gunny-barcode = Please assign valid ULD barcode.
+
+error-invalid-shipment-location = This shipment is in "{0}".
+
+error-invalid-shipment-state = This shipment is in "{0}" state
+
+error-nationalId = Invalid nationl id
+
+error-no-gunny-found = No ULD found!
+
+error-no-shipment-found = No Shipment found
+
+error-not-valid = The {0} is not valid
+
+error-onlycharacter = Only alphabetic character
+
+error-onlydigit = Only digit character
+
+error-password-missmatch = Password mismatch
+
+error-required = The {0} is required
+
+error-username-length = Your username must have at least 6 and less than 15 characters
+
+error-x-already-exist = The {0} is already exist
+
+error.data-duplicate                            = Field {0} is duplicate
+error.hesab-already-assigned-to-different-agent = Selected account is already assigned to different agent 
+error.hesab-already-assigned-to-this-agent      = Selected account is already assigned to this agent 
+error.please-update-cargo                       = Please update cargo informations
+error.save.houseWaybill                         = Waybill save failed!
+
+errorCode.10001       = Internal error
+errorCode.10002       = Internal IO error
+errorCode.10003       = Version changed
+errorCode.10004       = LOCKED
+errorCode.10005       = Invalid data
+errorCode.10006       = Save error
+errorCode.10007       = Remove error
+errorCode.10008       = Get error
+errorCode.10009       = Record not found
+errorCode.10010       = Data exist
+errorCode.10011       = Duplicate data
+errorCode.10012       = Access denied
+errorCode.10013       = Record is used by another record
+errorCode.10014       = Required fields is empty
+errorCode.10015       = Invalid date format
+errorCode.10016       = incomplete parameters
+errorCode.10017       = Calculation Error
+errorCode.10018       = End date must be after start date
+errorCode.10100       = Atleast one track needed
+errorCode.10101       = Houseway has no track
+errorCode.10102       = Key is not unique
+errorCode.10103       = Invalid Instance Class
+errorCode.10104       = Invalid Data Fromat
+errorCode.10106       = Invalid Action
+errorCode.10200       = Same start and end node
+errorCode.10201       = Origin or Destination nodes are set as Via node
+errorCode.10300       = Invalid start number for generate waybill number
+errorCode.10301       = Invalid end number for generate waybill number
+errorCode.10302       = Invalid step number for generate waybill number
+errorCode.10303       = Issued WaybillNumber can not be reassigned
+errorCode.10304       = No electronic waybill number is available to assign
+errorCode.10305       = Only waybill numbers with "print" type can be assigned
+errorCode.10306       = Waybill Number is not assigned to your agent
+errorCode.10307       = Invalid waybill number based on selected format
+errorCode.10400       = Invalid Parent
+errorCode.10500       = Invalid dependency
+errorCode.10600       = Missing Dependency while eavluating rate-rule(s).
+errorCode.10601       = Less than zero for rate value
+errorCode.10602       = You can only edit rate rules for draft products
+errorCode.10700       = Another agent already has been set to this node.
+errorCode.10701       = Logo can not be added to branch agent
+errorCode.10800       = Please Enter Name
+errorCode.10801       = name is not unique
+errorCode.10900       = Cannot void draft shipment
+errorCode.10901       = Only draft shipment can be issued
+errorCode.10902       = Cannot update manifested shipment
+errorCode.10903       = Waybill number already assigned
+errorCode.10904       = \u0641\u0642\u0637 \u0628\u0627\u0631\u0646\u0627\u0645\u0647 \u0647\u0627\u06CC\u06CC \u06A9\u0647 \u0628\u0627\u0637\u0644 \u0634\u062F\u0647 \u0627\u0646\u062F \u0631\u0627 \u0645\u06CC \u062A\u0648\u0627\u0646 \u062F\u0648\u0628\u0627\u0631\u0647 \u0627\u0646\u062A\u0633\u0627\u0628 \u062F\u0627\u062F
+errorCode.10905       = Cannot Inscan from current state
+errorCode.10906       = Cannot Outscan from current state
+errorCode.10907       = Invalid transition from current state
+errorCode.10908       = No hsipment found with this waybill number
+errorCode.10909       = Please use manifest for scan this shipment
+errorCode.10910       = Shipment dose not exists in any active manifest
+errorCode.10911       = Shipment exists in more than one active manifest
+errorCode.10912       = Shipment exists in another active manifest
+errorCode.10913       = Shipment exists in a manifest
+errorCode.10914       = This shipment has unresolved lost and found record.
+errorCode.10915       = Invalid shipment location
+errorCode.10916       = Invalid product status
+errorCode.10917       = Invalid shipment deliver location
+errorCode.10921       = CARGO HAS NOT ORIGIN NODE
+errorCode.10922       = CARGO HAS NOT DESTINATION NODE
+errorCode.10923       = CARGO HAS NOT SHIPPER NAME
+errorCode.10924       = CARGO HAS NOT SHIPPER ADDRESS
+errorCode.10925       = CARGO HAS NOT SHIPPER COUNTRY CODE
+errorCode.10926       = CARGO HAS NOT CONSIGNEE NAME
+errorCode.10927       = CARGO HAS NOT CONSIGNEE ADDRESS
+errorCode.10928       = CARGO HAS NOT TOTAL PIECES
+errorCode.10930       = CARGO HAS NOT PACKAGE TYPE
+errorCode.10931       = CARGO HAS NOT TOTAL GROSS VEIGHT
+errorCode.10932       = CARGO HAS NOT WAYBILLNUMBER
+errorCode.10933       = Too many shipment selected for batch print
+errorCode.10934       = Delivery order exist for this waybill number
+errorCode.10935       = Cargo doesn't have any PersonId
+errorCode.10936       = Cargo doesn't have any PackingItem
+errorCode.10937       = This cargo does not have any warehouse receipt
+errorCode.10938       = This cargo is set to without warehouse receipt
+errorCode.10939       = Cargo was holded
+errorCode.10940       = Incimplete dimentions
+errorCode.10941       = Invalid Action, Must be within 72 Hours
+errorCode.10942       = Action is location sensitive, but location cannot get verified
+errorCode.10944       = No Volumetric Weight Rule Found
+errorCode.10945       = More than one published rule set exists
+errorCode.10950       = ClientAppCode is missing from config
+errorCode.10951       = No Account Number has been assigned to current employee
+errorCode.11000       = Departure time is set after arrival
+errorCode.11001       = Departure and arrival are set as same
+errorCode.11002       = You can't scan this manifest again
+errorCode.11003       = You can only edit issued manifest
+errorCode.11004       = You cann't delete scanned manifest
+errorCode.11005       = Invalid Departure Date
+errorCode.11006       = Invalid Arrival Date
+errorCode.11007       = You cannot edit manifest after departure
+errorCode.11008       = Invalid state
+errorCode.11009       = Manifest is in mastered state
+errorCode.11010       = This manifest has a courier
+errorCode.11011       = Invalid Action
+errorCode.11012       = Invalid manifest type for doing this
+errorCode.11013       = Invalid Departure Date
+errorCode.11014       = Manifest has invalid Expected-Departure-Time.
+errorCode.11015       = Manifest doesn't have any Received-Pieces for waybill number
+errorCode.11016       = Manifest doesn't have any Received-Gross-Weight for waybill number
+errorCode.11053       = Duplicate ULD barcode
+errorCode.11054       = ULD barcode is invalid
+errorCode.11056       = Error occurred while exporting CUSTOMS-ELECTRONIC-MANIFEST
+errorCode.11057       = Waybill Number exists and its total gross doesn't match with entered value :
+errorCode.11058       = Waybill Number exists and its total pieces doesn't match with entered value :
+errorCode.11059       = \u062F\u0631 \u062D\u06CC\u0646 \u0627\u06CC\u062C\u0627\u062F \u0641\u0627\u06CC\u0644 \u062E\u0631\u0648\u062C\u06CC \u0627\u06A9\u0633\u0644\u060C \u062E\u0637\u0627 \u0631\u062E \u062F\u0627\u062F
+errorCode.11060       = Invalid FFM
+errorCode.11100       = Subscription Number not uniuqe
+errorCode.11200       = email not unique
+errorCode.12000       = Standard and Code combination must be unique
+errorCode.13000       = Route with such type, carrier, route number combination already exists
+errorCode.13001       = No Route with selected nodes exist
+errorCode.14001       = You can not edit System-Defined rate types
+errorCode.14002       = You can not edit System-Defined rate types
+errorCode.14003       = You can not delete System-Defined rate types
+errorCode.14004       = You can only edit rate type for draft products
+errorCode.15000       = You are not valid agent
+errorCode.15001       = You ar not valid courier
+errorCode.15002       = Only issuing agent is authorized to do this action
+errorCode.15003       = Only destination agent is authorized to do this action
+errorCode.15004       = Only issuing or destination agent is authorized to do this action
+errorCode.15005       = Only courier or issuing or destination agent is authorized to do this action
+errorCode.15100       = Account not found
+errorCode.15101       = No account found for agent
+errorCode.15102       = This client has no creditor agent
+errorCode.17001       = Invalid MOA Code
+errorCode.17002       = Invalid MOA Code For Your Agent.
+errorCode.17003       = MOA Code is not valid for selected product.
+errorCode.17004       = Enter WaybillNumber to validate MOA Code.
+errorCode.17005       = MOA Code is not valid for this waybill number.
+errorCode.17006       = MOA Code is not valid for this weight.
+errorCode.17007       = MOA Code is cancelled.
+errorCode.17009       = Discount Type is not permitted for Agent
+errorCode.18000       = Used product cannot change status
+errorCode.18001       = Different versions of a product, can not be in published state
+errorCode.19000       = Multiple transportation number available in selected transportation schedules
+errorCode.19001       = PAST_DATE_IN_BULK_UPDATE
+errorCode.19002       = Invalid duration time
+errorCode.19003       = Invalid reservable weight
+errorCode.19004       = Invalid arraival date
+errorCode.19005       = Invalid departure date
+errorCode.19006       = Invalid departure time
+errorCode.19007       = Invalid arrival date
+errorCode.19008       = Invalid arrival time
+errorCode.19009       = Transportaion schedule is already exist with this transportaion number and departure date
+errorCode.19014       = No matching day of week for date interval
+errorCode.20001       = Duplicated waybill numbers in same ULD
+errorCode.20002       = Loaded pieces are greater than Total pieces
+errorCode.20003       = Total Pieces doesn't match with total pieces in manifest
+errorCode.20004       = Total Gross Weight doesn't match with sum total of manifest gross weight
+errorCode.20005       = Total loaded pieces is more that total pieces of waybill
+errorCode.20006       = Total pieces is more that total pieces of waybill
+errorCode.20007       = Entered flight already has a manifest in the system
+errorCode.20008       = Inconsistency in destination for airwaybill
+errorCode.20009       = Received pieces are greater than Total pieces
+errorCode.20010       = Total received pieces is more that total pieces of waybill
+errorCode.20011       = Total pieces is more that total pieces of waybill
+errorCode.30000       = No person found
+errorCode.30001       = The person status is not active
+errorCode.302         = Session timeout. please login again
+errorCode.40000       = No broker found
+errorCode.40001       = The broker status is not active
+errorCode.403         = Access Denied
+errorCode.404         = Page not found
+errorCode.50001       = MANIFEST HAS NOT CARRIER CODE
+errorCode.50002       = MANIFEST HAS NOT VEHICLE CARRIER REG NUMBER
+errorCode.50003       = MANIFEST HAS NOT TRANSPORTATION NUMBER
+errorCode.50004       = MANIFEST HAS NOT DESTINATION COUNTRY SHORT CODE
+errorCode.50005       = MANIFEST HAS NOT DESTINATION NODE CODE
+errorCode.50006       = MANIFEST HAS NOT DESTINATION COUNTRY SHORT-CODE OR DESTINATION NODE CODE
+errorCode.50007       = MANIFEST HAS NOT EXPECTED ARRIVE DATE
+errorCode.50008       = MANIFEST HAS NOT CUSTOMS-REFERENCE-NO
+errorCode.503         = 503
+errorCode.parsererror = Parser error
+errorCode.timeout     = Time out
+
+errorString.ERROR_WHILE_SAVING = An error happend during saving
+errorString.INVALID_ROUTE      = No Route with selected nodes exist
+errorString.NO_RATE_DEFINED    = No rate has been defined for selected route
+
+false = No
+
+file = File
+
+friday = friday
+
+friday.short = FRI
+
+fromNode = From Node
+
+fromState = From State
+
+geoEntities = Geo Entities
+
+geoEntity = Geo Entity
+
+geoEntity.code           = Code
+geoEntity.create         = Create Geo Entity
+geoEntity.delete         = Delete Geo Entity
+geoEntity.delete.confirm = Are you sure you want to remove geo entity?
+geoEntity.geoLat         = Latitude
+geoEntity.geoLng         = Longitude
+geoEntity.modify         = Modify Geo Entity
+geoEntity.nameEn         = English name
+geoEntity.nameFa         = Persian Name
+geoEntity.nameOther      = Other Names
+geoEntity.parent         = Parent
+geoEntity.shortCode      = Short Code
+geoEntity.type           = Type
+
+geoType = Geo Type
+
+geoType.code           = Code
+geoType.create         = Create Geo Type
+geoType.delete         = Delete Geo Type
+geoType.delete.confirm = Are you sure to delete Geo type?
+geoType.modify         = Edit Geo Type
+geoType.nameEn         = English Name
+geoType.nameFa         = Persian Name
+geoType.parent         = Parent
+
+geoTypes = Geo Types
+
+group.create         = Create Group
+group.delete         = Delete group
+group.delete.confirm = Are you sure to delete Group?
+group.description    = Description
+group.modify         = Edit Group
+group.name           = Name
+group.parent         = Parent
+
+gunny-without-barcode = Without barcode
+
+gunny.barcode         = Invalid ULD barcode
+
+height = height
+
+hesab.closed         = Closed
+hesab.create         = Create Account
+hesab.delete         = Delete Acount
+hesab.delete.confirm = Are you sure to delete Account?
+hesab.description    = Description
+hesab.group          = Group
+hesab.hesabCode      = Account code
+hesab.modify         = Modify Account
+hesab.name           = Name
+hesab.type           = Type
+
+history = History
+
+home = Home
+
+housewaybill = House Waybill
+
+howseWaybill.issueDate = Waybill number  issue date
+
+hwb-number.exist = Waybill number exists
+
+i18n.msg.emptytable        = No data available in table
+i18n.msg.info              = Showing START to END of TOTAL entries
+i18n.msg.info.empty        = Showing 0 to 0 of 0 entries
+i18n.msg.info.filtered     = (filtered from MAX total entries)
+i18n.msg.lengthMenu        = Show MENU entries
+i18n.msg.loadingrecords    = Loading\u2026\u200B
+i18n.msg.paginate.first    = First
+i18n.msg.paginate.last     = Last
+i18n.msg.paginate.next     = Next
+i18n.msg.paginate.previous = Previous
+i18n.msg.processing        = Processing\u2026
+i18n.msg.zerorecord        = No matching records found
+
+id = Id
+
+initial.location = Initial Location
+initial.status   = Initial Status
+
+inscan = Manifest Inscan
+
+inscan-courier = Courier Inscan
+
+inscan.confirm        = Confirm
+inscan.confirm.desc   = {0} shipment not scanned
+inscan.manifest       = Receive Manifest
+inscan.returnDelivery = Returned from delivery
+
+insurance.list = Export Insurance
+
+invalid-value = is not valid
+
+invalid.issueDate = Issue date invalid
+
+issueDateFrom = Issue From
+
+issueDateTo = Issue To
+
+issuingAgent = Issuing Agent
+
+kindOfDelivery.address = \u062A\u062D\u0648\u06CC\u0644 \u062F\u0631 \u0622\u062F\u0631\u0633
+kindOfDelivery.agent   = \u062A\u062D\u0648\u06CC\u0644 \u062F\u0631 \u0646\u0645\u0627\u06CC\u0646\u062F\u06AF\u06CC
+
+ledger.account        = Accounts
+ledger.accountReports = Account Report
+ledger.balanceReport  = Balance Report
+ledger.group          = Account Group
+
+ledgerPrint = Ledger print
+
+ledgerReport = Export to Excel
+
+lenght = lenght
+
+load.failed = Receiving data failed
+
+location = Location
+
+lostAndFound = Lost & Found
+
+lostAndFound.comment         = comment
+lostAndFound.create          = Create
+lostAndFound.createFound     = Create new found recoard
+lostAndFound.delete          = Delete
+lostAndFound.delete.confirm  = Are you sure to delete lost and found record?
+lostAndFound.location        = Location
+lostAndFound.modify          = Modify
+lostAndFound.resolve         = Resolve
+lostAndFound.resolve.confirm = Are you sure to resolve this shipment?
+lostAndFound.resolved        = Resolved
+lostAndFound.type            = Type
+
+lostAndFounds = Lost And Founds
+
+manage = Manage
+
+manifest = Manifest
+
+manifest.active                                                   = Active
+manifest.actualArrival                                            = Actual Arrival
+manifest.actualDeparture                                          = Actual Departure
+manifest.assignedCourier                                          = Courier
+manifest.attachCourier                                            = Choose Courier
+manifest.carrier                                                  = Carrier
+manifest.carrierCode                                              = Carrier
+manifest.close                                                    = Cancel
+manifest.courier                                                  = Courier
+manifest.create                                                   = Create Manifest
+manifest.customs                                                  = Customs
+manifest.customsReferenceNo                                       = Customs reference no.
+manifest.delete                                                   = Delete Manifest
+manifest.delete.confirm                                           = Are you sure to delete manifest?
+manifest.description                                              = Description
+manifest.destination                                              = Destination
+manifest.destinationAgent                                         = Destination Agent
+manifest.destinationCityShortCode                                 = Desination City
+manifest.destinationCountryShortCode                              = Destination country code
+manifest.destinationHubNodeId                                     = Desination City's Hub
+manifest.destinationNodeCode                                      = Destination
+manifest.destinationNodeId                                        = Desination City
+manifest.destinationStateShortCode                                = Destination state code
+manifest.expectedArrival                                          = Expected Arrival
+manifest.expectedDeparture                                        = Expected Departure
+manifest.flightNumber                                             = Flight Number
+manifest.gunniesCount                                             = ULD count
+manifest.handlingAgentCode                                        = Handling Agent
+manifest.id                                                       = Manifest Number
+manifest.masterContradictionWithShipmentSumManifestRouteFreights  = Contradiction
+manifest.masterContradictionWithShipmentSumTotalChargeableWeights = Contradiction
+manifest.masterWaybillAmount                                      = Master Waybill Amount
+manifest.masterWaybillNumber                                      = Master WaybillNumber
+manifest.masterWaybillPackCount                                   = Master package count
+manifest.masterWaybillWeight                                      = Master Waybill Weight
+manifest.modify                                                   = Modify Manifest
+manifest.offload                                                  = Offload
+manifest.offload.confirm                                          = Are you sure to offload this manifest?
+manifest.origin                                                   = Origin
+manifest.originAgent                                              = Origin Agent
+manifest.originCityShortCode                                      = Origin city code
+manifest.originCountryShortCode                                   = Origin country Code
+manifest.originNodeCode                                           = Origin
+manifest.originStateShortCode                                     = Origin state code
+manifest.part-count                                               = Part count
+manifest.report                                                   = Manifests Report
+manifest.save                                                     = Save manifest
+manifest.setDeparted                                              = Change Departure date
+manifest.setMaster                                                = Change Master Manifest
+manifest.shipment-count                                           = Shipment count
+manifest.shipmentSumAllRouteFreights                              = Total route freight
+manifest.shipmentSumManifestRouteFreights                         = Total manifest route freight
+manifest.shipmentSumTotalChargeableWeights                        = Total Chargeable Weight
+manifest.shipmentSumTotalGrossWeights                             = Total gross weigth
+manifest.shipmentSumTotalPieces                                   = Total pieces
+manifest.shipmentSumTotalVolumetricWeights                        = Total volumetric weigth
+manifest.state                                                    = state
+manifest.state.AGENT_SCANNED                                      = AGENT SCANNED
+manifest.state.COURIER_SCANNED                                    = COURIER SCANNED
+manifest.state.DEPARTED                                           = DEPARTED
+manifest.state.ISSUED                                             = ISSUED
+manifest.state.MASTERED                                           = MASTERED
+manifest.state.OFFLOADED                                          = OFFLOADED
+manifest.totalGrossWeight                                         = Total Weight
+manifest.transportationDate                                       = Flight Date
+manifest.transportationNumber                                     = FLight No
+manifest.type                                                     = Type
+manifest.uld-count                                                = ULD count
+manifest.vehicleCarrierRegNumber                                  = Aircraft Reg No
+manifest.waybillNumber                                            = Waybill Numbers
+
+manifestAmount = Manifest Amount
+
+manifestWaybillNumber = Manifest Master Waybill Number
+
+manifestWeight = Manifest Weight
+
+manifests = Manifest List
+
+masterAmount = Master Waybill Amount
+
+masterWaybill = Master waybill
+
+masterWaybill.amount           = Amount
+masterWaybill.comment          = Comment
+masterWaybill.create           = Create master waybill
+masterWaybill.delete           = Delete master waybill
+masterWaybill.delete.confirm   = Are you sure to delete master waybill?
+masterWaybill.diff             = Difference
+masterWaybill.import           = Import
+masterWaybill.import-failed    = Importing master waybills failed
+masterWaybill.import-succeeded = Importing master waybills succeeded
+masterWaybill.import.desc      = Excel file
+masterWaybill.list             = Master waybill list
+masterWaybill.modify           = Edit master waybill
+masterWaybill.resolve          = Resolve difference
+masterWaybill.resolved         = Resolved
+masterWaybill.waybillNumber    = Waybill number
+masterWaybill.weight           = Weight
+
+masterWaybills = Master waybills
+
+masterWeight = Master Waybill Weight
+
+menu.active         = Active
+menu.code           = Code
+menu.create         = New Menu
+menu.cssClass       = Css Class
+menu.delete         = Delete Menu
+menu.delete.confirm = Are you sure to delete this menu?
+menu.indexInParent  = index
+menu.link           = Link
+menu.modify         = Edit Menu
+menu.parent         = Parent
+menu.roles          = Roles
+menu.sort           = Sort menus
+menu.title          = Persian Title
+menu.titleEn        = English title
+menu.type           = Type
+
+monday = monday
+
+monday.short = MON
+
+more-info = More info
+
+new = New
+
+new-gunny = New ULD
+
+new-location = New Location
+
+new-status = New Status
+
+new.HWB                = New Waybill
+
+news = News
+
+news.body              = Body
+news.create            = Create News
+news.delete            = Delete news
+news.delete.confirm    = Are you sure to delete this news?
+news.modify            = Edit News
+news.title             = Title
+news.type              = Type
+news.type.announcement = Announcement
+news.type.events       = Events
+news.type.news         = News
+
+no = No
+
+noa.callee         = Callee
+noa.create         = Create NOA
+noa.delete         = Delete NOA
+noa.delete.confirm = Are you sure to delete this NOA?
+noa.modify         = Modify NOA
+noa.remarks        = Remarks
+noa.type           = Type
+
+node = Node
+
+node.active         = Active
+node.codeName       = Code
+node.create         = Create Node
+node.delete         = Delete Node
+node.delete.confirm = Are you sure you want to delete node?
+node.freightType    = Freight Type
+node.from           = From
+node.fromRoute      = From Route
+node.geoType        = Geo Type
+node.list           = Nodes List
+node.modify         = Edit Node
+node.name           = Name
+node.otherNames     = Other Names
+node.to             = To
+node.toRoute        = To Route
+
+nodeAndRoute = Nodes & Routes Map
+
+nodes = Nodes
+
+not-delivered.cause.ABSENT           = Not present at delivery location
+not-delivered.cause.INVALID_ADDRESS  = Wrong Address
+not-delivered.cause.REFUSAL_PEYMENT  = Refusal to pay
+not-delivered.cause.REFUSAL_SHIPMENT = Refusal to accept
+
+not-pickedup.cause.ABSENT             = Not present at pickup location
+not-pickedup.cause.CANCEL             = Cancel
+not-pickedup.cause.INVALID_ADDRESS    = Wrong shipper address
+not-pickedup.cause.REFUSAL_PEYMENT    = Refusal to pay
+not-pickedup.cause.UNAUTHORIZED_GOODS = Unauthorized Goods
+
+notifies = Notifies
+
+online-users = Online Users
+
+optionalService.delete.confirm = Are you sure to delete this optional service?
+optionalService.description    = Description
+optionalService.nameEn         = English Name
+optionalService.nameFa         = Persian Name
+
+optionalServices = Optional Services
+
+outscan = Create manifest for outscan
+
+outscan.delivery = Delivery
+outscan.manifest = Send to next agent (Create manifet)
+outscan.return   = Return to customer
+
+packages = Packages
+
+packingItem.declaredValue      = Declared Value
+packingItem.grossWeight        = Weight
+packingItem.height             = Height
+packingItem.length             = Length
+packingItem.nature             = Nature
+packingItem.packingItemType    = Packing item type
+packingItem.partNumber         = Part Number
+packingItem.width              = Width
+
+packingItemRowCount = Packing items row count
+
+packingItemType = Packing Item Type
+
+packingItemType.code           = Code
+packingItemType.create         = Create Packing Item Type
+packingItemType.delete         = Delete Payment Method
+packingItemType.delete.confirm = Are you sure to delete selected packing item type?
+packingItemType.displayOrder   = Display order
+packingItemType.height         = Height
+packingItemType.length         = Length
+packingItemType.maxWeight      = Max Weight
+packingItemType.modify         = Modify Packing Item Type
+packingItemType.nameEn         = English Name
+packingItemType.nameFa         = Persian Name
+packingItemType.standard       = Standard
+packingItemType.width          = Weight
+
+packingType.code   = Code
+packingType.create = Create New Packing Type
+packingType.nameEn = English Name
+packingType.nameFa = Persian Name
+
+partNumber = Part Number
+
+password = Password
+
+paymentMethod = Payment Method
+
+paymentMethod.active           = Active
+paymentMethod.create           = Create Payment Method
+paymentMethod.customerBase     = Customer Base
+paymentMethod.delete           = Delete Payment Method
+paymentMethod.delete.confirm   = Aru you sure to delete seleced payment method?
+paymentMethod.hasReferenceCode = Has reference code
+paymentMethod.key              = Code
+paymentMethod.list             = Payment Method List
+paymentMethod.modify           = Modify Payment Method
+paymentMethod.remark           = Remark
+paymentMethod.type             = Type
+paymentMethod.value            = Value
+
+paymentMethods = Payment Methods
+
+person.active                = Active
+person.clientCode            = Subscription Code
+person.createLegal           = Create legal person
+person.createReal            = Create Person
+person.delete                = Delete person
+person.delete.confirm        = Are you sure to delete this person?
+person.economicCode          = Economic Code
+person.firstName             = First Name
+person.firstNameEn           = English First Name
+person.firstNameLocal        = First Name
+person.fullName              = Name
+person.issueDate             = Issue Date
+person.issueId               = Issue ID
+person.issueLocation         = Issue Location
+person.lastName              = Last Name
+person.lastNameEn            = English Last Name
+person.lastNameLocal         = Last Name
+person.middleNameEn          = English Middle Name
+person.middleNameLocal       = Middle Name
+person.modifyLegal           = Edit legal person
+person.modifyReal            = Edit person
+person.nationalId            = National ID
+person.nickNameEn            = English Nike name
+person.nickNameLocal         = Nike name
+person.prefix                = Prefix
+person.prefix.bank           = Bank
+person.prefix.clinic         = Clinic
+person.prefix.community      = Community
+person.prefix.company        = Company
+person.prefix.cooperative    = Cooperative
+person.prefix.garrison       = Garrison
+person.prefix.hospital       = Hospital
+person.prefix.institution    = Institution
+person.prefix.laboratory     = Laboratory
+person.prefix.ministry       = Ministry
+person.prefix.mr             = Mr.
+person.prefix.ms             = Ms.
+person.prefix.office         = Office
+person.prefix.organization   = Organization
+person.prefix.representative = Representative
+person.prefix.union          = Union
+person.remarks               = Remarks
+person.suffixEn              = English Suffix
+person.suffixLocal           = Prefix
+person.type                  = Type
+person.uuid                  = uuid
+person.view                  = View person
+
+pickup = Pick up
+
+pickup.acceptance            = Accept Pickup
+pickup.from                  = From
+pickup.shipmentListOf        = Pickup shipments of
+pickup.to                    = To
+
+pickupSchedule.courierNote   = Courier note
+pickupSchedule.fromDateTime  = Pickup time from
+pickupSchedule.operationNote = Operation Note
+pickupSchedule.toDateTime    = Pickup time to
+
+please-enter-waybill-number = Please enter waybill number
+
+preview = Preview
+
+print = Print
+
+product = Product
+
+product.active                     = Active
+product.changeStatus               = Change status
+product.code                       = Code
+product.collectDistributeCondition = And
+product.collectFreightNodeTypes    = Collect Freight Node Types
+product.copy                       = Copy Product
+product.copyRateRules              = Copy rate rules
+product.copyRateTypes              = Copy rate types
+product.create                     = Create Product
+product.customerBase               = Customer Base
+product.delete                     = Delete Product
+product.delete.confirm             = Are you sure you want to delete product?
+product.distributeFreightNodeTypes = Distribute Freight Node Types
+product.list                       = Products List
+product.modify                     = Edit Product
+product.name                       = Name
+product.newVersion                 = New Version
+product.productVersion             = Version
+product.status                     = Status
+product.status.DEPRECATED          = Deprecated
+product.status.DRAFT               = Draft
+product.status.PUBLISHED           = Published
+
+productRuleSet = Product Rule
+
+products = Products
+
+profile = Profile
+
+province.IR-ALBZ-P = Alborz
+province.IR-ARDB-P = Ardabil
+province.IR-BSHR-P = Bushehr
+province.IR-CHBK-P = Chaharmahal and Bakhtiari
+province.IR-EAZR-P = East Azerbaijan
+province.IR-FARS-P = Fars
+province.IR-GILN-P = Gilan
+province.IR-GLST-P = Golestan
+province.IR-HMDN-P = Hamadan
+province.IR-HRMZ-P = Hormozgan
+province.IR-ILAM-P = Ilam
+province.IR-ISFN-P = Isfahan
+province.IR-KGBD-P = Kohgiluyeh and Boyer-Ahmad
+province.IR-KHUZ-P = Khuzestan
+province.IR-KRMN-P = Kerman
+province.IR-KRMS-P = Kermanshah
+province.IR-KURD-P = Kurdistan
+province.IR-LORS-P = Luristan
+province.IR-MAZN-P = Mazandaran
+province.IR-MRKZ-P = Markazi
+province.IR-NKHO-P = North Khorasan
+province.IR-QOM-P  = Qom
+province.IR-QZVN-P = Qazvin
+province.IR-RKHO-P = Razavi Khorasan
+province.IR-SKHO-P = South Khorasan
+province.IR-SMNN-P = Semnan
+province.IR-STBL-P = Sistan and Baluchestan
+province.IR-THRN-P = Tehran
+province.IR-WAZR-P = West Azerbaijan
+province.IR-YAZD-P = Yazd
+province.IR-ZNJN-P = Zanjan
+
+rateRule.create            = Create Rate Rule
+rateRule.delete            = Delete Rate Rule
+rateRule.delete.confirm    = Are you sure you want to delete price rule?
+rateRule.excelType         = Excel Type
+rateRule.import.desc       = Excel file
+rateRule.list              = Rate Rules List
+rateRule.modify            = Edit Rate Rule
+rateRule.rateRuleOwnerType = Owner Type
+
+rateRules = Rate Rules
+
+rateType = Rate Type
+
+rateType.appSpecificType = App Specific Type
+rateType.code            = Code Name
+rateType.create          = Create Rate Type
+rateType.delete          = Delete Rate Type
+rateType.delete.confirm  = Are you sure you want to delete rate type?
+rateType.displayOrder    = Display Order
+rateType.displayType     = Displayable
+rateType.editable        = Editable
+rateType.list            = Rate Types List
+rateType.modify          = Edit Rate Type
+rateType.name            = Name
+rateType.nameEn          = English Name
+rateType.nameFa          = Persian Name
+rateType.optional        = Optional
+rateType.rateDue         = Due
+rateType.resultFormula   = By Formula
+rateType.resultValue     = By Value
+rateType.userDefined     = User Defined
+
+rateTypes = Rate Types
+
+recalc.confirm                    = Confirm
+recalc.confirm.desc               = Are you sure to recreate ledger records?
+recalc.confirm.desc-waybillnumber = Are you sure to recreate ledger records for this waybill number?
+
+recalcLedger = Recreate ledger records
+
+relation = Relation
+
+relation.active          = Active
+relation.appWideTypeCode = Type
+relation.create          = Create Relation
+relation.description     = Description
+relation.fromPerson      = From Person
+relation.modify          = Edit Relation
+relation.toPerson        = To Person
+relation.validFrom       = Valid From
+relation.validTo         = Valid To
+
+remarks = Remarks
+
+rememberme = Remember me
+
+report = Report
+
+report.counter          = Counter
+report.currentOperation = Current Operation
+report.endDate          = End Date
+report.startDate        = Start Date
+
+required = [[FIELD]] is required
+
+required.issueDate = Issue date required
+
+reset = Reset
+
+return = Return
+
+reviewAndPrint = Tag Print
+
+role-managment = Role Management
+
+role.ROLE_ADMIN        = Administrator
+role.ROLE_AGENT        = Agent Staff
+role.ROLE_AGENTMANAGER = Agent Manager
+role.ROLE_CLIENT       = Client
+role.ROLE_COURIER      = Courier
+role.ROLE_INSURANCE    = Insurance
+role.ROLE_LEDGER       = Ledger
+role.ROLE_MANAGER      = Manager
+role.ROLE_USER         = User Role
+role.roleName          = Role
+
+route = Route
+
+route.active              = Active
+route.carrierRouteNumber  = Carrier Route Number
+route.category            = Category
+route.create              = Create Route
+route.delete              = Delete Route
+route.delete.confirm      = Are you sure you want to delete route?
+route.fromNode            = From Node
+route.import-route-failed = Error in import file
+route.import.desc         = Excel file
+route.list                = Routes List
+route.modify              = Edit Route
+route.toNode              = To Node
+route.type                = Type
+
+routes = Routes
+
+ruleAction.action = Action
+ruleAction.type   = Action Type
+
+ruleCondition.ruleCondition = Condition
+ruleCondition.type          = Condition Type
+
+salesReport = Sales Report
+
+salesReport.agent2AgentReport = Agent to Agent
+
+sanad.createDate               = Create date
+sanad.refrenceId               = Sanad Refrence ID
+
+sanadRow.refrenceId            = Sanad Row Refrence ID
+
+sanadRowReport.bedehkar        = Bedehkar
+sanadRowReport.bestankar       = Bestankar
+sanadRowReport.date            = Date
+sanadRowReport.description     = Description
+sanadRowReport.hesab           = Account
+sanadRowReport.hesabCode       = Account Code
+sanadRowReport.mandehBedehkar  = Mandeh Bedehkar
+sanadRowReport.mandehBestankar = Mandeh Bestankar
+sanadRowReport.refrenceId      = Sanad Row Refrence ID
+sanadRowReport.waybillNumber   = Sanad Refrence ID
+
+saturday = saturday
+
+saturday.short = SAT
+
+save = Save
+
+save-inscan = Save inscan
+
+save.failed = Saving failed!
+
+scan = Scan
+
+scan-cancel = Cancel
+
+scan-shipments = scan shipment
+
+scan-with-kasr = Continuing scan and record lost shipments?
+
+search = Search
+
+search-form = Search Form
+
+search.form   = Search Form
+search.result = Search results
+
+select = Select
+
+self-broker = Set consignee as broker
+
+setting = Settings
+
+settings = Settings
+
+settingspanel = Settings Panel
+
+settlement.account        = Account
+settlement.confirmMessage = The total value to be settled is as below, confirm?
+settlement.createDate     = Create Date
+settlement.deliveryDate   = Delivery Date
+settlement.settle         = Settle
+settlement.settlements    = Settlements
+settlement.sumSelected    = Sum Selected
+settlement.sumTotal       = Sum Total
+settlement.total          = Total
+settlement.username       = User's name
+
+shipment = Shipment
+
+shipment-in = Inbound Shipments
+
+shipment-out = Outbound Shipments
+
+shipment-per-city = Shipments
+
+shipment-per-state = Shipments
+
+shipment.accountNumber                   = Account Number
+shipment.address                         = Address
+shipment.agent                           = Agent
+shipment.allNumber                       = Number
+shipment.assignedAgent                   = Assigned Agent
+shipment.baseOnDistributeNode            = Based on distribution
+shipment.beDistributeFreightNodeType     = Be Distribute Node Type
+shipment.beDistributeNode                = Be Distribution Node
+shipment.cancel                          = Cancel
+shipment.cancel_pickup                   = Cancel Pickup
+shipment.chargeTo                        = Charged To
+shipment.city                            = City
+shipment.client                          = Client
+shipment.clientId                        = Client ID
+shipment.close                           = Cancel
+shipment.collect                         = Collect Node
+shipment.collectDistribute               = Collect / Distribute
+shipment.company                         = Company
+shipment.confirm_req_pickup              = Request Pickup
+shipment.consignee                       = Consignee
+shipment.consigneeAddress                = Consignee Address
+shipment.consigneeCity                   = Consignee City
+shipment.consigneeContactNumber          = Consignee Tel
+shipment.consigneeName                   = Consignee
+shipment.consigneeSignature              = Consignee Signature
+shipment.consigneeState                  = Consignee Province
+shipment.contactNationalId               = National ID
+shipment.contactNumber                   = Contact Number
+shipment.contentDescription              = Content Description
+shipment.contents                        = Contents
+shipment.country                         = Country
+shipment.createDate                      = Record Create Date
+shipment.createDateFrom                  = Create Date From
+shipment.createDateTo                    = Create Date To
+shipment.createManifest                  = Create Manifest
+shipment.createShipment                  = Create Shipment
+shipment.createUserId                    = Record creator
+shipment.currentNode                     = Current Node
+shipment.currentState                    = Current state
+shipment.currentTrackState               = Current State
+shipment.declaredValue                   = Declared Value
+shipment.delete                          = Delete
+shipment.deleteShipment                  = Delete Shipment
+shipment.deliveringAgent                 = Delivering Agent
+shipment.deliveryDate                    = Delivery Date
+shipment.designatedDeliveringAgent       = Designated Delivering Agent
+shipment.destination                     = Destination
+shipment.destinationHub                  = Destination Hub
+shipment.detailes                        = Detailes
+shipment.distribute                      = Distribute Node
+shipment.editShipment                    = Edit Shipment
+shipment.expectedDeliveryDate            = Expected Delivery Date
+shipment.export                          = Export
+shipment.faxNumber                       = Fax No.
+shipment.forwarderReferenceNumber        = Forwarder Reference No.
+shipment.height                          = Height
+shipment.houseWaybillNumber              = HWB No.
+shipment.hub                             = Hub
+shipment.hubDepot                        = Hub / Depot
+shipment.hwbNumber                       = House Waybill Number
+shipment.issue                           = Issue
+shipment.issueDate                       = Issue Date
+shipment.issuedShipment                  = Issue Shipment
+shipment.issuingAgent                    = Issuing Agent
+shipment.lastChangeStateDate             = Date of Changing to Current State
+shipment.ledgerStatus                    = Ledger status
+shipment.length                          = Length
+shipment.mobileNumber                    = Mobile No.
+shipment.name                            = Name
+shipment.nationalId                      = National ID
+shipment.newShipment                     = New Shipment
+shipment.nodes                           = Nodes
+shipment.notBeDistributeFreightNodeType  = Not Be Distribute Node Type
+shipment.notBeDistributeNode             = Not Be Distribution Node
+shipment.notCity                         = Not City
+shipment.notCurrentState                 = Not State
+shipment.notDistribute                   = Not Distribute Node
+shipment.notDistributeFreightNodeType    = Not Distribute Node Type
+shipment.note                            = Notes
+shipment.optionalServices                = Optional Services
+shipment.origin                          = Origin
+shipment.originHub                       = Origin Hub
+shipment.packingContents                 = Packing Contents
+shipment.packingItems                    = Packing Items
+shipment.partNo                          = Part Barcode
+shipment.paymentMethod                   = Payment Method
+shipment.paymentReferenceInfo            = Payment Reference Code
+shipment.phoneNumber                     = Phone No.
+shipment.pickupNumber                    = Pickup Number
+shipment.pickupSchedule                  = Pickup Schedule
+shipment.pieces                          = Pieces
+shipment.postalCode                      = Postal Code
+shipment.priceItems                      = Invoice
+shipment.priceType                       = Price Type
+shipment.product                         = Product
+shipment.re_issue                        = Reissue
+shipment.re_schedule                     = Re Schedule
+shipment.saveDraft                       = Save Draft
+shipment.savePickup                      = Request For Pickup
+shipment.settled                         = Settle status
+shipment.settlementDate                  = Settlement Date
+shipment.settlementUser                  = Settlement User
+shipment.shipment                        = Shipment
+shipment.shipmentActionCode              = Action
+shipment.shipmentInfo                    = Shipment Info
+shipment.shipmentStateHistory            = Change State
+shipment.shipmentStateHistoryActingAgent = Acting Agent
+shipment.shipmentStateHistoryCreateUser  = Acting User
+shipment.shipmentStateHistoryDate        = Change State Date
+shipment.shipmentStatus                  = Status
+shipment.shipmentType                    = Shipment Type
+shipment.shipments                       = Shipments
+shipment.shipper                         = Shipper
+shipment.shipperAddress                  = Shipper Address
+shipment.shipperCity                     = Shipper City
+shipment.shipperConsignee                = Shipper / Consignee
+shipment.shipperContactNumber            = Shipper Tel
+shipment.shipperName                     = Shipper
+shipment.shipperState                    = Shipper Province
+shipment.shippingDate                    = Issue Date
+shipment.shippingDateFrom                = Issue Date From
+shipment.shippingDateTo                  = Issue Date To
+shipment.state                           = State
+shipment.status                          = Current Status
+shipment.totalChargeableWeight           = Total Chargeable Weight
+shipment.totalDeclaredValue              = Total Declared Value
+shipment.totalGrossWeight                = Total Gross Weight
+shipment.totalPieces                     = Total Pieces
+shipment.totalVolumetricWeight           = Total Volumetric Weight
+shipment.track                           = Track Shipment
+shipment.trackingNumber                  = Tracking Number
+shipment.type                            = Type
+shipment.undoDelivery                    = Undo Shipment Delivery
+shipment.undoDelivery.confirm            = Are you sure to cancel delivery of this shipment and delete delivery informations?
+shipment.updateDate                      = Record Update Date
+shipment.updateDateFrom                  = Update Date From
+shipment.updateDateTo                    = Update Date To
+shipment.value                           = Value
+shipment.via                             = Via
+shipment.void                            = Void
+shipment.voidShipment                    = Void Shipment
+shipment.waybillNumber                   = Waybill Number
+shipment.waybillNumberFrom               = Waybill Number From
+shipment.waybillNumberTo                 = Waybill Number To
+shipment.weight                          = Weight
+shipment.width                           = Width
+
+shipmentState.assiged_for_pickup = Assiged for Pickup
+shipmentState.canceled_pickup    = Canceled Pickup
+shipmentState.confirm_pickup_req = Pickup Requested
+shipmentState.delivered          = Delivered
+shipmentState.draft              = Draft
+shipmentState.in_transit         = In Transit
+shipmentState.in_warehouse       = In Warehouse
+shipmentState.issued             = Issued
+shipmentState.manifested         = Manifested
+shipmentState.mastered           = Mastered
+shipmentState.notDelivered       = Not Delivered
+shipmentState.not_pickedup       = Not Pickedup
+shipmentState.offloaded          = Offloaded
+shipmentState.out_for_delivery   = Out for delivery
+shipmentState.out_for_pickup     = Out for pickup
+shipmentState.pickedup           = Pickedup
+shipmentState.ready_for_issue    = Ready for Issue
+shipmentState.received           = Received at Hub
+shipmentState.returned           = Returned
+shipmentState.voided             = Voided
+
+shipments = Shipments
+
+shipper = Shipper
+
+sign-out = Sign out
+
+signature = Signature
+
+signin = Sign In
+
+signin.header = Sign In
+
+state = state
+
+status = Status
+
+status.history = Status history
+
+summary = Summary
+
+sunday = sunday
+
+sunday.short = SUN
+
+switchuser-logout = Exit impersonation
+
+system = System
+
+tags = Tags
+
+template.start = Start Batch Insert
+template.stop  = Stop Batch Insert
+
+tenant = System
+
+third_party = Third Person
+
+thursday = thursday
+
+thursday.short = THU
+
+toNode = To Node
+
+toState = To State
+
+total-cargo = Total Cargo
+
+total-shipment = All Shipments
+
+track.entryDate             = Last status date
+
+trackNumber = Track Number
+
+tracking = Tracking
+
+trackstate.DELIVERED        = Delivered
+trackstate.DRAFT            = Draft
+trackstate.IN_TRANSIT       = In Transit
+trackstate.IN_WAREHOUSE     = In Warehouse
+trackstate.ISSUED           = Issued
+trackstate.MANIFESTED       = Manifested
+trackstate.MASTERED         = Mastered
+trackstate.OUT_FOR_DELIVERY = Out for Delivery
+trackstate.RETURNED         = Returned
+trackstate.VOIDED           = Voided
+
+transportation = Transportation
+
+transportation.active                                = Active
+transportation.carrier                               = Carrier
+transportation.carrierCode                           = Carrier code
+transportation.create                                = Create transportation
+transportation.delete                                = Delete Transportation
+transportation.delete.confirm                        = Are you sure to delete this transportaion?
+transportation.duration                              = Duration
+transportation.fromNode                              = Origin
+transportation.modify                                = Edit Transportation
+transportation.remarks                               = Remarks
+transportation.toNode                                = Destination
+transportation.transportationNumber                  = Flight No
+transportation.volume                                = Volume
+transportation.weight                                = Weight
+
+transportationSchedule.arrivalDateFromInUtc          = Arrival date from (UTC)
+transportationSchedule.arrivalDateInDestinationLocal = ARR (DEST)
+transportationSchedule.arrivalDateInUtc              = ARR (UTC)
+transportationSchedule.arrivalDateToInUtc            = Arrival date to (UTC)
+transportationSchedule.arrivalTimeInDestinationLocal = ARR  (DEST)
+transportationSchedule.arrivalTimeInUtc              = ARR  (UTC)
+transportationSchedule.carrier                       = Carrier
+transportationSchedule.create                        = Create transportation schedule
+transportationSchedule.dayOfWeeks                    = Day of weeks
+transportationSchedule.delete                        = Delete transportation schedule
+transportationSchedule.delete.confirm                = Are you sure to delete this transportation schedule?
+transportationSchedule.departureDateFromInUtc        = Departure date from (UTC)
+transportationSchedule.departureDateInOriginLocal    = DEP (Origin)
+transportationSchedule.departureDateInUtc            = DEP (UTC)
+transportationSchedule.departureDateToInUtc          = Departure date to (UTC)
+transportationSchedule.departureTimeInOriginLocal    = DEP (Origin)
+transportationSchedule.departureTimeInUtc            = Departure time (UTC)
+transportationSchedule.generateFromDateInUtc         = From Date (UTC)
+transportationSchedule.generateToDateInUtc           = To Date (UTC)
+transportationSchedule.modify                        = Edit transportation schedule
+transportationSchedule.remarks                       = Remarks
+transportationSchedule.reservableWeight              = Reservable Weight
+transportationSchedule.scheduled                     = scheduled
+transportationSchedule.status                        = status
+transportationSchedule.status.active                 = Active
+transportationSchedule.status.canceled               = Canceled
+transportationSchedule.status.inactive               = Inactive
+transportationSchedule.totalWeight                   = Total Weight
+transportationSchedule.transportation                = Number
+transportationSchedule.uldInfo                       = Uld Info
+
+true = Yes
+
+tuesday = tuesday
+
+tuesday.short = TUE
+
+type = Type
+
+uld.carrier              = Carrier
+uld.create               = Create
+uld.modify               = Edit
+uld.serialNumber         = Serial Number
+uld.uld                  = ULD
+uld.uldType              = ULD Type
+
+uldType.active           = Active
+uldType.code             = Code
+uldType.create           = Create
+uldType.delete.confirm   = Are sure you want to delete this ULD Type?
+uldType.form             = Form
+uldType.linearDimentions = Linear Dimentions
+uldType.modify           = Edit
+uldType.remarks          = Remarks
+uldType.volume           = Volume
+
+update = Update
+
+update.date    = Update date
+
+updateDate = Update date
+
+updateDateFrom = Edit-Date, From
+
+updateDateTo = Edit-Date, To
+
+updateUser = Updater user
+
+updateUserId = Updating user
+
+user-managment = User Management
+
+user-profile = User Profile
+
+user.active                 = Active
+user.calendar               = Calendar
+user.change-password        = Change Password
+user.change-password-failed = Change Password Failed!
+user.change-roles           = Change Role
+user.changepass.header      = Change Password
+user.clientId               = Subscription Number
+user.confirm-new-password   = Confirm Password
+user.confirmPassword        = Confirm Password
+user.create                 = Create
+user.createClient           = Create Client
+user.current-password       = Current Password
+user.delete                 = Delete User
+user.delete.confirm         = Are you sure you want to delete user?
+user.deleteClient           = Delete Client
+user.email                  = Email
+user.firstName              = First Name
+user.fullName               = Full Name
+user.invalid-password       = Invalid Password
+user.lastName               = Last Name
+user.list                   = User List
+user.load.failed            = User info retrieval failed!
+user.locale                 = Language
+user.modify                 = Modify
+user.modifyClient           = Modify Client
+user.new-password           = New Password
+user.password               = Password
+user.reset-password         = Password Reset
+user.userName               = User Name
+user.zoneId                 = Time Zone
+
+username = Username
+
+users = Users
+
+usertrack.not.exists.hwb   = No such waybill number exits!
+usertrack.pls.enter.hwb    = Please serach your waybill number
+
+usertracking.title = Shipment Tracking System
+
+usertrackpage.titlemessage = Please search your tracking number in the box below
+
+vehicle = Vehicle
+
+vehicle.active            = Active
+vehicle.capacity          = Capacity
+vehicle.cargoOnly         = Cargo
+vehicle.carrier           = Carrier
+vehicle.carrierCode       = Carrier code
+vehicle.carrierRegister   = Carrier register
+vehicle.create            = Create Vehicle
+vehicle.delete            = Delete Vehicle
+vehicle.delete.confirm    = Are you sure to delete this vehicle?
+vehicle.desc              = Description
+vehicle.manufacturer      = Manufacturer
+vehicle.manufacturerModel = Model
+vehicle.modify            = Edit
+vehicle.remarks           = Remarks
+vehicle.type              = Type
+vehicle.type.aircraft     = Aircraft
+vehicle.type.mini_truck   = Mini truck
+vehicle.type.motorcycle   = Mototcycle
+vehicle.type.pickup_truck = Pickup truck
+vehicle.type.ship         = Ship
+vehicle.type.train        = Train
+vehicle.type.truck        = Truck
+vehicle.type.van          = Van
+vehicle.uldInfo           = Uld Info
+vehicle.volume            = Volume
+vehicle.weight            = Weight
+
+vehicles = Vehicles
+
+version = Version
+
+volumetricWeightRuleSet = Volumetric Weight Rule
+
+volumetricWeightRuleSet.delete.confirm = Are you sure?
+
+warehouseReceipt = Warehouse Receipt
+
+warehouseReceipt.cargoTotalPieces              = Total pices of cargo
+warehouseReceipt.cargototalGrossWeight         = Gross weight of cargo
+warehouseReceipt.confirmedExceededQuantity     = Confirmed Exceeded Quantity
+warehouseReceipt.create                        = Create Warehouse Receipt
+warehouseReceipt.customsReferenceNo            = Customs reference no.
+warehouseReceipt.date                          = Date
+warehouseReceipt.dateFrom                      = From Date
+warehouseReceipt.dateTo                        = To Date
+warehouseReceipt.delete                        = Delete Warehouse Receipt
+warehouseReceipt.delete.confirm                = Are you sure to delete this warehouse receipt?
+warehouseReceipt.forceSaveWithAdditionalPieces = Save with additional pieces, Are you sure?
+warehouseReceipt.grossWeight                   = Gross Weight
+warehouseReceipt.issueWithoutWarehouseReceipt  = Issue without warehouse receipt
+warehouseReceipt.location                      = Location
+warehouseReceipt.modify                        = Modify Warehouse Receipt
+warehouseReceipt.number                        = Number
+warehouseReceipt.pieces                        = Pieces
+warehouseReceipt.remarks                       = Remarks
+warehouseReceipt.storeNo                       = Store No
+warehouseReceipt.totalPieces                   = Total Pieces
+warehouseReceipt.withoutstoreNo                = This carog has not warehouse receipt
+
+waybillNumber = Waybill number
+
+waybillNumber.change-agent           = Change Agent
+waybillNumber.change-status          = Change Status
+waybillNumber.create                 = Create Waybill Number Series
+waybillNumber.delete                 = Delete Waybill
+waybillNumber.delete.confirm         = Are you sure to delete waybill number?
+waybillNumber.domestic               = domestic
+waybillNumber.domestic-international = Domestic/International
+waybillNumber.format                 = Standard Format
+waybillNumber.format.IATA            = IATA
+waybillNumber.hasAgent               = Has Agent
+waybillNumber.international          = international
+waybillNumber.modify                 = Update Waybill
+waybillNumber.step                   = Increasing Steps
+waybillNumber.waybillNumberFrom      = Waybill-Number, From
+waybillNumber.waybillNumberTo        = Waybill-Number, To
+waybillNumber.waybillNumberType      = Number Type
+waybillNumber.waybillType            = Waybill type
+
+waybillNumberGenerate.create = Generate Waybill Number Series
+
+waybillNumbers = Waybill Numbers
+
+waybillType.create         = Create Waybill Type
+waybillType.delete         = Delete Waybill Type
+waybillType.delete.confirm = Are you sure to delete waybill type?
+waybillType.modify         = Edit Waybill Type
+waybillType.name           = Waybill Type
+
+wednesday = wednesday
+
+wednesday.short = WED
+
+width = width
+
+withoutAgent = Without Agent
+
+yes = Yes
+
+zone = Zone
+
+zone.active         = Active
+zone.codeName       = Code Name
+zone.create         = Create Zone
+zone.delete         = Delete Zone
+zone.delete.confirm = Are you sure you want to remove zone?
+zone.list           = Zone List
+zone.modify         = Edit Zone
+zone.name           = Name
+zone.parent         = Parent
+
+zones = Zones

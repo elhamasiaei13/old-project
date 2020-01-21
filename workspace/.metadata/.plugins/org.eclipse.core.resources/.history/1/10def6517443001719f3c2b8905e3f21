@@ -1,0 +1,128 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.identitymanagement2;
+
+import java.util.List;
+import java.util.Map;
+
+import com.parvanpajooh.client.accounting.model.VoucherMsg;
+import com.parvanpajooh.client.common.GenericRestClient;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.common.ParvanClientException;
+import com.parvanpajooh.client.common.RestClientConstants;
+import com.parvanpajooh.client.identitymanagement2.model.ObjectAccessScopeMsg;
+import com.parvanpajooh.client.identitymanagement2.model.PermissionResultMsg;
+import com.parvanpajooh.client.identitymanagement2.model.RoleMsg;
+import com.parvanpajooh.client.identitymanagement2.model.UserMsg;
+import com.parvanpajooh.client.identitymanagement2.service.Identitymanagement2Api;
+import com.parvanpajooh.commons.config.Config;
+
+import retrofit2.Call;
+
+/**
+ * @author ali
+ * @author dev-03
+ * @author MO
+ */
+public class Identitymanagement2ApiRestClient extends GenericRestClient<Identitymanagement2Api> {
+
+	private static final String ENDPOINT_PATH = "/identitymanagement2-rest/";
+
+	private Identitymanagement2Api identitymanagement2Api;
+
+	public Identitymanagement2ApiRestClient() {
+		super(
+				Config.getProperty("identitymanagement2.rest.endpoint.protocol", RestClientConstants.ENDPOINT_DEF_PROTOCOL__HTTP),
+				Config.getProperty("identitymanagement2.rest.endpoint.host", RestClientConstants.ENDPOINT_DEF_HOST__LOCALHOST),
+				Config.getProperty("identitymanagement2.rest.endpoint.port", RestClientConstants.ENDPOINT_DEF_PORT__80),
+				ENDPOINT_PATH,
+				Config.getLongProperty("identitymanagement2.rest.endpoint.timeout", RestClientConstants.TIMEOUT));
+		
+		identitymanagement2Api = super.createRestClient();
+	}
+
+	public PermissionResultMsg check(Long scopeId, String uri, String actionId) throws ParvanClientException {
+		Call<PermissionResultMsg> call = identitymanagement2Api.check(scopeId, uri, actionId);
+		return executeCall(call);
+	}
+
+	public Boolean isScopeBased(String uri, String actionId) throws ParvanClientException {
+		Call<Boolean> call = identitymanagement2Api.isScopeBased(uri, actionId);
+		return executeCall(call);
+	}
+
+	public boolean isResourceAvailable(String uri) throws ParvanClientException {
+		Call<Boolean> call = identitymanagement2Api.isResourceAvailable(uri);
+		return executeCall(call);
+	}
+
+	public boolean isResourceActionAvailable(String uri, String actionId) throws ParvanClientException {
+		Call<Boolean> call = identitymanagement2Api.isResourceActionAvailable(uri, actionId);
+		return executeCall(call);
+	}
+	
+	public UserMsg initLoginLoadUserByUsername(String username) throws ParvanClientException {
+		Call<UserMsg> call = identitymanagement2Api.initLoginLoadUserByUsername(username);
+		return executeCall(call);
+	}
+	
+	public UserMsg findUserByUsername(String username) throws ParvanClientException {
+		Call<UserMsg> call = identitymanagement2Api.findUserByUsername(username);
+		return executeCall(call);
+	}
+
+	public List<ObjectAccessScopeMsg> loadScopes() throws ParvanClientException {
+		Call<List<ObjectAccessScopeMsg>> call = identitymanagement2Api.loadScopes();
+		return executeCall(call);
+	}
+
+	public UserMsg loadUserByUuid(String uuid) throws ParvanClientException {
+		Call<UserMsg> call = identitymanagement2Api.loadUserByUuid(uuid);
+		return executeCall(call);
+	}
+	
+	public UserMsg findUserByPersonUuid(String personUuid) throws ParvanClientException {
+		Call<UserMsg> call = identitymanagement2Api.findUserByPersonUuid(personUuid);
+		return executeCall(call);
+	}
+	
+	public UserMsg findUserByEmailOrMobile(String identify) throws ParvanClientException {
+		Call<UserMsg> call = identitymanagement2Api.findUserByUsername(username);
+		return executeCall(call);
+	}
+	
+	public PageList<UserMsg> loadUsers(String query, int page, int size) throws ParvanClientException {
+		Call<List<UserMsg>> call = identitymanagement2Api.loadUsers(query, page, size);
+		return executePageCall(call);
+	}
+
+	public UserMsg getUser(Long id) throws ParvanClientException {
+		Call<UserMsg> call = identitymanagement2Api.getUser(id);
+		return executeCall(call);
+	}
+
+	public List<UserMsg> getUserByIds(Long[] ids) throws ParvanClientException {
+		Call<List<UserMsg>> call = identitymanagement2Api.getUsersByIds(ids);
+		return executeCall(call);
+	}
+
+	public UserMsg createUser(UserMsg user) throws ParvanClientException {
+		Call<UserMsg> call = identitymanagement2Api.createUser(user);
+		return executeCall(call);
+	}
+	
+	public List<RoleMsg> getAllRoles(String term) throws ParvanClientException {
+		Call<List<RoleMsg>> call = identitymanagement2Api.getAllRoles(term);
+		return executeCall(call);
+	}
+	
+	public List<UserMsg> findUsersByRoleNames(String[] roleNames) throws ParvanClientException {
+		Call<List<UserMsg>> call = identitymanagement2Api.findUsersByRoleNames(roleNames);
+		return executeCall(call);
+	}
+	public void activateUserAndSetPassword(Long id,String password) throws ParvanClientException {
+		Call<Void> call = identitymanagement2Api.activateUserAndSetPassword(id, password);
+		executeCall(call);
+	}
+}

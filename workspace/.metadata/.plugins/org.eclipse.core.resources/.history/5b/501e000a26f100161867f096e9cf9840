@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>Create Task</title>
+
+<style>
+.select-device-modal label {
+	margin-bottom: 0px;
+}
+
+.select-device-modal input {
+	width: auto;
+	height: 28px;
+}
+
+.select-device-modal .form-control {
+	width: auto;
+}
+
+.select-device-modal table.dataTable td {
+	padding: 1px 10px;
+}
+
+.select-device-modal .dataTables_filter label {
+	margin-bottom: 5px;
+}
+</style>
+</head>
+
+<body th:with="rightMenu='tasks'">
+	<section layout:fragment="top-header" class="fixed-header">
+
+		<div class="ui-header-image pull-left">
+			<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/stock2-web/resources/images/stack.png" th:src="@{/resources/images/stack.png}" style="width: 48px; height: 48px;" />
+		</div>
+		<div class="ui-header-title">
+			<div class="split-left">
+				<h3>
+					<small>Create</small>
+				</h3>
+				<h3>Task</h3>
+			</div>
+		</div>
+
+	</section>
+
+	<!-- Main content -->
+	<!-- BODY -->
+	<section class="content" layout:fragment="content">
+		<div class="box box-default">
+			<div class="box-header">
+				<h3 class="box-title" th:text="#{taskCreateCommand.create}">ایجاد کار جدید</h3>
+			</div>
+			<div class="box-body" style="display: block;">
+				<dy:form entity="TaskCreateCommand" form="create" type="create" />
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" id="taskCreateCommandBtn" th:text="#{button.save}">Save</button>
+				<a type="button" class="btn btn-default" th:href="@{'/tasks'}" th:text="#{button.cancel}">Close</a>
+			</div>
+		</div>
+
+	</section>
+
+	<th:block layout:fragment="javascripts">
+		<script th:inline="javascript">
+
+		jQuery(document).ready(function(){
+			
+			$('#taskCreateCommandBtn').click(function(event){
+				
+				$('#taskCreateCommandForm').data('bootstrapValidator').validate();
+				if($('#taskCreateCommandForm').data('bootstrapValidator').isValid()){
+					
+					var $btn = $(this);
+					var isInMultipleMode = $('#createTaskCreateCommand-create-another').is(':checked');
+					$('#createTaskCreateCommandForm').find('.callout').text('').addClass('hide');
+						
+						$btn.attr('disabled', true);
+						$.post('/taskmanagement-web/tasks/create/save', $('#createTaskCreateCommandForm').serialize()).done(function(data) {
+							if(data.status == 'success') {
+								try{createTaskCreateCommandAfterSaveSuccess()}catch(error){}
+								showTopleftGrowl('success', 'Create', 'Create Successful');
+								window.open("/taskmanagement-web/tasks", "_self");
+								try{oTable_TaskCreateCommandTable.ajax.reload();}catch(error){}
+								if(isInMultipleMode){
+									resetCreateForm($('#createTaskCreateCommandModal'));
+								} else {
+									$('#createTaskCreateCommandModal').modal('hide');
+								}
+							} else if(data.status == 'ValidationException'){
+								$('#createTaskCreateCommandForm').find('.callout').text(data.invalidField + ' invalid-value').removeClass('hide');
+							} else if(data.status == 'ObjectExistsException'){
+								$('#createTaskCreateCommandForm').find('.callout').text((data.invalidField ? data.invalidField : 'data') + ' already-exists').removeClass('hide');
+							} else if(data.status == 'ErrorCode'){
+								if(data.errorMessage){
+									$('#createTaskCreateCommandForm').find('.callout').text(data.errorMessage).removeClass('hide');
+								} else {
+									$('#createTaskCreateCommandForm').find('.callout').text(messages[data.errorCode]).removeClass('hide');
+								}
+							} else {
+								console.debug(data.status);
+								$('#createTaskCreateCommandForm').find('.callout').text((data.message ? data.message : 'save.failed_fa_IR')).removeClass('hide');
+							}
+							$btn.attr('disabled', false);
+						}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, 'taskCreateCommandBtn')});
+				}
+				return false;
+			});
+			});
+
+		</script>
+	</th:block>
+</body>
+</html>
+

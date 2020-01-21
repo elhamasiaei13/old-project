@@ -1,0 +1,56 @@
+package com.parvanpajooh.personmanagement.service;
+
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
+import org.json.JSONObject;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.service.GenericLocalService;
+import com.parvanpajooh.personmanagement.model.Person;
+import com.parvanpajooh.personmanagement.model.enums.RelationType;
+import com.parvanpajooh.personmanagement.model.vo.PersonVO;
+
+/**
+ * @author ali
+ * @author MO
+ */
+public interface PersonLocalService extends GenericLocalService<Person, Long> {
+	
+	public Person getByUuid(String uuid) throws ParvanServiceException;
+	
+	/**
+	 * 
+	 * @param excelIS
+	 * @throws ParvanServiceException
+	 */
+	public void importPersons(InputStream excelIS) throws ParvanServiceException;
+
+	public PageList<Person> searchActivePeopleInOrganization(Long organizationId, String term, Integer start, Integer length, SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanServiceException;
+	
+	public void index() throws ParvanServiceException;
+	
+	/**
+	 * 
+	 * @param uuids
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public Map<String, String> getPersonsByUuids(List<String> uuids) throws ParvanServiceException;
+
+	/**
+	 * 
+	 * @param data
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public JSONObject createPerson(JSONObject data) throws ParvanServiceException;
+
+	public JSONObject findPersonAndUserByUuid(String uuid) throws ParvanServiceException;
+
+	public List<Person> findRelatedFrom(String personUuid, RelationType type, String term) throws ParvanServiceException;
+}

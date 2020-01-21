@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--<parent>
+        <artifactId>ecourier</artifactId>
+        <groupId>com.parvanpajooh</groupId>
+        <version>1.0.0</version>
+    </parent>-->
+
+
+	<groupId>com.parvanpajooh</groupId>
+    <artifactId>shipment-ejb</artifactId>
+    <packaging>ejb</packaging>
+    <version>1.0.0</version>
+
+    <name>shipment - ejb</name>
+    
+    <properties>
+        <!-- Explicitly declaring the source encoding eliminates the following
+            message: -->
+        <!-- [WARNING] Using platform encoding (UTF-8 actually) to copy filtered
+            resources, i.e. build is platform dependent! -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Define the version of the JBoss BOMs we want to import to specify tested stacks. -->
+        <version.jboss.bom>10.0.0.Final</version.jboss.bom>
+        <version.wildfly>10.0.0.Final</version.wildfly>
+
+        <!-- WildFly Maven plug-in to deploy your WAR to a local WildFly container -->
+        <version.wildfly.maven.plugin>1.0.2.Final</version.wildfly.maven.plugin>
+
+        <!-- other plug-in versions -->
+        <version.ear.plugin>2.8</version.ear.plugin>
+        <version.ejb.plugin>2.3</version.ejb.plugin>
+        <version.surefire.plugin>2.10</version.surefire.plugin>
+        <version.war.plugin>2.1.1</version.war.plugin>
+
+        <!-- maven-compiler-plugin -->
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+	        <dependency>
+	            <groupId>org.jboss.arquillian</groupId>
+	            <artifactId>arquillian-bom</artifactId>
+	            <version>1.1.5.Final</version>
+	            <scope>import</scope>
+	            <type>pom</type>
+	        </dependency>
+
+            <!-- Define the version of the EJB jar so that we don't need
+                to repeat ourselves in every module -->
+            
+            <!-- Define the version of the WAR so that we don't need to repeat 
+                ourselves in every module -->
+            <dependency>
+                <groupId>com.parvanpajooh</groupId>
+                <artifactId>ecourier-web</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+                <scope>compile</scope>
+            </dependency>
+
+            <!-- JBoss distributes a complete set of Java EE 7 APIs including
+                a Bill of Materials (BOM). A BOM specifies the versions of a "stack" (or
+                a collection) of artifacts. We use this here so that we always get the correct
+                versions of artifacts. Here we use the jboss-javaee-7.0-with-tools stack
+                (you can read this as the JBoss stack of the Java EE 7 APIs, with some extras
+                tools for your project, such as Arquillian for testing) and the jboss-javaee-7.0-with-hibernate
+                stack you can read this as the JBoss stack of the Java EE 7 APIs, with extras
+                from the Hibernate family of projects) -->
+            <dependency>
+                <groupId>org.wildfly.bom</groupId>
+                <artifactId>wildfly-javaee7-with-tools</artifactId>
+                <version>${version.jboss.bom}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            
+            <dependency>
+            	<groupId>com.parvanpajooh</groupId>
+            	<artifactId>workflow-ejb</artifactId>
+            	<version>1.0.0</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.parvanpajooh</groupId>
+						<artifactId>common-ejb</artifactId>
+					</exclusion>
+				</exclusions>
+            </dependency>
+            
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- Import the EJB API, we use provided scope as the API is included in WildFly -->
+        <dependency>
+            <groupId>org.jboss.spec.javax.ejb</groupId>
+            <artifactId>jboss-ejb-api_3.2_spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Import the CDI API, we use provided scope as the API is included in WildFly -->
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Import the JPA API, we use provided scope as the API is included in WildFly -->
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Bean Validation Implementation -->
+        <!-- Provides portable constraints such as @Email -->
+        <!-- Hibernate Validator is shipped in WildFly -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+	<dependency>
+            <groupId>org.jboss.spec.javax.websocket</groupId>
+            <artifactId>jboss-websocket-api_1.1_spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        
+	<dependency>
+		<groupId>org.hibernate</groupId>
+		<artifactId>hibernate-core</artifactId>
+		<scope>provided</scope>
+	</dependency>
+
+	<dependency>
+		<groupId>org.infinispan</groupId>
+		<artifactId>infinispan-core</artifactId>
+		<scope>provided</scope>
+	</dependency>
+
+	<dependency>
+		<groupId>com.parvanpajooh.commons</groupId>
+		<artifactId>common</artifactId>
+		<version>1.1.0</version>
+	</dependency>
+		
+	<dependency>
+        	<groupId>com.parvanpajooh</groupId>
+        	<artifactId>workflow-ejb</artifactId>
+        </dependency>
+		
+	<!-- <dependency>
+		<groupId>com.parvanpajooh</groupId>
+		<artifactId>common-rest</artifactId>
+		<version>1.0.0</version>
+	</dependency> -->
+
+	<dependency>
+		<groupId>com.parvanpajooh.commons</groupId>
+		<artifactId>common-platform-ejb</artifactId>
+		<version>1.1.0</version>
+		<exclusions>
+			<exclusion>
+				<artifactId>httpclient</artifactId>
+				<groupId>org.apache.httpcomponents</groupId>
+			</exclusion>
+		</exclusions>
+	</dependency>
+        
+	<dependency>
+		<groupId>org.apache.solr</groupId>
+		<artifactId>solr-solrj</artifactId>
+		<version>5.4.0</version>
+	</dependency>
+	
+	<!-- Test scope dependencies -->
+        
+        <!-- for arquillian -->   
+    	<dependency>
+	      <groupId>junit</groupId>
+	      <artifactId>junit</artifactId>
+	      <scope>test</scope>
+	    </dependency>
+	    
+	    <!-- for arquillian -->
+	    <dependency>
+		    <groupId>org.jboss.arquillian.junit</groupId>
+		    <artifactId>arquillian-junit-container</artifactId>
+		    <scope>test</scope>
+		</dependency>
+	        
+	    <!-- for arquillian -->
+		<dependency>
+			<groupId>org.jboss.shrinkwrap.resolver</groupId>
+			<artifactId>shrinkwrap-resolver-depchain</artifactId>
+			<!-- <version>2.0.0</version> --> <!-- Or whatever version you need -->
+			<scope>test</scope>
+			<type>pom</type>
+	    </dependency>
+				
+		<dependency>
+    		<groupId>ch.qos.logback</groupId>
+    		<artifactId>logback-classic</artifactId>
+    		<version>1.0.13</version>
+		</dependency>
+				
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+		  	<groupId>org.hibernate</groupId>
+		  	<artifactId>hibernate-jpamodelgen</artifactId>
+			<scope>provided</scope>
+		</dependency>
+    </dependencies>
+
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- The WildFly plug-in deploys your ear to a local WildFly container -->
+                <!-- Due to Maven's lack of intelligence with EARs we need
+                    to configure the WildFly Maven plug-in to skip deployment for all modules.
+                    We then enable it specifically in the ear module. -->
+                <plugin>
+                    <groupId>org.wildfly.plugins</groupId>
+                    <artifactId>wildfly-maven-plugin</artifactId>
+                    <version>${version.wildfly.maven.plugin}</version>
+                    <inherited>true</inherited>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <artifactId>maven-ejb-plugin</artifactId>
+                <version>${version.ejb.plugin}</version>
+                <configuration>
+                    <!-- Tell Maven we are using EJB -->
+                    <ejbVersion>3.1</ejbVersion>
+                    <archive>
+          				<manifestEntries>
+            				<Dependencies>org.infinispan export</Dependencies>
+          				</manifestEntries>
+        			</archive>
+                </configuration>
+            </plugin>
+
+	        <!-- mehrdad for arquillian -->
+	        <plugin>
+	             <artifactId>maven-compiler-plugin</artifactId>
+	             <version>2.3.2</version>
+	             <configuration>
+	                 <source>1.8</source>
+	                 <target>1.8</target>
+	                 <compilerArguments>
+			            	<processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
+		        	 </compilerArguments>
+	             </configuration>
+	         </plugin>
+
+	         <!-- mehrdad for arquillian -->
+	         <plugin>
+			    <artifactId>maven-surefire-plugin</artifactId>
+			    <version>2.12</version>
+			 </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <!-- The default profile skips all tests, though you can tune it
+                to run just unit tests based on a custom pattern -->
+            <!-- Separate profiles are provided for running all tests, including
+                Arquillian tests that execute in the specified container -->
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${version.surefire.plugin}</version>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+		    <id>arquillian-jbossas-managed</id>
+		    <dependencies>
+		        <dependency>
+		            <groupId>org.jboss.spec</groupId>
+		            <artifactId>jboss-javaee-7.0</artifactId>
+					<version>1.0.2.Final</version>
+		            <type>pom</type>
+		            <scope>provided</scope>
+		        </dependency>
+		        <dependency>
+					<groupId>org.wildfly</groupId>
+					<artifactId>wildfly-arquillian-container-managed</artifactId>
+					<version>8.2.0.Final</version>
+		            <scope>test</scope>
+		        </dependency>
+		        <dependency>
+		            <groupId>org.jboss.arquillian.protocol</groupId>
+		            <artifactId>arquillian-protocol-servlet</artifactId>
+		            <scope>test</scope>
+		        </dependency>
+		    </dependencies>
+		</profile>
+
+        <profile>
+			<id>arquillian-jbossas-remote</id>
+		    <dependencies>
+		        <dependency>
+		            <groupId>org.jboss.spec</groupId>
+		            <artifactId>jboss-javaee-7.0</artifactId>
+					<version>1.0.2.Final</version>
+		            <type>pom</type>
+		            <scope>provided</scope>
+		        </dependency>
+		        <dependency>
+		            <groupId>org.wildfly</groupId>
+		            <artifactId>wildfly-arquillian-container-remote</artifactId>
+		            <!-- <version>8.2.0.Final</version> -->
+		            <scope>test</scope>
+		        </dependency>
+		        <dependency>
+		            <groupId>org.jboss.arquillian.protocol</groupId>
+		            <artifactId>arquillian-protocol-servlet</artifactId>
+		            <scope>test</scope>
+		        </dependency>
+		    </dependencies>
+		</profile>
+
+    </profiles>
+
+</project>

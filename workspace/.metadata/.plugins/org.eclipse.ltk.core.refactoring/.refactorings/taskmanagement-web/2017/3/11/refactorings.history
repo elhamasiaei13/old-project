@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;allVotes&apos; in &apos;com.parvanpajooh.taskmanagement.mvc.TaskController.watch(...)&apos; to &apos;allWatchers&apos;&#x0A;- Original project: &apos;taskmanagement-web&apos;&#x0A;- Original element: &apos;com.parvanpajooh.taskmanagement.mvc.TaskController.watch(String, HttpServletRequest).allVotes&apos;&#x0A;- Renamed element: &apos;allVotes&apos;&#x0A;- Update references to refactored element" description="Rename local variable &apos;allVotes&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src\/main\/java&lt;com.parvanpajooh.taskmanagement.mvc{TaskController.java[TaskController~watch~QString;~QHttpServletRequest;@allVotes!6822!6931!6835!6842!QList\&lt;QBaseVO;&gt;;!0!false" name="allWatchers" references="true" stamp="1489492565764" version="1.0"/>
+</session>

@@ -1,0 +1,203 @@
+package com.parvanpajooh.agentmanagement.dao.jpa;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+import javax.validation.ConstraintViolationException;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hibernate.StaleObjectStateException;
+
+import com.parvanpajooh.agentmanagement.dao.AccountNumberDao;
+import com.parvanpajooh.agentmanagement.dao.EmployeeDao;
+import com.parvanpajooh.agentmanagement.dao.GeneralAgentDao;
+import com.parvanpajooh.agentmanagement.model.AccountNumber;
+import com.parvanpajooh.agentmanagement.model.Employee;
+import com.parvanpajooh.agentmanagement.model.Employee_;
+import com.parvanpajooh.agentmanagement.model.GeneralAgent;
+import com.parvanpajooh.agentmanagement.model.criteria.EmployeeCriteria;
+import com.parvanpajooh.agentmanagement.model.vo.GeneralAgentVO;
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectExistsException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.DateUtil;
+import com.parvanpajooh.commons.util.Validator;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class EmployeeDaoJpa extends GenericDaoJpa<Employee, Long>implements EmployeeDao {
+
+	
+
+	public EmployeeDaoJpa() {
+		super(Employee.class);
+	}
+
+
+
+	private Date getDate(LocalDateTime ldt) {
+
+		Date date = null;
+		if (Validator.isNotNull(ldt)) {
+			Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
+			date = Date.from(instant);
+		}
+
+		return date;
+	}
+
+
+
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<Employee> root, Map<String, Join> joins)
+			throws ParvanException {
+
+		// LOG
+		log.debug("Entering buildPredicateList( ... )");
+
+		EmployeeCriteria employeeCriteria = (EmployeeCriteria) cri;
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		String userName = employeeCriteria.getUserName();
+
+		String userUuid = employeeCriteria.getUserUuid();
+
+		String canonicalSearchName = employeeCriteria.getCanonicalSearchName();
+		
+		GeneralAgentVO generalAgent = employeeCriteria.getGeneralAgent();
+
+		// ----------------------------------------------------------------
+		// userName
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(userName)) {
+			Predicate predicate = builder.equal(root.<String> get(Employee_.userName), userName);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// userUuid
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(userUuid)) {
+			Predicate predicate = builder.equal(root.<String> get(Employee_.userUuid), userUuid);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// canonicalSearchName
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(canonicalSearchName)) {
+			List<Predicate> preList = new ArrayList<Predicate>();
+
+			String[] splited = canonicalSearchName.trim().split("\\s+");
+
+			for (String str : splited) {
+
+				Predicate predicate = builder.or(builder.like(root.<String> get(Employee_.userName), "%" + str + "%"),
+						builder.like(root.<String> get(Employee_.fullName), "%" + str + "%"));
+				preList.add(predicate);
+
+			}
+			predicateList.add(builder.and(preList.toArray(new Predicate[0])));
+		}
+		
+		// ----------------------------------------------------------------
+		// GeneralAgent
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(generalAgent) && Validator.isNotNull(generalAgent.getId())) {
+
+			Join<Employee, GeneralAgent> memberJoin = root.join("generalAgent");
+			if (Validator.isNotNull(generalAgent.getId())) {
+
+				Predicate predicate = builder.equal(memberJoin.<Long> get(G.id), currentMember.getId());
+				predicateList.add(predicate);
+			}
+
+		}
+
+		basePredicate((BaseCriteria) employeeCriteria, builder, root, predicateList);
+
+		// LOG
+		log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<Employee> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDate())) {
+			Predicate predicate = builder.equal(root.<LocalDateTime> get("createDate"), cri.getCreateDate());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDate())) {
+			Predicate predicate = builder.equal(root.<LocalDateTime> get("updateDate"), cri.getCreateDate());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateFrom())) {
+			LocalDateTime localDateTime = DateUtil.getFirstTimeOfDate(cri.getCreateDateFrom());
+
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("createDate"), localDateTime);
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateTo())) {
+			LocalDateTime localDateTime = DateUtil.getLastTimeOfDate(cri.getCreateDateTo());
+
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("createDate"), localDateTime);
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateFrom())) {
+			LocalDateTime localDateTime = DateUtil.getFirstTimeOfDate(cri.getUpdateDateFrom());
+
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("updateDate"), localDateTime);
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateTo())) {
+			LocalDateTime localDateTime = DateUtil.getLastTimeOfDate(cri.getUpdateDateTo());
+
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("updateDate"), localDateTime);
+			predicateList.add(predicate);
+		}
+	}
+
+}

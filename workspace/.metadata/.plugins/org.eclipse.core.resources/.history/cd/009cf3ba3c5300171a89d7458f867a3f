@@ -1,0 +1,63 @@
+package com.parvanpajooh.siteservices.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.ddd.application.AbstractApplicationServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.siteservices.model.criteria.ComplaintCriteria;
+import com.parvanpajooh.siteservices.model.enums.ComplaintStatus;
+import com.parvanpajooh.siteservices.model.vo.ComplaintCategoryVO;
+import com.parvanpajooh.siteservices.model.vo.ComplaintVO;
+import com.parvanpajooh.siteservices.service.ComplaintManagementLocalService;
+import com.parvanpajooh.siteservices.service.ComplaintManagementService;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class ComplaintManagementServiceImpl extends AbstractApplicationServiceImpl implements ComplaintManagementService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(ComplaintManagementServiceImpl.class);
+
+	@Inject
+	private ComplaintManagementLocalService complaintManagementLocalService;
+
+
+	@Override
+	public ComplaintCategoryVO getComplaintCategory(UserInfo userInfo, Long id) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering getComplaintCategory( id={})", id);
+		return complaintManagementLocalService.getComplaintCategory(id);
+	}
+
+	@Override
+	public PageList<ComplaintCategoryVO> findComplaintCategoriesBy(UserInfo userInfo, String term, int page, int size) throws ParvanServiceException {
+	
+		// LOG
+		log.debug("Entering findComplaintCategoriesBy( term={}, page={}, size={})", term, page, size);
+		return complaintManagementLocalService.findComplaintCategoriesBy(term, page, size);
+	}
+
+	@Override
+	public PageList<ComplaintVO> findMyComplaintsBy(UserInfo userInfo, String term,ComplaintStatus status, int page, int size, SortDirectionEnum sortDirection, String sortCriterion)
+			throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering findComplaintCategoriesBy( term={}, status={}, page={}, size={})", term, status, page, size);
+		return complaintManagementLocalService.findMyComplaintsBy(criteria, page, size, sortDirection, sortCriterion);
+		
+	}
+
+}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	layout:decorator="filter-layout" ddl:bundle-includes="bootstrapValidator,select2">
+
+	<head>
+		<title>Packing Items List</title>
+	</head>
+
+	<body th:with="rightMenu='admin', subRightMenu='packingitems'">
+		<section layout:fragment="top-header" class="fixed-header">
+			<div class="ui-header-image pull-left">
+            	<img data-src="holder.js/140x140" class="img-circle" alt="140x140" 
+            		src="/ecourier-web/resources/images/car.png"
+            		th:src="@{/resources/images/car.png}"  
+            		style="width: 48px; height: 48px;" />
+           	</div>
+            <div class="ui-header-title">
+                <div class="split-left">
+                    <h3>
+                        <small>Search</small>
+                    </h3>
+                    <h3>Packing Items</h3>
+                </div>
+       			<div class="split-right">
+					<th:block th:include="search-fragment :: search-button" />
+				</div>
+            </div>
+		</section>
+		
+		<!-- Main content -->
+		<!-- BODY -->
+		<section class="content" layout:fragment="content">
+			<div id="wrapper" class="toggled">
+	    		<th:block th:include="search-fragment :: search-filters(PackingItem)" />
+				<div class="box">
+					<div class="box-body table-responsive">
+						<dy:table entity="PackingItem" table="list" customSearch="true"/>
+					</div>
+				</div>
+			</div>
+		    
+		</section>
+		<th:block layout:fragment="javascripts">
+			<script th:inline="javascript">
+
+            function getPackingItemExtraParams(aoData) {
+                return {
+                    "data": function(data) {
+                        customPush(data, 'waybillNumber', $('#waybillNumberFilter').val());
+                        customPush(data, 'currentStates', $('#currentStatesFilter').val());
+                        customPush(data, 'notCurrentStates', $('#notCurrentStatesFilter').val());
+                        customPush(data, 'currentNodeId', $('#currentNodeIdFilter').val());
+                        customPush(data, 'lastChangeStateDateFrom', $('#lastChangeStateDateFromFilter').val());
+                        customPush(data, 'lastChangeStateDateTo', $('#lastChangeStateDateToFilter').val());
+                        customPush(data, 'consigneeCityCode', $('#consigneeCityCodeFilter').val());
+
+						customPush(data, 'packingItemStateHistoryDateFrom', $("#packingItemStateHistoryDateFromFilter").val());
+						customPush(data, 'packingItemStateHistoryDateTo', $("#packingItemStateHistoryDateToFilter").val());
+						customPush(data, 'packingItemStateHistoryActingAgentId', $("#packingItemStateHistoryActingAgentIdFilter").val());
+						customPush(data, 'packingItemStateHistoryCreateUserId', $("#packingItemStateHistoryCreateUserIdFilter").val());
+						customPush(data, 'packingItemActionCodes', $("#packingItemActionCodesFilter").val());
+                    }
+                };
+            }
+
+            var previousWaybillNumber;
+			function waybillNumberRender(data, type, row, meta){
+				if(previousWaybillNumber === data){
+					return '<div class="text-center"><span class="label label-default">'+data.toLowerCase()+'</span></div>';
+				}else{
+					previousWaybillNumber = data;
+					return '<div class="text-center"><span class="label label-warning">'+data.toLowerCase()+'</span></div>';
+				}
+								
+			}
+			
+			function packingItemStateRender(data, type, row, meta){
+				if(data != null){
+					return '<div class="text-center"><span class="label label-default">'+data.toLowerCase()+'</span></div>';
+				}
+				else
+					return null;								
+			}
+			</script>
+		</th:block>
+	</body>
+</html>

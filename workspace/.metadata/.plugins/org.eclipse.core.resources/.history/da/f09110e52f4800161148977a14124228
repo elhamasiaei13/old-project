@@ -1,0 +1,172 @@
+package com.parvanpajooh.identitymanagement2.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.common.UserInfo;
+import com.parvanpajooh.common.exceptions.ErrorCode;
+import com.parvanpajooh.common.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.common.exceptions.ParvanServiceException;
+import com.parvanpajooh.common.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.ecourier.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.identitymanagement2.dao.RoleDao;
+import com.parvanpajooh.identitymanagement2.dao.UserDao;
+import com.parvanpajooh.identitymanagement2.model.Role;
+import com.parvanpajooh.identitymanagement2.model.User;
+import com.parvanpajooh.identitymanagement2.model.enums.RoleTypeEnum;
+import com.parvanpajooh.identitymanagement2.model.vo.UserVO;
+import com.parvanpajooh.identitymanagement2.service.UserLocalService;
+
+/**
+ * 
+ * @author ali
+ * @author mehrdad
+ *
+ */
+@Stateless
+public class UserLocalServiceImpl extends GenericLocalServiceImpl<User, Long>implements UserLocalService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(UserLocalServiceImpl.class);
+
+	public UserDao userDao;
+	public RoleDao roleDao;
+
+	@Inject
+	public void setRoleDao(RoleDao roleDao) {
+		this.roleDao = roleDao;
+	}
+
+	@Inject
+	public void setUserDao(UserDao userDao) {
+		this.dao = userDao;
+		this.userDao = userDao;
+	}
+
+	@Override
+	public UserVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		UserVO userVO = (UserVO) baseVO;
+		List<Role> roles = new ArrayList<Role>();
+
+		try {
+
+			User user = null;
+
+			if (Validator.isNull(userVO.getId())) {
+				user = new User();
+				user.fromVO(userVO);
+				user.setActive(true);
+
+			} else {
+				user = userDao.get(userVO.getId());
+			    Set rolesSet = new HashSet(roles);
+				user.setRoles(rolesSet);
+			}
+
+			// save entity
+			user = save(user, userInfo);
+
+			userVO = (UserVO) user.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+
+		return userVO;
+	}
+	
+	@Override
+	public UserVO save(BaseVO baseVO, UserInfo userInfo, String[] ids) throws ParvanServiceException {
+		log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		UserVO userVO = (UserVO) baseVO;
+		List<Role> roles = new ArrayList<Role>();
+
+		try {
+
+			User user = null;
+
+			if (Validator.isNull(userVO.getId())) {
+				user = new User();
+				user.fromVO(userVO);
+				user.setActive(true);
+
+			} else {
+				user = userDao.get(userVO.getId());
+				for (String id : ids) {
+
+					Role role = roleDao.get(Long.parseLong(id));
+					roles.add(role);
+
+				}
+				Set rolesSet = new HashSet(roles);
+				user.setRoles(rolesSet);
+			}
+
+			// save entity
+			user = save(user, userInfo);
+
+			userVO = (UserVO) user.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+
+		return userVO;
+	}
+
+	@Override
+	public BaseVO changePass(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		log.info("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		UserVO userVO = (UserVO) baseVO;
+
+		if (!Validator.equals(userVO.getPassword(), userVO.getConfirmPassword())) {
+
+			throw new ParvanRecoverableException(ErrorCode.INCOMPLETE_DIMENSION);
+		}
+
+		try {
+
+			User user = null;
+
+			user = userDao.get(userVO.getId());
+			user.setPassword(userVO.getPassword());
+
+			// save entity
+			user.setActive(true);
+			user = save(user, userInfo);
+
+			userVO = (UserVO) user.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+
+		return userVO;
+	}
+
+}

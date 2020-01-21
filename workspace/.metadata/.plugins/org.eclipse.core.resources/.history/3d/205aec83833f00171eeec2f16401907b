@@ -1,0 +1,291 @@
+package com.parvanpajooh.client.geomanagement.model;
+
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.DiscountStatus;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+
+public class DiscountMsg extends BaseMsg {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1203566569659875533L;
+	
+	private Long id;
+	
+	private String code;
+	
+	private String action;
+	
+	private RateAndRouteEnums.DiscountStatus status;
+
+	private String waybillNumberFrom;
+	
+	private String waybillNumberTo;
+	
+	private Double weightFrom;
+	
+	private Double weightTo;
+	
+	private String dateFrom;
+	
+	private String dateTo;
+	
+	private String agentCode;
+	
+	private ProductMsg product;
+	
+	private RateTypeMsg rateType;
+	
+	private RouteMsg route;
+	
+	private NodeMsg fromNode;
+	
+	private NodeMsg toNode;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * @param code the code to set
+	 */
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the action
+	 */
+	public String getAction() {
+		return action;
+	}
+
+	/**
+	 * @param action the action to set
+	 */
+	public void setAction(String action) {
+		this.action = action;
+	}
+
+	/**
+	 * @return the status
+	 */
+	public DiscountStatus getStatus() {
+		return status;
+	}
+
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(DiscountStatus status) {
+		this.status = status;
+	}
+
+	/**
+	 * @return the waybillNumberFrom
+	 */
+	public String getWaybillNumberFrom() {
+		return waybillNumberFrom;
+	}
+
+	/**
+	 * @param waybillNumberFrom the waybillNumberFrom to set
+	 */
+	public void setWaybillNumberFrom(String waybillNumberFrom) {
+		this.waybillNumberFrom = waybillNumberFrom;
+	}
+
+	/**
+	 * @return the waybillNumberTo
+	 */
+	public String getWaybillNumberTo() {
+		return waybillNumberTo;
+	}
+
+	/**
+	 * @param waybillNumberTo the waybillNumberTo to set
+	 */
+	public void setWaybillNumberTo(String waybillNumberTo) {
+		this.waybillNumberTo = waybillNumberTo;
+	}
+
+	/**
+	 * @return the weightFrom
+	 */
+	public Double getWeightFrom() {
+		return weightFrom;
+	}
+
+	/**
+	 * @param weightFrom the weightFrom to set
+	 */
+	public void setWeightFrom(Double weightFrom) {
+		this.weightFrom = weightFrom;
+	}
+
+	/**
+	 * @return the weightTo
+	 */
+	public Double getWeightTo() {
+		return weightTo;
+	}
+
+	/**
+	 * @param weightTo the weightTo to set
+	 */
+	public void setWeightTo(Double weightTo) {
+		this.weightTo = weightTo;
+	}
+
+	/**
+	 * @return the dateFrom
+	 */
+	public String getDateFrom() {
+		return dateFrom;
+	}
+
+	/**
+	 * @param dateFrom the dateFrom to set
+	 */
+	public void setDateFrom(String dateFrom) {
+		this.dateFrom = dateFrom;
+	}
+
+	/**
+	 * @return the dateTo
+	 */
+	public String getDateTo() {
+		return dateTo;
+	}
+
+	/**
+	 * @param dateTo the dateTo to set
+	 */
+	public void setDateTo(String dateTo) {
+		this.dateTo = dateTo;
+	}
+
+	/**
+	 * @return the agentCode
+	 */
+	public String getAgentCode() {
+		return agentCode;
+	}
+
+	/**
+	 * @param agentCode the agentCode to set
+	 */
+	public void setAgentCode(String agentCode) {
+		this.agentCode = agentCode;
+	}
+
+	/**
+	 * @return the product
+	 */
+	public ProductMsg getProduct() {
+		return product;
+	}
+
+	/**
+	 * @param product the product to set
+	 */
+	public void setProduct(ProductMsg product) {
+		this.product = product;
+	}
+
+	/**
+	 * @return the rateType
+	 */
+	public RateTypeMsg getRateType() {
+		return rateType;
+	}
+
+	/**
+	 * @param rateType the rateType to set
+	 */
+	public void setRateType(RateTypeMsg rateType) {
+		this.rateType = rateType;
+	}
+
+	/**
+	 * @return the route
+	 */
+	public RouteMsg getRoute() {
+		return route;
+	}
+
+	/**
+	 * @param route the route to set
+	 */
+	public void setRoute(RouteMsg route) {
+		this.route = route;
+	}
+
+	/**
+	 * @return the fromNode
+	 */
+	public NodeMsg getFromNode() {
+		return fromNode;
+	}
+
+	/**
+	 * @param fromNode the fromNode to set
+	 */
+	public void setFromNode(NodeMsg fromNode) {
+		this.fromNode = fromNode;
+	}
+
+	/**
+	 * @return the toNode
+	 */
+	public NodeMsg getToNode() {
+		return toNode;
+	}
+
+	/**
+	 * @param toNode the toNode to set
+	 */
+	public void setToNode(NodeMsg toNode) {
+		this.toNode = toNode;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "DiscountVO [id=" + getId() + ", code=" + code + ", action=" + action
+				+ ", status=" + status + ", waybillNumberFrom="
+				+ waybillNumberFrom + ", waybillNumberTo=" + waybillNumberTo
+				+ ", weightFrom=" + weightFrom + ", weightTo=" + weightTo
+				+ ", dateFrom=" + dateFrom + ", dateTo=" + dateTo
+				+ ", agentCode=" + agentCode + ", product=" + product
+				+ ", rateType=" + rateType + ", route=" + route + ", fromNode="
+				+ fromNode + ", toNode=" + toNode + "]";
+	}
+
+}

@@ -1,0 +1,19 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.service;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.service.GenericService;
+import com.parvanpajooh.shipment.model.ShipmentAction;
+import com.parvanpajooh.shipment.model.vo.ShipmentActionVO;
+
+/**
+ * @author Mohammad
+ * 
+ */
+public interface PackingItemActionService extends GenericService<ShipmentAction, Long> {
+
+	ShipmentActionVO get(UserInfo userInfo, String actionCode) throws ParvanServiceException;
+}

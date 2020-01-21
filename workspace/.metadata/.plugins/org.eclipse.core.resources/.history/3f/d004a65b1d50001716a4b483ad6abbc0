@@ -1,0 +1,47 @@
+package com.parvanpajooh.personmanagement.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.dao.GenericDao;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.personmanagement.model.Organization;
+import com.parvanpajooh.personmanagement.model.Person;
+import com.parvanpajooh.personmanagement.model.Relation;
+import com.parvanpajooh.personmanagement.model.enums.RelationType;
+
+/**
+ * @author ali
+ * @author MO
+ *
+ */
+public interface PersonDao extends GenericDao<Person, Long> {
+
+	public Person findPersonByNationalId(String nationalId) throws ParvanDaoException;
+
+	public Person findPersonByEmail(String email) throws ParvanDaoException;
+	
+	public Person getByUuid(String uuid) throws ParvanDaoException;
+
+	public PageList<Person> searchActivePeopleInOrganization(Long organizationId, String term, Integer start, Integer length, SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanDaoException;
+
+	public void index() throws ParvanDaoException;
+
+	/**
+	 * 
+	 * @param uuids
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public Map<String, String> getByUuids(List<String> uuids) throws ParvanDaoException;
+	
+	public Person findPersonByOrganizationIdAndNationalId(String nationalId,Long organizationId) throws ParvanDaoException;
+
+	public List<Person> findRelatedFrom(String personUuid, RelationType type, String allowedOrgId, String term) throws ParvanDaoException;
+
+	public List<Person> findRelatedTo(String personUuid, RelationType type, String allowdOrgId, String term) throws ParvanDaoException;
+
+}

@@ -1,0 +1,27 @@
+/**
+ * 
+ */
+package com.parvanpajooh.routemanagement.dao;
+
+import java.util.List;
+
+import com.parvanpajooh.commons.platform.ejb.dao.GenericDao;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.routemanagement.model.Node;
+import com.parvanpajooh.routemanagement.model.Route;
+
+/**
+ * @author ali
+ *
+ */
+public interface RouteDao extends GenericDao<Route, Long>{
+
+	List<Node> findCollectionByGeoCity(String geoCityCode, Long toNodeId, String term) throws ParvanDaoException;
+	
+	List<Node> findDistributionByGeoCity(String geoCityCode, Long fromNodeId, String term) throws ParvanDaoException;
+	
+	List<Node> findHubByGeoCity(String geoCityCode) throws ParvanDaoException;
+
+	public List<String> findRouteNumbersByFromNodeCode(String fromNodeCode) throws ParvanDaoException;
+
+}

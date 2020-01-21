@@ -1,0 +1,1341 @@
+{
+  "entity": [
+    {
+      "name": "WaybillNumberGenerateCommand",
+      "actions": [
+        {
+          "name": "create",
+          "url": "/stock2-web/waybillNumber/generateCommand",
+          "enabled": true,
+          "type": "object"
+        }
+        
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": true,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "version",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "prefix",
+          "dataType": "string",
+          "order": 1,
+          "inputType": "text",
+          "title": "waybillNumberGenerateCommand.prefix",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators":[],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "from",
+          "dataType": "string",
+          "order": 2,
+          "inputType": "text",
+          "title": "waybillNumberGenerateCommand.from",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators":[],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "to",
+          "dataType": "string",
+          "order": 3,
+          "inputType": "text",
+          "title": "waybillNumberGenerateCommand.to",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators":[],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "incrementStep",
+          "dataType": "string",
+          "order": 4,
+          "inputType": "text",
+          "title": "waybillNumberGenerateCommand.incrementStep",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators":[],
+          "mask": "",
+          "enabled": false
+        },
+        {
+            "name": "waybillNumberType",
+            "dataType": "string",
+            "order": 5,
+            "inputType": "select2",
+            "title": "waybillNumberGenerateCommand.waybillNumberType",
+            "hint": "waybillNumberGenerateCommand.waybillNumberType",
+            "help": "",
+            "placeholder": "",
+            "defaultValue": "",
+            "values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"text": "Electronic", "value": "ELECTRONIC"},{"text": "Print", "value": "PRINT"}] },
+            "style": "",
+            "cssClass": "",
+            "sortable": true,
+            "isId": "",
+            "data": [],
+            "validators":[],
+            "mask": "",
+            "enabled": false
+        },        
+        {
+          "name": "waybillNumberGroupId",
+          "dataType": "long",
+          "order": 8,
+          "inputType": "select2",
+          "title": "waybillNumberGenerateCommand.waybillNumberGroupId",
+          "hint": "waybillNumberGenerateCommand.waybillNumberGroupId",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+		  "values": {
+            "firstRow": {
+              "text": "&nbsp;",
+              "value": ""
+            },
+            "sourceType": "session",
+            "key": "waybillNumberGroups",
+            "dataType": "list",
+            "converter": "com.parvanpajooh.dialects.converter.DefaultConverter"
+            "converterTitleField": "nameFa"
+            "converterValueField": "id"
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators":[],
+          "mask": "",
+          "enabled": false
+        },
+        {
+            "name": "domestic",
+            "dataType": "string",
+            "order": 7,
+            "inputType": "select2",
+            "title": "waybillNumberGenerateCommand.domestic",
+            "hint": "waybillNumberGenerateCommand.domestic",
+            "help": "",
+            "placeholder": "",
+            "defaultValue": "",
+            "values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"text": "Domestic", "value": "True"},{"text": "International", "value": "False"}] },
+            "style": "",
+            "cssClass": "",
+            "sortable": true,
+            "isId": "",
+            "data": [],
+            "validators":[],
+            "mask": "",
+            "enabled": false
+        },                
+        {
+            "name": "format",
+            "dataType": "string",
+            "order": 9,
+            "inputType": "select2",
+            "title": "waybillNumberGenerateCommand.format",
+            "hint": "waybillNumberGenerateCommand.format",
+            "help": "",
+            "placeholder": "",
+            "defaultValue": "",
+            "values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"text": "Iata", "value": "IATA"}] },
+            "style": "",
+            "cssClass": "",
+            "sortable": true,
+            "isId": "",
+            "data": [],
+            "validators":[],
+            "mask": "",
+            "enabled": false
+        },
+        {
+          "name": "remarks",
+          "dataType": "string",
+          "order": 10,
+          "inputType": "textarea",
+          "title": "waybillNumberGenerateCommand.remarks",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "createDate",
+          "dataType": "date",
+          "order": 7,
+          "inputType": "hidden",
+          "title": "createDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "updateDate",
+          "dataType": "date",
+          "order": 8,
+          "inputType": "hidden",
+          "title": "updateDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        }
+      ],
+      "forms": [
+
+        {
+          "name": "create",
+          "type": "create",
+          "fields": [
+            {
+              "name": "prefix",
+              "validators":[{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+              "enabled": true
+            },
+            {
+              "name": "from",
+              "validators":[{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+              "enabled": true
+            },
+            {
+              "name": "to",
+              "validators":[{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+              "enabled": true
+            },
+            {
+              "name": "incrementStep",
+              "validators":[{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+              "enabled": true
+            },
+            {
+              "name": "waybillNumberGroupId",
+              "validators":[{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+              "enabled": true
+            },
+            {
+              "name": "waybillNumberType",
+              "validators":[{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+              "enabled": true
+            },
+            {
+              "name": "domestic",
+              "validators":[{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+              "enabled": true
+            },
+            {
+              "name": "format",
+              "enabled": true
+            },
+            {
+              "name": "remarks",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "name": "modify",
+          "type": "modify",
+          "fields": [
+            {
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            },
+            {
+              "name": "waybillNumberGroupId",
+              "enabled": true
+            },
+            {
+              "name": "waybillNumberType",
+              "enabled": true
+            },
+            {
+              "name": "domestic",
+              "enabled": true
+            },
+            {
+              "name": "format",
+              "enabled": true
+            },
+            {
+              "name": "remarks",
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "WaybillNumberUpdateCommand",
+      "actions": [
+        {
+          "name": "modify",
+          "url": "/stock2-web/waybillNumber/modify",
+          "enabled": true,
+          "type": "object"
+        }
+        
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": true,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "version",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "prefix",
+          "dataType": "string",
+          "order": 1,
+          "inputType": "text",
+          "title": "waybillNumberGenerateCommand.prefix",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators":[],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "from",
+          "dataType": "string",
+          "order": 2,
+          "inputType": "text",
+          "title": "waybillNumber.from",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators":[],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "to",
+          "dataType": "string",
+          "order": 3,
+          "inputType": "text",
+          "title": "waybillNumber.to",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators":[],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "incrementStep",
+          "dataType": "string",
+          "order": 4,
+          "inputType": "text",
+          "title": "waybillNumberGenerateCommand.incrementStep",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators":[],
+          "mask": "",
+          "enabled": false
+        },
+        {
+            "name": "waybillNumberType",
+            "dataType": "string",
+            "order": 5,
+            "inputType": "select2",
+            "title": "waybillNumberGenerateCommand.waybillNumberType",
+            "hint": "waybillNumberGenerateCommand.waybillNumberType",
+            "help": "",
+            "placeholder": "",
+            "defaultValue": "",
+            "values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"text": "Electronic", "value": "ELECTRONIC"},{"text": "Print", "value": "PRINT"}] },
+            "style": "",
+            "cssClass": "",
+            "sortable": true,
+            "isId": "",
+            "data": [],
+            "validators":[],
+            "mask": "",
+            "enabled": false
+        },        
+        {
+          "name": "waybillNumberGroupId",
+          "dataType": "long",
+          "order": 8,
+          "inputType": "select2",
+          "title": "waybillNumberGenerateCommand.waybillNumberGroupId",
+          "hint": "waybillNumberGenerateCommand.waybillNumberGroupId",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+		  "values": {
+            "firstRow": {
+              "text": "&nbsp;",
+              "value": ""
+            },
+            "sourceType": "session",
+            "key": "waybillNumberGroups",
+            "dataType": "list",
+            "converter": "com.parvanpajooh.dialects.converter.DefaultConverter"
+            "converterTitleField": "nameFa"
+            "converterValueField": "id"
+          },
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators":[],
+          "mask": "",
+          "enabled": false
+        },
+        {
+            "name": "domestic",
+            "dataType": "string",
+            "order": 7,
+            "inputType": "select2",
+            "title": "waybillNumberGenerateCommand.domestic",
+            "hint": "waybillNumberGenerateCommand.domestic",
+            "help": "",
+            "placeholder": "",
+            "defaultValue": "",
+            "values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"text": "Domestic", "value": "True"},{"text": "International", "value": "False"}] },
+            "style": "",
+            "cssClass": "",
+            "sortable": true,
+            "isId": "",
+            "data": [],
+            "validators":[],
+            "mask": "",
+            "enabled": false
+        },                
+        {
+            "name": "format",
+            "dataType": "string",
+            "order": 9,
+            "inputType": "select2",
+            "title": "waybillNumberGenerateCommand.format",
+            "hint": "waybillNumberGenerateCommand.format",
+            "help": "",
+            "placeholder": "",
+            "defaultValue": "",
+            "values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"text": "Iata", "value": "IATA"}] },
+            "style": "",
+            "cssClass": "",
+            "sortable": true,
+            "isId": "",
+            "data": [],
+            "validators":[],
+            "mask": "",
+            "enabled": false
+        },
+        {
+          "name": "remarks",
+          "dataType": "string",
+          "order": 10,
+          "inputType": "textarea",
+          "title": "waybillNumberGenerateCommand.remarks",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "createDate",
+          "dataType": "date",
+          "order": 7,
+          "inputType": "hidden",
+          "title": "createDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "updateDate",
+          "dataType": "date",
+          "order": 8,
+          "inputType": "hidden",
+          "title": "updateDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        }
+      ],
+      "forms": [
+
+        {
+          "name": "modify",
+          "type": "modify",
+          "fields": [
+            {
+              "name": "id",
+              "enabled": true
+            },
+            {
+              "name": "version",
+              "enabled": true
+            },
+            {
+              "name": "waybillNumberGroupId",
+              "enabled": true
+            },
+            {
+              "name": "waybillNumberType",
+              "enabled": true
+            },
+            {
+              "name": "domestic",
+              "enabled": true
+            },
+            {
+              "name": "format",
+              "enabled": true
+            },
+            {
+              "name": "remarks",
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "WaybillNumberDisplay",
+      "actions": [
+        {
+          "name": "paging",
+          "url": "/waybillNumber/paging_waybillNumbers",
+          "enabled": true,
+          "type": "table"
+        }
+      ],
+
+      "fields": [
+        {
+          "name": "id",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": true,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "version",
+          "dataType": "long",
+          "order": 0,
+          "size": 0,
+          "inputType": "hidden",
+          "title": "",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "waybillNumberFrom",
+          "dataType": "string",
+          "order": 2,
+          "inputType": "text",
+          "title": "waybillNumber.from",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],   
+          "validators": [],       
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "waybillNumberTo",
+          "dataType": "string",
+          "order": 3,
+          "inputType": "text",
+          "title": "waybillNumber.to",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "waybillNumber",
+          "dataType": "string",
+          "order": 1,
+          "inputType": "text",
+          "title": "waybillNumberDisplay.waybillNumber",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+            "name": "waybillNumberType",
+            "dataType": "string",
+            "order": 5,
+            "inputType": "select2",
+            "title": "waybillNumberDisplay.waybillNumberType",
+            "hint": "waybillNumberDisplay.waybillNumberType",
+            "help": "",
+            "placeholder": "",
+            "defaultValue": "",
+            "values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"text": "Electronic", "value": "ELECTRONIC"},{"text": "Print", "value": "PRINT"}] },
+            "style": "",
+            "cssClass": "",
+            "sortable": true,
+            "isId": "",
+            "data": [],
+            "validators": [],
+            "mask": "",
+            "enabled": false
+        },        
+        {
+            "name": "domestic",
+            "dataType": "boolean",
+            "order": 7,
+            "inputType": "select2",
+            "title": "waybillNumberDisplay.domestic",
+            "hint": "waybillNumberDisplay.domestic",
+            "help": "",
+            "placeholder": "",
+            "defaultValue": "",
+            "values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"text": "Domestic", "value": "True"},{"text": "International", "value": "False"}] },
+            "style": "",
+            "cssClass": "",
+            "sortable": true,
+            "isId": "",
+            "data": [],
+            "validators": [],
+            "mask": "",
+            "enabled": false
+        },
+        {
+            "name": "format",
+            "dataType": "string",
+            "order": 8,
+            "inputType": "select2",
+            "title": "waybillNumberDisplay.format",
+            "hint": "waybillNumberDisplay.format",
+            "help": "",
+            "placeholder": "",
+            "defaultValue": "",
+            "values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"text": "Iata", "value": "IATA"}] },
+            "style": "",
+            "cssClass": "",
+            "sortable": true,
+            "isId": "",
+            "data": [],
+            "validators": [],
+            "mask": "",
+            "enabled": false
+        },
+        {
+            "name": "currentState",
+            "dataType": "string",
+            "order": 8,
+            "inputType": "select2",
+            "title": "waybillNumberDisplay.currentState",
+            "hint": "waybillNumberDisplay.currentState",
+            "help": "",
+            "placeholder": "",
+            "defaultValue": "",
+            "values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"text": "New", "value": "NEW"},{"text": "Used", "value": "USED"},{"text": "Voided", "value": "VOIDED"},{"text": "Blocked", "value": "BLOCKED"}] },
+            "style": "",
+            "cssClass": "",
+            "sortable": true,
+            "isId": "",
+            "data": [],
+            "validators": [],
+            "mask": "",
+            "enabled": false
+        },
+        {
+          "name": "allRemarks",
+          "dataType": "string",
+          "order": 10,
+          "inputType": "textarea",
+          "title": "waybillNumberDisplay.allRemarks",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "recordCreateDate",
+          "dataType": "date",
+          "order": 7,
+          "inputType": "hidden",
+          "title": "waybillNumberDisplay.recordCreateDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "generateDateTimeFrom",
+          "dataType": "date",
+          "order": 8,
+          "inputType": "text",
+          "title": "waybillNumberDisplay.generatDateTimeFrom",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "datePicker",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "generateDateTimeTo",
+          "dataType": "date",
+          "order": 9,
+          "inputType": "text",
+          "title": "waybillNumberDisplay.generatDateTimeTo",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "datePicker",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "recordUpdateDate",
+          "dataType": "date",
+          "order": 10,
+          "inputType": "hidden",
+          "title": "waybillNumberDisplay.recordUpdateDate",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "lastUpdateDateTimeFrom",
+          "dataType": "date",
+          "order": 11,
+          "inputType": "text",
+          "title": "waybillNumberDisplay.lastUpdateDateTimeFrom",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "datePicker",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "lastUpdateDateTimeTo",
+          "dataType": "date",
+          "order": 12,
+          "inputType": "text",
+          "title": "waybillNumberDisplay.lastUpdateDateTimeTo",
+          "hint": "",
+          "help": "",
+          "defaultValue": "",
+          "placeholder": "",
+          "values": {},
+          "data": [],
+          "style": "",
+          "cssClass": "datePicker",
+          "sortable": true,
+          "isId": false,
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "ownerAgentName",
+          "dataType": "string",
+          "order": 10,
+          "inputType": "text",
+          "title": "waybillNumberDisplay.ownerAgentName",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": false,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        },
+        {
+          "name": "currentAssigneeAgentName",
+          "dataType": "string",
+          "order": 10,
+          "inputType": "text",
+          "title": "waybillNumberDisplay.currentAssigneeAgentName",
+          "hint": "",
+          "help": "",
+          "placeholder": "",
+          "defaultValue": "",
+          "style": "",
+          "cssClass": "",
+          "sortable": true,
+          "isId": "",
+          "data": [],
+          "validators": [],
+          "mask": "",
+          "enabled": false
+        }
+      ],
+
+      "data-tables": [
+        {
+          "name": "list",
+          "fields": [
+            {
+              "name": "recordCreateDate",
+              "order": 1,
+              "enabled": true
+            },
+            {
+              "name": "recordUpdateDate",
+              "order": 2,
+              "enabled": true
+            },
+            {
+              "name": "waybillNumber",
+              "order": 3,
+              "enabled": true
+            },
+            {
+              "name": "domestic",
+              "renderFunction": "domesticRender",
+              "order": 4,             
+              "enabled": true
+            },
+            {
+              "name": "waybillNumberType",
+              "renderFunction": "waybillNumberTypeRender",
+              "order": 5,
+              "enabled": true
+            },   
+            {
+              "name": "currentState",
+              "renderFunction": "currentStateRender",
+              "order": 6,
+              "enabled": true
+            },          
+            {
+              "name": "format",
+              "order": 7,
+              "enabled": true
+            },
+            {
+              "name": "ownerAgentName",
+              "order": 8,
+              "enabled": true
+            },
+            {
+              "name": "currentAssigneeAgentName",
+              "order": 9,
+              "enabled": true
+            },
+            {
+              "name": "allRemarks",
+              "order": 10,
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "WaybillNumberGroup",
+      
+      "actions": [
+		          {"name": "create","url": "/stock2-web/waybillNumberGroup/save","enabled": true,"type": "object"},
+			      {"name": "modify","url": "/stock2-web/waybillNumberGroup/save","enabled": true,"type": "object"},
+			      {"name": "delete", "url": "/stock2-web/waybillNumberGroup/del", "enabled": true, "type": "object"},
+			      {"name": "view", "url": "/stock2-web/waybillNumberGroup/", "enabled": false, "type": "object"},
+			      {"name": "paging", "url": "/waybillNumberGroup/paging", "enabled": true, "type": "table"}
+     			 ],
+      
+      "fields": [
+			     {
+		          "name": "id",
+		          "dataType": "long",
+		          "order": 0,
+		          "size": 0,
+		          "inputType": "hidden",
+		          "title": "",
+		          "hint": "",
+		          "help": "",
+		          "defaultValue": "",
+		          "placeholder": "",
+		          "values": {},
+		          "data": [],
+		          "style": "",
+		          "cssClass": "",
+		          "sortable": true,
+		          "isId": true,
+		          "validators": [],
+		          "mask": "",
+		          "enabled": false
+		        },
+		        {
+		          "name": "version",
+		          "dataType": "long",
+		          "order": 0,
+		          "size": 0,
+		          "inputType": "hidden",
+		          "title": "",
+		          "hint": "",
+		          "help": "",
+		          "defaultValue": "",
+		          "placeholder": "",
+		          "values": {},
+		          "data": [],
+		          "style": "",
+		          "cssClass": "",
+		          "sortable": true,
+		          "isId": false,
+		          "validators": [],
+		          "mask": "",
+		          "enabled": false
+		        },
+		        {
+		          "name": "code",
+		          "dataType": "string",
+		          "order": 2,
+		          "inputType": "text",
+		          "title": "waybillNumberGroup.code",
+		          "hint": "",
+		          "help": "",
+		          "placeholder": "",
+		          "defaultValue": "",
+		          "style": "",
+		          "cssClass": "",
+		          "sortable": true,
+		          "isId": "",
+		          "data": [],
+		          "validators":[],
+		          "mask": "",
+		          "enabled": false
+		        },
+		        {
+		          "name": "nameFa",
+		          "dataType": "string",
+		          "order": 3,
+		          "inputType": "text",
+		          "title": "waybillNumberGroup.nameFa",
+		          "hint": "",
+		          "help": "",
+		          "placeholder": "",
+		          "defaultValue": "",
+		          "style": "",
+		          "cssClass": "",
+		          "sortable": true,
+		          "isId": "",
+		          "data": [],
+		          "validators":[],
+		          "mask": "",
+		          "enabled": false
+		        },
+		        {
+		          "name": "nameEn",
+		          "dataType": "string",
+		          "order": 4,
+		          "inputType": "text",
+		          "title": "waybillNumberGroup.nameEn",
+		          "hint": "",
+		          "help": "",
+		          "placeholder": "",
+		          "defaultValue": "",
+		          "style": "",
+		          "cssClass": "",
+		          "sortable": true,
+		          "isId": "",
+		          "data": [],
+		          "validators":[],
+		          "mask": "",
+		          "enabled": false
+		        }      	        								
+      			],
+      "forms": [
+	      		{
+		          "name": "search",
+		          "type": "search",
+		          "fields": [
+					            {
+					              "name": "code",
+					              "order": 1,
+					              "size" :200,              
+					              "enabled": true
+					            },
+					            {
+					              "name": "nameFa",
+					              "order": 2,
+					              "size" :200,
+					              "enabled": true
+					            },
+					            {
+					              "name": "nameEn",
+					              "order": 3,
+					              "size" :200,
+					              "enabled": true
+					            }
+		          		]
+	         	},      
+	   		 	{
+		          "name": "create",
+		          "type": "create",
+		          "fields": [
+					            {
+					              "name": "code",
+					              "validators":[{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+					              "enabled": true
+					            },
+					            {
+					              "name": "nameFa",
+					              "validators":[{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+					              "enabled": true
+					            },
+					            {
+					              "name": "nameEn",
+					              "validators":[{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+					              "enabled": true
+					            }
+	          			]
+	        	},
+	        	{
+		          "name": "modify",
+		          "type": "modify",
+		          "fields": [
+					            {
+					              "name": "id",
+					              "enabled": true
+					            },
+					            {
+					              "name": "version",
+					              "enabled": true
+					            },
+					            {
+					              "name": "code",
+					              "enabled": true
+					            },
+					            {
+					              "name": "nameFa",
+					              "enabled": true
+					            },
+					            {
+					              "name": "nameEn",
+					              "enabled": true
+					            }
+	          				]
+	    		},
+	    		{
+                 "name": "delete",
+                 "type": "delete",
+                 "fields": [
+	                            {
+	                                "name": "id",
+	                                "enabled": true
+	                            },
+	                            {
+	                                "name": "version",
+	                                "enabled": true
+	                            }
+                            ]
+                 }
+  			],
+	 "data-tables": [
+	                 {
+	                 "name": "list",
+                     "fields": [
+                                    {
+                                        "name": "code",
+                                        "enabled": true
+                                    },
+                                    {
+                                        "name": "nameFa",
+                                        "enabled": true
+                                    },
+                                    {
+                                        "name": "nameEn",
+                                        "enabled": true
+                                    }
+                                ]
+     		}
+     	]
+    }           
+  ]
+}

@@ -1,0 +1,19 @@
+<root>
+	<group id="1" titleKey="cataloging">
+		<resource uri="com.parvanpajooh.identitymanagement2.model.User"
+			titleKey="com.parvanpajooh.identitymanagement2.model.User" scopeCode="code1">
+			<action id="CREATE" titleKey="action.create" bitWiseValue="2" scopeBased="false" />
+			<action id="VIEW" titleKey="action.view" bitWiseValue="1" scopeBased="true" />
+			<action id="UPDATE" titleKey="action.update" bitWiseValue="3" scopeBased="true" />
+			<action id="DELETE" titleKey="action.delete" bitWiseValue="4" scopeBased="true" />
+		</resource>
+	
+		<resource uri="com.parvanpajooh.identitymanagement2.model.UserGroup"
+			titleKey="com.parvanpajooh.identitymanagement2.model.UserGroup">
+			<action id="VIEW" titleKey="action.view" bitWiseValue="1" />
+			<action id="CREATE" titleKey="action.create" bitWiseValue="2" />
+			<action id="UPDATE" titleKey="action.update" bitWiseValue="3" />
+			<action id="DELETE" titleKey="action.delete" bitWiseValue="4" />
+		</resource>
+	</group>
+</root>

@@ -1,0 +1,297 @@
+package com.parvanpajooh.agentmanagement.service.impl;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.acc.AccountingProtos;
+import com.parvanpajooh.agentmanagement.common.AccountingService;
+import com.parvanpajooh.agentmanagement.dao.GeneralAgentDao;
+import com.parvanpajooh.agentmanagement.model.AccountNumber;
+import com.parvanpajooh.agentmanagement.model.Employee;
+import com.parvanpajooh.agentmanagement.model.GeneralAgent;
+import com.parvanpajooh.agentmanagement.model.vo.AccountNumberVO;
+import com.parvanpajooh.agentmanagement.model.vo.GeneralAgentVO;
+import com.parvanpajooh.agentmanagement.service.AccountNumberLocalService;
+import com.parvanpajooh.agentmanagement.service.EmployeeLocalService;
+import com.parvanpajooh.agentmanagement.service.GeneralAgentLocalService;
+import com.parvanpajooh.common.security.OauthHelper;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.ServiceGenerator;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.util.permission.IdmService;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.idm.IdmProtos;
+
+import retrofit2.Call;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class GeneralAgentLocalServiceImpl extends GenericLocalServiceImpl<GeneralAgent, Long>implements GeneralAgentLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(GeneralAgentLocalServiceImpl.class);
+
+	public GeneralAgentDao generalAgentDao;
+	
+	@Inject
+	public EmployeeLocalService employeeLocalService;
+	
+	@Inject
+	public AccountNumberLocalService accountNumberLocalService;
+
+	@Inject
+	public void setGeneralAgentDao(GeneralAgentDao generalAgentDao) {
+		this.dao = generalAgentDao;
+		this.generalAgentDao = generalAgentDao;
+	}
+
+	@Override
+	public void delete(GeneralAgent object, UserInfo UserInfo)
+			throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering delete( object={})", object);
+
+		try {
+			List<GeneralAgent> agents = generalAgentDao.findAll();
+			
+			
+			for(GeneralAgent agent:agents){
+				
+				if(Validator.isNotNull(agent.getParent())){
+					
+					if(Validator.equals(agent.getParent().getId(), object.getId())){
+						
+						throw new ParvanDaoException(ErrorCode.AGENT_DELETE__NODE_ALREADY_HAS_ANOTHER_AGENT);
+					}
+				}
+			}
+			
+			// delete entity
+			dao.delete(object);
+
+		} catch (ParvanDaoException e) {
+			if (Validator.isNotNull(e.getErrorCode())) {
+				throw new ParvanRecoverableException(e, e.getErrorCode());
+			} else {
+				throw new ParvanUnrecoverableException(
+						"Error occurred while delete object.", e);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException(
+					"Error occurred while delete object.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method delete()");
+	}
+	
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		log.trace("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		GeneralAgentVO generalAgentVO = (GeneralAgentVO) baseVO;
+
+		try {
+			
+			GeneralAgent generalAgent = null;
+			
+			// check account available in accounting system
+			
+			OauthHelper helper = OauthHelper.getInstance();
+	    	String accessToken = helper.getAccessToken().getValue();
+			
+	    	AccountingService accountingService = ServiceGenerator.createService(AccountingService.class, "http://localhost/accounting-rest/", accessToken);
+	    	
+	    	Call<AccountingProtos.AccountList> call = accountingService.findAccounts(userInfo.getUserName(), userInfo.getIp());
+
+	    	AccountingProtos.AccountList accountList = call.execute().body();
+	    	
+	    	List<AccountingProtos.AccountList> list = accountList.getAccountsList();
+	    	
+	    	
+			boolean isAcountAvailable = true;//TODO
+			
+			AccountNumberVO accountNumberVO = generalAgentVO.getCurrentAccountNumber();
+			
+			// find account by accountNumber
+			AccountNumber accountNumber = accountNumberLocalService.findByAccountNumber(accountNumberVO.getAccountNumber());
+			
+			// check name
+			generalAgent = generalAgentDao.findByName(generalAgentVO.getName());
+			if (Validator.isNotNull(generalAgent)) {
+				if (!generalAgent.getId().equals(generalAgentVO.getId())) {
+					throw new ParvanRecoverableException("generalAgent.name", ErrorCode.DATA_DUPLICATE);
+				}
+			}
+			
+			boolean isNew = Validator.isNull(generalAgentVO.getId());
+			boolean isAccountCreated = false;
+			
+			if(isNew){
+				
+				if(accountNumber == null){
+					// create new accountNumber
+					accountNumber = createAccountNumber(accountNumberVO.getAccountNumber());
+					isAccountCreated = true;
+					
+				} else {
+					throw new ParvanRecoverableException("accountNumber.accountNumber", ErrorCode.DATA_DUPLICATE);
+				}
+				
+				generalAgent = new GeneralAgent();
+				generalAgent.fromVO(generalAgentVO);
+				generalAgent.setActive(true);
+				
+			} else {
+				if(accountNumber == null){
+					// create new accountNumber
+					accountNumber = createAccountNumber(accountNumberVO.getAccountNumber());
+					isAccountCreated = true;
+					
+				} else if(!accountNumber.getGeneralAgent().getId().equals(generalAgentVO.getId())){
+					throw new ParvanRecoverableException("accountNumber.accountNumber", ErrorCode.OBJECT_USED);
+				} else {
+					AccountNumber lastAccountNumber = accountNumberLocalService.getAccountNumberByAgentId(generalAgentVO.getId());
+					
+					if(!lastAccountNumber.getAccountNumber().equals(accountNumberVO.getAccountNumber())){
+						throw new ParvanRecoverableException(ErrorCode.AGENT_OLD_ACCOUNTNUMBER);
+					}
+				}
+				
+				generalAgent = get(generalAgentVO.getId());
+				generalAgent.fromVO(generalAgentVO);
+			}
+			
+			GeneralAgentVO parentVO = generalAgentVO.getParent();
+			if(parentVO != null && Validator.isNotNull(parentVO.getId())){
+				GeneralAgent parent = get(parentVO.getId());
+				
+				generalAgent.setParent(parent);
+			}
+			
+			// save entity
+			generalAgent = super.save(generalAgent, userInfo);
+			
+			if(isAccountCreated){
+				accountNumber.setGeneralAgent(generalAgent);
+				
+				//save accountNumber
+				accountNumber = accountNumberLocalService.save(accountNumber, userInfo);
+			}
+			
+			generalAgent.getAccountNumbers().add(accountNumber);
+			
+			generalAgentVO = generalAgent.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving generalAgent.", e);
+		}
+
+		log.trace("Leaving method save()");
+
+		return generalAgentVO;
+	}
+
+	@Override
+	public GeneralAgent attachEmployee(long id, String[] userUuids, String remarks) throws ParvanServiceException {
+		log.trace("Entering attachEmployee(id={}, userUuids={})", id, userUuids);
+
+		GeneralAgent generalAgent = null;
+
+		try {
+			//get user info from current context
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+			
+			generalAgent = get(id);
+			
+			for (String userUuid : userUuids) {
+				Employee employee = employeeLocalService.findByUserUuid(userUuid);
+				
+				if(employee == null){
+					employee = createEmployee(userUuid);
+					employee.setRemarks(remarks);
+				}
+				
+				employee.setGeneralAgent(generalAgent);
+				
+				employee = employeeLocalService.save(employee, userInfo);
+				
+				generalAgent.getEmployees().add(employee);
+			}
+						
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while attach Employee to generalAgent.", e);
+		}
+
+		log.trace("Leaving method attachEmployee()");
+
+		return generalAgent;
+	}
+	
+	private AccountNumber createAccountNumber(String accountNumber){
+		LocalDateTime now = LocalDateTime.now();
+		
+		AccountNumber account = new AccountNumber();
+		account.setAccountNumber(accountNumber);
+		account.setActive(true);
+		account.setVersion(0);
+		account.setCreateDate(now);
+		account.setUpdateDate(now);
+		
+		return account;
+	}
+	
+	private Employee createEmployee(String userUuid) throws Exception{
+		
+		OauthHelper helper = OauthHelper.getInstance();
+    	String accessToken = helper.getAccessToken().getValue();
+		
+    	IdmService idmService = ServiceGenerator.createService(IdmService.class, "http://localhost/identitymanagement2-rest/", accessToken);
+    	
+    	Call<IdmProtos.User> call = idmService.loadUserByUuid(userUuid);
+    	
+    	IdmProtos.User user = call.execute().body();
+		
+		LocalDateTime now = LocalDateTime.now();
+		
+		Employee employee = new Employee();
+		employee.setUserUuid(user.getUuid());
+		employee.setUserName(user.getUserName());
+		//employee.setPersonUuid(user.getPersonUuid);
+		employee.setFullName(user.getFirstName() + StringPool.SPACE + user.getLastName());
+		//employee.setRemarks(remarks);
+		employee.setActive(true);
+		employee.setVersion(0);
+		employee.setCreateDate(now);
+		employee.setUpdateDate(now);
+		
+		return employee;
+	}
+}

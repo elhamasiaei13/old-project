@@ -1,0 +1,121 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.dao.jpa;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.siteservices.dao.RecoveryCodeDao;
+import com.parvanpajooh.siteservices.model.RecoveryCode;
+
+/**
+ * @author ali
+ *
+ */
+public class RecoveryCodeDaoJpa extends GenericDaoJpa<RecoveryCode, Long> implements RecoveryCodeDao {
+
+	/**
+	 * Entity manager, injected by Spring using @PersistenceContext annotation
+	 * on setEntityManager()
+	 */
+	@PersistenceContext(unitName = PERSISTENCE_UNIT_NAME)
+	private EntityManager entityManager;
+	
+	public RecoveryCodeDaoJpa() {
+		super(RecoveryCode.class);
+	}
+
+	
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<RecoveryCode> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("expireDate"), cri.getCreateDateFrom());
+			predicateList.add(predicate);
+		}
+	}
+
+
+	@Override
+	public RecoveryCode findActiveByUserId(Long userId) throws ParvanDaoException {
+		
+		//LOG
+		log.trace("Entering findByUserId userId={}", userId);
+		RecoveryCode recoveryCode = null;
+		try {
+			TypedQuery<RecoveryCode> q = getEntityManager().createQuery("select obj from RecoveryCode obj where obj.userId = ? and obj.active is true", RecoveryCode.class);
+			q.setParameter(1, userId);
+			
+			List<RecoveryCode> results = q.getResultList();
+			if ( results.isEmpty() ) {
+				recoveryCode = results.get(0);
+			}
+			if ( results.size() > 1 ) {
+				throw new ParvanDaoException("More than one active code exist");
+			}
+			
+			return recoveryCode;
+			
+		} catch(Exception e) {
+			throw new ParvanDaoException("Error occurred while finding active recovery code by userId : " + userId, e);
+		}
+	}
+
+
+	@Override
+	public List<RecoveryCode> findByUserId(Long userId) throws ParvanDaoException {
+
+		//LOG
+		log.trace("Entering findByUserId userId={}", userId);
+		try {
+			TypedQuery<RecoveryCode> q = getEntityManager().createQuery("select obj from RecoveryCode obj where obj.userId = ? ", RecoveryCode.class);
+			q.setParameter(1, userId);
+			
+			List<RecoveryCode> results = q.getResultList();
+			
+			return results;
+			
+		} catch(Exception e) {
+			throw new ParvanDaoException("Error occurred while finding recovery code by userId : " + userId, e);
+		}
+		
+	}
+
+
+	@Override
+	public RecoveryCode findByCode(String code) throws ParvanDaoException {
+		
+		//LOG
+		log.trace("Entering findByCode code={}", code);
+		RecoveryCode recoveryCode = null;
+		try {
+			TypedQuery<RecoveryCode> q = getEntityManager().createQuery("select obj from RecoveryCode obj where obj.code = ? and obj.active is true", RecoveryCode.class);
+			q.setParameter(1, code);
+			
+			List<RecoveryCode> results = q.getResultList();
+			if ( results.isEmpty() ) {
+				recoveryCode = results.get(0);
+			}
+			if ( results.size() > 1 ) {
+				throw new ParvanDaoException("More than one active code exist");
+			}
+			
+			return recoveryCode;
+			
+		} catch(Exception e) {
+			throw new ParvanDaoException("Error occurred while finding active recovery code by code : " + code, e);
+		}
+	}
+}

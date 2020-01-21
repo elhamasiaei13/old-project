@@ -1,0 +1,149 @@
+package com.parvanpajooh.accounting.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.accounting.dao.AccountDao;
+import com.parvanpajooh.accounting.dao.ClientAppDao;
+import com.parvanpajooh.accounting.dao.GroupDao;
+import com.parvanpajooh.accounting.model.ClientApp;
+import com.parvanpajooh.accounting.model.Group;
+import com.parvanpajooh.accounting.model.vo.GroupVO;
+import com.parvanpajooh.accounting.service.GroupLocalService;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.commons.util.Validator;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class GroupLocalServiceImpl extends GenericLocalServiceImpl<Group, Long>implements GroupLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(GroupLocalServiceImpl.class);
+
+	@Inject
+	private AccountDao accountDao;
+	
+	@Inject
+	private ClientAppDao clientAppDao;
+
+	public GroupDao groupDao;
+
+	@Inject
+	public void setGroupDao(GroupDao groupDao) {
+		this.dao = groupDao;
+		this.groupDao = groupDao;
+	}
+
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		
+		//LOG
+		log.debug("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		GroupVO groupVO = (GroupVO) baseVO;
+		Group group = new Group();
+		Group parent = null;
+		ClientApp clientApp = null;
+
+		try {
+
+			// validate name and description and clientApp
+			String name = groupVO.getName();
+			if (Validator.isNull(name)) {
+				throw new ParvanRecoverableException("group.name", ErrorCode.FIELD_IS_EMPTY);
+			}
+			
+			String description = groupVO.getDescription();
+			if (Validator.isNull(description)) {
+				throw new ParvanRecoverableException("group.description", ErrorCode.FIELD_IS_EMPTY);
+			}
+			
+			Long clientAppId = groupVO.getClientApp().getId();
+			if (Validator.isNull(clientAppId)) {
+				throw new ParvanRecoverableException("group.clientApp", ErrorCode.FIELD_IS_EMPTY);
+			}
+
+			group.fromVO(groupVO);
+
+			if (Validator.isNotNull(groupVO.getParent()) && Validator.isNotNull(groupVO.getParent().getId())) {
+				parent = groupDao.get(groupVO.getParent().getId());
+
+				if (!Validator.equals(parent.getClientApp().getId(), clientAppId)) {
+					throw new ParvanRecoverableException("group.clientApp", ErrorCode.DATA_IS_INVALID);
+				}
+				group.setParent(parent);
+			}
+			
+			if (Validator.isNotNull(groupVO.getClientApp()) && Validator.isNotNull(groupVO.getClientApp().getId())) {
+				clientApp = clientAppDao.get(groupVO.getClientApp().getId());
+				group.setClientApp(clientApp);
+			}
+
+			// save entity
+			group = save(group, userInfo);
+
+			groupVO = (GroupVO) group.toVO();
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving group.", e);
+		}
+
+		//LOG
+		log.debug("Leaving save():ret={}", groupVO);
+		return groupVO;
+	}
+
+	@Override
+	public void delete(Group object, UserInfo userInfo) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering delete( object={})", object);
+
+		try {
+
+			boolean hasChilderen = groupDao.findByParentId(object.getId());
+			if (Validator.equals(hasChilderen, true)) {
+				throw new ParvanDaoException(ErrorCode.AGENT_GROUP_DELETE__NODE_ALREADY_HAS_ANOTHER_GROUP);
+			}
+
+			boolean hasAccount = accountDao.findByGroupId(object.getId());
+			if (Validator.equals(hasAccount, true)) {
+				throw new ParvanDaoException(ErrorCode.AGENT_GROUP_DELETE__NODE_ALREADY_USED_BY_SOME_ACCOUNTS);
+			}
+
+			// delete entity
+			super.delete(object, userInfo);
+
+		} catch (ParvanDaoException e) {
+			if (Validator.isNotNull(e.getErrorCode())) {
+				throw new ParvanRecoverableException(e, e.getErrorCode());
+			} else {
+				throw new ParvanUnrecoverableException("Error occurred while delete group.", e);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while delete group.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method delete()");
+	}
+
+}

@@ -1,0 +1,65 @@
+package com.parvanpajooh.taskmanagement.domain.repository.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.taskmanagement.domain.model.Task;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroup;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroupCounter;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroup_;
+import com.parvanpajooh.taskmanagement.domain.model.criteria.TaskGroupCriteria;
+import com.parvanpajooh.taskmanagement.domain.repository.TaskGroupRepository;
+
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class TaskGroupCounterRepositoryJpa extends GenericDaoJpa<TaskGroup, Long> implements TaskGroupRepository {
+
+	public TaskGroupCounterRepositoryJpa() {
+		super(TaskGroup.class);
+	}
+
+	@PersistenceContext(unitName = "ApplicationEntityManager")
+	private EntityManager entityManager;
+
+	@Override
+	public void getTaskGroupCounterByTaskGroupKey(TaskGroup taskGroup) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering delete( taskGroup={})", taskGroup);
+
+		try {
+			
+			// remove taskGroupCounter
+			
+			this.entityManager.remove(taskDisplay);
+
+			// remove task
+			this.entityManager.remove(taskGroup);
+			this.entityManager.flush();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while delete: taskGroup [" + taskGroup + "]", e);
+		}
+	}
+
+}

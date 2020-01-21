@@ -1,0 +1,209 @@
+package com.parvanpajooh.taskmanagement.domain.model;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.GenericGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCreateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.enums.EmailType;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskType;
+import com.parvanpajooh.taskmanagement.domain.model.enums.UserType;
+
+@Entity
+@Table(name = "task_tbl")
+public class Task implements Serializable {
+
+	static final Logger log = LoggerFactory.getLogger(Task.class);
+	
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@GeneratedValue(generator = "system-uuid")
+	@GenericGenerator(name = "system-uuid", strategy = "uuid")
+	private String id;
+
+	@Version
+	private Integer version;
+	
+	private Long objectAccessScopeId;
+	
+	private Long ownerAgentId;
+	
+	@OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@JoinColumn(name = "taskCommandId", referencedColumnName = "id")
+	private Set<TaskCommand> taskCommands = new LinkedHashSet<TaskCommand>();		
+
+	/**
+	 * @return the id
+	 */
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	/**
+	 * @return the objectAccessScopeId
+	 */
+	public Long getObjectAccessScopeId() {
+		return objectAccessScopeId;
+	}
+
+	/**
+	 * @param objectAccessScopeId the objectAccessScopeId to set
+	 */
+	public void setObjectAccessScopeId(Long objectAccessScopeId) {
+		this.objectAccessScopeId = objectAccessScopeId;
+	}
+
+	/**
+	 * @return the ownerAgentId
+	 */
+	public Long getOwnerAgentId() {
+		return ownerAgentId;
+	}
+
+	/**
+	 * @param ownerAgentId the ownerAgentId to set
+	 */
+	public void setOwnerAgentId(Long ownerAgentId) {
+		this.ownerAgentId = ownerAgentId;
+	}
+
+	/**
+	 * @return the taskCommands
+	 */
+	public Set<TaskCommand> getTaskCommands() {
+		return taskCommands;
+	}
+
+	/**
+	 * @param taskCommands the taskCommands to set
+	 */
+	public void setTaskCommands(Set<TaskCommand> taskCommands) {
+		this.taskCommands = taskCommands;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Task)) {
+			return false;
+		}
+
+		final Task obj = (Task) o;
+
+		return new EqualsBuilder().append(this.id, obj.getId()).isEquals();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(-970989579, 1884842917).append(this.id).toHashCode();
+	}
+	
+	/**
+	 * 
+	 * @param taskCreateCommandDto
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	public static List<Task> createTask(TaskCreateCommandDto taskCreateCommandDto) throws ParvanServiceException {
+
+		log.debug("Entering createTask(taskCreateCommandDto={})", taskCreateCommandDto);
+
+		// initialize
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+
+		LocalDateTime now = LocalDateTime.now();
+		String commandBody = null;
+		
+		List<Task> taskList = new ArrayList<>();
+
+		// set values for create
+		String subject = taskCreateCommandDto.getSubject();
+		String remarks = taskCreateCommandDto.getRemarks();
+		UserType userType = taskCreateCommandDto.getUserType();
+		TaskType taskType = taskCreateCommandDto.getTaskType();
+		EmailType emailType = taskCreateCommandDto.getEmailStatus();
+		TaskGroup taskGroup = taskCreateCommandDto.getGroup();
+
+		// create task
+
+			Task task = new Task();
+
+
+			// create command object
+			TaskCommand taskCommand = new TaskCommand();
+			taskCommand.setUserUuid(null);// TODO
+			taskCommand.setUserName(userInfo.getUserName());
+			taskCommand.setDateTime(now);
+			taskCommand.setTaskCommandType(TaskCommandType.Create);
+			taskCommand.setCommandBody(commandBody);
+
+			task.setOwnerAgentId(userInfoWrapper.getAgentId());
+			Set<TaskCommand> taskCommands = task.getTaskCommands();
+			if (taskCommands == null) {
+				taskCommands = new LinkedHashSet<TaskCommand>();
+			}
+			taskCommands.add(taskCommand);
+
+			// add task
+			taskList.add(task);
+
+			log.trace("Added to list");
+		}
+
+		return waybillNumbers;
+	}
+}

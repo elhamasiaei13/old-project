@@ -1,0 +1,847 @@
+package com.parvanpajooh.transportationmanagement2.mvc;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.common.auth.UserInfoLoader;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.CalendarTypeEnum;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.DateUtil;
+import com.parvanpajooh.commons.util.DateUtilV2;
+import com.parvanpajooh.commons.util.LocaleUtil;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.commons.util.ZoneIdUtil;
+import com.parvanpajooh.transportationmanagement2.base.mvc.TransportaionMngBaseController;
+import com.parvanpajooh.transportationmanagement2.model.criteria.TransportationScheduleCriteria;
+import com.parvanpajooh.transportationmanagement2.model.vo.BulkEditTransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.CarrierVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.GenerateTransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.NodeVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.RouteVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.TransportationScheduleVO;
+import com.parvanpajooh.transportationmanagement2.model.vo.VehicleVO;
+import com.parvanpajooh.transportationmanagement2.service.CarrierManagementService;
+import com.parvanpajooh.transportationmanagement2.service.LogesticManagementService;
+import com.parvanpajooh.transportationmanagement2.service.RouteManagementService;
+import com.parvanpajooh.transportationmanagement2.service.TransportationScheduleService;
+
+@Controller
+@RequestMapping("/transportationSchedule")
+public class TransportationScheduleController extends TransportaionMngBaseController {
+	
+	
+//	@EJB(mappedName="java:global/transportationmanagement2-ear/transportationmanagement2-ejb/TransportationServiceImpl") 
+//	private TransportationService transportationService;
+//	
+//	@EJB(mappedName="java:global/transportationmanagement2-ear/transportationmanagement2-ejb/VehicleServiceImpl") 
+//	private VehicleService vehicleService;
+
+//	@EJB(mappedName = "java:global/rateAndRoute-ear/rateAndRoute-ejb/RateAndRouteServiceFacadeImpl!com.parvanpajooh.rateandroute.service.RateAndRouteServiceFacade")
+//	private RateAndRouteServiceFacade rateAndRouteServiceFacade;
+	
+	@EJB(mappedName="java:global/transportationmanagement2-ear/transportationmanagement2-ejb/CarrierManagementServiceImpl")
+	private CarrierManagementService carrierManagementService;
+	
+	@EJB(mappedName="java:global/transportationmanagement2-ear/transportationmanagement2-ejb/RouteManagementServiceImpl")
+	private RouteManagementService routeManagementService;
+	
+	@EJB(mappedName="java:global/transportationmanagement2-ear/transportationmanagement2-ejb/LogesticManagementServiceImpl")
+	private LogesticManagementService logesticManagementService;
+	
+	@EJB(mappedName="java:global/transportationmanagement2-ear/transportationmanagement2-ejb/TransportationScheduleServiceImpl")
+	private TransportationScheduleService transportationScheduleService;
+	
+	private final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
+	private final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HHmm");
+	//private final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public String showTransportationSchedules(HttpServletRequest request, Model model) throws Exception {
+		
+		removeSelected(request, "TransportationSchedule");
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+		model.addAttribute("today", getLocalDate(LocalDate.now(), userInfo));
+		model.addAttribute("rightMenu", "transportationschedules");
+	    return "transportationschedules";
+	}
+	
+	@RequestMapping(value="/generate", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> generateTransportationSchedule(
+			GenerateTransportationScheduleVO generateTransportationScheduleVO, 
+			HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			transportationScheduleService.generateTransportationSchedules(userInfo, generateTransportationScheduleVO);
+			
+			result.put("status", "success");
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/save", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> saveTransportationSchedule(TransportationScheduleVO transportationScheduleVO, String departureDateTimeInUtc, String arrivalDateTimeInUtc, HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			// XXX MO: for now, we don't convert departure and arrival dates to local time,
+			// the reason is, at the moment, manifests are issued at the receiving end and not the origin.
+			
+			/*LocalDateTime departureLocalDateTime = DateUtil.parseLocalDateTime(departureDateTime, 
+					LocaleUtil.fromLanguageId(ecUserInfo.getLanguage()), 
+					ZoneIdUtil.getZoneId(ecUserInfo.getZoneId()), 
+					ecUserInfo.getCalendar());
+			
+			LocalDateTime arrivalLocalDateTime = DateUtil.parseLocalDateTime(arrivalDateTime, 
+					LocaleUtil.fromLanguageId(ecUserInfo.getLanguage()), 
+					ZoneIdUtil.getZoneId(ecUserInfo.getZoneId()), 
+					ecUserInfo.getCalendar());*/
+			
+			departureDateTimeInUtc = departureDateTimeInUtc.substring(0, 13) + ":" + departureDateTimeInUtc.substring(13, departureDateTimeInUtc.length());
+			LocalDateTime ldDepartureDateTimeInUtc = LocalDateTime.parse(departureDateTimeInUtc, DateUtilV2.DATETIME_FORMATTER);
+			LocalDateTime ldArrivalDateTimeInUtc = LocalDateTime.parse(arrivalDateTimeInUtc, DateUtilV2.DATETIME_FORMATTER);
+			
+			transportationScheduleVO.setArrivalDateInUtc( Integer.parseInt( ldArrivalDateTimeInUtc.format(DATE_FORMAT) ) );
+			transportationScheduleVO.setArrivalTimeInUtc( ldArrivalDateTimeInUtc.format(TIME_FORMAT) );
+			transportationScheduleVO.setDepartureTimeInUtc( ldDepartureDateTimeInUtc.format(TIME_FORMAT) );
+			
+			transportationScheduleVO = (TransportationScheduleVO) transportationScheduleService.save(userInfo, transportationScheduleVO);
+			
+			result.put("status", "success");
+			result.put("result", transportationScheduleVO);
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/{id}", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> getTransportationSchedule(@PathVariable Long id, HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			TransportationScheduleVO transportationScheduleVO = (TransportationScheduleVO) transportationScheduleService.get(userInfo, id);
+			
+			Map<String, Object> transportationSchedule = convertTransportationScheduleVOToMap(transportationScheduleVO, userInfo, request);
+			
+			result.put("status", "success");
+			result.put("result", transportationSchedule);
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/del/{id}", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> deleteTransportationSchedule(@PathVariable Long id, HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			transportationScheduleService.delete(userInfo, id);
+			
+			result.put("status", "success");
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/delall", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> deleteTransportationSchedules(@RequestParam("id") Long[] ids, HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			transportationScheduleService.delete(userInfo, ids);
+			
+			result.put("status", "success");
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value = "/pagingSelective", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> pagingSelective(String action, Long id, HttpServletRequest request) {
+		log.debug("Entering pagingSelective(action={}, id={})", action, id);
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		changeSelected(request, "TransportationSchedule", action, id);
+		
+		result.put("status", "success");
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/preBulkEdit", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> preBulkEditTransportationSchedules(TransportationScheduleCriteria transportationScheduleCriteria, Long[] transportationScheduleIds, HttpServletRequest request) {
+		log.debug("Entering pagingSelective(transportationScheduleCriteria={}, transportationScheduleIds={})", transportationScheduleCriteria, transportationScheduleIds);
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			transportationScheduleCriteria.setIds(transportationScheduleIds);
+			
+			convertStringToDate(transportationScheduleCriteria);
+			
+			TransportationScheduleVO transportationScheduleVO = transportationScheduleService.preBulkEdit(userInfo, transportationScheduleCriteria);
+			
+			Map<String, Object> transportationSchedule = convertTransportationScheduleVOToMap(transportationScheduleVO, userInfo, request);
+			
+			result.put("status", "success");
+			result.put("result", transportationSchedule);
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/bulkEdit", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> bulkEditTransportationSchedule(TransportationScheduleCriteria transportationScheduleCriteria, 
+			Long[] transportationScheduleIds, 
+			BulkEditTransportationScheduleVO bulkEditTransportationScheduleVO, 
+			String departureDateTimeBulkEdit, 
+			String arrivalDateTimeBulkEdit, HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		try {
+			
+			convertStringToDate(transportationScheduleCriteria);
+			
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			// XXX MO: for now, we don't convert departure and arrival dates to local time,
+			// the reason is, at the moment, manifests are issued at the receiving end and not the origin.
+			
+			if ( Validator.isNotNull(arrivalDateTimeBulkEdit) ) {
+				/*LocalDateTime arrivalLocalDateTime = DateUtil.parseLocalDateTime(arrivalDateTimeBulkEdit, 
+						LocaleUtil.fromLanguageId(ecUserInfo.getLanguage()), 
+						ZoneIdUtil.getZoneId(ecUserInfo.getZoneId()), 
+						ecUserInfo.getCalendar());*/
+				
+				LocalDateTime arrivalLocalDateTime = LocalDateTime.parse( arrivalDateTimeBulkEdit, DateUtilV2.DATETIME_FORMATTER);
+				
+				bulkEditTransportationScheduleVO.setArrivalDateBulkEdit( Integer.parseInt( arrivalLocalDateTime.format(DATE_FORMAT) ) );
+				bulkEditTransportationScheduleVO.setArrivalTimeBulkEdit( arrivalLocalDateTime.toLocalTime() );
+			}
+			
+			if ( Validator.isNotNull(departureDateTimeBulkEdit) ) {
+				/*LocalDateTime departureLocalDateTime = DateUtil.parseLocalDateTime(departureDateTimeBulkEdit, 
+						LocaleUtil.fromLanguageId(ecUserInfo.getLanguage()), 
+						ZoneIdUtil.getZoneId(ecUserInfo.getZoneId()), 
+						ecUserInfo.getCalendar());*/
+				
+				LocalDateTime departureLocalDateTime = LocalDateTime.parse(departureDateTimeBulkEdit, DateUtilV2.DATETIME_FORMATTER);
+				
+				bulkEditTransportationScheduleVO.setDepartureTimeBulkEdit( departureLocalDateTime.toLocalTime() );
+			}
+			
+			transportationScheduleCriteria.setIds(transportationScheduleIds);
+			
+			transportationScheduleService.bulkEdit(userInfo, transportationScheduleCriteria, bulkEditTransportationScheduleVO); 
+			
+			result.put("status", "success");
+			//result.put("result", transportationScheduleVO);
+			
+		} catch (Exception e) {
+			proccessException(e, result);
+		}
+		
+		return result;
+	}
+	
+	@RequestMapping(value="/paging", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<List> paging(
+			@DatatablesParams DatatablesCriterias criterias, 
+			TransportationScheduleCriteria transportationScheduleCriteria, 
+			HttpServletRequest request) {
+		
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = columnDef.getName();
+		
+		if("0".equals(sortCriterion)){
+			sortCriterion = null;
+		}
+		
+		if(columnDef.getSortDirection().equals(SortDirection.DESC)){
+			sortDirection = SortDirectionEnum.Descending;
+		}
+		
+		DataSet<List> dataSet;
+		try {
+			
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			convertStringToDate(transportationScheduleCriteria);
+			
+			List<BaseVO> rows = transportationScheduleService.findByCriteria(userInfo, transportationScheduleCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+			List transportationScheduleVOList = new ArrayList<>();
+			
+			for (BaseVO baseVO : rows) {
+				TransportationScheduleVO transportationScheduleVO = (TransportationScheduleVO) baseVO;
+				
+				Map<String, Object> map = convertTransportationScheduleVOToMap(transportationScheduleVO, userInfo, request);
+				
+				transportationScheduleVOList.add(map);
+			}
+			
+			long totalRecords = transportationScheduleService.countByCriteria(userInfo, transportationScheduleCriteria);
+			dataSet = new DataSet<List>(transportationScheduleVOList, (long) transportationScheduleVOList.size(), totalRecords);
+		} catch (Exception e) {
+			log.error("error occured in transportationSchedule paging..." ,e);
+			dataSet = new DataSet<List>(new ArrayList(), 0l, 0l);
+		}
+        return DatatablesResponse.build(dataSet, criterias);
+    }
+
+	/**
+	 * 
+	 * @param criterias
+	 * @param term
+	 * @param request
+	 * @return
+	 */
+//	@RequestMapping(value = "/nodes", method = RequestMethod.GET)
+//	public @ResponseBody DatatablesResponse<BaseVO> findNodes(@DatatablesParams DatatablesCriterias criterias, String term,
+//			HttpServletRequest request) {
+//		log.trace("Entering findNodes( criterias={}, term={})", criterias, term);
+//		int firstResult = criterias.getStart();
+//		int maxResults = criterias.getLength();
+//		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+//		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+//		String sortCriterion = columnDef.getName();
+//		if (columnDef.getSortDirection().equals(SortDirection.DESC)) {
+//			sortDirection = SortDirectionEnum.Descending;
+//		}
+//		DataSet<BaseVO> dataSet = null;
+//		try {
+//			NodeCriteria criteria = new NodeCriteria();
+//			criteria.setAllNames(term);
+//			
+//			if(!hasRole("ROLE_ADMIN") && !hasRole("ROLE_MANAGER")){
+//				criteria.setActive(true);
+//			}
+//			
+//			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+//			List<BaseVO> rows = rateAndRouteServiceFacade.findNodeByCriteria(userInfo, criteria, firstResult,
+//					maxResults, sortDirection, sortCriterion);
+//			long totalRecords = rateAndRouteServiceFacade.countNodeByCriteria(userInfo, criteria);
+//			dataSet = new DataSet<BaseVO>(rows, (long) rows.size(), totalRecords);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			log.error("Error occurred while findNodes.", e);
+//			dataSet = new DataSet<BaseVO>(new ArrayList<BaseVO>(), 0l, 0l);
+//		}
+//		log.debug("Exiting findNodes()");
+//		return DatatablesResponse.build(dataSet, criterias);
+//	}
+
+	/**
+	 * 
+	 * @param nodeId
+	 * @param request
+	 * @return
+	 */
+//	@RequestMapping(value = "/node", method = RequestMethod.GET)
+//	public @ResponseBody NodeVO getNode(@RequestParam(value = "codeName") String codeName, HttpServletRequest request) {
+//		log.debug("Entering getNode( codeName={})", codeName);
+//		NodeVO node = null;
+//		try {
+//			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+//			if (Validator.isNotNull(codeName)) {
+//				node = rateAndRouteServiceFacade.findNodeByCode(userInfo, codeName);
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			log.error("Error occurred while getNode.", e);
+//		}
+//		log.debug("Exiting getNode()");
+//		return node;
+//	}
+	
+	/**
+	 * 
+	 * @param criterias
+	 * @param term
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/carriers", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<CarrierVO> findCarriers(@DatatablesParams DatatablesCriterias criterias, String term,
+			HttpServletRequest request) {
+		log.trace("Entering findCarriers( criterias={}, term={})", criterias, term);
+		
+		int firstResult = criterias.getStart();
+		int size = criterias.getLength();
+		int page = (firstResult / size) + 1;
+		DataSet<CarrierVO> dataSet = null;
+		
+		try {
+//			CarrierCriteria criteria = new CarrierCriteria();
+//			criteria.setAllNames(term);
+			
+//			if(!hasRole("ROLE_ADMIN") && !hasRole("ROLE_MANAGER")){
+//				criteria.setActive(true);
+//			}
+			
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			PageList<CarrierVO> rows = carrierManagementService.findCarriers(userInfo, term, page, size);
+			
+			dataSet = new DataSet<CarrierVO>(rows.getElements(), (long) rows.getElements().size(), (long)rows.getTotal());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Error occurred while findCarriers.", e);
+			dataSet = new DataSet<CarrierVO>(new ArrayList<CarrierVO>(), 0l, 0l);
+		}
+		log.debug("Exiting findCarriers()");
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	/**
+	 * 
+	 * @param code
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/carrier", method = RequestMethod.GET)
+	public @ResponseBody CarrierVO getCarrier(@RequestParam(value = "code") String code, HttpServletRequest request) {
+		log.debug("Entering getCarrier( code={})", code);
+		CarrierVO carrier = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			if (Validator.isNotNull(code)) {
+				carrier = carrierManagementService.findCarrierByCode(userInfo, code);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Error occurred while getCarrier.", e);
+		}
+		log.debug("Exiting getCarrier()");
+		return carrier;
+	}
+	
+	/**
+	 * 
+	 * @param criterias
+	 * @param term
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/routes", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<RouteVO> findTransportations(@DatatablesParams DatatablesCriterias criterias, String carrierCode, String term,
+			HttpServletRequest request) {
+		log.trace("Entering findTransportations( criterias={}, carrierCode={}, term={})", criterias, carrierCode, term);
+
+		int firstResult = criterias.getStart();
+		int size = criterias.getLength();
+		int page = (firstResult / size) + 1;
+		DataSet<RouteVO> dataSet = null;
+		try {
+			if(Validator.isNull(carrierCode)){
+				carrierCode = "UNAVAILABLE_CARRIER_CODE";
+			}
+			
+//			
+//			TransportationCriteria criteria = new TransportationCriteria();
+//			criteria.setTransportationNumber(term);
+//			criteria.setCarrierCode(carrierCode);
+//			
+//			if(!hasRole("ROLE_ADMIN") && !hasRole("ROLE_MANAGER")){
+//				criteria.setActive(true);
+//			}
+			
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			PageList<RouteVO> rows = routeManagementService.findRoutes(userInfo, term, page, size);
+			
+			
+			for (RouteVO routeVO : rows.getElements()) {
+				String fromNodeCode = routeVO.getFromNode().getCodeName();
+				String toNodeCode = routeVO.getToNode().getCodeName();
+				
+				NodeVO fromNodeVO = routeManagementService.getNodeByCode(userInfo, fromNodeCode);
+				NodeVO toNodeVO = routeManagementService.getNodeByCode(userInfo, toNodeCode);
+				
+				routeVO.setFromNode(fromNodeVO);
+				routeVO.setToNode(toNodeVO);
+			}
+			
+			
+			long totalRecords = rows.getTotal();
+			dataSet = new DataSet<RouteVO>(rows.getElements(), (long) rows.getElements().size(), totalRecords);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Error occurred while findCarriers.", e);
+			dataSet = new DataSet<RouteVO>(new ArrayList<RouteVO>(), 0l, 0l);
+		}
+		log.debug("Exiting findCarriers()");
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/route", method = RequestMethod.GET)
+	public @ResponseBody RouteVO getRoute(@RequestParam(value = "id") Long id, HttpServletRequest request) {
+		log.debug("Entering getTransportation( id={})", id);
+		RouteVO routeVO = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			routeVO = (RouteVO) routeManagementService.getRoute(userInfo, id);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Error occurred while getRoute.", e);
+		}
+		log.debug("Exiting getTransportation()");
+		return routeVO;
+	}
+	
+
+	@RequestMapping(value = "/route/carrierroutenumber", method = RequestMethod.GET)
+	public @ResponseBody RouteVO getRouteByCarrierRouteNumber(
+			@RequestParam(value = "carrierRouteNumber") String carrierRouteNumber, 
+			HttpServletRequest request) {
+		
+		//LOG
+		log.debug("Entering  getRouteByCarrierRouteNumber( id={})", carrierRouteNumber);
+		RouteVO routeVO = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			routeVO = (RouteVO) routeManagementService.getRouteByCarrierRouteNumber(userInfo, carrierRouteNumber);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Error occurred while  getRouteByCarrierRouteNumber.", e);
+		}
+		return routeVO;
+	}
+	
+	/**
+	 * 
+	 * @param criterias
+	 * @param term
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/vehicles", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<VehicleVO> findVehicles(@DatatablesParams DatatablesCriterias criterias, String carrierCode, String term,
+			HttpServletRequest request) {
+		log.trace("Entering findVehicles( criterias={}, carrierCode={}, term={})", criterias, carrierCode, term);
+		int firstResult = criterias.getStart();
+		int size = criterias.getLength();
+		int page = (firstResult / size) + 1;
+		DataSet<VehicleVO> dataSet = null;
+		try {
+			if(Validator.isNull(carrierCode)){
+				carrierCode = "UNAVAILABLE_CARRIER_CODE";
+			}
+			
+			
+//			VehicleCriteria criteria = new VehicleCriteria();
+//			criteria.setCarrierRegister(term);
+//			criteria.setCarrierCode(carrierCode);
+//			
+//			if(!hasRole("ROLE_ADMIN") && !hasRole("ROLE_MANAGER")){
+//				criteria.setActive(true);
+//			}
+			
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			PageList<VehicleVO> rows =  logesticManagementService.findVehicles(userInfo, term, page, size);
+			long totalRecords = rows.getTotal();
+			
+			dataSet = new DataSet<VehicleVO>(rows.getElements(), (long) rows.getElements().size(), totalRecords);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Error occurred while findCarriers.", e);
+			dataSet = new DataSet<VehicleVO>(new ArrayList<VehicleVO>(), 0l, 0l);
+		}
+		log.debug("Exiting findCarriers()");
+		return DatatablesResponse.build(dataSet, criterias);
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/vehicle", method = RequestMethod.GET)
+	public @ResponseBody VehicleVO getVehicle(@RequestParam(value = "id") Long id, HttpServletRequest request) {
+		log.debug("Entering getVehicle( id={})", id);
+		VehicleVO vehicle = null;
+		try {
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			vehicle = (VehicleVO) logesticManagementService.getVehicle(userInfo, id);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Error occurred while getVehicle.", e);
+		}
+		log.debug("Exiting getVehicle()");
+		return vehicle;
+	}
+	
+	private Map<String, Object> convertTransportationScheduleVOToMap(TransportationScheduleVO transportationScheduleVO, UserInfo ecUserInfo, HttpServletRequest request) throws Exception{
+		Map<String, NodeVO> nodesCodeNameMap = (Map<String, NodeVO>) request.getSession().getServletContext().getAttribute("nodesCodeNameMap");
+		Map<String, CarrierVO> carriersCodeMap = (Map<String, CarrierVO>) request.getSession().getServletContext().getAttribute("carriersCodeMap");
+		
+		Map<String, Object> transportationSchedule = new HashMap<>();
+		Map<String, Object> transportation = new HashMap<>();
+		Map<String, Object> vehicle = new HashMap<>();
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+//		TransportationVO transportationVO = transportationScheduleVO.getTransportation();
+		String carrierRouteNumber = transportationScheduleVO.getCarrierRouteNumber();
+		RouteVO routeVO = routeManagementService.getRouteByCarrierRouteNumber(userInfo, carrierRouteNumber);
+		String carrierCode = routeVO.getCarrierCode();
+		NodeVO fromNodeVO = routeVO.getFromNode();
+		NodeVO toNodeVO = routeVO.getToNode();
+		
+		String carrierName = null;
+		if(Validator.isNotNull(carrierCode)){
+			CarrierVO carrierVO = carriersCodeMap.get(routeVO.getCarrierCode());
+			if(carrierVO == null){
+				carrierVO = carrierManagementService.findCarrierByCode(ecUserInfo, carrierCode);
+			}
+			
+			if(carrierVO != null){
+				carrierName = carrierVO.getNameFa();
+			}
+		}
+		
+		String fromNodeName = null;
+		if(Validator.isNotNull(fromNodeVO.getCodeName())){
+			NodeVO nodeVO = nodesCodeNameMap.get(fromNodeVO.getCodeName());
+			if(nodeVO == null){
+				nodeVO = routeManagementService.getNodeByCode(ecUserInfo, fromNodeVO.getCodeName());
+			}
+			
+			if(nodeVO != null){
+				fromNodeName = nodeVO.getName();
+			}
+		}
+		
+		String toNodeName = null;
+		if(Validator.isNotNull(toNodeVO.getCodeName())){
+			NodeVO nodeVO = nodesCodeNameMap.get(toNodeVO.getCodeName());
+			if(nodeVO == null){
+				nodeVO = routeManagementService.getNodeByCode(ecUserInfo, toNodeVO.getCodeName());
+			}
+			
+			if(nodeVO != null){
+				toNodeName = nodeVO.getName();
+			}
+		}
+		
+		transportationSchedule.put("id", transportationScheduleVO.getId());
+		transportationSchedule.put("updateDate", transportationScheduleVO.getUpdateDate());
+		transportationSchedule.put("createDate", transportationScheduleVO.getCreateDate());
+		transportationSchedule.put("version", transportationScheduleVO.getVersion());
+		transportationSchedule.put("status", transportationScheduleVO.getStatus());
+		transportationSchedule.put("scheduled", transportationScheduleVO.isScheduled());
+		transportationSchedule.put("remarks", transportationScheduleVO.getRemarks());
+		transportationSchedule.put("capacityDeterminant", transportationScheduleVO.getCapacityDeterminant());
+		transportationSchedule.put("reservableWeight", transportationScheduleVO.getReservableWeight());
+		transportationSchedule.put("totalWeight", transportationScheduleVO.getTotalWeight());
+		transportationSchedule.put("uldInfo", transportationScheduleVO.getUldInfo());
+		transportationSchedule.put("departureInUtc", transportationScheduleVO.getDepartureInUtc());
+		transportationSchedule.put("departureInUtc", transportationScheduleVO.getDepartureInUtc());
+		transportationSchedule.put("carrierRouteNumber", transportationScheduleVO.getCarrierRouteNumber());
+		
+		// departureDate in local time of origin
+		Integer departureDateInOriginLocal = transportationScheduleVO.getDepartureDateInOriginLocal();
+		if (departureDateInOriginLocal != null) {
+			transportationSchedule.put("departureDateInOriginLocal", 
+					DateUtilV2.parseDateOnlyAsLocalDate(
+							DateUtilV2.convertIntegerDateToString(departureDateInOriginLocal), 
+							CalendarTypeEnum.Gregorian));
+		} else {
+			transportationSchedule.put("departureDateInOriginLocal", "-");
+		}
+		
+		// departureDate in UTC
+		transportationSchedule.put(
+				"departureDateInUtc", 
+				DateUtilV2.parseDateOnlyAsLocalDate(
+						DateUtilV2.convertIntegerDateToString(transportationScheduleVO.getDepartureDateInUtc()), 
+						CalendarTypeEnum.Gregorian));
+		
+		// departureTime in local time of origin
+		transportationSchedule.put("departureTimeInOriginLocal", transportationScheduleVO.getDepartureTimeInOriginLocal());
+		
+		// departureDate in UTC
+		transportationSchedule.put("departureTimeInUtc", transportationScheduleVO.getDepartureTimeInUtc());
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+		String arrivalDateTimeInUtc = transportationScheduleVO.getArrivalInUtc() != null ? transportationScheduleVO.getArrivalInUtc().format(formatter) : StringPool.BLANK;
+		
+		transportationSchedule.put("departureDateLocal", DateUtil.getDate(transportationScheduleVO.getDepartureInUtc(), LocaleUtil.fromLanguageId(ecUserInfo.getLocale()), ecUserInfo.getCalendar(), ZoneIdUtil.getZoneId(ecUserInfo.getZoneId())));
+		transportationSchedule.put("arrivalDateTimeInUtc", arrivalDateTimeInUtc);
+		transportationSchedule.put("arrivalDateInUtc", transportationScheduleVO.getArrivalDateInUtc());
+		transportationSchedule.put("arrivalTimeInUtc", transportationScheduleVO.getArrivalTimeInUtc());
+		
+		// arrivalDate in local time of destination
+		Integer arrivalDateInDestinationLocal = transportationScheduleVO.getArrivalDateInDestinationLocal();
+		if (arrivalDateInDestinationLocal != null) {
+			transportationSchedule.put("arrivalDateInDestinationLocal", 
+					DateUtilV2.parseDateOnlyAsLocalDate(
+							DateUtilV2.convertIntegerDateToString(arrivalDateInDestinationLocal), 
+							CalendarTypeEnum.Gregorian));
+		} else {
+			transportationSchedule.put("arrivalDateInDestinationLocal", "-");
+		}
+		
+		// arrivalDate in UTC
+		transportationSchedule.put(
+				"arrivalDateInUtc",
+				DateUtilV2.parseDateOnlyAsLocalDate(
+						DateUtilV2.convertIntegerDateToString(transportationScheduleVO.getArrivalDateInUtc()), 
+						CalendarTypeEnum.Gregorian) );
+		
+		// arrivalTime in local time of destination
+		transportationSchedule.put("arrivalTimeInDestinationLocal", transportationScheduleVO.getArrivalTimeInDestinationLocal());
+		
+		// arrivalTime in UTC
+		transportationSchedule.put("arrivalTimeInUtc", transportationScheduleVO.getArrivalTimeInUtc());
+		
+		transportationSchedule.put("arrivalDateLocal", getLocalDate(transportationScheduleVO.getArrivalInUtc(), ecUserInfo));
+		transportationSchedule.put("arrivalDateTimeLocal", getLocalDate(transportationScheduleVO.getArrivalInUtc(), ecUserInfo));
+		
+		transportation.put("id", routeVO.getId());
+		transportation.put("carrierCode", carrierCode);
+		transportation.put("carrierName", carrierName);
+		transportation.put("fromNodeCode", routeVO.getFromNode().getCodeName());
+		transportation.put("fromNodeName", fromNodeName);
+		transportation.put("toNodeCode", routeVO.getToNode().getCodeName());
+		transportation.put("toNodeName", toNodeName);
+//		transportation.put("carrierRouteNumber", routeVO.getCarrierRouteNumber());
+//		transportation.put("duration", routeVO.getDuration());
+//		transportation.put("weight", routeVO.getWeight());
+		transportationSchedule.put("transportation", transportation);
+		
+//		VehicleVO vehicleVO = transportationScheduleVO.getVehicle();
+		Long vehicleId = transportationScheduleVO.getVehicleId();
+		VehicleVO vehicleVO = logesticManagementService.getVehicle(userInfo, vehicleId);
+		
+		if(vehicleVO != null){
+			vehicle.put("id", vehicleVO.getId());
+			vehicle.put("carrierRegister", vehicleVO.getCarrierRegister());
+			vehicle.put("manufacturer", vehicleVO.getManufacturer());
+			vehicle.put("manufacturerModel", vehicleVO.getManufacturerModel());
+			vehicle.put("type", vehicleVO.getType());
+			vehicle.put("uldInfo", vehicleVO.getUldInfo());
+			vehicle.put("volume", vehicleVO.getVolume());
+			vehicle.put("weight", vehicleVO.getWeight());
+			vehicle.put("cargoOnly", vehicleVO.getCargoOnly());
+			transportationSchedule.put("vehicle", vehicle);
+		}
+		
+		return transportationSchedule;
+	}
+	
+	private void convertStringToDate(TransportationScheduleCriteria transportationScheduleCriteria){
+		String departureInUtcStr = transportationScheduleCriteria.getDepartureInUtc();
+		if (Validator.isNotNull(departureInUtcStr)) {
+			LocalDateTime departureInUtc = DateUtilV2.parseDateTimeAsLocalDateTime(departureInUtcStr, CalendarTypeEnum.Gregorian);
+			transportationScheduleCriteria.setDepartureDateInUtc( Integer.parseInt( departureInUtc.format(DATE_FORMAT) ) );
+		}
+		
+		String departureFromInUtcStr = transportationScheduleCriteria.getDepartureDateFromInUtc();
+		if (Validator.isNotNull(departureFromInUtcStr)) {
+			LocalDate departureFromInUtc = DateUtilV2.parseDateOnlyAsLocalDate(departureFromInUtcStr, CalendarTypeEnum.Gregorian) ;
+			transportationScheduleCriteria.setIntDepartureDateFromInUtc( Integer.parseInt( departureFromInUtc.format(DATE_FORMAT) ) );
+		}
+		
+		String departureToInUtcStr = transportationScheduleCriteria.getDepartureDateToInUtc();
+		if (Validator.isNotNull(departureToInUtcStr)) {
+			LocalDate departureToInUtc = DateUtilV2.parseDateOnlyAsLocalDate(departureToInUtcStr, CalendarTypeEnum.Gregorian);
+			transportationScheduleCriteria.setIntDepartureDateToInUtc( Integer.parseInt( departureToInUtc.format(DATE_FORMAT) ) );
+		}
+		
+		String arrivalInUtcStr = transportationScheduleCriteria.getArrivalInUtc();
+		if (Validator.isNotNull(arrivalInUtcStr)) {
+			LocalDateTime arrivalInUtc = DateUtilV2.parseDateTimeAsLocalDateTime(arrivalInUtcStr, CalendarTypeEnum.Gregorian);
+			transportationScheduleCriteria.setArrivalDateInUtc( Integer.parseInt( arrivalInUtc.format(DATE_FORMAT) ) );
+		}
+		
+		String arrivalFromInUtcStr = transportationScheduleCriteria.getArrivalDateFromInUtc();
+		if (Validator.isNotNull(arrivalFromInUtcStr)) {
+			LocalDate arrivalFromInUtc = DateUtilV2.parseDateOnlyAsLocalDate(arrivalFromInUtcStr, CalendarTypeEnum.Gregorian);
+			transportationScheduleCriteria.setIntArrivalDateFromInUtc( Integer.parseInt( arrivalFromInUtc.format(DATE_FORMAT) ) );
+		}
+		
+		String arrivalToInUtcStr = transportationScheduleCriteria.getArrivalDateToInUtc();
+		if (Validator.isNotNull(arrivalToInUtcStr)) {
+			LocalDate arrivalToInUtc = DateUtilV2.parseDateOnlyAsLocalDate(arrivalToInUtcStr, CalendarTypeEnum.Gregorian);
+			transportationScheduleCriteria.setIntArrivalDateToInUtc( Integer.parseInt( arrivalToInUtc.format(DATE_FORMAT) ) );
+		}
+	}
+}

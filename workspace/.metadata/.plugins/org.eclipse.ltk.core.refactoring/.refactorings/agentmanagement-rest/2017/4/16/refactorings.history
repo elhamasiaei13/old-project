@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;GlobalRestControllerAdvice.java&apos; to &apos;transportationManagement-rest/src/main/java/com.parvanpajooh.transportationmanagement.rest&apos;&#x0A;- Original project: &apos;agentmanagement-rest&apos;&#x0A;- Destination element: &apos;transportationManagement-rest/src/main/java/com.parvanpajooh.transportationmanagement.rest&apos;&#x0A;- Original element: &apos;com.parvanpajooh.agentmanagement.rest.GlobalRestControllerAdvice.java&apos;" description="Copy compilation unit" destination="=transportationManagement-rest/src\/main\/java&lt;com.parvanpajooh.transportationmanagement.rest" element1="/src\/main\/java&lt;com.parvanpajooh.agentmanagement.rest{GlobalRestControllerAdvice.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1492847847371" units="1" version="1.0"/>
+</session>

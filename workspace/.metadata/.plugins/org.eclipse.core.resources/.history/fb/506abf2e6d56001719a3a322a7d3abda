@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	layout:decorator="filter-layout" ddl:bundle-includes="bootstrapValidator,select2">
+
+	<head>
+		<title>Person List</title>
+	</head>
+
+	<body th:with="rightMenu='persons'">
+		<section layout:fragment="top-header" class="fixed-header">
+			<div class="ui-header-image pull-left">
+            	<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/personmanagement-web/resources/images/contacts.png" style="width: 48px; height: 48px;" />
+           	</div>
+            <div class="ui-header-title">
+                <div class="split-left">
+                    <h3>
+                        <small>Search</small>
+                    </h3>
+                    <h3>Persons</h3>
+                </div>
+                <div class="split-right">
+					<a th:href="@{/person/new}" class="btn btn-success" >
+						<i class="fa fa-plus">&nbsp;&nbsp;</i><span th:text="#{create}">جدید</span>
+					</a>
+					<button onclick="index(this);" class="btn bg-navy" sec:authorize="hasAnyRole('ROLE_LEDGER','ROLE_ADMIN')">
+						<i id="icon" class="fa fa-cog">&nbsp;&nbsp;</i><span>Index</span>
+					</button>
+					<th:block th:include="search-fragment :: search-button" />
+                </div>
+            </div>
+		</section>
+		
+		<!-- Main content -->
+		<section class="content" layout:fragment="content">
+			<div id="wrapper" class="toggled">
+    			<th:block th:include="search-fragment :: search-filters(Person)" />
+				<div class="box">
+					<div class="box-body table-responsive">
+						<dy:table entity="Person" table="list" customObjectActions="true" customSearch="true"/>
+					</div>
+				</div>
+    		</div>
+			
+			<div class="modal fade" id="deletePersonModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+		        <div class="modal-dialog">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h4 class="modal-title" th:text="#{person.delete}">حذف</h4>
+		                </div>
+		                <div class="modal-body">
+		                    <dy:form entity="Person" form="delete" type="delete"/>
+		                </div>
+		                <div class="modal-footer">
+		                    <button type="button" class="btn btn-primary" th:text="#{button.delete}" id="deletePersonBtn">Delete</button>
+		                    <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.cancel}">Close</button>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+		    
+		</section>
+		
+		<th:block layout:fragment="javascripts">
+			<script>
+			var titleView = '<span th:text="#{person.view}" th:remove="tag"></span>';
+			var titleModifyReal = '<span th:text="#{person.modifyReal}" th:remove="tag"></span>';
+			var titleModifyLegal = '<span th:text="#{person.modifyLegal}" th:remove="tag"></span>';
+			var titleDelete = '<span th:text="#{person.delete}" th:remove="tag"></span>';
+			var titleModify = '<span th:text="#{person.modify}" th:remove="tag"></span>';
+			
+		    function getPersonExtraParams() {
+		    	return {
+		    	    "data" : function(data){
+					    customPush(data, 'firstName', $('#firstNameFilter').val());
+					    customPush(data, 'lastName', $('#lastNameFilter').val());
+					    customPush(data, 'nationalId', $('#nationalIdFilter').val());
+					    customPush(data, 'active', $('#activeFilter').val());
+					    customPush(data, 'type', $('#typeFilter').val());
+					    customPush(data, 'organization.id', $('#organizationidFilter').val());
+					    customPush(data, 'contactInfo.cityCode', $('#primaryContactInfocityCodeFilter').val());
+					    customPush(data, 'canonicalSearchName', $('#canonicalSearchNameFilter').val());
+		    	    }
+		    	};
+			}
+		    
+		    function personRowActions(data, type, full) {
+				var d = '<div style="white-space: nowrap;">';
+				d += '<a class="btn btn-xs btn-info" href="/personmanagement-web/person/view/'+full.id+'" data-toggle="tooltip" data-placement="top" title="'+titleView+'"><i class="fa fa-eye"></i></a> ';
+				d += '<a class="btn btn-xs btn-primary" href="/personmanagement-web/person/edit/'+full.id+'" data-toggle="tooltip" data-placement="top" title="'+titleModify+'"><i class="fa fa-pencil"></i></a> ';
+				d += '<a class="btn btn-xs btn-danger" data-toggle="tooltip" data-placement="top" title="'+titleDelete+'" href="javascript:;" onclick="deletePerson('+full.id+')"><i class="fa fa-times"></i></a> ';
+				d += '</div>'
+				return d;
+			}
+		    
+		    function geoEntityInitSelection(element, callback) {
+	    		var id = $(element).val();
+	    		$.ajax({
+	    			url : '/personmanagement-web/person/cities/' + id, 
+	    			dataType: 'json'
+	    		}).done(function(data) {callback(data);});
+	    	}
+
+	    	function geoEntityFormat(aaData) {
+	    		var res = '<strong>'+ aaData.nameFa +'</strong>';
+	    		var resAdditional = '';
+	    		if(aaData.provinceNameFa){
+	    			resAdditional = aaData.provinceNameFa + ' , ';
+	    			
+	    			if(aaData.countryNameFa){
+	    				resAdditional = aaData.countryNameFa + ' , ' + resAdditional;
+	    			}
+	    			
+	    			res = '<span class="text-muted">' + resAdditional + '</span>' + res;
+	    		}
+	    		return res; 
+	    	}
+
+	    	function fullNameRender(entity, type, full){
+		    	if('en_US' === userLocale){
+			    	return full.fullNameEn;
+			    } else {
+			    	return full.fullNameLocal;
+				}
+			}
+
+	    	function contactCountryRender(entity, type, full){
+		    	if(full.primaryContactInfo != null){
+					return full.primaryContactInfo.countryNameFa;
+		    	}
+			}
+
+	    	function contactProvinceRender(entity, type, full){
+	    		if(full.primaryContactInfo != null){
+					return full.primaryContactInfo.provinceNameFa;
+	    		}
+			}
+
+	    	function contactCityRender(entity, type, full){
+	    		if(full.primaryContactInfo != null){
+					return full.primaryContactInfo.cityNameFa;
+	    		}
+			}
+			
+	    	function organizationInitSelection(element, callback) {
+	    		var id = $(element).val();
+	    		$.ajax({
+	    			url : '/personmanagement-web/organization/' + id, 
+	    			dataType: 'json'
+	    		}).done( function(data) { callback(data.result); } );
+	    	}
+	    	
+	    	function organizationNameRender(entity, type, full){
+				return full.organization.nameLocal;
+			}
+			
+		    function typeRender(entity, type, full){
+	    		if (entity == 'REAL') {
+					return '<div class="text-center"><span class="label bg-navy" th:text="#{real}"></span></div>';
+				}else if (entity == 'LEGAL') {
+					return '<div class="text-center"><span class="label bg-purple" th:text="#{legal}"></span></div>';
+				}
+			}
+
+			function index(elem) {
+				var $btn = $(elem);
+				$btn.attr('disabled', true);
+				$btn.find('i').addClass('fa-spin');
+				$.post('/personmanagement-web/person/index').done(function(data) {
+					if(data.status == 'success') {
+						showTopleftGrowl('success', 'Index', 'Index Done');
+					} else {
+						showTopleftGrowl('fail', 'Index', 'Index Failed');
+						console.debug(data.status);
+					}
+					$btn.attr('disabled', false);
+					$btn.find('i').removeClass('fa-spin');
+				}).fail(function( jqXHR, textStatus, errorThrown ){failAjax(jqXHR, textStatus, errorThrown, elem)});
+				return false;
+			}
+			/*<![CDATA[*/
+	    	/*]]>*/
+    		</script>
+		</th:block>
+	</body>
+</html>

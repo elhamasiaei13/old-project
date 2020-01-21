@@ -1,0 +1,5 @@
+package com.parvanpajooh.sample.model.criteria;
+
+public class SampleCriteria {
+
+}

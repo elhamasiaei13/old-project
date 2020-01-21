@@ -1,0 +1,29 @@
+package com.parvanpajooh.sample.dao;
+
+import java.util.List;
+
+import com.parvanpajooh.common.exceptions.ParvanDaoException;
+import com.parvanpajooh.ecourier.dao.GenericDao;
+import com.parvanpajooh.sample.model.Group;
+
+/**
+ * 
+ * @author ali
+ *
+ */
+public interface GroupDao extends GenericDao<Group, Long> {
+	/* (non-Javadoc)
+	 * @see com.parvanpajooh.ecourier.dao.GenericDao#findAll()
+	 */
+	@Override
+	public List<Group> findAll() throws ParvanDaoException;
+	
+	
+	/* (non-Javadoc)
+	 * @see com.parvanpajooh.ecourier.dao.GenericDao#save(java.lang.Object)
+	 */
+	
+	public void saveUser(Group user) throws ParvanDaoException;
+	
+
+}

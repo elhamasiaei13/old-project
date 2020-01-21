@@ -1,0 +1,38 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.model.criteria;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+
+/**
+ * @author Mohammad
+ *
+ */
+public class PackingItemCriteria extends BaseCriteria{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1398889630806340120L;
+	
+    private String waybillNumber;
+
+	/**
+	 * @return the waybillNumber
+	 */
+	public String getWaybillNumber() {
+		return waybillNumber;
+	}
+
+	/**
+	 * @param waybillNumber the waybillNumber to set
+	 */
+	public void setWaybillNumber(String waybillNumber) {
+		this.waybillNumber = waybillNumber;
+	}
+    
+    
+	
+	
+}

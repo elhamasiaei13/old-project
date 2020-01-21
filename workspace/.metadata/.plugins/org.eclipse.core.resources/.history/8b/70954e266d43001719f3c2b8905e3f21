@@ -1,0 +1,404 @@
+/**
+ * 
+ */
+package com.parvanpajooh.siteservices.dao.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.routemanagement.dao.NodeDao;
+import com.parvanpajooh.routemanagement.model.Node;
+import com.parvanpajooh.routemanagement.model.Node_;
+import com.parvanpajooh.routemanagement.model.Zone;
+import com.parvanpajooh.routemanagement.model.Zone_;
+import com.parvanpajooh.routemanagement.model.criteria.NodeCriteria;
+import com.parvanpajooh.routemanagement.model.enums.FreightNodeType;
+import com.parvanpajooh.routemanagement.model.vo.ZoneVO;
+
+/**
+ * @author ali
+ * @author Mohammad
+ * @author mehrdad
+ *
+ */
+public class NodeDaoJpa extends GenericDaoJpa<Node, Long> implements NodeDao {
+
+	/**
+	 * Entity manager, injected by Spring using @PersistenceContext annotation
+	 * on setEntityManager()
+	 */
+	@PersistenceContext(unitName = PERSISTENCE_UNIT_NAME)
+	private EntityManager entityManager;
+	
+	public NodeDaoJpa() {
+		super(Node.class);
+	}
+	
+	@Override
+	protected List<Predicate> buildPredicateList(
+			BaseCriteria cri, 
+			CriteriaBuilder builder, 
+			Metamodel metamodel, 
+			Root<Node> root, 
+			@SuppressWarnings("rawtypes") Map<String, Join> joins) throws ParvanException {
+
+		//LOG
+    	log.debug("Entering buildPredicateList( ... )");
+    	
+    	NodeCriteria nodeCriteria = ( NodeCriteria) cri;
+    	
+    	List<Predicate> predicateList = new ArrayList<Predicate>();
+    	
+    	String codeName = nodeCriteria.getCodeName();
+    	String name = nodeCriteria.getName();
+    	String otherNames = nodeCriteria.getOtherNames();
+    	String allNames = nodeCriteria.getAllNames();
+    	FreightNodeType[] freightNodeTypes = nodeCriteria.getFreightType();
+    	Boolean active = nodeCriteria.getActive();
+		//Boolean hasAgent = nodeCriteria.getHasAgent();
+    	ZoneVO zone = nodeCriteria.getZone();
+//    	GeoEntityVO geoEntity = nodeCriteria.getGeoEntity();
+    	
+    	if(Validator.isNotNull( codeName )){
+    		Predicate predicate = builder.like(root.<String>get(Node_.codeName),"%"+ codeName + "%");
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull( name )){
+    		Predicate predicate = builder.like(root.<String>get(Node_.name),"%"+ name + "%");
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull( otherNames )){
+    		Predicate predicate = builder.like(root.<String>get(Node_.otherNames),"%"+ otherNames + "%");
+    		predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull( allNames )){
+    		
+    		Predicate predicate = builder.or(
+    				builder.like(root.<String>get(Node_.codeName), "%" + allNames + "%"),
+    				builder.like(root.<String>get(Node_.name), "%" + allNames + "%"),
+    				builder.like(root.<String>get(Node_.otherNames), "%" + allNames + "%"));
+			
+			predicateList.add(predicate);
+    	}
+    	
+    	if(Validator.isNotNull( active )){
+    		Predicate predicate = builder.equal(root.<Boolean>get(Node_.active), active);
+    		predicateList.add(predicate);
+    	}
+    	
+    	
+    	if( Validator.isNotNull(freightNodeTypes) ) {
+    		
+    		List<Predicate> orPredicate = new ArrayList<Predicate>();
+    		
+    		for( FreightNodeType thisFreightNodeType : freightNodeTypes ) {
+    			orPredicate.add(builder.equal(root.<FreightNodeType>get(Node_.freightType), thisFreightNodeType));
+    		}
+    		
+    		Predicate predicate = builder.or(orPredicate.toArray(new Predicate[orPredicate.size()]));
+			predicateList.add(predicate);
+    		
+    	}
+    	
+    	if(Validator.isNotNull(zone)){
+    		Join<Node, Zone> join = root.join(Node_.zone, JoinType.LEFT);
+    		
+    		joins.put("zone", join);
+			
+			if(Validator.isNotNull( zone.getId() )){
+				Predicate predicate = builder.equal(join.<Long>get(Zone_.id), zone.getId());
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull( zone.getName() )){
+				Predicate predicate = builder.equal(join.<String>get(Zone_.name), zone.getName());
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull( zone.getCodeName() )){
+				Predicate predicate = builder.equal(join.<String>get(Zone_.codeName), zone.getCodeName());
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull( zone.getActive() )){
+				Predicate predicate = builder.equal(join.<Boolean>get(Zone_.active), zone.getActive());
+				predicateList.add(predicate);
+			}
+    	}
+    	
+//    	if(Validator.isNotNull(geoEntity)){
+//    		Join<Node, GeoEntity> geoEntityJoin = root.join(Node_.geoEntity, JoinType.LEFT);
+//    		
+//    		joins.put("geoEntity", geoEntityJoin);
+    		
+//    		if(Validator.isNotNull( geoEntity.getId() )){
+//    			Predicate predicate = builder.equal(geoEntityJoin.<Long>get(GeoEntity_.id), geoEntity.getId());
+//    			predicateList.add(predicate);
+//    		}
+//    		
+//    		if(Validator.isNotNull( geoEntity.getNameFa() )){
+//    			Predicate predicate = builder.equal(geoEntityJoin.<String>get(GeoEntity_.nameFa), geoEntity.getNameFa());
+//    			predicateList.add(predicate);
+//    		}
+//    		
+//    		if(Validator.isNotNull( geoEntity.getNameEn() )){
+//    			Predicate predicate = builder.equal(geoEntityJoin.<String>get(GeoEntity_.nameEn), geoEntity.getNameEn());
+//    			predicateList.add(predicate);
+//    		}
+//    		
+//    		if(Validator.isNotNull( geoEntity.getNameOther() )){
+//    			Predicate predicate = builder.equal(geoEntityJoin.<String>get(GeoEntity_.nameOther), geoEntity.getNameOther());
+//    			predicateList.add(predicate);
+//    		}
+//    		
+//    		if(Validator.isNotNull( geoEntity.getCode() )){
+//    			Predicate predicate = builder.equal(geoEntityJoin.<String>get(GeoEntity_.code), geoEntity.getCode());
+//    			predicateList.add(predicate);
+//    		}
+    		
+//    		if(Validator.isNotNull(geoEntity.getParent())){
+//    			
+//    			Join<GeoEntity, GeoEntity> joinByParentGeoEntity = geoEntityJoin.join(GeoEntity_.parent, JoinType.LEFT);
+//    			
+//    			
+//    			GeoEntityVO parentGeoEntity = geoEntity.getParent();
+//    			Long parentGeoEntityId = parentGeoEntity.getId();
+//    			String parentGeoEntityShortCode = parentGeoEntity.getShortCode();
+//    			
+//    			if(Validator.isNotNull(parentGeoEntityId)){
+//    				Predicate predicate = builder.equal(joinByParentGeoEntity.<Long>get(GeoEntity_.id), parentGeoEntityId);
+//    				predicateList.add(predicate);
+//    			}
+//    			
+//    			if(Validator.isNotNull(parentGeoEntityId)){
+//    				Predicate predicate = builder.equal(joinByParentGeoEntity.<String>get(GeoEntity_.shortCode), parentGeoEntityShortCode);   				
+//    				predicateList.add(predicate);
+//    			}
+//    		}
+    		
+//    		if(Validator.isNotNull( geoEntity.getType() )){
+//    			Join<GeoEntity, GeoType> geoEntityTypeJoin = geoEntityJoin.join(GeoEntity_.type, JoinType.LEFT);
+//    			
+//    			joins.put("type", geoEntityTypeJoin);
+//    			
+//    			if(Validator.isNotNull( geoEntity.getType().getId() )){
+//        			Predicate predicate = builder.equal(geoEntityTypeJoin.<Long>get(GeoType_.id), geoEntity.getType().getId());
+//        			predicateList.add(predicate);
+//        		}
+//        		
+//        		if(Validator.isNotNull( geoEntity.getType().getNameFa() )){
+//        			Predicate predicate = builder.equal(geoEntityTypeJoin.<String>get(GeoType_.nameFa), geoEntity.getType().getNameFa());
+//        			predicateList.add(predicate);
+//        		}
+//        		
+//        		if(Validator.isNotNull( geoEntity.getType().getNameEn() )){
+//        			Predicate predicate = builder.equal(geoEntityTypeJoin.<String>get(GeoType_.nameEn), geoEntity.getType().getNameEn());
+//        			predicateList.add(predicate);
+//        		}
+//        		
+//        		if(Validator.isNotNull( geoEntity.getType().getCode() )){
+//        			Predicate predicate = builder.equal(geoEntityTypeJoin.<String>get(GeoType_.code), geoEntity.getType().getCode());
+//        			predicateList.add(predicate);
+//        		}
+//    		}
+//    	}
+    	
+    	/*if(Validator.isNotNull( hasAgent ) || Validator.isNotNull( nodeCriteria.getAgent() )){
+			Join<Node, Agent> join = root.join(Node_.agent, JoinType.LEFT);
+			
+			joins.put("agent", join);
+			
+			if(Validator.isNotNull( hasAgent )){
+				if(hasAgent){
+					Predicate predicate = builder.isNotNull(join.<Long>get(Agent_.id));
+					predicateList.add(predicate);
+					
+				}
+				else {
+					Predicate predicate = builder.isNull(join.<Long>get(Agent_.id));
+					predicateList.add(predicate);
+					
+				}
+			}
+			
+			if(Validator.isNotNull( nodeCriteria.getAgent() )){
+				
+				AgentVO agentVO = nodeCriteria.getAgent();
+				
+				if(Validator.isNotNull( agentVO.getId() )){
+					Predicate predicate = builder.equal(join.<Long>get(Agent_.id), agentVO.getId());
+					predicateList.add(predicate);
+				}
+				
+				if(Validator.isNotNull( agentVO.getEmail() )){
+					Predicate predicate = builder.equal(join.<String>get(Agent_.email), agentVO.getEmail());
+					predicateList.add(predicate);
+				}
+				
+				if(Validator.isNotNull( agentVO.getName() )){
+					Predicate predicate = builder.equal(join.<String>get(Agent_.name), agentVO.getName());
+					predicateList.add(predicate);
+				}
+				
+				if(Validator.isNotNull( agentVO.getEnabled() )){
+					Predicate predicate = builder.equal(join.<Boolean>get(Agent_.enabled), agentVO.getEnabled());
+					predicateList.add(predicate);
+				}
+				
+				if(Validator.isNotNull( agentVO.getBranch() )){
+					Predicate predicate = builder.equal(join.<Boolean>get(Agent_.branch), agentVO.getBranch());
+					predicateList.add(predicate);
+				}
+			}
+			
+		}*/
+    	
+    	basePredicate((BaseCriteria) nodeCriteria, builder, root, predicateList);
+		
+		//LOG
+    	log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+    	
+    	 return predicateList;
+	}
+
+	@Override
+	public Node findeNodeByCodeName(String codeName) throws ParvanDaoException {
+		log.debug("Entering findeNodeByCodeName");
+		try {
+			
+			//get user info from current context
+			UserInfo userInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+			
+    		// make query
+    		Query q = getEntityManager().createQuery("select obj from Node obj where obj.codeName = ? and obj.tenantId = ? ");
+    		
+    		q.setParameter(1, codeName);
+			q.setParameter(2, userInfo.getTenantId());
+    		
+    		// execute query
+    		return (Node) q.getSingleResult();
+		
+    	} catch (Exception e) {
+    		//FIXME should throw exception
+    		return null;
+		}
+	}
+
+	@Override
+	public Node findeNodeByName(String name) throws ParvanDaoException {
+		log.debug("Entering findeNodeByName");
+		try {
+			
+			//get user info from current context
+			UserInfo userInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+			
+    		// make query
+    		Query q = getEntityManager().createQuery("select obj from Node obj where obj.name = ? and obj.tenantId = ? ");
+    		
+    		q.setParameter(1, name);
+			q.setParameter(2, userInfo.getTenantId());
+    		
+    		// execute query
+    		return (Node) q.getSingleResult();
+		
+    	} catch (Exception e) {
+    		//FIXME should throw exception
+    		return null;
+		}
+	}
+	
+	/*@Override
+	public List<Node> findeNodeByCityShortCode(String cityShortCode, Boolean active) throws ParvanDaoException {
+		log.debug("Entering findeNodeByName");
+		
+		List<Node> nodes = null;
+		try {
+			
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+			
+			// make criteria
+			CriteriaQuery<Node> criteria = builder.createQuery(Node.class);
+			Root<Node> fromNode = criteria.from(Node.class);
+			
+			Join<Node, GeoEntity> joinByGeoEntity = fromNode.join(Node_.geoEntity, JoinType.LEFT);
+			
+			Join<GeoEntity, GeoEntity> joinByParentGeoEntity = joinByGeoEntity.join(GeoEntity_.parent, JoinType.LEFT);
+			
+			List<Predicate> conditions = new ArrayList<>();
+			if (active != null) {
+				conditions.add(builder.equal(fromNode.<Boolean>get(Node_.active), active));
+			}
+			conditions.add(builder.equal(joinByParentGeoEntity.<String>get(GeoEntity_.shortCode), cityShortCode));
+			
+			TypedQuery<Node> typedQuery = this.entityManager.createQuery(
+					criteria
+			        .select(fromNode)
+			        .where(conditions.toArray(new Predicate[] {}))
+			        .distinct(true));
+			
+			nodes = typedQuery.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while finding nodes by cityShortCode.", e);
+		}
+		
+		return nodes;
+	}*/
+	
+	
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<Node> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateTo());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateTo());
+			predicateList.add(predicate);
+		}
+	}
+}

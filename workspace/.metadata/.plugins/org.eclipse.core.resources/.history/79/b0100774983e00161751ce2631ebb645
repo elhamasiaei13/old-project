@@ -1,0 +1,209 @@
+package com.parvanpajooh.accounting.dao.jpa;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.accounting.common.exceptions.ParvanException;
+import com.parvanpajooh.accounting.dao.VoucherRowDao;
+import com.parvanpajooh.accounting.model.AccountType_;
+import com.parvanpajooh.accounting.model.Group_;
+import com.parvanpajooh.accounting.model.Voucher;
+import com.parvanpajooh.accounting.model.VoucherRow;
+import com.parvanpajooh.accounting.model.VoucherRow_;
+import com.parvanpajooh.accounting.model.Voucher_;
+import com.parvanpajooh.accounting.model.voucherRow_;
+import com.parvanpajooh.accounting.model.criteria.VoucherRowCriteria;
+import com.parvanpajooh.common.util.DateUtil;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseCriteria;
+
+/**
+ * 
+ * @author moosa
+ *
+ */
+@Stateless
+public class VoucherRowDaoJpa extends GenericDaoJpa<VoucherRow, Long>implements VoucherRowDao {
+
+	public VoucherRowDaoJpa() {
+		super(VoucherRow.class);
+	}
+	
+	private Date getDate(LocalDateTime ldt){
+		
+		Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
+		Date date = Date.from(instant );
+		
+		return date;		
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<VoucherRow> root, Map<String, Join> joins)
+			throws ParvanException {
+
+		// LOG
+		log.debug("Entering buildPredicateList( ... )");
+
+		VoucherRowCriteria voucherRowCriteria = (VoucherRowCriteria) cri;
+
+		String description = voucherRowCriteria.getDescription();
+
+		Long voucherId = voucherRowCriteria.getVoucherId();
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		Boolean active = voucherRowCriteria.getActive();
+
+		// ----------------------------------------------------------------
+		// Active
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(active)) {
+			Predicate predicate = builder.equal(root.<Boolean> get(VoucherRow_.active), active);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Description
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(description)) {
+
+			Predicate predicate = builder.like(root.<String> get(VoucherRow_.description), "%" + description + "%");
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Voucher
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(voucherId)) {
+			Join<VoucherRow, Voucher> join = root.join(VoucherRow_.voucher, JoinType.LEFT);
+
+			joins.put("voucherId", join);
+
+			Predicate predicate = builder.equal(join.<Long> get(Voucher_.id), voucherId);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Journal Date
+		// ----------------------------------------------------------------
+		LocalDateTime journalLocalDateFrom = voucherRowCriteria.getJournalDateFrom();
+		LocalDateTime journalLocalDateTo = voucherRowCriteria.getJournalDateTo();
+		
+		Instant instantjournalFrom = journalLocalDateFrom.atZone(ZoneId.systemDefault()).toInstant();
+		Date journalDateFrom = Date.from(instantjournalFrom);
+		Instant instantjournalTo = journalLocalDateTo.atZone(ZoneId.systemDefault()).toInstant();
+		Date journalDateTo = Date.from(instantjournalTo);
+		
+		if (Validator.isNotNull(journalLocalDateFrom) || Validator.isNotNull(journalLocalDateTo)) {
+
+			if (Validator.isNotNull(journalDateFrom)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(journalDateFrom);
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE, 0);
+				cal.set(Calendar.SECOND, 0);
+
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(VoucherRow_.journalDate),DateUtil.getFirstTimeOfDate(journalDateFrom));
+				predicateList.add(predicate);
+			}
+
+			if (Validator.isNotNull(journalDateTo)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(journalDateTo);
+				cal.set(Calendar.HOUR_OF_DAY, 23);
+				cal.set(Calendar.MINUTE, 59);
+				cal.set(Calendar.SECOND, 59);
+
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(VoucherRow_.journalDate), DateUtil.getFirstTimeOfDate(journalDateTo));
+				predicateList.add(predicate);
+			}
+
+		}
+		
+		// ----------------------------------------------------------------
+		// Create Date
+		// ----------------------------------------------------------------
+		Date createDateFrom = getDate(voucherRowCriteria.getCreateDateFrom());
+		Date createDateTo = getDate(voucherRowCriteria.getCreateDateTo());
+		
+		if (Validator.isNotNull(createDateFrom) || Validator.isNotNull(createDateTo)) {
+
+			if (Validator.isNotNull(createDateFrom)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(createDateFrom);			
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE, 0);
+				cal.set(Calendar.SECOND, 0);
+
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(AccountType_.createDate), DateUtil.getFirstTimeOfDate(createDateFrom));
+				predicateList.add(predicate);
+			}
+
+			if (Validator.isNotNull(createDateTo)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(createDateTo);
+				cal.set(Calendar.HOUR_OF_DAY, 23);
+				cal.set(Calendar.MINUTE, 59);
+				cal.set(Calendar.SECOND, 59);
+
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(AccountType_.createDate), DateUtil.getFirstTimeOfDate(createDateTo));
+				predicateList.add(predicate);
+			}
+
+		}
+
+		// ----------------------------------------------------------------
+		// Update Date
+		// ----------------------------------------------------------------
+		Date updateDateFrom = getDate(voucherRowCriteria.getUpdateDateFrom());
+		Date updateDateTo = getDate(voucherRowCriteria.getUpdateDateTo());
+		if (Validator.isNotNull(updateDateFrom) || Validator.isNotNull(updateDateTo)) {
+
+			if (Validator.isNotNull(updateDateFrom)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(updateDateFrom);
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE, 0);
+				cal.set(Calendar.SECOND, 0);
+
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(AccountType_.updateDate), DateUtil.getFirstTimeOfDate(updateDateFrom));
+				predicateList.add(predicate);
+			}
+
+			if (Validator.isNotNull(updateDateTo)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(updateDateTo);
+				cal.set(Calendar.HOUR_OF_DAY, 23);
+				cal.set(Calendar.MINUTE, 59);
+				cal.set(Calendar.SECOND, 59);
+
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(AccountType_.updateDate), DateUtil.getFirstTimeOfDate(updateDateTo));
+				predicateList.add(predicate);
+			}
+		}
+
+
+		basePredicate((BaseCriteria) voucherRowCriteria, builder, root, predicateList);
+
+		// LOG
+		log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+
+}

@@ -1,0 +1,120 @@
+package com.parvanpajooh.sample.model.criteria;
+
+import java.util.List;
+
+import com.parvanpajooh.common.vo.BaseCriteria;
+
+public class SampleCriteria extends BaseCriteria {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6692696276170013041L;
+
+	private String title;
+	
+	private String link;
+	
+	private Boolean active;
+	
+	private List<String> roles;
+
+	private Long parentId;
+
+	private Long childrenId;
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "SampleCriteria [title=" + title + ", link=" + link + ", active="
+				+ active + ", roles=" + roles + ", parentId=" + parentId
+				+ ", childrenId=" + childrenId + "]";
+	}
+
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * @param title the title to set
+	 */
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	/**
+	 * @return the link
+	 */
+	public String getLink() {
+		return link;
+	}
+
+	/**
+	 * @param link the link to set
+	 */
+	public void setLink(String link) {
+		this.link = link;
+	}
+
+	/**
+	 * @return the roles
+	 */
+	public List<String> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * @param roles the roles to set
+	 */
+	public void setRoles(List<String> roles) {
+		this.roles = roles;
+	}
+
+	/**
+	 * @return the parentId
+	 */
+	public Long getParentId() {
+		return parentId;
+	}
+
+	/**
+	 * @param parentId the parentId to set
+	 */
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
+	/**
+	 * @return the childrenId
+	 */
+	public Long getChildrenId() {
+		return childrenId;
+	}
+
+	/**
+	 * @param childrenId the childrenId to set
+	 */
+	public void setChildrenId(Long childrenId) {
+		this.childrenId = childrenId;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+}

@@ -1,0 +1,249 @@
+package com.parvanpajooh.issuemanager.model;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.Cascade;
+
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseVO;
+import com.parvanpajooh.ecourier.model.BaseModel;
+import com.parvanpajooh.issuemanager.model.enums.TaskStatusEnum;
+import com.parvanpajooh.issuemanager.model.vo.GroupVO;
+import com.parvanpajooh.issuemanager.model.vo.MemberVO;
+import com.parvanpajooh.issuemanager.model.vo.MembershipVO;
+import com.parvanpajooh.issuemanager.model.vo.TaskAssignmentVO;
+import com.parvanpajooh.issuemanager.model.vo.TaskVO;
+import com.parvanpajooh.issuemanager.model.vo.TypeVO;
+
+/**
+ * @author 
+ * 
+ */
+@Entity
+@XmlRootElement
+@Table(name = "taskAssignment_tbl")
+public class TaskAssignment extends BaseModel {
+
+	private static final long serialVersionUID = -4036378126742804100L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@ManyToOne
+	@JoinColumn(name = "memberId", referencedColumnName = "id")
+	private Member member;
+	
+	
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status")
+	private TaskStatusEnum taskStatusEnum;
+	
+	@Version
+	private Integer version;
+	
+	private String changeStatusComment;
+	
+	private String changeAssignToComment;
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "task_history", nullable = false)
+	private Task taskHistory;
+
+	@Override
+	public TaskAssignmentVO toVOLite() {
+		TaskAssignmentVO vo = new TaskAssignmentVO();
+
+		vo.setId(this.id);
+		vo.setVersion(this.version);
+		vo.setChangeAssignToComment(this.changeAssignToComment);
+		vo.setChangeStatusComment(this.changeStatusComment);
+		vo.setTaskStatusEnum(this.taskStatusEnum);
+
+		if (Validator.isNotNull(this.member)) {
+
+			MemberVO memberVO = this.member.toVOLite();
+			vo.setMember(memberVO);
+		}
+		
+
+		setAuditToVO(vo);
+
+		return vo;
+	}
+
+	@Override
+	public TaskAssignmentVO toVO() {
+
+		TaskAssignmentVO taskAssignmentVO = (TaskAssignmentVO) toVOLite();
+
+		return taskAssignmentVO;
+	}
+
+	@Override
+	public void fromVO(BaseVO baseVO) {
+
+		TaskAssignmentVO vo = (TaskAssignmentVO) baseVO;
+
+		this.id = vo.getId();
+		this.version = vo.getVersion();
+		this.changeAssignToComment=vo.getChangeAssignToComment();
+		this.changeStatusComment =vo.getChangeStatusComment();
+		this.taskStatusEnum=vo.getTaskStatusEnum();
+
+		getAuditFromVO(vo);
+	}
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the member
+	 */
+	public Member getMemberId() {
+		return member;
+	}
+
+	/**
+	 * @param member the member to set
+	 */
+	public void setMemberId(Member member) {
+		this.member = member;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version
+	 *            the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	/**
+	 * @return the changeStatusComment
+	 */
+	public String getChangeStatusComment() {
+		return changeStatusComment;
+	}
+
+	/**
+	 * @return the member
+	 */
+	public Member getMember() {
+		return member;
+	}
+
+	/**
+	 * @param member the member to set
+	 */
+	public void setMember(Member member) {
+		this.member = member;
+	}
+
+	/**
+	 * @return the taskStatusEnum
+	 */
+	public TaskStatusEnum getTaskStatusEnum() {
+		return taskStatusEnum;
+	}
+
+	/**
+	 * @param taskStatusEnum the taskStatusEnum to set
+	 */
+	public void setTaskStatusEnum(TaskStatusEnum taskStatusEnum) {
+		this.taskStatusEnum = taskStatusEnum;
+	}
+
+	/**
+	 * @param changeStatusComment the changeStatusComment to set
+	 */
+	public void setChangeStatusComment(String changeStatusComment) {
+		this.changeStatusComment = changeStatusComment;
+	}
+
+	/**
+	 * @return the changeAssignToComment
+	 */
+	public String getChangeAssignToComment() {
+		return changeAssignToComment;
+	}
+
+	/**
+	 * @param changeAssignToComment the changeAssignToComment to set
+	 */
+	public void setChangeAssignToComment(String changeAssignToComment) {
+		this.changeAssignToComment = changeAssignToComment;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", version=" + version
+				+ "]";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof TaskAssignment)) {
+			return false;
+		}
+
+		final TaskAssignment obj = (TaskAssignment) o;
+
+		return new EqualsBuilder().append(this.id, obj.getId()).isEquals();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(-970989579, 1884842917).append(this.id)
+				.toHashCode();
+	}
+
+}

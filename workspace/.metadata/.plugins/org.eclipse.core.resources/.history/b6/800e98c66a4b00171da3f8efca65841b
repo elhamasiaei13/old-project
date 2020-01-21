@@ -1,0 +1,31 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.model.vo;
+
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.shipment.model.enums.ShipmentValidationType;
+
+/**
+ * @author dev-03
+ *
+ */
+public class PackingItemActionVO extends BaseVO {
+	
+	private static final long serialVersionUID = -2517904704540636315L;
+
+	private String code;
+	
+	private String title;
+	
+	private String style;
+	
+	private int actionOrder;
+	
+	private boolean locationSensitive ;
+	
+	private boolean asButton;
+	
+	private String buttonType;
+	
+}

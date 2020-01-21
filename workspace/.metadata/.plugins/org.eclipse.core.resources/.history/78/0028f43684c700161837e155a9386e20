@@ -1,0 +1,33 @@
+action = Action
+
+actions = Actions
+
+active = active
+
+objectAccessScope = Object Access Scope
+
+updateDate = Update Date
+
+createDate = CreateDate
+
+choose = Choose
+
+enabled = Enabled
+
+create-another = Create another
+
+button.add      = Add
+button.cancel   = Cancel
+button.close    = Close
+button.create   = Create
+button.delete   = Delete
+button.save     = Save
+button.reset    = reset
+
+task   						= Task
+task.id      				= Id
+task.subject 				= Subject
+task.createMemberUsername 	= Create Member Username
+task.updateMemberUsername  	= Update Member Username
+task.dueDate 				= Due date
+task.create 				= Create Task

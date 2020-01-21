@@ -1,0 +1,46 @@
+1470724454553	Delete element
+1470724689873	Rename type 'Sample'
+1470724709715	Rename type 'SampleCriteria'
+1470724723642	Rename type 'SampleVO'
+1470724738045	Rename type 'SampleLocalService'
+1470724749661	Rename type 'SampleService'
+1470724766609	Rename type 'SampleLocalServiceImpl'
+1470724775463	Rename type 'SampleServiceImpl'
+1470724811925	Rename type 'SampleDao'
+1470724824820	Rename type 'SampleDaoJpa'
+1470725398236	Delete element
+1470725404576	Rename compilation unit 'GenericAgentDao2.java'
+1470725472629	Delete element
+1470725620146	Delete element
+1470725881416	Rename compilation unit 'AgentManagement.java'
+1470725956542	Delete element
+1470726104780	Rename type 'AgentManagementDao'
+1470727469590	Rename local variable 'sampleVO'
+1470727508816	Rename local variable 'sample'
+1470727543376	Rename local variable 'sampleVO'
+1470727919689	Copy compilation unit
+1470728223780	Copy compilation unit
+1470729696479	Copy compilation unit
+1470730026098	Copy compilation unit
+1470730035308	Delete element
+1470730055009	Copy compilation unit
+1470731074704	Rename local variable 'generalAgentVO'
+1470732083250	Copy compilation unit
+1470733136720	Copy compilation unit
+1470733154411	Copy compilation unit
+1470733377533	Copy compilation unit
+1470733685076	Copy compilation unit
+1470733901728	Delete element
+1470733913995	Copy compilation unit
+1470734348860	Copy compilation unit
+1470734385940	Copy compilation unit
+1470734502052	Copy compilation unit
+1470734634503	Copy compilation unit
+1470734861210	Copy compilation unit
+1470734879592	Rename type 'EmployeeerviceImpl'
+1470734956786	Copy compilation unit
+1470734973083	Copy compilation unit
+1470735050159	Copy compilation unit
+1470743391716	Rename local variable 'userCriteria'
+1470809345469	Delete element
+1470908111814	Rename local variable 'user'

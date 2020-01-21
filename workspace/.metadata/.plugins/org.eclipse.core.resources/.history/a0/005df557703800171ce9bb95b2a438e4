@@ -1,0 +1,70 @@
+package com.parvanpajooh.transportationmanagement.service.adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.logesticmanagement.LogesticManagementApiRestClient;
+import com.parvanpajooh.client.logesticmanagement.model.VehicleMsg;
+import com.parvanpajooh.client.routemanagement.RouteManagementApiRestClient;
+import com.parvanpajooh.client.routemanagement.model.TransportationMsg;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.transportationmanagement.model.vo.VehicleVO;
+
+@Stateless
+public class LogesticManagementServiceAdapterRest implements LogesticManagementServiceAdapter {
+
+	private LogesticManagementApiRestClient logesticManagementApiRestClient;
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	public LogesticManagementServiceAdapterRest() {
+		this.logesticManagementApiRestClient = new LogesticManagementApiRestClient();
+	}
+
+	@Override
+	public PageList<VehicleVO> findVehicles(String term, int page, int size) throws ParvanUnrecoverableException {
+		PageList<VehicleVO> vehicleVOsPageList = null;
+		List<VehicleVO> vehicleVOs = null; 
+		try {
+			PageList<VehicleMsg> vehicleMsgsPageList = logesticManagementApiRestClient.findVehicles(term, page, size);
+			
+			if (vehicleMsgsPageList != null) {
+				vehicleVOs = new ArrayList<VehicleVO>();
+				for (VehicleMsg msg : vehicleMsgsPageList.getElements()) {
+					VehicleVO vehicleVO = new VehicleVO();
+					vehicleVO.fromMsg(msg);
+					vehicleVOs.add(vehicleVO);
+				}
+			}
+			
+			vehicleVOsPageList = new PageList<>(vehicleVOs, vehicleMsgsPageList.getTotal());
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findVehicles", e);
+		}
+		return vehicleVOsPageList;
+	}
+
+	@Override
+	public VehicleVO getVehicle(Long id) throws ParvanUnrecoverableException {
+
+		VehicleVO vehicleVO = null;
+		try {
+			VehicleMsg vehicleMsg = logesticManagementApiRestClient.getVehicle(id);
+
+			vehicleVO = new VehicleVO();
+			vehicleVO.fromMsg(vehicleMsg);
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getVehicle", e);
+		}
+		return vehicleVO;
+	}
+
+}

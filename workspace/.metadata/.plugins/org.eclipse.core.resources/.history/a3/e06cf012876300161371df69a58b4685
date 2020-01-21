@@ -1,0 +1,148 @@
+package com.parvanpajooh.identitymanagement2.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.util.permission.PermissionChecker;
+import com.parvanpajooh.commons.platform.ejb.util.permission.exception.PrincipalException;
+import com.parvanpajooh.identitymanagement2.model.Constraint;
+import com.parvanpajooh.identitymanagement2.model.vo.Access;
+import com.parvanpajooh.identitymanagement2.model.vo.ConstraintVO;
+import com.parvanpajooh.identitymanagement2.util.Action;
+import com.parvanpajooh.identitymanagement2.util.ActionUtil;
+import com.parvanpajooh.identitymanagement2.util.Resource;
+
+@Stateless
+public class PermissionCheckerImpl implements PermissionChecker{
+	public static final Logger log = LoggerFactory.getLogger( PermissionChecker.class);
+	public static final Long NO_SCOPE = null; 
+	public static final String OMNI_ADMIN = "admin"; 
+	
+	private static final Access DEFAULT_ACCESS_DENIED = new Access(Boolean.FALSE, "Access Denied", null);
+	private static final Access DEFAULT_ACCESS_GRANTED = new Access(Boolean.TRUE, null, null);
+	
+	@Inject
+	private PermissionLocalService permissionLocalService;
+
+	/**
+	 * 
+	 * @param userInfo
+	 * @param scopeId
+	 * @param actionId
+	 * @return
+	 */
+	private Access hasPermission(UserInfo userInfo, Long scopeId, String uri, String actionId) {
+
+		if(userInfo.getUserName() != null && userInfo.getUserName().equals(OMNI_ADMIN)){
+			//return DEFAULT_ACCESS_GRANTED;//FIXME
+		}
+		
+		Access value = null;//PermissionCacheUtil.getPermission(userInfo.getUserId(), scopeId, uri, actionId, userInfo);//TODO
+
+		if (value == null) {
+			try {
+				
+				value = permissionLocalService.hasPermission(userInfo, scopeId, uri, actionId);
+
+				log.trace("Checking permission for( userName={} ,scopeId={} ,uri={} ,actionId={} ,IP={} ,prope={} ,result={}" , 
+						userInfo.getUserName(), scopeId, uri, actionId, userInfo.getIp(), userInfo.getProperties(), value);
+			} catch (ParvanServiceException e) {
+				log.error("Error in check hasPermission", e);
+				
+			}
+			finally {
+				if (value == null) {
+					value = DEFAULT_ACCESS_DENIED;
+				}
+
+				//PermissionCacheUtil.putPermission(userInfo.getUserId(), scopeId, uri, actionId, userInfo, value);//TODO
+			}
+		}
+		
+		if(value.isGranted() == false){
+			log.trace("has permission! for( userName={} ,scopeId={} ,uri={} ,actionId={} ,IP={}" , 
+					userInfo.getUserName(), scopeId, uri, actionId, userInfo.getIp(), userInfo.getProperties(), value);
+		}
+		else {
+			log.trace("no permission! for( userName={} ,scopeId={} ,uri={} ,actionId={} ,IP={}" , 
+					userInfo.getUserName(), scopeId, uri, actionId, userInfo.getIp(), userInfo.getProperties(), value);
+		}
+
+		return value;
+	}
+	
+	/**
+	 * 
+	 * @param userInfo
+	 * @param scopeId
+	 * @param uri
+	 * @param actionId
+	 * @throws PrincipalException
+	 */
+	public void check(UserInfo userInfo, Long scopeId, String uri, String actionId) throws PrincipalException {
+
+		Access access = hasPermission(userInfo, scopeId, uri, actionId);
+		
+		if (access.isGranted() == false) {
+			
+			List<Constraint> constraints = access.getConstraints();
+			List<ConstraintVO> constraintVOs = null;
+			if(constraints != null){
+				
+				constraintVOs = new ArrayList<ConstraintVO>();
+				for (Constraint constraint : constraints) {
+					constraintVOs.add(constraint.toVOLite());
+				}
+			}
+			
+			throw new PrincipalException(scopeId, uri, actionId, access.getMessage(), constraintVOs);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param userInfo
+	 * @param scopeId
+	 * @param uri
+	 * @param actionId
+	 * @return
+	 */
+	public boolean contains(UserInfo userInfo, Long scopeId, String uri, String actionId) {
+		
+		Access access = hasPermission(userInfo, scopeId, uri, actionId);
+		
+		return access.isGranted();
+	}
+
+	@Override
+	public Boolean isScopeBased(String uri, String actionId) {
+		Action action = ActionUtil.getInstance().getAction(uri, actionId);
+		
+		if(action == null){
+			return null;
+		}
+		
+		return action.isScopeBased();
+	}
+
+	@Override
+	public boolean isResourceAvailable(String uri) {
+		Resource resource = ActionUtil.getInstance().getResource(uri);
+		return resource != null;
+	}
+
+	@Override
+	public boolean isResourceActionAvailable(String uri, String actionId) {
+		Action action = ActionUtil.getInstance().getAction(uri, actionId);
+		
+		return action != null;
+	}
+}

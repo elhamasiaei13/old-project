@@ -1,0 +1,913 @@
+package com.parvanpajooh.agentmanagement.service.impl;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.agentmanagement.dao.GeneralAgentDao;
+import com.parvanpajooh.agentmanagement.model.AccountNumber;
+import com.parvanpajooh.agentmanagement.model.Employee;
+import com.parvanpajooh.agentmanagement.model.GeneralAgent;
+import com.parvanpajooh.agentmanagement.model.criteria.GeneralAgentCriteria;
+import com.parvanpajooh.agentmanagement.model.vo.AccountVO;
+import com.parvanpajooh.agentmanagement.model.vo.AgentTreeVO;
+import com.parvanpajooh.agentmanagement.model.vo.EmployeeVO;
+import com.parvanpajooh.agentmanagement.model.vo.GeneralAgentVO;
+import com.parvanpajooh.agentmanagement.model.vo.NodeVO;
+import com.parvanpajooh.agentmanagement.model.vo.UserVO;
+import com.parvanpajooh.agentmanagement.service.AccountNumberLocalService;
+import com.parvanpajooh.agentmanagement.service.EmployeeLocalService;
+import com.parvanpajooh.agentmanagement.service.GeneralAgentLocalService;
+import com.parvanpajooh.agentmanagement.service.RateAndRouteLocalService;
+import com.parvanpajooh.agentmanagement.service.adapter.AccountingServiceAdapter;
+import com.parvanpajooh.agentmanagement.service.adapter.IdentityManagement2ServiceAdapter;
+import com.parvanpajooh.commons.config.Config;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.commons.util.Validator;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class GeneralAgentLocalServiceImpl extends GenericLocalServiceImpl<GeneralAgent, Long>implements GeneralAgentLocalService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(GeneralAgentLocalServiceImpl.class);
+	
+	private static Map<String, AgentTreeVO> rootAgentTreeVoMap = new HashMap<String, AgentTreeVO>();
+
+	public GeneralAgentDao generalAgentDao;
+
+	@Inject
+	private AccountingServiceAdapter accountingServiceAdapter;
+
+	@Inject
+	private EmployeeLocalService employeeLocalService;
+
+	@Inject
+	private AccountNumberLocalService accountNumberLocalService;
+	
+	@Inject
+	private RateAndRouteLocalService rateAndRouteLocalService;
+
+	@Inject
+	private IdentityManagement2ServiceAdapter identityManagement2ServiceAdapter;
+
+	@Inject
+	public void setGeneralAgentDao(GeneralAgentDao generalAgentDao) {
+		this.dao = generalAgentDao;
+		this.generalAgentDao = generalAgentDao;
+	}
+	
+	@Override
+	public List<GeneralAgent> findByCriteria(BaseCriteria criteria, int firstResult, int maxResults, SortDirectionEnum sortDirection, String sortCriterion)
+			throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findByCriteria( criteria={}, firstResult={}, maxResults={}, sortDirection={}, sortCriterion={})", criteria, firstResult, maxResults,
+				sortDirection, sortCriterion);
+
+		List<GeneralAgent> list = null;
+		GeneralAgentCriteria generalAgentCriteria = (GeneralAgentCriteria) criteria;
+
+		try {
+
+			// set agentId and agentChildrenIds
+			setAllowedAgentIds(generalAgentCriteria);
+
+			// find by criteria
+			list = super.findByCriteria(generalAgentCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+
+		} catch (ParvanServiceException e) {
+			throw new ParvanServiceException(e.getMessage());
+		}
+
+		return list;
+	}
+
+	@Override
+	public void delete(GeneralAgent generalAgent, UserInfo userInfo) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering delete( generalAgent={})", generalAgent);
+
+		try {
+
+			boolean hasChildren = generalAgentDao.hasChildren(generalAgent.getId());
+
+			if (Validator.equals(hasChildren, true)) {
+				throw new ParvanDaoException(ErrorCode.AGENT_DELETE__NODE_ALREADY_HAS_ANOTHER_AGENT);
+			}
+
+			// delete generalAgent
+			super.delete(generalAgent, userInfo);
+			
+			// ---------------------------------------------------
+			// clear hierarchy
+			// ---------------------------------------------------
+			String defaultTenantId = "DEFAULT";;
+			rootAgentTreeVoMap.remove(defaultTenantId);
+
+		} catch (ParvanDaoException e) {
+			if (Validator.isNotNull(e.getErrorCode())) {
+				throw new ParvanRecoverableException(e, e.getErrorCode());
+			} else {
+				throw new ParvanUnrecoverableException("Error occurred while delete GeneralAgent.", e);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while delete generalAgent.", e);
+		}
+
+		// LOG
+		log.debug("Leaving method delete()");
+	}
+
+	@Override
+	public GeneralAgent save(GeneralAgent agent, UserInfo userInfo) throws ParvanServiceException {
+		
+		agent = super.save(agent, userInfo);
+		
+		// ---------------------------------------------------
+		// clear hierarchy
+		// ---------------------------------------------------
+		String defaultTenantId = "DEFAULT";
+		rootAgentTreeVoMap.remove(defaultTenantId);
+		
+		return agent;
+	}
+
+	@Override
+	public BaseVO save(BaseVO baseVO, UserInfo userInfo) throws ParvanServiceException {
+		log.trace("Entering save(baseVO={}, userInfo={})", baseVO, userInfo);
+
+		GeneralAgentVO generalAgentVO = (GeneralAgentVO) baseVO;
+		//TODO boolean isAccountAvailable = true;
+		GeneralAgent savedGeneralAgent = null;
+
+		try {
+			// initialize
+			Long generalAgentId = generalAgentVO.getId();
+			boolean isNew = Validator.isNull(generalAgentId);
+			String savingAccountNumber = generalAgentVO.getCurrentAccountNumber();
+			
+			Long nodeId = generalAgentVO.getNodeId();
+			if (Validator.isNull(nodeId)) {
+				throw new ParvanRecoverableException("generalAgent.nodeId", ErrorCode.FIELD_IS_EMPTY);
+			} else {
+				NodeVO nodeVO = rateAndRouteLocalService.getNode(nodeId);
+				generalAgentVO.setNodeCode(nodeVO.getCodeName());
+			}
+			
+			Long hubNodeId = generalAgentVO.getHubNodeId();
+			if (Validator.isNull(hubNodeId)) {
+				throw new ParvanRecoverableException("generalAgent.hubNodeId", ErrorCode.FIELD_IS_EMPTY);
+			} else {
+				NodeVO nodeVO = rateAndRouteLocalService.getNode(hubNodeId);
+				generalAgentVO.setHubNodeCode(nodeVO.getCodeName());
+			}
+			
+			// check for account number existent in remote service
+			AccountVO accountVO = accountingServiceAdapter.findAccountByAccountNumber(savingAccountNumber);
+			if (Validator.isNull(accountVO)) {
+				throw new ParvanRecoverableException("accountNumber.accountNumber", ErrorCode.DATA_IS_INVALID);
+			}
+			
+			// check for duplicate accountNumber
+			AccountNumber existentAccountNumber = accountNumberLocalService.findSingleByAccountNumber(savingAccountNumber);
+			if (existentAccountNumber != null) {
+				GeneralAgent currUsingGa = existentAccountNumber.getGeneralAgent();
+				Long currUsingGaId = null;
+				if (currUsingGa != null) {
+					currUsingGaId = currUsingGa.getId();
+				}
+				
+				if (currUsingGaId == null || !currUsingGaId.equals(generalAgentVO.getId())) {
+					// accountNumber is used by another agent
+					log.error("AccountNumber [{}] currently used by agentId [{}].", savingAccountNumber, currUsingGaId);
+					throw new ParvanRecoverableException(ErrorCode.AGENT_CREATE__ACCOUNTNUMBER_IS_USED_BY_ANOTHER_AGENT);
+				}
+			}
+			
+			// check agent: only one root agent should be exists.
+			GeneralAgent parentGeneralAgent = null;
+			GeneralAgentVO parentAgentVO = generalAgentVO.getParent();
+			if (parentAgentVO == null || parentAgentVO.getId() == null) {
+				GeneralAgent rootAgent = generalAgentDao.findRootAgent();
+				if (rootAgent != null && !rootAgent.getId().equals(generalAgentId)) {
+					log.error("Error: only one root agent should be exists!");
+					throw new ParvanRecoverableException(ErrorCode.AGENT_CREATE__ONLY_ONE_ROOT_AGENT_SHOULD_BE_EXISTS);
+				}
+				
+			} else {
+				Long parentGeneralAgentId = parentAgentVO.getId();
+				// check agent: an agent cannot be parent of itself 
+				if(Validator.equals(generalAgentVO.getId(), parentGeneralAgentId)) {
+					throw new ParvanRecoverableException(ErrorCode.AGENT_MODIFY__CANNOT_SET_OWNER_AGENT_AS_PARENT);
+				}
+				
+				parentGeneralAgent = get(parentGeneralAgentId);
+			}
+			
+			// check for duplicate agent-name
+			GeneralAgent dupNameGeneralAgent = generalAgentDao.findByName(generalAgentVO.getName());
+			if (Validator.isNotNull(dupNameGeneralAgent)) {
+				if (!dupNameGeneralAgent.getId().equals(generalAgentVO.getId())) {
+					throw new ParvanRecoverableException("generalAgent.name", ErrorCode.DATA_DUPLICATE);
+				}
+			}
+			
+			// fill general-agent record
+			GeneralAgent savingGeneralAgent = null;
+			if (isNew) {
+				savingGeneralAgent = new GeneralAgent();
+				savingGeneralAgent.fromVO(generalAgentVO);
+				savingGeneralAgent.setActive(true);
+				
+			} else {
+				savingGeneralAgent = get(generalAgentVO.getId());
+				savingGeneralAgent.fromVO(generalAgentVO);
+			}
+			
+			// set parent
+			savingGeneralAgent.setParent(parentGeneralAgent);
+			
+			// save general-agent
+			savedGeneralAgent = super.save(savingGeneralAgent, userInfo);
+			
+			// create new accountNumber record, if required
+			AccountNumber newlyCreatedAccountNumber = null;
+			AccountNumber currActiveAccountNumber = null;
+			if (! isNew) {
+				currActiveAccountNumber = accountNumberLocalService.findCurrentActiveAccountNumberByAgentId(
+					generalAgentVO.getId());
+			}
+
+			if (currActiveAccountNumber == null || !currActiveAccountNumber.getAccountNumber().equals(savingAccountNumber)) {
+				// create new accountNumber
+				LocalDateTime now = LocalDateTime.now();
+				newlyCreatedAccountNumber = new AccountNumber();
+				newlyCreatedAccountNumber.setAccountNumber(savingAccountNumber);
+				newlyCreatedAccountNumber.setActive(true);
+				newlyCreatedAccountNumber.setVersion(0);
+				newlyCreatedAccountNumber.setCreateDate(now);
+				newlyCreatedAccountNumber.setUpdateDate(now);
+				newlyCreatedAccountNumber.setGeneralAgent(savedGeneralAgent);
+				
+				// save accountNumber
+				newlyCreatedAccountNumber = accountNumberLocalService.save(newlyCreatedAccountNumber, userInfo);
+				
+				// deActivate existentAccountNumber
+				if (currActiveAccountNumber != null && newlyCreatedAccountNumber != null) {
+					currActiveAccountNumber.setActive(false);
+					
+					// save accountNumber
+					currActiveAccountNumber = accountNumberLocalService.save(currActiveAccountNumber, userInfo);				
+				}
+			}
+			
+			// to VO
+			generalAgentVO = savedGeneralAgent.toVO();
+			
+			// ---------------------------------------------------
+			// clear hierarchy
+			// ---------------------------------------------------
+			String defaultTenantId = "DEFAULT";
+			rootAgentTreeVoMap.remove(defaultTenantId);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving generalAgent.", e);
+		}
+
+		log.trace("Leaving method save()");
+
+		return generalAgentVO;
+	}
+
+	@Override
+	public GeneralAgent findByEmployeeUserNameWhileLogin(String userName) throws ParvanServiceException {
+		log.debug("Entering findByEmployeeUserNameWhileLogin(userName={})", userName);
+		GeneralAgent generalAgent = null;
+		Long nodeId = null;
+		Long hubNodeId = null;
+		try {
+			// this method is used in login process, so must call DAO
+			generalAgent = generalAgentDao.findByEmployeeUserName(userName);
+			if (generalAgent != null) {
+				nodeId = generalAgent.getNodeId();
+				hubNodeId = generalAgent.getHubNodeId();
+			}
+			if (nodeId != null) {
+				NodeVO node = rateAndRouteLocalService.getNodeForInit(nodeId);
+				generalAgent.setNodeName(node.getName());
+				generalAgent.setCityShortCode(node.getCityShortCode());
+			}
+			
+			if (hubNodeId != null) {
+				NodeVO hubNode = rateAndRouteLocalService.getNodeForInit(hubNodeId);
+				generalAgent.setNodeName(hubNode.getName());
+			}
+		} catch (Exception e) {
+			log.error("Error occurred while getting General Agent by Employee UserName [{}]", userName, e);
+			throw new ParvanUnrecoverableException(String.format("Error occurred while getting General Agent by Employee UserName [%s]", userName), e);
+		}
+		return generalAgent;
+	}
+
+	@Override
+	public GeneralAgentVO getGeneralAgentVO(Long id) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering get(id={})", id);
+		
+		GeneralAgentVO agentVO = null;
+		
+		try {
+			AgentTreeVO rootAgentTreeVO = this.getRootAgentHierarchy();
+			if (rootAgentTreeVO != null) {
+				AgentTreeVO foundAgentTreeVO = rootAgentTreeVO.getTreeVO(id);
+				
+				if (foundAgentTreeVO != null) {
+					GeneralAgentVO foundAgentVO = foundAgentTreeVO.getAgent();
+					agentVO = foundAgentVO.clone();
+					
+				}
+				
+			} else {
+				log.error("Agent by id [{}] not found", id);
+				throw new ParvanUnrecoverableException(String.format("Agent by id [%s] not found", id));
+			}
+			
+		} catch (Exception e) {
+			log.error("Error occurred while finding agent by id [{}]", id);
+			throw new ParvanUnrecoverableException(
+					String.format("Error occurred while finding agent by id [%s]", id), 
+					e);
+		}
+
+		return agentVO;
+	}
+
+	@Override
+	public Map<Long, String> getAgentNamesByIds(List<Long> ids) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findAgentNamesByIds(ids={})", ids);
+		Map<Long, String> agentNames = new HashMap<>();
+
+		try {
+			
+			for (Long thisId : ids) {
+				GeneralAgentVO thisGeneralAgentVO = getGeneralAgentVO(thisId);
+				
+				agentNames.put(thisId, thisGeneralAgentVO.getName());
+			}
+
+		} catch (Exception e) {
+			log.error("Error occurred while getting agentNames with their ids");
+			throw new ParvanUnrecoverableException("Error occurred while getting agentNames with their ids", e);
+		}
+
+		// LOG
+		log.debug("Leaving findAgentNamesByIds(): ret={}", (agentNames != null) ? agentNames.size() : "NULL");
+		return agentNames;
+	}
+	
+	@Override
+	public List<GeneralAgent> findByCityShortCode(String cityShortCode, String tag, String term) throws ParvanServiceException {
+		log.debug("Entering findByCityShortCode(cityShortCode={}, tag={}, term={})", cityShortCode, tag, term);
+		
+		List<GeneralAgent> agents = null;
+
+		try {
+			agents = generalAgentDao.findByCityShortCode(cityShortCode, tag, term);
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findByCityShortCode", e);
+		}
+
+		log.debug("Leaving findByCityShortCode(): ret={}", (agents != null) ? agents.size() : "NULL");
+		return agents;
+	}
+
+	@Override
+	public GeneralAgentVO findByNodeId(Long nodeId) throws ParvanServiceException, ObjectNotFoundException {
+		log.debug("Entering findByNodeId( nodeId={})", nodeId);
+		GeneralAgentVO agentVO = null;
+		AgentTreeVO rootAgentTreeVO = this.getRootAgentHierarchy();
+		if (rootAgentTreeVO != null) {
+			AgentTreeVO foundAgentTreeVO = rootAgentTreeVO.getTreeVoByNodeId(nodeId);
+			if (foundAgentTreeVO != null) {
+				agentVO = foundAgentTreeVO.getAgent();
+			} else {
+				throw new ObjectNotFoundException();
+			}
+		}
+		return agentVO;
+	}
+
+	@Override
+	public GeneralAgentVO findByNodeCode(String nodeCode) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findByNnodeCode(nodeCode={})", nodeCode);
+		
+		GeneralAgentVO agentVO = null;
+		
+		try {
+			AgentTreeVO rootAgentTreeVO = this.getRootAgentHierarchy();
+			if (rootAgentTreeVO != null) {
+				AgentTreeVO foundAgentTreeVO = rootAgentTreeVO.getTreevoByNodeCode(nodeCode);
+				
+				if (foundAgentTreeVO != null) {
+					agentVO = foundAgentTreeVO.getAgent();
+				}
+			}
+			
+		} catch (Exception e) {
+			log.error("Error occurred while finding agent by nodeCode [{}]", nodeCode);
+			throw new ParvanUnrecoverableException(
+					String.format("Error occurred while finding agent by nodeCode [%s]", nodeCode),
+					e);
+		}
+
+		return agentVO;
+
+	}
+
+	@Override
+	public GeneralAgent findByIataCode(String iataCode) throws ParvanServiceException {
+
+		// LOG
+		log.trace("Entering findByIataCode( iataCode={})", iataCode);
+
+		GeneralAgent generalAgent = null;
+
+		try {
+			generalAgent = generalAgentDao.findByIataCode(iataCode);
+
+		} catch (Exception e) {
+			log.error("Error occurred while finding agent by iataCode [{}]", iataCode);
+			throw new ParvanUnrecoverableException(
+					String.format("Error occurred while finding agent by iataCode [%s]", iataCode),
+					e);
+		}
+
+		return generalAgent;
+
+	}
+
+	@Override
+	public GeneralAgentVO findByAccountNumber(String accountNumber) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findByAccountNumber( accountNumber={})", accountNumber);
+		
+		GeneralAgentVO agentVO = null;
+		
+		try {
+			AgentTreeVO rootAgentTreeVO = this.getRootAgentHierarchy();
+			if (rootAgentTreeVO != null) {
+				AgentTreeVO foundAgentTreeVO = rootAgentTreeVO.getTreeVoByAccountNumber(accountNumber);
+				
+				if (foundAgentTreeVO != null) {
+					agentVO = foundAgentTreeVO.getAgent();
+				}
+			} 
+			
+		} catch (Exception e) {
+			log.error("Error occurred while finding agent by accountNumber [{}]", accountNumber);
+			throw new ParvanUnrecoverableException(
+					String.format("Error occurred while finding agent by accountNumber [%s]", accountNumber),
+					e);
+		}
+
+		return agentVO;
+
+	}
+
+	@Override
+	public List<GeneralAgentVO> findAllSubAgentsBy(Long parentId, String term) throws ParvanServiceException {
+
+		List<GeneralAgentVO> filteredAllSubAgents = null;
+		
+		try {
+			AgentTreeVO agentTreeVO = this.getAgentHierarchy(parentId);
+			List<GeneralAgentVO> allSubAgents = agentTreeVO.getAllSubAgents(agentTreeVO);
+			
+			if (term != null && term.trim().length() > 0) {
+				filteredAllSubAgents = new ArrayList<>();
+				
+				for (GeneralAgentVO thisGAVO : allSubAgents) {
+					String canonicalSeachName = thisGAVO.getCanonicalSeachName();
+					
+					if (canonicalSeachName.contains(term)) {
+						filteredAllSubAgents.add(thisGAVO);
+					}
+				}
+				
+			} else {
+				filteredAllSubAgents = allSubAgents;
+			}
+			
+		} catch (Exception e) {
+			log.error("Error occurred while findAllSubAgentsBy of agentId [{}], term [{}]", parentId, term);
+			throw new ParvanUnrecoverableException(
+					String.format("Error occurred while findAgentDirectChildren of agentId [%s], term [%s]", parentId, term),
+					e);
+		}
+
+		return filteredAllSubAgents;
+
+	}
+
+	/*@Override
+	public List<GeneralAgent> findByParentId(Long id) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findByParentId( parentId={})", id);
+
+		List<GeneralAgent> generalAgents;
+
+		try {
+			generalAgents = generalAgentDao.findByParentId(id);
+
+		} catch (Exception e) {
+			log.error("Error occurred while finding agents by parentId [" + id + "]", e);
+			throw new ParvanServiceException(e.getMessage());
+		}
+
+		return generalAgents;
+
+	}*/
+	
+	@Override
+	public List<GeneralAgentVO> findAgentDirectSubAgents(Long parentAgentId) throws ParvanServiceException {
+		log.debug("Entering findAgentDirectSubAgents parentAgentId={}", parentAgentId);
+		
+		List<GeneralAgentVO> directSubAgents = null;
+		
+		try {
+			AgentTreeVO agentTreeVO = this.getAgentHierarchy(parentAgentId);
+			directSubAgents = agentTreeVO.getDirectSubAgents(agentTreeVO);
+			
+		} catch (Exception e) {
+			log.error("Error occurred while findAgentDirectSubAgents of agentId [{}]", parentAgentId);
+			throw new ParvanUnrecoverableException(
+					String.format("Error occurred while findAgentDirectSubAgents of agentId [%s]", parentAgentId),
+					e);
+		}
+		
+		return directSubAgents;
+	}
+	
+	@Override
+	public List<GeneralAgentVO> findAllBranchSubAgents(Long parentAgentId) throws ParvanServiceException {
+		log.debug("Entering findAllBranchSubAgents parentAgentId={}", parentAgentId);
+		
+		List<GeneralAgentVO> allBranchSubAgents = null;
+		
+		try {
+			AgentTreeVO agentTreeVO = this.getAgentHierarchy(parentAgentId);
+			allBranchSubAgents = agentTreeVO.getAllBranchSubAgents(agentTreeVO.getAgent());
+			
+		} catch (Exception e) {
+			log.error("Error occurred while findAllBranchSubAgents of agentId [{}]", parentAgentId);
+			throw new ParvanUnrecoverableException(
+					String.format("Error occurred while findAllBranchSubAgents of agentId [%s]", parentAgentId),
+					e);
+		}
+		
+		return allBranchSubAgents;
+	}
+
+	@Override
+	public GeneralAgent attachEmployee(EmployeeVO employeeVO, String[] userUuids) throws ParvanServiceException {
+		log.trace("Entering attachEmployee(employeeVO={}, userUuids={})", employeeVO, userUuids);
+
+		GeneralAgent generalAgent = null;
+
+		try {
+			// get user info from current context
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+
+			// get generalAgent
+			long agentId = employeeVO.getGeneralAgent().getId();
+			generalAgent = get(agentId);
+
+			for (String userUuid : userUuids) {
+				Employee employee = employeeLocalService.findByUserUuid(userUuid);
+
+				if (employee == null) {
+					employee = _createEmployee(userUuid);
+					employee.setRemarks(employeeVO.getRemarks());
+					employee.setGroups(employeeVO.getGroups());
+				}
+
+				employee.setGeneralAgent(generalAgent);
+
+				employee = employeeLocalService.save(employee, userInfo);
+
+				generalAgent.getEmployees().add(employee);
+			}
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while attach Employee to generalAgent.", e);
+		}
+
+		log.trace("Leaving method attachEmployee()");
+
+		return generalAgent;
+	}
+
+	@Override
+	public void saveAgentLogo(Long agentId,byte[] bytes) throws ParvanServiceException {
+
+		// LOG
+		log.trace("Entering saveAgentLogo(bytes={})", bytes);
+		
+		try {
+			
+			// get user info from current context
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+						
+			String agentsLogoPath = Config.getProperty("agentslogo", "/usr/local/ecourier/data/agentslogo");
+			UUID uuid = UUID.randomUUID();
+			String logoId = agentId + StringPool.UNDERLINE + uuid.toString();
+			
+			// Creating the directory to store file
+			File dir = new File(agentsLogoPath);
+			if (!dir.exists()) {
+				dir.mkdirs();
+			}
+
+			// Create the file on server
+			File serverFile = new File(dir.getAbsolutePath() + StringPool.SLASH + logoId);
+			if (serverFile.exists()) {
+				throw new ParvanRecoverableException(ErrorCode.DATA_DUPLICATE);
+			}
+
+			BufferedOutputStream stream;
+			stream = new BufferedOutputStream(new FileOutputStream(serverFile));
+			stream.write(bytes);
+			stream.close();
+			
+			GeneralAgent agent = generalAgentDao.get(agentId);
+			agent.setLogoId(logoId);
+			
+			//save Agent
+		    this.save(agent, userInfo);
+
+		} catch (Exception e) {
+			throw new ParvanServiceException("Error occurred while saveAgentLogo.", e);
+		}
+	}
+	
+	@Override
+	public void deleteAgentLogo(Long agentId) throws ParvanServiceException {
+
+		// LOG
+		log.trace("Entering deleteAgentLogo(agentId={})", agentId);
+		
+		try {
+			
+			// get user info from current context
+			UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+			GeneralAgent genralAgent = get(agentId);
+			genralAgent.setLogoId(null);
+						
+			//save Agent
+		    this.save(genralAgent, userInfo);
+
+		} catch (Exception e) {
+			throw new ParvanServiceException("Error occurred while deleteAgentLogo.", e);
+		}
+	}
+	
+	/**
+	 * 
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	private AgentTreeVO getRootAgentHierarchy() throws ParvanServiceException {
+		Long rootAgentId = null;
+		AgentTreeVO rootAgentTreeVO = this.getAgentHierarchy(rootAgentId);
+		return rootAgentTreeVO;
+	}
+	
+	/**
+	 * 
+	 * @param agentId
+	 * @return null or an AgentTreeVO
+	 * @throws ParvanServiceException
+	 */
+	private AgentTreeVO getAgentHierarchy(Long agentId) throws ParvanServiceException {
+		log.info("Entring getAgentHierarchy(agentId={})", agentId);
+		
+		AgentTreeVO agentTreeVO;
+		try {
+			
+			// get hierarchy from cache
+			String tenantId = "DEFAULT";
+			AgentTreeVO rootAgentTreeVO = rootAgentTreeVoMap.get(tenantId);
+			
+			if (rootAgentTreeVO == null) {
+				rootAgentTreeVO = _reloadAgentHierarchy(tenantId);
+			}
+			
+			if (rootAgentTreeVO != null) {
+				
+				if (agentId == null) {
+					GeneralAgentVO rootGeneralAgentVO = rootAgentTreeVO.getAgent();
+					agentId = rootGeneralAgentVO.getId();
+				}
+				
+				// get tree of given agent
+				agentTreeVO = rootAgentTreeVO.getTreeVO(agentId);
+				if (agentTreeVO == null) {
+					
+					boolean exists = this.exists(agentId);
+					if (exists) {
+						rootAgentTreeVO = _reloadAgentHierarchy(tenantId);
+						agentTreeVO = rootAgentTreeVO.getTreeVO(agentId);
+					} else {
+						throw new ParvanUnrecoverableException("GeneralAgent with id [" + agentId + "] dose not exist in agent hierarchy.");
+					}
+				}
+				
+			} else {
+				// there is not any root agent in DB
+				agentTreeVO = null;
+			}
+			
+		} catch (ParvanServiceException e) {
+			log.error("Eror occurred while getting agent hierarchy. {}", e.getMessage()); 
+			throw e;
+			
+		} catch (Exception e) {
+			log.error("Eror occurred while getting agent hierarchy. {}", e.getMessage()); 
+			throw new ParvanUnrecoverableException("Eror occurred while getting agent hierarchy.", e);
+		}
+		
+		return agentTreeVO;
+	}
+
+	/**
+	 * 
+	 * @param userUuid
+	 * @return
+	 * @throws ParvanServiceException
+	 */
+	private Employee _createEmployee(String userUuid) throws ParvanServiceException {
+		UserVO user = identityManagement2ServiceAdapter.loadUserByUuid(userUuid);
+
+		LocalDateTime now = LocalDateTime.now();
+
+		Employee employee = new Employee();
+		employee.setUserUuid(user.getUuid());
+		employee.setUserName(user.getUserName());
+		// employee.setPersonUuid(user.getPersonUuid);
+		employee.setFullName(user.getFirstName() + StringPool.SPACE + user.getLastName());
+		// employee.setRemarks(remarks);
+		employee.setActive(true);
+		employee.setVersion(0);
+		employee.setCreateDate(now);
+		employee.setUpdateDate(now);
+
+		return employee;
+	}
+
+	/**
+	 * 
+	 * @param tenantId
+	 * @return
+	 * @throws ParvanUnrecoverableException
+	 * @throws ParvanDaoException
+	 */
+	private AgentTreeVO _reloadAgentHierarchy(String tenantId) throws ParvanServiceException, ParvanDaoException {
+		log.info("Reload hierarchy");
+		
+		AgentTreeVO rootAgentTreeVO = null;
+		
+		GeneralAgent rootAgent = generalAgentDao.findRootAgent();
+		if (rootAgent != null) {
+			GeneralAgentVO rootAgentVO = rootAgent.toVO();
+			
+			// Set currentAccountNumber
+			AccountNumber accountNumber = accountNumberLocalService.findCurrentActiveAccountNumberByAgentId(rootAgentVO.getId());
+			if (accountNumber != null) {
+				rootAgentVO.setCurrentAccountNumber(accountNumber.getAccountNumber());
+			}
+						
+			// make start node of tree
+			rootAgentTreeVO = new AgentTreeVO(rootAgentVO);
+			
+			// fill hierarchy of given agent
+			_fillAgentHierarchy(rootAgentTreeVO, rootAgentVO.getId());
+		}
+		
+		// set hierarchy to cache
+		rootAgentTreeVoMap.put(tenantId, rootAgentTreeVO);
+		
+		return rootAgentTreeVO;
+	}
+	
+	/**
+	 * 
+	 * @param parentAgentTreeVO
+	 * @param parentAgentId
+	 * @throws ParvanUnrecoverableException
+	 */
+	private void _fillAgentHierarchy(AgentTreeVO parentAgentTreeVO, Long parentAgentId) throws ParvanServiceException {
+		
+		
+		try {
+			// load children
+			List<GeneralAgent> directChildrenList = generalAgentDao.findByParentId(parentAgentId);
+			
+			for (GeneralAgent thisChildAgent : directChildrenList) {
+				
+				GeneralAgentVO thisChildAgentVO = thisChildAgent.toVO();
+
+				// Set currentAccountNumber
+				AccountNumber accountNumber = accountNumberLocalService.findCurrentActiveAccountNumberByAgentId(thisChildAgentVO.getId());
+				if (accountNumber != null) {
+					thisChildAgentVO.setCurrentAccountNumber(accountNumber.getAccountNumber());
+				}
+				
+				AgentTreeVO thisChildTree = parentAgentTreeVO.addSubAgent(thisChildAgentVO);
+				
+				Long thisChildGeneralAgentId = thisChildAgentVO.getId();
+				
+				_fillAgentHierarchy(thisChildTree, thisChildGeneralAgentId);
+			}
+			
+			
+		} catch (ParvanDaoException e) {
+			log.error("Error occurred while filling agent hierarchy. Finding agents by parentId [{}]. {}", parentAgentId, e.getMessage()); 
+			throw new ParvanUnrecoverableException(
+					String.format("Error occurred while filling agent hierarchy. Finding agents by parentId [%s]. %s", parentAgentId, e.getMessage()),
+					e);
+		}
+		
+	}
+
+	/**
+	 * 
+	 * @param generalAgentCriteria
+	 */
+	private void setAllowedAgentIds(GeneralAgentCriteria generalAgentCriteria) {
+
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		Set<Long> agentChildrenIds = userInfoWrapper.getAllSubAgentIds();
+		Long agentId = userInfoWrapper.getAgentId();
+
+		Set<Long> allowedAgentIds = new HashSet<Long>();
+		if (Validator.isNotNull(agentChildrenIds)) {
+			allowedAgentIds.addAll(agentChildrenIds);
+		}
+		if (Validator.isNotNull(agentId)) {
+			allowedAgentIds.add(agentId);
+		}
+
+		generalAgentCriteria.setAllowedAgentIds(allowedAgentIds);
+	}
+
+}

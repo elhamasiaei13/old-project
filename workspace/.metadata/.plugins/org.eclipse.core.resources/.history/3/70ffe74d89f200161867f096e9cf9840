@@ -1,0 +1,160 @@
+package com.parvanpajooh.taskmanagement.domain.repository;
+
+import java.util.List;
+
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.taskmanagement.domain.model.Task;
+import com.parvanpajooh.taskmanagement.domain.model.TaskCommand;
+import com.parvanpajooh.taskmanagement.domain.model.TaskGroupCounter;
+import com.parvanpajooh.taskmanagement.domain.model.TaskDisplay;
+import com.parvanpajooh.taskmanagement.domain.model.criteria.TaskCriteria;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType;
+
+public interface TaskRepository {
+
+	/**
+	 * 
+	 * @param waybillNumbers
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public List<TaskDisplay> findTaskDisplayByIds(List<String> waybillNumbers) throws ParvanDaoException;
+
+	/**
+	 * 
+	 * @param criteria
+	 * @param firstResult
+	 * @param maxResults
+	 * @param sortDirection
+	 * @param sortCriterion
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public List<TaskDisplay> findTaskDisplayByCriteria(TaskCriteria criteria, int firstResult, int maxResults, SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanDaoException;
+
+	/**
+	 * 
+	 * @param criteria
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public long countTaskDisplayByCriteria(TaskCriteria criteria) throws ParvanDaoException;
+
+	// /**
+	// *
+	// * @param criteria
+	// * @param firstResult
+	// * @param maxResults
+	// * @param sortDirection
+	// * @param sortCriterion
+	// * @return
+	// * @throws ParvanDaoException
+	// */
+	// public List<TaskDisplay> findTaskChangedEventByCriteria(
+	// TaskChangedEventCriteria criteria,
+	// int firstResult,
+	// int maxResults,
+	// SortDirectionEnum sortDirection,
+	// String sortCriterion) throws ParvanDaoException;
+	//
+	// /**
+	// *
+	// * @param criteria
+	// * @return
+	// * @throws ParvanDaoException
+	// */
+	// public List<TaskDisplay> countTaskChangedEventByCriteria(
+	// TaskChangedEventCriteria criteria) throws ParvanDaoException;
+
+	/**
+	 * Loads full tree structure of aggregate-root
+	 * 
+	 * @param taskId
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public Task getTask(String taskId) throws ParvanDaoException;
+
+	/**
+	 * 
+	 * @param taskId
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public TaskDisplay getTaskDisplay(String taskId) throws ParvanDaoException;
+
+	/**
+	 * 
+	 * @param taskKey
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public TaskDisplay getTaskDisplayByKey(String taskKey) throws ParvanDaoException;
+	
+	/**
+	 * 
+	 * @param id
+	 * @throws ParvanDaoException
+	 */
+	public void deleteTask(String id) throws ParvanDaoException;
+
+	/**
+	 * 
+	 * @param task
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public Task saveTask(Task task) throws ParvanDaoException;
+	
+	/**
+	 * 
+	 * @param task
+	 * @param taskGroupCounter
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public Task saveTaskAndTaskGroupCounter(Task task,TaskGroupCounter taskGroupCounter) throws ParvanDaoException;
+
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public TaskCommand getTaskCommand(Long id) throws ParvanDaoException;
+
+	/**
+	 * 
+	 * @param taskId
+	 * @param taskCommandType
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public List<TaskCommand> getTaskCommands(String taskId, TaskCommandType taskCommandType) throws ParvanDaoException;
+
+	/**
+	 * 
+	 * @param groupId
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public TaskGroupCounter getTaskGroupCounter(Long groupId) throws ParvanDaoException;
+
+	/**
+	 * 
+	 * @param groupId
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	boolean findTaskByGroupId(Long groupId) throws ParvanDaoException;
+
+	/**
+	 * 
+	 * @param taskKey
+	 * @return
+	 * @throws ParvanDaoException
+	 */
+	public Task getTaskByTaskKey(String taskKey) throws ParvanDaoException;
+}

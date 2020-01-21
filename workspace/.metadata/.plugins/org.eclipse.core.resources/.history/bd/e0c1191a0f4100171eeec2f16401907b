@@ -1,0 +1,84 @@
+package com.parvanpajooh.agentmanagement.service.adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.agentmanagement.model.vo.CityInfoVO;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.client.geomanagement.GeoManagementApiRestClient;
+import com.parvanpajooh.client.rateandroute.RateAndRouteApiRestClient;
+import com.parvanpajooh.client.rateandroute.model.CityInfoMsg;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+
+@Stateless
+public class GeoManagementServiceAdapterRest implements GeoManagementServiceAdapter {
+
+	private GeoManagementApiRestClient geoManagementApiRestClient;
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	public GeoManagementServiceAdapterRest() {
+		this.geoManagementApiRestClient = new GeoManagementApiRestClient();
+	}
+
+	@Override
+	public List<CityInfoVO> findCitiesByNameOrShortCode(String term, int firstResult, int maxResults, String sortDirection, String sortCriterion) throws ParvanUnrecoverableException {
+
+		//LOG
+		log.debug("Entering findCityByNameOrShortCode(term={})",term);
+		
+		List<CityInfoVO> voList = null;
+		CityInfoVO cityInfoVO = null;
+
+
+		try {
+
+			PageList<CityInfoMsg> msgPageList = rateAndRouteApiRestClient.findCitiesByNameOrShortCode(
+					null, // parent code
+					term, 
+					firstResult, 
+					maxResults, 
+					sortDirection, 
+					sortCriterion);
+			
+			voList = new ArrayList<CityInfoVO>();			
+			for (CityInfoMsg msg : msgPageList.getElements()) {
+				cityInfoVO = new CityInfoVO();
+				cityInfoVO.fromMsg(msg);
+
+				voList.add(cityInfoVO);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findCityByNameOrShortCode", e);
+		}
+
+		return voList;
+	}
+
+	@Override
+	public CityInfoVO getCityByShortCode(String shortCode) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering getCityByShortCode(shortCode={})", shortCode);
+		CityInfoVO cityInfoVO = null;
+
+		try {
+
+			CityInfoMsg cityInfoMsg = rateAndRouteApiRestClient.getCityByShortCode(shortCode);
+			cityInfoVO = new CityInfoVO();
+			cityInfoVO.fromMsg(cityInfoMsg);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getCityByShortCode", e);
+		}
+
+		return cityInfoVO;
+	}
+}

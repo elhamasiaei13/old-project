@@ -1,0 +1,319 @@
+
+actions = \u0641\u0639\u0627\u0644\u06CC\u062A\u200C\u0647\u0627\n
+
+baseModel.createDate = \u062A\u0627\u0631\u06CC\u062E \u0627\u06CC\u062C\u0627\u062F
+baseModel.updateDate = \u062A\u0627\u0631\u06CC\u062E \u0628\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06CC
+
+button.add    = \u0627\u06CC\u062C\u0627\u062F
+button.cancel = \u0627\u0646\u0635\u0631\u0627\u0641
+button.close  = \u0628\u0633\u062A\u0646
+button.create = \u0627\u06CC\u062C\u0627\u062F
+button.delete = \u062D\u0630\u0641
+button.reset  = \u0627\u0632 \u0646\u0648
+button.save   = \u0630\u062E\u06CC\u0631\u0647
+button.search = \u062C\u0633\u062A\u062C\u0648
+
+error.data-duplicate = \u0627\u06CC\u0646 \u0645\u0642\u062F\u0627\u0631 \u0642\u0628\u0644\u0627 \u0630\u062E\u06CC\u0631\u0647 \u0634\u062F\u0647 \u0627\u0633\u062A
+error.error-required = \u0627\u06CC\u0646 \u0641\u06CC\u0644\u062F \u0627\u062C\u0628\u0627\u0631\u06CC \u0645\u06CC\u200C\u0628\u0627\u0634\u062F
+
+errorCode.10702 = \u0634\u0645\u0627 \u0646\u0645\u06CC\u062A\u0648\u0627\u0646\u06CC\u062F \u0646\u0645\u0627\u0646\u06CC\u062F\u0647 \u0627\u06CC \u0631\u0627 \u06A9\u0647\u060C \u06CC\u06A9 \u06CC\u0627 \u0686\u0646\u062F \u0646\u0645\u0627\u06CC\u0646\u062F\u0647 \u062F\u06CC\u06AF\u0631 \u0632\u06CC\u0631 \u0645\u062C\u0645\u0648\u0639\u0647 \u0622\u0646 \u0647\u0633\u062A\u0646\u062F\u060C \u062D\u0630\u0641 \u06A9\u0646\u06CC\u062F
+errorCode.10706 = \u062E\u0648\u062F \u0646\u0645\u0627\u06CC\u0646\u062F\u0647 \u0646\u0645\u06CC\u200C\u062A\u0648\u0627\u0646\u062F \u0628\u0647 \u0639\u0646\u0648\u0627\u0646 \u0646\u0645\u0627\u06CC\u0646\u062F\u0647 \u0648\u0627\u0644\u062F \u0627\u0646\u062A\u062E\u0627\u0628 \u0634\u0648\u062F.
+errorCode.10707 = \u062A\u0646\u0647\u0627 \u06CC\u06A9 \u0646\u0645\u0627\u06CC\u0646\u062F\u0647 \u0628\u062F\u0648\u0646 \u0648\u0627\u0644\u062F \u0645\u06CC\u200C\u062A\u0648\u0627\u0646\u062F \u0645\u0648\u062C\u0648\u062F \u0628\u0627\u0634\u062F
+errorCode.10708 = \u0627\u06CC\u0646 \u0634\u0645\u0627\u0631\u0647 \u062D\u0633\u0627\u0628 \u0645\u062A\u0639\u0644\u0642 \u0628\u0647 \u0646\u0645\u0627\u06CC\u0646\u062F\u0647 \u062F\u06CC\u06AF\u0631\u06CC \u0645\u06CC\u200C\u0628\u0627\u0634\u062F
+errorCode.20000 = \u062D\u062F\u0627\u0642\u0644 \u06CC\u06A9 \u0634\u062E\u0635 \u0631\u0627 \u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F
+
+header.delete = \u062D\u0630\u0641
+header.search = \u062C\u0633\u062A\u062C\u0648
+
+packingType = \u0646\u0648\u0639 \u0628\u0633\u062A\u0647 \u0628\u0646\u062F\u06CC
+
+packingType.active       = \u0641\u0639\u0627\u0644
+packingType.code         = \u06A9\u062F
+packingType.displayOrder = \u062A\u0631\u062A\u06CC\u0628 \u0646\u0645\u0627\u06CC\u0634
+packingType.height       = \u0627\u0631\u062A\u0641\u0627\u0639
+packingType.length       = \u0637\u0648\u0644
+packingType.maxWeight    = \u062D\u062F\u0627\u06A9\u062B\u0631 \u0648\u0632\u0646
+packingType.nameEn       = \u0646\u0627\u0645 (\u0627\u0646\u06AF\u0644\u06CC\u0633\u06CC)
+packingType.nameFa       = \u0646\u0627\u0645 (\u0641\u0627\u0631\u0633\u06CC)
+packingType.standard     = \u0627\u0633\u062A\u0627\u0646\u062F\u0627\u0631\u062F
+packingType.width        = \u0639\u0631\u0636
+
+reset = \u0627\u0632\u0646\u0648
+
+search = \u062C\u0633\u062A\u062C\u0648
+
+error-required = \u0627\u06CC\u0646 \u0641\u06CC\u0644\u062F \u0627\u062C\u0628\u0627\u0631\u06CC \u0627\u0633\u062A
+
+choose = \u0627\u0646\u062A\u062E\u0627\u0628
+
+delete = \u062D\u0630\u0641
+
+#---------------------------------------------------------complaintCategory
+
+complaintCategory = \u062F\u0633\u062A\u0647 \u0628\u0646\u062F\u06CC \u0634\u06A9\u0627\u06CC\u062A
+
+create-another = Create Another
+
+create = \u0627\u06CC\u062C\u0627\u062F
+modify = \u0648\u06CC\u0631\u0627\u06CC\u0634
+complaintCategory.delete.confirm = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+
+complaintCategory.code = \u06A9\u062F \u062F\u0633\u062A\u0647 \u0634\u06A9\u0627\u06CC\u062A
+complaintCategory.nameFa = \u0646\u0627\u0645 (\u0641\u0627\u0631\u0633\u06CC)
+complaintCategory.nameEn = \u0646\u0627\u0645 (\u0627\u0646\u06AF\u0644\u06CC\u0633\u06CC)
+complaintCategory.active = \u0641\u0639\u0627\u0644 \u0628\u0648\u062F\u0646
+complaintCategory.description = \u062A\u0648\u0636\u06CC\u062D\u0627\u062A
+
+#---------------------------------------------------------complaint
+
+complaint = \u0634\u06A9\u0627\u06CC\u062A
+
+create-another = Create Another
+
+create = \u0627\u06CC\u062C\u0627\u062F
+modify = \u0648\u06CC\u0631\u0627\u06CC\u0634
+complaint.delete.confirm = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+
+complaint.userName = \u0646\u0627\u0645 \u06A9\u0627\u0631\u0628\u0631\u06CC
+complaint.firstName = \u0646\u0627\u0645
+complaint.lastName = \u0646\u0627\u0645 \u062E\u0627\u0646\u0648\u0627\u062F\u06AF\u06CC
+complaint.subject = \u0645\u0648\u0636\u0648\u0639
+complaint.userUuid = Uuid
+complaint.email = \u0627\u06CC\u0645\u06CC\u0644
+complaint.tel = \u062A\u0644\u0641\u0646
+complaint.attachement = \u0636\u0645\u06CC\u0645\u0647
+complaint.description = \u062A\u0648\u0636\u06CC\u062D\u0627\u062A
+complaint.status = \u0648\u0636\u0639\u06CC\u062A
+complaint.fullName = \u0646\u0627\u0645 \u0648 \u0646\u0627\u0645 \u062E\u0627\u0646\u0648\u0627\u062F\u06AF\u06CC
+complaint.result   = \u0646\u062A\u06CC\u062C\u0647
+
+complaintCustomer = \u0634\u06A9\u0627\u06CC\u062A \u0647\u0627\u06CC \u0645\u0646
+complaintCustomer = \u0645\u0634\u062A\u0631\u06CC - \u0634\u06A9\u0627\u06CC\u062A
+complaintCustomerList = \u0634\u06A9\u0627\u06CC\u062A \u0647\u0627\u06CC \u0645\u0646
+
+
+#-----------------------------------------------------EntityType
+entityType               = \u0646\u0648\u0639 Entity
+
+entitytype.applicationId = Application ID
+entitytype.name          = \u0646\u0627\u0645
+entitytype.title         = \u0639\u0646\u0648\u0627\u0646
+entitytype.description   = \u062A\u0648\u0636\u06CC\u062D\u0627\u062A
+entitytype.userDefined   = \u062A\u0639\u0631\u06CC\u0641 \u06A9\u0627\u0631\u0628\u0631\u06CC
+
+button.addEntityType     = \u0627\u06CC\u062C\u0627\u062F \u0646\u0648\u0639 Entity
+
+entityType.delete.confirm = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+
+#-----------------------------------------------------ViewTemplate
+viewTemplate             = View Template
+
+viewTemplate.templateType= Template Type
+viewTemplate.title       = \u0639\u0646\u0648\u0627\u0646
+viewTemplate.body        = Template Body
+viewTemplate.dataModel   = Data Model
+viewTemplate.visible     = \u0642\u0627\u0628\u0644 \u0646\u0645\u0627\u06CC\u0634
+
+button.addViewTemplate   = \u0627\u06CC\u062C\u0627\u062F View Template
+create.addViewTemplate   = \u0627\u06CC\u062C\u0627\u062F View Template
+modify.addViewTemplate   = \u0648\u06CC\u0631\u0627\u06CC\u0634 View Template 
+delete.addViewTemplate   = \u062D\u0630\u0641 View Template
+
+viewTemplate.delete.confirm = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+
+#-----------------------------------------------------MetadataField
+
+metadataField                         = MetaData Field
+
+metadataField.parent.label            = \u0648\u0627\u0644\u062F
+
+metadataField.parentMetadataField     = \u0632\u06CC\u0631 \u0645\u062C\u0645\u0648\u0639\u0647
+metadataField.parent                  = \u0632\u06CC\u0631 \u0645\u062C\u0645\u0648\u0639\u0647
+
+metadataField.name                    = \u0646\u0627\u0645
+metadataField.labels                  = \u0639\u0646\u0648\u0627\u0646
+metadataField.description             = Description
+metadataField.dataType                = Data Type
+metadataField.dataLength              = Data Length
+metadataField.languageScriptDirection = Script Direction
+metadataField.languageScriptFamily    = Script Family
+metadataField.language                = Language
+metadataField.defaultValue            = Default Value
+metadataField.required                = Required
+metadataField.repeatable              = Repeatable
+metadataField.visible                 = Visible
+metadataField.searchable              = Searchable
+metadataField.sortable                = Sortable
+metadataField.helpId                  = help Id
+metadataField.fullName                = FullName
+metadataField.sortField               = Sort Field
+metadataField.indentedName            = IndentedName
+
+#Nesting
+metadataField.nestingIndexInParent    = Index In Parent
+metadataField.nestingAbsoluteIndex    = Absolute Index
+metadataField.nestingIndent           = Nesting Indent
+
+metadataField.command                 = \u0641\u0639\u0627\u0644\u06CC\u062A\u200C\u0647\u0627
+
+create.MetadataField                  = \u0627\u06CC\u062C\u0627\u062F Metadata Field
+delete.MetadataField                  = \u062D\u0630\u0641 Metadata Field
+modify.MetadataField                  = \u0648\u06CC\u0631\u0627\u06CC\u0634 Meta Field
+
+metadata.delete.confirm               = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+
+#-----------------------------------------------------CvGroup
+cvGroup                    = CV Group
+
+cvGroup.applicationId      = ApplicationId
+cvGroup.name               = \u0646\u0627\u0645
+cvGroup.title              = Title
+cvGroup.externalTermSource = ExternalTermSource
+cvGroup.authority          = Authority
+cvGroup.description        = Description
+
+cvGroup.delete.confirm     = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+
+#-----------------------------------------------------CvTerm
+cvTerm                           = CV Term
+
+parent                           = \u0632\u06CC\u0631 \u0645\u062C\u0645\u0648\u0639\u0647
+parent.term                      = \u0648\u0627\u0644\u062F
+cvTerm.fullName                  = \u0639\u0628\u0627\u0631\u062A \u06A9\u0627\u0645\u0644
+cvTerm.indentedName              = Indented
+
+cvTerm.termCanonicalSearch       = \u0639\u0628\u0627\u0631\u062A \u062C\u0633\u062A\u062C\u0648
+cvTerm.termCanonicalSort         = \u0639\u0628\u0627\u0631\u062A Sort
+cvTerm.authorized                = authorized
+cvTerm.authority                 = authority
+cvTerm.approved                  = \u062A\u0627\u06CC\u06CC\u062F \u0634\u062F\u0647
+cvTerm.term                      = \u0639\u0628\u0627\u0631\u062A
+cvTerm.languageScriptDirection   = Script Direction
+cvTerm.languageScriptFamily      = Script Family
+cvTerm.language                  = \u0632\u0628\u0627\u0646
+cvTerm.metadataXML               = metadata XML
+
+cvTerm.delete                    = \u062D\u0630\u0641
+cvTerm.modify                    = \u0648\u06CC\u0631\u0627\u06CC\u0634
+
+cvTerm.delete.confirm            = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+cvTerm.sortFiead                 = Sort Field
+
+#-----------------------------------------------------metadataInputFieldConverter
+metadataInputFieldConverter      = metadataInputFieldConverter
+
+metadataInputFieldConverter.name = \u0646\u0627\u0645
+metadataInputFieldConverter.uri  = URI
+
+
+metadataInputFieldConverter.delete.confirm = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+
+#-----------------------------------------------------inputWidget
+inputWidget                      = inputWidget
+
+inputWidget.name                 = \u0646\u0627\u0645
+inputWidget.classUri             = Class URI
+
+inputWidget.delete.confirm       = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+
+#-----------------------------------------------------inputValidator
+inputValidator                   = inputValidator
+
+inputValidator.name              = \u0646\u0627\u0645
+inputValidator.classUri          = Class URI
+
+inputValidator.delete.confirm    = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+
+#-----------------------------------------------------inputFormField
+inputFormField                        = inputFormField
+
+inputFormField.name                   = \u0646\u0627\u0645
+inputFormField.labels                 = Labels
+inputFormField.displayType            = DisplayType
+inputFormField.defaultValue           = DefaultValue
+inputFormField.preservedLastValue     = PreservedLastValue
+inputFormField.required               = Required
+inputFormField.repeatable             = Repeatable
+inputFormField.visible                = Visible
+inputFormField.helpId                 = HelpId
+inputFormField.description            = Description
+
+inputConverter                        = Converter
+inputValidator                        = Validator
+
+parent.name                           = Parent
+inputFormField.parent                 = Parent
+inputFormField.parent.label           = Parent
+
+metadataFieldName                     = Metadata Field
+
+inputFormField.fullName               = \u0639\u0628\u0627\u0631\u062A \u06A9\u0627\u0645\u0644
+inputFormField.sortFiead              = Sort Field
+inputFormField.indentedName           = Indented
+
+inputFormField.delete.confirm         = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+
+#-----------------------------------------------------inputForm
+inputForm                             = inputForm
+
+inputForm.name                        = \u0646\u0627\u0645
+inputForm.titles                      = \u0639\u0646\u0648\u0627\u0646
+entityTypeName                        = \u0646\u0627\u0645 EntityType
+inputForm.active                      = active
+inputForm.description                 = Description
+
+inputForm.delete.confirm              = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+inputFormInEntityType.delete.confirm  = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+
+
+#-----------------------------------------------------WarehouseReceipt
+warehouseReceipt                            = warehouseReceipt
+
+warehouseReceipt.number                     = \u0634\u0645\u0627\u0631\u0647
+warehouseReceipt.waybillNumber              = \u0634\u0645\u0627\u0631\u0647 \u0628\u0627\u0631 \u0646\u0627\u0645\u0647
+warehouseReceipt.customsReferenceNo         = \u0634\u0645\u0627\u0631\u0647 \u0645\u0627\u0646\u06CC\u0641\u0633\u062A \u06AF\u0645\u0631\u06A9
+warehouseReceipt.manifestId                 = Manifest Id
+warehouseReceipt.date                       = \u062A\u0627\u0631\u06CC\u062E
+warehouseReceipt.location                   = \u0646\u0627\u0645 \u0627\u0646\u0628\u0627\u0631
+warehouseReceipt.pieces                     = \u062A\u0639\u062F\u0627\u062F
+warehouseReceipt.confirmedExceededQuantity  = confirmedExceededQuantity
+warehouseReceipt.grossWeight                = \u0648\u0632\u0646
+warehouseReceipt.remarks                    = \u06CC\u0627\u062F\u062F\u0627\u0634\u062A
+
+warehouseReceipt.toDate                     = \u0627\u0632 \u062A\u0627\u0631\u06CC\u062E
+warehouseReceipt.fromDate                   = \u062A\u0627 \u062A\u0627\u0631\u06CC\u062E
+
+warehouseReceipt.delete.confirm             = \u0622\u06CC\u0627 \u0628\u0631\u0627\u06CC \u062D\u0630\u0641 \u0645\u0637\u0645\u06CC\u0646 \u0647\u0633\u062A\u06CC\u062F
+
+
+#-----------------------------------------------------WaybillMsg
+
+warehouseReceiptView.wrTotalPieces              = \u0645\u062C\u0645\u0648\u0639 \u0642\u0628\u0636 \u0627\u0646\u0628\u0627\u0631 \u0634\u062F\u0647
+warehouseReceiptView.waybillNumber              = \u0634\u0645\u0627\u0631\u0647 \u0628\u0627\u0631 \u0646\u0627\u0645\u0647
+warehouseReceiptView.consigneeNameEn            = \u06AF\u06CC\u0631\u0646\u062F\u0647
+warehouseReceiptView.consigneeNameLocal         = \u06AF\u06CC\u0631\u0646\u062F\u0647
+warehouseReceiptView.wbTotalPieces              = \u062A\u0639\u062F\u0627\u062F \u062F\u0631 \u0628\u0627\u0631\u0646\u0627\u0645\u0647
+warehouseReceiptView.WrTotalGrossWeight         = \u0645\u062C\u0645\u0648\u0639 \u0648\u0632\u0646 \u062E\u0627\u0644\u0635 \u062F\u0631 \u0627\u0646\u0628\u0627\u0631
+warehouseReceiptView.wbTotalGrossWeight         = \u0645\u062C\u0645\u0648\u0639 \u0648\u0632\u0646 \u062E\u0627\u0644\u0635 \u062F\u0631 \u0628\u0627\u0631\u0646\u0627\u0645\u0647
+
+warehouseReceiptView.number                     = \u0634\u0645\u0627\u0631\u0647
+warehouseReceiptView.waybillNumber              = \u0634\u0645\u0627\u0631\u0647 \u0628\u0627\u0631 \u0646\u0627\u0645\u0647
+warehouseReceiptView.customsReferenceNo         = \u0634\u0645\u0627\u0631\u0647 \u0645\u0627\u0646\u06CC\u0641\u0633\u062A \u06AF\u0645\u0631\u06A9
+warehouseReceiptView.manifestId                 = Manifest Id
+warehouseReceiptView.date                       = \u062A\u0627\u0631\u06CC\u062E
+warehouseReceiptView.location                   = \u0646\u0627\u0645 \u0627\u0646\u0628\u0627\u0631
+warehouseReceiptView.pieces                     = \u062A\u0639\u062F\u0627\u062F
+warehouseReceiptView.confirmedExceededQuantity  = confirmedExceededQuantity
+warehouseReceiptView.grossWeight                = \u0648\u0632\u0646
+warehouseReceiptView.remarks                    = \u06CC\u0627\u062F\u062F\u0627\u0634\u062A
+
+
+
+
+
+
+
+
+
+
+

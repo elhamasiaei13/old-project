@@ -1,0 +1,15 @@
+package com.parvanpajooh.siteservices.service;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.siteservices.model.vo.RecoveryCodeVO;
+import com.parvanpajooh.siteservices.model.vo.RegisterVO;
+
+public interface ProfileLocalService {
+
+	public void register(RegisterVO registerVO) throws ParvanServiceException;
+
+	public void identifyAndCreateCode(String emailOrMobile) throws ParvanServiceException;
+
+	public RecoveryCodeVO findRecovryCodeBy(RecoveryCodeVO recoveryCodeVO) throws ParvanServiceException;
+
+}

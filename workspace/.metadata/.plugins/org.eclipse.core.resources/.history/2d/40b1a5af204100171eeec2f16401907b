@@ -1,0 +1,140 @@
+package com.parvanpajooh.client.geomanagement.model.criteria;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.NodeMsg;
+import com.parvanpajooh.client.rateandroute.model.ZoneMsg;
+
+public class ZoneCriteriaMsg extends BaseMsg {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8000124586892926771L;
+
+	private String name;
+	
+	private String codeName;
+	
+	private String allNames;
+	
+	private Boolean active;
+	
+    private NodeMsg node;
+    
+    private ZoneMsg parent;
+    
+    private ZoneMsg children;
+	
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @return the codeName
+	 */
+	public String getCodeName() {
+		return codeName;
+	}
+
+	/**
+	 * @param codeName the codeName to set
+	 */
+	public void setCodeName(String codeName) {
+		this.codeName = codeName;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the node
+	 */
+	public NodeMsg getNode() {
+		return node;
+	}
+
+	/**
+	 * @param node the node to set
+	 */
+	public void setNode(NodeMsg node) {
+		this.node = node;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the allNames
+	 */
+	public String getAllNames() {
+		return allNames;
+	}
+
+	/**
+	 * @param allNames the allNames to set
+	 */
+	public void setAllNames(String allNames) {
+		this.allNames = allNames;
+	}
+
+	/**
+	 * @return the parent
+	 */
+	public ZoneMsg getParent() {
+		return parent;
+	}
+
+	/**
+	 * @param parent the parent to set
+	 */
+	public void setParent(ZoneMsg parent) {
+		this.parent = parent;
+	}
+
+	/**
+	 * @return the children
+	 */
+	public ZoneMsg getChildren() {
+		return children;
+	}
+
+	/**
+	 * @param children the children to set
+	 */
+	public void setChildren(ZoneMsg children) {
+		this.children = children;
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("name", name)
+			.add("codeName", codeName)
+			.add("allNames", allNames)
+			.add("active", active)
+			.add("node", node)
+			.add("parent", parent)
+			.add("children", children)
+			.toString();
+	}
+
+}

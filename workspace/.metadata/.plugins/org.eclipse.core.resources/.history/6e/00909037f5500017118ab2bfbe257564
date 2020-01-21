@@ -1,0 +1,17 @@
+package com.parvanpajooh.siteservices.service;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.siteservices.model.vo.ComplaintCategoryVO;
+import com.parvanpajooh.siteservices.model.vo.ComplaintVO;
+
+public interface ComplaintManagementLocalService {
+
+	public ComplaintCategoryVO getComplaintCategory(Long id) throws ParvanServiceException;
+	
+	public PageList<ComplaintCategoryVO> findComplaintCategoriesBy(String term, int page, int size) throws ParvanServiceException;
+
+	public void saveComplaint(UserInfo userInfo, ComplaintVO complaintVO) throws ParvanServiceException;
+
+}

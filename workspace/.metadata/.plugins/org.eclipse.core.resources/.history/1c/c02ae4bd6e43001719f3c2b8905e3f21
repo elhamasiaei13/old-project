@@ -1,0 +1,29 @@
+package com.parvanpajooh.siteservices.service.impl;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.ddd.application.AbstractApplicationServiceImpl;
+import com.parvanpajooh.siteservices.service.RecoveryCodeLocalService;
+import com.parvanpajooh.siteservices.service.RecoveryCodeService;
+
+/**
+ * @author dev-03
+ *
+ */
+@Stateless
+public class RecoveryCodeServiceImpl extends AbstractApplicationServiceImpl implements RecoveryCodeService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(RecoveryCodeServiceImpl.class);
+
+	@Inject
+	private RecoveryCodeLocalService recoveryCodeLocalService;
+
+
+}

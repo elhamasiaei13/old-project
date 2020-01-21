@@ -1,0 +1,319 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.geomanagement.model;
+
+import java.util.List;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RateRuleOwnerType;
+
+/**
+ * @author mehrdad
+ *
+ */
+public class RateRuleMsg extends BaseMsg {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	private Long id;
+	
+	private RateTypeMsg type;
+	
+	private RateRuleOwnerType rateRuleOwnerType;
+	
+	private List<RuleConditionMsg> ruleConditions;
+	
+	private List<RuleActionMsg> ruleActions;
+	
+	private ProductMsg product;
+	
+	private RouteMsg route;
+	
+	private NodeMsg node;
+	
+	private ZoneMsg zone;
+	
+	private String evaluatedWeightRateClass;
+	
+	private Double evaluatedValue;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public RateTypeMsg getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(RateTypeMsg type) {
+		this.type = type;
+	}
+
+	/**
+	 * @return the rateRuleOwnerType
+	 */
+	public RateRuleOwnerType getRateRuleOwnerType() {
+		return rateRuleOwnerType;
+	}
+
+	/**
+	 * @param rateRuleOwnerType the rateRuleOwnerType to set
+	 */
+	public void setRateRuleOwnerType(RateRuleOwnerType rateRuleOwnerType) {
+		this.rateRuleOwnerType = rateRuleOwnerType;
+	}
+
+	/**
+	 * @return the ruleConditions
+	 */
+	public List<RuleConditionMsg> getRuleConditions() {
+		return ruleConditions;
+	}
+
+	/**
+	 * @param ruleConditions the ruleConditions to set
+	 */
+	public void setRuleConditions(
+			List<RuleConditionMsg> ruleConditions) {
+		this.ruleConditions = ruleConditions;
+	}
+
+	/**
+	 * @return the ruleActions
+	 */
+	public List<RuleActionMsg> getRuleActions() {
+		return ruleActions;
+	}
+
+	/**
+	 * @param ruleActions the ruleActions to set
+	 */
+	public void setRuleActions(List<RuleActionMsg> ruleActions) {
+		this.ruleActions = ruleActions;
+	}
+
+	/**
+	 * @return the product
+	 */
+	public ProductMsg getProduct() {
+		return product;
+	}
+
+	/**
+	 * @param product the product to set
+	 */
+	public void setProduct(ProductMsg product) {
+		this.product = product;
+	}
+
+	/**
+	 * @return the route
+	 */
+	public RouteMsg getRoute() {
+		return route;
+	}
+
+	/**
+	 * @param route the route to set
+	 */
+	public void setRoute(RouteMsg route) {
+		this.route = route;
+	}
+
+	/**
+	 * @return the node
+	 */
+	public NodeMsg getNode() {
+		return node;
+	}
+
+	/**
+	 * @param node the node to set
+	 */
+	public void setNode(NodeMsg node) {
+		this.node = node;
+	}
+
+	/**
+	 * @return the zone
+	 */
+	public ZoneMsg getZone() {
+		return zone;
+	}
+
+	/**
+	 * @param zone the zone to set
+	 */
+	public void setZone(ZoneMsg zone) {
+		this.zone = zone;
+	}
+
+	/**
+	 * @return the evaluatedWeightRateClass
+	 */
+	public String getEvaluatedWeightRateClass() {
+		return evaluatedWeightRateClass;
+	}
+
+	/**
+	 * @param evaluatedWeightRateClass the evaluatedWeightRateClass to set
+	 */
+	public void setEvaluatedWeightRateClass(String evaluatedWeightRateClass) {
+		this.evaluatedWeightRateClass = evaluatedWeightRateClass;
+	}
+
+	/**
+	 * @return the evaluatedValue
+	 */
+	public Double getEvaluatedValue() {
+		return evaluatedValue;
+	}
+
+	/**
+	 * @param evaluatedValue the evaluatedValue to set
+	 */
+	public void setEvaluatedValue(Double evaluatedValue) {
+		this.evaluatedValue = evaluatedValue;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder sb = new ToStringBuilder(this,
+				ToStringStyle.DEFAULT_STYLE)
+				.append("id", getId())
+				.append("type", this.type)
+				.append("evaluatedWeightRateClass", this.evaluatedWeightRateClass)
+				.append("evaluatedValue", this.evaluatedValue)
+				.append("rateRuleOwnerType", this.rateRuleOwnerType)
+				.append("ruleConditions", this.ruleConditions)
+				.append("ruleActions", this.ruleActions)
+				.append("product", this.product)
+				.append("route", this.route)
+				.append("node", this.node)
+				.append("zone", this.zone)
+				;
+
+		return sb.toString();
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String toStringCompact() {
+		
+		String nullStr = "null";
+		
+		StringBuilder sb = new StringBuilder();
+		
+		// id
+		sb.append("id:[");
+		sb.append(this.getId());
+		sb.append(']');
+		
+		// product
+		sb.append(" product:[");
+		ProductMsg ProductMsg = this.getProduct();
+		if (ProductMsg == null) {
+			sb.append(nullStr);
+		} else {
+			sb.append(ProductMsg.getCode());
+		}
+		sb.append(']');
+		
+		// rateType
+		sb.append(" rateType:[");
+		RateTypeMsg RateTypeMsg = this.getType();
+		if (RateTypeMsg == null) {
+			sb.append(nullStr);
+		} else {
+			sb.append(RateTypeMsg.getCode());
+		}
+		sb.append(']');
+		
+		// ownerType
+		sb.append(" ownerType:[");
+		sb.append(this.getRateRuleOwnerType());
+		sb.append(']');
+		
+		// evaluatedWeightRateClass
+		sb.append(" rateClass:[");
+		sb.append(this.getEvaluatedWeightRateClass());
+		sb.append(']');
+		
+		// evaluatedValue
+		sb.append(" evaluatedValue:[");
+		sb.append(this.getEvaluatedValue());
+		sb.append(']');
+		
+		// route
+		sb.append(" route:[");
+		RouteMsg RouteMsg = this.getRoute();
+		if (RouteMsg == null) {
+			sb.append(nullStr);
+			
+		} else {
+			sb.append(" routeId:[");
+			sb.append(RouteMsg.getId());
+			sb.append(']');
+			
+			sb.append(" from:[");
+			NodeMsg fromNodeMsg = RouteMsg.getFromNode();
+			sb.append(fromNodeMsg.getCodeName());
+			sb.append(']');
+			
+			sb.append(" to:[");
+			NodeMsg toNodeMsg = RouteMsg.getToNode();
+			sb.append(toNodeMsg.getCodeName());
+			sb.append(']');
+			
+		}
+		sb.append(']');
+		
+		// node
+		NodeMsg NodeMsg = this.getNode();
+		sb.append(" node:[");
+		if (NodeMsg == null) {
+			sb.append(nullStr);
+		} else {
+			sb.append(NodeMsg.getCodeName());
+		}
+		sb.append(']');
+		
+		// node
+		ZoneMsg ZoneMsg = this.getZone();
+		sb.append(" zone:[");
+		if (ZoneMsg == null) {
+			sb.append(nullStr);
+		} else {
+			sb.append(ZoneMsg.getCodeName());
+		}
+		sb.append(']');
+		
+		return sb.toString();
+		
+	}
+}

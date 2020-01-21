@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;dynamic-crumbs.js&apos; to &apos;js&apos;&#x0A;- Original project: &apos;taskmanagement-web&apos;&#x0A;- Destination element: &apos;js&apos;&#x0A;- Original element: &apos;dynamic-crumbs.js&apos;" description="Copy file" element1="src/main/webapp/js/dynamic-crumbs.js" files="1" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1483858323487" target="/taskmanagement-web/src/main/webapp/js" units="0" version="1.0"/>
+</session>

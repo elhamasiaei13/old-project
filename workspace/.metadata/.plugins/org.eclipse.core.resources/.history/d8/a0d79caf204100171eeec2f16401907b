@@ -1,0 +1,194 @@
+package com.parvanpajooh.client.geomanagement.model.criteria;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.CarrierMsg;
+import com.parvanpajooh.client.rateandroute.model.GeoEntityMsg;
+import com.parvanpajooh.client.rateandroute.model.NodeMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RouteCategory;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.RouteType;
+
+public class RouteCriteriaMsg extends BaseMsg {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5500012424486727461L;
+
+	private RouteType[] types;
+	
+	private RouteCategory[] categories;
+	
+	private String carrierRouteNumber;
+	
+	private Boolean active;
+	
+    private NodeMsg toNode;
+    
+	private NodeMsg fromNode;
+	
+	private GeoEntityMsg fromNodeParentGeoEntity;
+	
+	private GeoEntityMsg toNodeParentGeoEntity;
+	
+	private CarrierMsg carrier;
+	
+	private String title;
+
+	/**
+	 * @return the types
+	 */
+	public RouteType[] getTypes() {
+		return types;
+	}
+
+	/**
+	 * @param types the types to set
+	 */
+	public void setTypes(RouteType[] types) {
+		this.types = types;
+	}
+	
+	/**
+	 * @return the categories
+	 */
+	public RouteCategory[] getCategories() {
+		return categories;
+	}
+
+	/**
+	 * @param categories the categories to set
+	 */
+	public void setCategories(RouteCategory[] categories) {
+		this.categories = categories;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the toNode
+	 */
+	public NodeMsg getToNode() {
+		return toNode;
+	}
+
+	/**
+	 * @param toNode the toNode to set
+	 */
+	public void setToNode(NodeMsg toNode) {
+		this.toNode = toNode;
+	}
+
+	/**
+	 * @return the fromNode
+	 */
+	public NodeMsg getFromNode() {
+		return fromNode;
+	}
+
+	/**
+	 * @param fromNode the fromNode to set
+	 */
+	public void setFromNode(NodeMsg fromNode) {
+		this.fromNode = fromNode;
+	}
+
+	/**
+	 * @return the carrierRouteNumber
+	 */
+	public String getCarrierRouteNumber() {
+		return carrierRouteNumber;
+	}
+
+	/**
+	 * @param carrierRouteNumber the carrierRouteNumber to set
+	 */
+	public void setCarrierRouteNumber(String carrierRouteNumber) {
+		this.carrierRouteNumber = carrierRouteNumber;
+	}
+
+	/**
+	 * @return the carrier
+	 */
+	public CarrierMsg getCarrier() {
+		return carrier;
+	}
+
+	/**
+	 * @param carrier the carrier to set
+	 */
+	public void setCarrier(CarrierMsg carrier) {
+		this.carrier = carrier;
+	}
+
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return title;
+	}
+	
+	/**
+	 * @return the fromNodeParentGeoEntity
+	 */
+	public GeoEntityMsg getFromNodeParentGeoEntity() {
+		return fromNodeParentGeoEntity;
+	}
+
+	/**
+	 * @param fromNodeParentGeoEntity the fromNodeParentGeoEntity to set
+	 */
+	public void setFromNodeParentGeoEntity(GeoEntityMsg fromNodeParentGeoEntity) {
+		this.fromNodeParentGeoEntity = fromNodeParentGeoEntity;
+	}
+
+	/**
+	 * @return the toNodeParentGeoEntity
+	 */
+	public GeoEntityMsg getToNodeParentGeoEntity() {
+		return toNodeParentGeoEntity;
+	}
+
+	/**
+	 * @param toNodeParentGeoEntity the toNodeParentGeoEntity to set
+	 */
+	public void setToNodeParentGeoEntity(GeoEntityMsg toNodeParentGeoEntity) {
+		this.toNodeParentGeoEntity = toNodeParentGeoEntity;
+	}
+
+	/**
+	 * with this value we search in route's id, fromNode's name and toNode's name
+	 * if you set fromNode and toNode, we ignore this value for search
+	 *  
+	 * @param title the title to set
+	 */
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("types", types)
+			.add("carrierRouteNumber", carrierRouteNumber)
+			.add("active", active)
+			.add("toNode", toNode)
+			.add("fromNode", fromNode)
+			.add("carrier", carrier)
+			.add("title", title)
+			.toString();
+	}
+
+}

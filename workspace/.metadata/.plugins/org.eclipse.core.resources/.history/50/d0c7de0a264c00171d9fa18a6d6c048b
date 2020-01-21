@@ -1,0 +1,131 @@
+/**
+ * 
+ */
+package com.parvanpajooh.carriermanagement.rest;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.parvanpajooh.carriermanagement.application.CarrierApplicationService;
+import com.parvanpajooh.carriermanagement.domain.model.criteria.CarrierCriteria;
+import com.parvanpajooh.carriermanagement.domain.model.dto.CarrierDto;
+import com.parvanpajooh.client.carriermanagement.model.CarrierMsg;
+import com.parvanpajooh.common.auth.BaseRestController;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseCriteria;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseDto;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.util.Validator;
+
+/**
+ * @author dev-06
+ *
+ */
+
+@RestController
+@RequestMapping("/v1")
+public class CarrierManagementRestController extends BaseRestController {
+	
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+	
+	@EJB(mappedName = "java:global/carriermanagement-ear/carriermanagement-ejb/CarrierApplicationServiceImpl")
+	private CarrierApplicationService carrierApplicationService;
+	
+	@RequestMapping(value = "/hello", method = RequestMethod.GET)
+	public String hello(@RequestParam(value = "name") String name)  {
+		return "Hello " + name;
+	}
+	
+	@RequestMapping(value = "/carriers/{carrierCode}", method = RequestMethod.GET)
+	public CarrierMsg getCarrierByCarrierCode(
+			@RequestHeader(value = "user_name") String userName, 
+			@RequestHeader(value = "ip") String ip,
+			@PathVariable(value = "carrierCode") String carrierCode) throws ParvanServiceException {
+
+		log.trace("Entering getCarrier(userName={}, carrierCode={})", userName, carrierCode);
+		UserInfo userInfo = loadUserInfo(userName, ip);
+
+		CarrierCriteria carrierCriteria = new CarrierCriteria();
+		carrierCriteria.setCarrierCode(carrierCode);
+
+		List<BaseDto> baseDtos = carrierApplicationService.findByCriteria(userInfo, carrierCriteria);
+
+		if (Validator.isNull(baseDtos)) {
+			throw new ParvanRecoverableException(
+					String.format("Route not found by  carrierRouteNumber [%s]", carrierRouteNumber),
+					ErrorCode.OBJECT_NOT_FOUND);
+		}
+		
+		CarrierMsg carrierMsg = null;
+		for (BaseDto baseDto : baseDtos) {
+			CarrierDto carrierDto = (CarrierDto) baseDto;
+			carrierMsg = new CarrierMsg();
+			carrierMsg = carrierDto.toMsg();
+		}
+
+		return carrierMsg;
+	}
+
+	@RequestMapping(value = "/carriers", method = RequestMethod.GET)
+	public List<CarrierMsg> findCarriers(
+			@RequestHeader(value = "user_name") String userName,
+			@RequestHeader(value = "ip") String ip,
+			@RequestParam(value = "term", required = false) String term, 
+			@RequestParam(value = "page") int page, 
+			@RequestParam(value = "size") int size,
+			@Context HttpServletResponse response) throws ParvanServiceException {
+
+		log.trace("Entering findCarriers(userName={})", userName);
+		UserInfo userInfo = loadUserInfo(userName, ip);
+		CarrierCriteria carrierCriteria = new CarrierCriteria();
+		carrierCriteria.setNameFa(term);
+		carrierCriteria.setCarrierCode(term);
+		
+		String sortCriterion="id";
+		if (page > 0) {
+			page = page - 1;// my pagination is zero based, but rest
+							// pagination best practice is 1-based
+		}
+
+		if (size == 0) {
+			size = 20;// it's default page size
+		}
+
+		int firstResult = page * size;
+		int maxResults = size;
+		
+		List<BaseDto> baseDtos = carrierApplicationService.findByCriteria(userInfo, carrierCriteria, firstResult, maxResults,
+				SortDirectionEnum.Ascending, sortCriterion);
+		int total = carrierApplicationService.countByCriteria(userInfo, carrierCriteria);
+		List<CarrierMsg> carrierMsgs = null;
+		
+		if (baseDtos != null) {
+			carrierMsgs = new ArrayList<CarrierMsg>();
+			for (BaseDto baseDto : baseDtos) {
+
+				CarrierDto carrierDto = (CarrierDto) baseDto;
+				CarrierMsg carrierMsg = new CarrierMsg();
+				carrierMsg = carrierDto.toMsg();
+				carrierMsgs.add(carrierMsg);
+			}
+		}
+		response.addIntHeader("total", total);
+		return carrierMsgs;
+	}
+}

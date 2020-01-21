@@ -1,0 +1,761 @@
+package com.parvanpajooh.taskmanagement.domain.model;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.Serializable;
+import java.io.StringWriter;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.GenericGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ErrorCode;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanRecoverableException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfoWrapper;
+import com.parvanpajooh.commons.util.DateUtilV2;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskAttachmentCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskChangeAssigneeCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskChangeStateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCommentCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskCreateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskRelationCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.dto.TaskUpdateCommandDto;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskCommandType;
+import com.parvanpajooh.taskmanagement.domain.model.enums.TaskState;
+
+@Entity
+@Table(name = "task_tbl" ,uniqueConstraints = { @UniqueConstraint(columnNames = { "taskNumber", "taskGroupId" })})
+public class Task implements Serializable {
+
+	static final Logger log = LoggerFactory.getLogger(Task.class);
+
+	private static final long serialVersionUID = 1L;
+
+	private static final String REPO_PATH = "/usr/local/issuemanager/";
+
+	@Id
+	@GeneratedValue(generator = "system-uuid")
+	@GenericGenerator(name = "system-uuid", strategy = "uuid")
+	private String id;
+
+	@Version
+	private Integer version;
+
+	private Long objectAccessScopeId;
+
+	private Long ownerAgentId;
+	
+	private Long taskGroupId;
+	
+	private Long taskNumber;
+	
+	private String taskKey;
+
+	@OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@JoinColumn(name = "taskId", referencedColumnName = "id")
+	private Set<TaskCommand> taskCommands = new LinkedHashSet<TaskCommand>();
+	
+	/**
+	 * @return the id
+	 */
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version
+	 *            the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	/**
+	 * @return the objectAccessScopeId
+	 */
+	public Long getObjectAccessScopeId() {
+		return objectAccessScopeId;
+	}
+
+	/**
+	 * @param objectAccessScopeId
+	 *            the objectAccessScopeId to set
+	 */
+	public void setObjectAccessScopeId(Long objectAccessScopeId) {
+		this.objectAccessScopeId = objectAccessScopeId;
+	}
+
+	/**
+	 * @return the ownerAgentId
+	 */
+	public Long getOwnerAgentId() {
+		return ownerAgentId;
+	}
+
+	/**
+	 * @param ownerAgentId
+	 *            the ownerAgentId to set
+	 */
+	public void setOwnerAgentId(Long ownerAgentId) {
+		this.ownerAgentId = ownerAgentId;
+	}
+
+	/**
+	 * @return the taskCommands
+	 */
+	public Set<TaskCommand> getTaskCommands() {
+		return taskCommands;
+	}
+
+	/**
+	 * @param taskCommands
+	 *            the taskCommands to set
+	 */
+	public void setTaskCommands(Set<TaskCommand> taskCommands) {
+		this.taskCommands = taskCommands;
+	}
+
+	/**
+	 * @return the taskGroupId
+	 */
+	public Long getTaskGroupId() {
+		return taskGroupId;
+	}
+
+	/**
+	 * @param taskGroupId the taskGroupId to set
+	 */
+	public void setTaskGroupId(Long taskGroupId) {
+		this.taskGroupId = taskGroupId;
+	}
+
+	/**
+	 * @return the taskNumber
+	 */
+	public Long getTaskNumber() {
+		return taskNumber;
+	}
+
+	/**
+	 * @param taskNumber the taskNumber to set
+	 */
+	public void setTaskNumber(Long taskNumber) {
+		this.taskNumber = taskNumber;
+	}
+
+	/**
+	 * @return the taskKey
+	 */
+	public String getTaskKey() {
+		return taskKey;
+	}
+
+	/**
+	 * @param taskKey the taskKey to set
+	 */
+	public void setTaskKey(String taskKey) {
+		this.taskKey = taskKey;
+	}
+
+	/**
+	 * 
+	 * @return
+	 * @throws JAXBException
+	 */
+	public TaskDto toDto() throws ParvanServiceException {
+		TaskDto dto = new TaskDto();
+
+		dto.setId(this.id);
+		dto.setVersion(this.version);
+		dto.setObjectAccessScopeId(this.objectAccessScopeId);
+		dto.setOwnerAgentId(this.ownerAgentId);
+
+		if (Validator.isNotNull(this.taskCommands)) {
+
+			List<TaskCommandDto> taskCommandList = new ArrayList<TaskCommandDto>();
+			
+			List<TaskCommand> allSortedtaskCommandsList = new ArrayList<TaskCommand>(this.taskCommands);
+			Collections.sort(allSortedtaskCommandsList, new Comparator<TaskCommand>() {
+				@Override
+				public int compare(TaskCommand cmd1, TaskCommand cmd2) {
+					return cmd1.getId().compareTo(cmd2.getId());
+				}
+			});
+
+			for (TaskCommand taskCommand : this.taskCommands) {
+				taskCommandList.add(taskCommand.toDto());
+			}
+
+			dto.setTaskCommands(taskCommandList);
+		}
+
+		return dto;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Task)) {
+			return false;
+		}
+
+		final Task obj = (Task) o;
+
+		return new EqualsBuilder().append(this.id, obj.getId()).isEquals();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(-970989579, 1884842917).append(this.id).toHashCode();
+	}
+
+	public static TaskDisplay getDisplayRecord(TaskDisplay existingTaskDisplay, Task task) throws ParvanServiceException {
+
+		TaskDisplay taskDisplay;
+		if (existingTaskDisplay == null) {
+			taskDisplay = new TaskDisplay();
+			taskDisplay.setTaskId(task.getId());
+		} else {
+			taskDisplay = existingTaskDisplay;
+		}
+
+		Set<TaskCommand> allTaskCommands = task.getTaskCommands();
+
+		List<TaskCommand> allSortedTaskCommandsList = new ArrayList<TaskCommand>(allTaskCommands);
+		Collections.sort(allSortedTaskCommandsList, new Comparator<TaskCommand>() {
+			@Override
+			public int compare(TaskCommand cmd1, TaskCommand cmd2) {
+				return cmd1.getId().compareTo(cmd2.getId());
+			}
+		});
+
+		Long ownerAgentId = task.getOwnerAgentId();
+		Long taskNumber = task.getTaskNumber();
+		String taskKey = task.getTaskKey();
+
+		for (TaskCommand thisTaskCmd : allSortedTaskCommandsList) {
+
+			switch (thisTaskCmd.getTaskCommandType()) {
+
+			case Create:
+
+				TaskCreateCommandDto createCommandDto = (TaskCreateCommandDto) thisTaskCmd.toDto();
+				taskDisplay.setTaskSubject(createCommandDto.getSubject());
+				taskDisplay.setCreateTaskRemarks(createCommandDto.getRemarks());
+				taskDisplay.setCreateUser(createCommandDto.getUserName());
+				taskDisplay.setCreateDateTime(DateUtilV2.convertStringDateTimeToLocalDateTime(thisTaskCmd.getLocalDateTime()));
+				taskDisplay.setPriority(createCommandDto.getPriority());
+				taskDisplay.setTaskType(createCommandDto.getTaskType());
+				taskDisplay.setTaskGroupId(createCommandDto.getGroupId());
+				if (Validator.isNotNull(createCommandDto.getDueDate())) {
+					taskDisplay.setDueDate(DateUtilV2.convertStringDateToLocalDate(createCommandDto.getDueDate()));
+				}
+				taskDisplay.setCurrentState(TaskState.NEW);
+
+				break;
+
+			case Update:
+
+				TaskUpdateCommandDto updateCommandDto = (TaskUpdateCommandDto) thisTaskCmd.toDto();
+				if(Validator.isNotNull(updateCommandDto.getSubject())){
+					taskDisplay.setTaskSubject(updateCommandDto.getSubject());					
+				}
+				
+				if(Validator.isNotNull(updateCommandDto.getGroupId())){
+					taskDisplay.setTaskGroupId(updateCommandDto.getGroupId());					
+				}
+				
+				if(Validator.isNotNull(updateCommandDto.getPriority())){
+					taskDisplay.setPriority(updateCommandDto.getPriority());					
+				}
+				
+				if(Validator.isNotNull(updateCommandDto.getTaskType())){
+					taskDisplay.setTaskType(updateCommandDto.getTaskType());					
+				}
+				
+				if(Validator.isNotNull(updateCommandDto.getDueDate())){
+					taskDisplay.setDueDate(DateUtilV2.convertStringDateToLocalDate(updateCommandDto.getDueDate()));					
+				}
+				
+				taskDisplay.setUpdateUser(updateCommandDto.getUserName());
+				taskDisplay.setUpdateDateTime(DateUtilV2.convertStringDateTimeToLocalDateTime(thisTaskCmd.getLocalDateTime()));
+
+				break;
+
+			case ChangeAssignee:
+
+				TaskChangeAssigneeCommandDto changeAssigneeCommandDto = (TaskChangeAssigneeCommandDto) thisTaskCmd.toDto();
+				taskDisplay.setCurrentAssigneeUserId(changeAssigneeCommandDto.getEmployeeIdTo());
+
+				break;
+
+			case ChangeState:
+
+				TaskChangeStateCommandDto changeStateCommandDto = (TaskChangeStateCommandDto) thisTaskCmd.toDto();
+				taskDisplay.setCurrentState(changeStateCommandDto.getNewState());
+
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		taskDisplay.setOwnerAgentId(ownerAgentId);
+		taskDisplay.setTaskNumber(taskNumber);
+		taskDisplay.setTaskKey(taskKey);
+		
+		return taskDisplay;
+	}
+
+	/**
+	 * 
+	 * @param taskCreateCommandDto
+	 * @throws ParvanUnrecoverableException
+	 */
+	public static Task createCommand(TaskCreateCommandDto taskCreateCommandDto) throws ParvanServiceException {
+
+		// initialize
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		String commandBody = null;
+
+		LocalDateTime now = LocalDateTime.now();
+		Task task = new Task();
+
+		try {
+
+			// create command object
+			TaskCommand taskCommand = new TaskCommand();
+
+			// Creating an Unmarshaller
+			JAXBContext createJaxbContext = JAXBContext.newInstance(TaskCreateCommandDto.class);
+			Marshaller createJaxbMarshaller = createJaxbContext.createMarshaller();
+
+			createJaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			StringWriter createResult = new StringWriter();
+			createJaxbMarshaller.marshal(taskCreateCommandDto, createResult);
+			commandBody = createResult.toString();
+
+			taskCommand.setTaskCommandType(TaskCommandType.Create);
+
+			taskCommand.setUserUuid(null);// TODO
+			taskCommand.setUserName(userInfo.getUserName());
+			taskCommand.setLocalDateTime(DateUtilV2.formatLocalDateTimeToStringDateTime(now));
+			taskCommand.setCommandBody(commandBody);
+
+			task.setOwnerAgentId(userInfoWrapper.getAgentId());
+
+			Set<TaskCommand> taskCommands = task.getTaskCommands();
+
+			if (taskCommands == null) {
+				throw new ParvanUnrecoverableException("invalid data. Task should have at least one command.");
+			}
+
+			taskCommands.add(taskCommand);
+
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while createCommand.", e);
+		}
+
+		return task;
+	}
+
+	/**
+	 * 
+	 * @param taskUpdateCommandDto
+	 * @throws ParvanRecoverableException
+	 */
+	public void updateCommand(TaskUpdateCommandDto taskUpdateCommandDto) throws ParvanServiceException {
+
+		// initialize
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		String commandBody = null;
+
+		// check
+		Long userAgentId = userInfoWrapper.getAgentId();
+		if (!this.ownerAgentId.equals(userAgentId)) {
+			log.error("only owner can change state of waybillnumber. ErrorCode[{}]", ErrorCode.STOCK2__ONLY_OWNER_CAN_CHANGE_STATE_OF_WAYBILLNUMBER);
+			throw new ParvanRecoverableException(ErrorCode.STOCK2__ONLY_OWNER_CAN_CHANGE_STATE_OF_WAYBILLNUMBER);
+		}
+
+		LocalDateTime now = LocalDateTime.now();
+
+		try {
+
+			// create command object
+			TaskCommand taskCommand = new TaskCommand();
+
+			// Creating an Unmarshaller
+			JAXBContext updateJaxbContext = JAXBContext.newInstance(TaskUpdateCommandDto.class);
+			Marshaller updateJaxbMarshaller = updateJaxbContext.createMarshaller();
+
+			updateJaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			StringWriter updateResult = new StringWriter();
+			updateJaxbMarshaller.marshal(taskUpdateCommandDto, updateResult);
+			commandBody = updateResult.toString();
+
+			taskCommand.setTaskCommandType(TaskCommandType.Update);
+			taskCommand.setUserUuid(null);// TODO
+			taskCommand.setUserName(userInfo.getUserName());
+			taskCommand.setLocalDateTime(DateUtilV2.formatLocalDateTimeToStringDateTime(now));
+			taskCommand.setCommandBody(commandBody);
+			Set<TaskCommand> taskCommands = this.getTaskCommands();
+
+			if (taskCommands == null) {
+				throw new ParvanUnrecoverableException("invalid data. Task should have at least one command.");
+			}
+
+			taskCommands.add(taskCommand);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while updateCommand.", e);
+		}
+
+	}
+
+	/**
+	 * 
+	 * @param taskChangeAssigneeCommandDto
+	 * @throws ParvanServiceException
+	 */
+	public void changeAssigneeCommand(TaskChangeAssigneeCommandDto taskChangeAssigneeCommandDto) throws ParvanServiceException {
+		// initialize
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		String commandBody = null;
+
+		// check
+		Long userAgentId = userInfoWrapper.getAgentId();
+		if (!this.ownerAgentId.equals(userAgentId)) {
+			log.error("only owner can change state of waybillnumber. ErrorCode[{}]", ErrorCode.STOCK2__ONLY_OWNER_CAN_CHANGE_STATE_OF_WAYBILLNUMBER);
+			throw new ParvanRecoverableException(ErrorCode.STOCK2__ONLY_OWNER_CAN_CHANGE_STATE_OF_WAYBILLNUMBER);
+		}
+
+		LocalDateTime now = LocalDateTime.now();
+
+		try {
+
+			// create command object
+			TaskCommand taskCommand = new TaskCommand();
+
+			// Creating an Unmarshaller
+			JAXBContext changeAssigneeJaxbContext = JAXBContext.newInstance(TaskChangeAssigneeCommandDto.class);
+			Marshaller changeAssigneeJaxbMarshaller = changeAssigneeJaxbContext.createMarshaller();
+
+			changeAssigneeJaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			StringWriter changeAssigneeResult = new StringWriter();
+			changeAssigneeJaxbMarshaller.marshal(taskChangeAssigneeCommandDto, changeAssigneeResult);
+			commandBody = changeAssigneeResult.toString();
+
+			taskCommand.setTaskCommandType(TaskCommandType.ChangeAssignee);
+			taskCommand.setUserUuid(null);// TODO
+			taskCommand.setUserName(userInfo.getUserName());
+			taskCommand.setLocalDateTime(DateUtilV2.formatLocalDateTimeToStringDateTime(now));
+			taskCommand.setCommandBody(commandBody);
+			Set<TaskCommand> taskCommands = this.getTaskCommands();
+
+			if (taskCommands == null) {
+				throw new ParvanUnrecoverableException("invalid data. Task should have at least one command.");
+			}
+
+			taskCommands.add(taskCommand);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while changeAssigneeCommand.", e);
+		}
+
+	}
+
+	/**
+	 * 
+	 * @param taskChangeStateCommandDto
+	 * @throws ParvanServiceException
+	 */
+	public void changeStateCommand(TaskChangeStateCommandDto taskChangeStateCommandDto) throws ParvanServiceException {
+
+		// initialize
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		String commandBody = null;
+
+		// check
+		Long userAgentId = userInfoWrapper.getAgentId();
+		if (!this.ownerAgentId.equals(userAgentId)) {
+			log.error("only owner can change state of waybillnumber. ErrorCode[{}]", ErrorCode.STOCK2__ONLY_OWNER_CAN_CHANGE_STATE_OF_WAYBILLNUMBER);
+			throw new ParvanRecoverableException(ErrorCode.STOCK2__ONLY_OWNER_CAN_CHANGE_STATE_OF_WAYBILLNUMBER);
+		}
+
+		LocalDateTime now = LocalDateTime.now();
+
+		try {
+
+			// create command object
+			TaskCommand taskCommand = new TaskCommand();
+
+			// Creating an Unmarshaller
+			JAXBContext changeStateJaxbContext = JAXBContext.newInstance(TaskChangeStateCommandDto.class);
+			Marshaller changeStateJaxbMarshaller = changeStateJaxbContext.createMarshaller();
+
+			changeStateJaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			StringWriter changeStateResult = new StringWriter();
+			changeStateJaxbMarshaller.marshal(taskChangeStateCommandDto, changeStateResult);
+			commandBody = changeStateResult.toString();
+
+			taskCommand.setTaskCommandType(TaskCommandType.ChangeState);
+
+			taskCommand.setUserUuid(null);// TODO
+			taskCommand.setUserName(userInfo.getUserName());
+			taskCommand.setLocalDateTime(DateUtilV2.formatLocalDateTimeToStringDateTime(now));
+			taskCommand.setCommandBody(commandBody);
+			Set<TaskCommand> taskCommands = this.getTaskCommands();
+
+			if (taskCommands == null) {
+				throw new ParvanUnrecoverableException("invalid data. Task should have at least one command.");
+			}
+
+			taskCommands.add(taskCommand);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while saving object.", e);
+		}
+
+	}
+
+	/**
+	 * 
+	 * @param taskCommentCommandDto
+	 * @throws ParvanServiceException
+	 */
+	public void addCommentCommand(TaskCommentCommandDto taskCommentCommandDto) throws ParvanServiceException {
+
+		// initialize
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		String commandBody = null;
+
+		// check
+		Long userAgentId = userInfoWrapper.getAgentId();
+		if (!this.ownerAgentId.equals(userAgentId)) {
+			log.error("only owner can change state of waybillnumber. ErrorCode[{}]", ErrorCode.STOCK2__ONLY_OWNER_CAN_CHANGE_STATE_OF_WAYBILLNUMBER);
+			throw new ParvanRecoverableException(ErrorCode.STOCK2__ONLY_OWNER_CAN_CHANGE_STATE_OF_WAYBILLNUMBER);
+		}
+
+		LocalDateTime now = LocalDateTime.now();
+
+		try {
+
+			// create command object
+			TaskCommand taskCommand = new TaskCommand();
+
+			// Creating an Unmarshaller
+			JAXBContext commentJaxbContext = JAXBContext.newInstance(TaskCommentCommandDto.class);
+			Marshaller commentJaxbMarshaller = commentJaxbContext.createMarshaller();
+
+			commentJaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			StringWriter commentResult = new StringWriter();
+			commentJaxbMarshaller.marshal(taskCommentCommandDto, commentResult);
+			commandBody = commentResult.toString();
+
+			taskCommand.setTaskCommandType(TaskCommandType.Comment);
+
+			taskCommand.setUserUuid(null);// TODO
+			taskCommand.setUserName(userInfo.getUserName());
+			taskCommand.setLocalDateTime(DateUtilV2.formatLocalDateTimeToStringDateTime(now));
+			taskCommand.setCommandBody(commandBody);
+			Set<TaskCommand> taskCommands = this.getTaskCommands();
+
+			if (taskCommands == null) {
+				throw new ParvanUnrecoverableException("invalid data. Task should have at least one command.");
+			}
+
+			taskCommands.add(taskCommand);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while addCommentCommand.", e);
+		}
+
+	}
+
+	/**
+	 * 
+	 * @param taskRelationCommandDto
+	 * @throws ParvanServiceException
+	 */
+	public void addRelationCommand(TaskRelationCommandDto taskRelationCommandDto) throws ParvanServiceException {
+		// initialize
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		String commandBody = null;
+
+		// check
+		Long userAgentId = userInfoWrapper.getAgentId();
+		if (!this.ownerAgentId.equals(userAgentId)) {
+			log.error("only owner can change state of waybillnumber. ErrorCode[{}]", ErrorCode.STOCK2__ONLY_OWNER_CAN_CHANGE_STATE_OF_WAYBILLNUMBER);
+			throw new ParvanRecoverableException(ErrorCode.STOCK2__ONLY_OWNER_CAN_CHANGE_STATE_OF_WAYBILLNUMBER);
+		}
+
+		LocalDateTime now = LocalDateTime.now();
+
+		try {
+
+			// create command object
+			TaskCommand taskCommand = new TaskCommand();
+
+			// Creating an Unmarshaller
+			JAXBContext relationJaxbContext = JAXBContext.newInstance(TaskRelationCommandDto.class);
+			Marshaller relationJaxbMarshaller = relationJaxbContext.createMarshaller();
+
+			relationJaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			StringWriter relationResult = new StringWriter();
+			relationJaxbMarshaller.marshal(taskRelationCommandDto, relationResult);
+			commandBody = relationResult.toString();
+
+			taskCommand.setTaskCommandType(TaskCommandType.Relation);
+
+			taskCommand.setUserUuid(null);// TODO
+			taskCommand.setUserName(userInfo.getUserName());
+			taskCommand.setLocalDateTime(DateUtilV2.formatLocalDateTimeToStringDateTime(now));
+			taskCommand.setCommandBody(commandBody);
+			Set<TaskCommand> taskCommands = this.getTaskCommands();
+
+			if (taskCommands == null) {
+				throw new ParvanUnrecoverableException("invalid data. Task should have at least one command.");
+			}
+
+			taskCommands.add(taskCommand);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while addRelation.", e);
+		}
+	}
+
+	/**
+	 * 
+	 * @param taskAttachmentCommandDto
+	 * @throws ParvanServiceException
+	 */
+	public void addAttachmentCommand(TaskAttachmentCommandDto taskAttachmentCommandDto) throws ParvanServiceException {
+		// initialize
+		UserInfo userInfo = CurrentContext.getCurrentUserInfo().get();
+		UserInfoWrapper userInfoWrapper = new UserInfoWrapper(userInfo);
+		String commandBody = null;
+
+		// check
+		Long userAgentId = userInfoWrapper.getAgentId();
+		if (!this.ownerAgentId.equals(userAgentId)) {
+			log.error("only owner can change state of waybillnumber. ErrorCode[{}]", ErrorCode.STOCK2__ONLY_OWNER_CAN_CHANGE_STATE_OF_WAYBILLNUMBER);
+			throw new ParvanRecoverableException(ErrorCode.STOCK2__ONLY_OWNER_CAN_CHANGE_STATE_OF_WAYBILLNUMBER);
+		}
+
+		LocalDateTime now = LocalDateTime.now();
+
+		try {
+
+			// create command object
+			TaskCommand taskCommand = new TaskCommand();
+
+			byte[] bytes = taskAttachmentCommandDto.getBytes();
+
+			// Creating the directory to store file
+			File dir = new File(REPO_PATH + this.getId());
+			if (!dir.exists()) {
+				dir.mkdirs();
+			}
+
+			// Create the file on server
+			File serverFile = new File(dir.getAbsolutePath() + StringPool.SLASH + taskAttachmentCommandDto.getName());
+			if (serverFile.exists()) {
+				throw new ParvanRecoverableException(ErrorCode.DATA_DUPLICATE);
+			}
+			BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile));
+			stream.write(bytes);
+			stream.close();
+
+			taskAttachmentCommandDto.setPath(this.getId() + StringPool.SLASH + taskAttachmentCommandDto.getName());
+
+			// Creating an Unmarshaller
+			JAXBContext attachmentJaxbContext = JAXBContext.newInstance(TaskAttachmentCommandDto.class);
+			Marshaller attachmentJaxbMarshaller = attachmentJaxbContext.createMarshaller();
+
+			attachmentJaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			StringWriter attachmentResult = new StringWriter();
+			attachmentJaxbMarshaller.marshal(taskAttachmentCommandDto, attachmentResult);
+			commandBody = attachmentResult.toString();
+
+			taskCommand.setTaskCommandType(TaskCommandType.Attachment);
+
+			taskCommand.setUserUuid(null);// TODO
+			taskCommand.setUserName(userInfo.getUserName());
+			taskCommand.setLocalDateTime(DateUtilV2.formatLocalDateTimeToStringDateTime(now));
+			taskCommand.setCommandBody(commandBody);
+			Set<TaskCommand> taskCommands = this.getTaskCommands();
+
+			if (taskCommands == null) {
+				throw new ParvanUnrecoverableException("invalid data. Task should have at least one command.");
+			}
+
+			taskCommands.add(taskCommand);
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while addAttachment.", e);
+		}
+	}
+
+}

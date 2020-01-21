@@ -1,0 +1,49 @@
+package com.parvanpajooh.stock2.domain.model.enums;
+
+import com.parvanpajooh.commons.util.Validator;
+
+public enum WaybillNumberState {
+	
+	
+	NEW("New"),
+	USED("Used"),
+	VOIDED("Voided"),
+	BLOCKED("Blocked");
+		
+	/**
+	 * 
+	 */
+	public final String value;
+
+	/**
+	 * 
+	 * @param value
+	 */
+	WaybillNumberState(String value) {
+		this.value = value;		
+	}
+
+	/**
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static WaybillNumberState fromValue(String value) {
+		
+		for (WaybillNumberState thisValue : values()) {
+			if (Validator.equals(thisValue.value, value)) {
+				return thisValue;
+			}
+		}
+
+		return null;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String toValue() {
+		return value;
+	}
+}

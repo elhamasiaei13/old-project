@@ -1,0 +1,138 @@
+package com.parvanpajooh.accounting.dao.jpa;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Metamodel;
+
+import com.parvanpajooh.accounting.common.exceptions.ParvanException;
+import com.parvanpajooh.accounting.dao.AccountTypeDao;
+import com.parvanpajooh.accounting.model.AccountType;
+import com.parvanpajooh.accounting.model.AccountType_;
+import com.parvanpajooh.accounting.model.criteria.AccountTypeCriteria;
+import com.parvanpajooh.common.util.Validator;
+import com.parvanpajooh.common.vo.BaseCriteria;
+
+/**
+ * 
+ * @author moosa
+ *
+ */
+@Stateless
+public class AccountTypeDaoJpa extends GenericDaoJpa<AccountType, Long> implements AccountTypeDao {
+
+	public AccountTypeDaoJpa() {
+		super(AccountType.class);
+	}
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder, Metamodel metamodel, Root<AccountType> root, Map<String, Join> joins)
+			throws ParvanException {
+
+		// LOG
+		log.debug("Entering buildPredicateList( ... )");
+
+		AccountTypeCriteria accountTypeCriteria = (AccountTypeCriteria) cri;
+		
+		String name = accountTypeCriteria.getName();
+
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		Boolean active = accountTypeCriteria.getActive();
+
+		// ----------------------------------------------------------------
+		// Active
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(active)) {
+			Predicate predicate = builder.equal(root.<Boolean> get(AccountType_.active), active);
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// name
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(name)) {
+
+			Predicate predicate = builder.like(root.<String> get(AccountType_.name),  "%" + name + "%");
+			predicateList.add(predicate);
+		}
+
+		// ----------------------------------------------------------------
+		// Create Date
+		// ----------------------------------------------------------------
+		Date createDateFrom = accountTypeCriteria.getCreateDateFrom();
+		Date createDateTo = accountTypeCriteria.getCreateDateTo();
+		if (Validator.isNotNull(createDateFrom) || Validator.isNotNull(createDateTo)) {
+
+			if (Validator.isNotNull(createDateFrom)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(createDateFrom);
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE, 0);
+				cal.set(Calendar.SECOND, 0);
+
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<Date> get(AccountType_.createDate), cal.getTime());
+				predicateList.add(predicate);
+			}
+
+			if (Validator.isNotNull(createDateTo)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(createDateTo);
+				cal.set(Calendar.HOUR_OF_DAY, 23);
+				cal.set(Calendar.MINUTE, 59);
+				cal.set(Calendar.SECOND, 59);
+
+				Predicate predicate = builder.lessThanOrEqualTo(root.<Date> get(AccountType_.createDate), cal.getTime());
+				predicateList.add(predicate);
+			}
+
+		}
+
+		// ----------------------------------------------------------------
+		// Update Date
+		// ----------------------------------------------------------------
+		Date updateDateFrom = accountTypeCriteria.getUpdateDateFrom();
+		Date updateDateTo = accountTypeCriteria.getUpdateDateTo();
+		if (Validator.isNotNull(updateDateFrom) || Validator.isNotNull(updateDateTo)) {
+
+			if (Validator.isNotNull(updateDateFrom)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(updateDateFrom);
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.set(Calendar.MINUTE, 0);
+				cal.set(Calendar.SECOND, 0);
+
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<Date> get(AccountType_.updateDate), cal.getTime());
+				predicateList.add(predicate);
+			}
+
+			if (Validator.isNotNull(updateDateTo)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(updateDateTo);
+				cal.set(Calendar.HOUR_OF_DAY, 23);
+				cal.set(Calendar.MINUTE, 59);
+				cal.set(Calendar.SECOND, 59);
+
+				Predicate predicate = builder.lessThanOrEqualTo(root.<Date> get(AccountType_.updateDate), cal.getTime());
+				predicateList.add(predicate);
+			}
+		}
+
+		basePredicate((BaseCriteria) accountTypeCriteria, builder, root, predicateList);
+
+		// LOG
+		log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+	
+	
+}

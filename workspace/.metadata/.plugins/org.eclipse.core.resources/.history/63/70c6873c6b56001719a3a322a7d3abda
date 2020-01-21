@@ -1,0 +1,772 @@
+package com.parvanpajooh.personmanagement.dao.jpa;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
+import org.hibernate.CacheMode;
+import org.hibernate.search.jpa.FullTextEntityManager;
+import org.hibernate.search.jpa.FullTextQuery;
+import org.hibernate.search.jpa.Search;
+import org.hibernate.search.query.dsl.BooleanJunction;
+import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hibernate.search.query.dsl.TermMatchingContext;
+
+import com.parvanpajooh.agentmanagement.model.GeneralAgent;
+import com.parvanpajooh.agentmanagement.model.GeneralAgent_;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.personmanagement.dao.PersonDao;
+import com.parvanpajooh.personmanagement.model.ContactInfo;
+import com.parvanpajooh.personmanagement.model.ContactInfo_;
+import com.parvanpajooh.personmanagement.model.Organization;
+import com.parvanpajooh.personmanagement.model.Organization_;
+import com.parvanpajooh.personmanagement.model.Person;
+import com.parvanpajooh.personmanagement.model.Person_;
+import com.parvanpajooh.personmanagement.model.Relation;
+import com.parvanpajooh.personmanagement.model.Relation_;
+import com.parvanpajooh.personmanagement.model.criteria.PersonCriteria;
+import com.parvanpajooh.personmanagement.model.enums.PersonType;
+import com.parvanpajooh.personmanagement.model.enums.RelationType;
+import com.parvanpajooh.personmanagement.model.vo.ContactInfoVO;
+import com.parvanpajooh.personmanagement.model.vo.OrganizationVO;
+import com.parvanpajooh.personmanagement.model.vo.PersonGroupVO;
+import com.parvanpajooh.personmanagement.model.vo.PersonVO;
+import com.parvanpajooh.personmanagement.model.vo.RelationVO;
+
+/**
+ * @author ali
+ * @author MO
+ *
+ */
+public class PersonDaoJpa extends GenericDaoJpa<Person, Long> implements PersonDao {
+		
+	public PersonDaoJpa() {
+		super(Person.class);
+	}
+
+	/**
+	 * Entity manager, injected by Spring using @PersistenceContext annotation
+	 * on setEntityManager()
+	 */
+	@PersistenceContext(unitName = PERSISTENCE_UNIT_NAME)
+	private EntityManager entityManager;
+
+	@Override
+	public Person findPersonByNationalId(String nationalId) throws ParvanDaoException {
+		log.debug("Entering findPersonByNationalId (nationalId={})", nationalId);
+		try {
+			TypedQuery<Person> q = getEntityManager().createQuery("select person from Person person where person.nationalId = ? ", Person.class);
+			q.setParameter(1, nationalId);
+			List<Person> results = q.getResultList();
+			if ( results.isEmpty() ) {
+				return null;
+			}
+			if ( results.size() > 1 ) {
+				throw new ParvanDaoException("Non Unique Result");
+			}
+			return results.get(0);
+		} catch (ParvanDaoException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting person by National id : " + nationalId, e);
+		}
+	}
+	
+	@Override
+	public Person findPersonByOrganizationIdAndNationalId(String nationalId,Long organizationId) throws ParvanDaoException {
+		log.debug("Entering findPersonByOrganizationAndNationalId (nationalId={},organizationId={})", nationalId , organizationId);
+		try {
+			TypedQuery<Person> q = getEntityManager().createQuery("select person from Person person where person.nationalId = ? and person.organization.id = ?", Person.class);
+			
+			q.setParameter(1, nationalId);
+			q.setParameter(2, organizationId);
+			
+			List<Person> results = q.getResultList();
+			if ( results.isEmpty() ) {
+				return null;
+			}
+			if ( results.size() > 1 ) {
+				throw new ParvanDaoException("Non Unique Result");
+			}
+			return results.get(0);
+		} catch (ParvanDaoException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting person by National id : " + nationalId +"and organizationId " + organizationId, e);
+		}
+	}
+
+	@Override
+	public Person findPersonByEmail(String email) throws ParvanDaoException {
+		log.debug("Entering findPersonByEmail (email={})", email);
+		try {
+    		TypedQuery<Person> q = getEntityManager().createQuery("select person from Person person join person.contactInfos contactInfo where contactInfo.email = ? ", Person.class);
+    		q.setParameter(1, email);
+    		List<Person> results = q.getResultList();
+			/*if ( results.isEmpty() ) {
+				throw new ObjectNotFoundException();
+			}*/
+			if ( results.size() > 1 ) {
+				throw new ParvanDaoException("Non Unique Result");
+			}
+			return results.size() > 0 ? results.get(0) : null;
+		} catch (ParvanDaoException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while finding person by email : " + email, e);
+		}
+	}
+
+	@Override
+	public Person getByUuid(String uuid) throws ParvanDaoException {
+		try {
+			log.debug("Entering getByUuid (uuid={})", uuid);
+			StringBuilder sb = new StringBuilder();
+			sb.append("select person from Person person ");
+			sb.append("join person.contactInfos contactInfo ");
+			sb.append("where contactInfo.primary = true ");
+			sb.append("and person.uuid = ? ");
+			TypedQuery<Person> q = getEntityManager().createQuery(sb.toString(), Person.class);
+			q.setParameter(1, uuid);
+			List<Person> results = q.getResultList();
+			if ( results.isEmpty() ) {
+				throw new ObjectNotFoundException();
+			}
+			if ( results.size() > 1 ) {
+				throw new ParvanDaoException("Non Unique Result");
+			}
+			return results.get(0);
+		} catch (ParvanDaoException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting person by uuid : " + uuid, e);
+		}
+	}
+	
+	@Override
+	public Map<String, String> getByUuids(List<String> uuids) throws ParvanDaoException {
+
+		// LOG
+		log.trace("Entering getByUuids uuids={}", uuids);
+
+		Map<String, String> mapResult = new HashMap<String, String>();
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+
+		// make criteria-builder
+		CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+
+		// make criteria
+		Metamodel metamodel = getEntityManager().getMetamodel();
+		EntityType<Person> generalAgentMM_ = metamodel.entity(Person.class);
+
+		CriteriaQuery<Tuple> criteria = builder.createTupleQuery();
+		Root<Person> root = criteria.from(generalAgentMM_);
+		criteria.multiselect(root.<String> get(Person_.uuid),
+				builder.concat(builder.concat(root.<String> get(Person_.firstNameLocal), StringPool.SPACE), root.<String> get(Person_.lastNameLocal)));
+
+		try {
+
+			predicateList.add(root.<String> get(Person_.uuid).in(uuids));
+
+			criteria.where(predicateList.get(0));
+			
+			// create query
+			TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);
+
+			// execute query
+			List<Tuple> tupleList = q.getResultList();
+
+			for (Tuple tuple : tupleList) {
+
+				String uuid = (String) tuple.get(0);
+				String personName = (String) tuple.get(1);
+				mapResult.put(uuid, personName);
+			}
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting persons with uuids", e);
+		}
+
+		// LOG
+		log.debug("Leaving getByUuids(): ret={}", (mapResult != null) ? mapResult.size() : "Null");
+		return mapResult;
+	}
+	
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder,
+			Metamodel metamodel, Root<Person> root, Map<String, Join> joins) throws ParvanException {
+
+		// LOG
+		log.debug("Entering buildPredicateList( ... )");
+
+		PersonCriteria personCriteria = (PersonCriteria) cri;
+		List<Predicate> predicateList = new ArrayList<Predicate>();
+		
+		String uuid = personCriteria.getUuid();
+		String appId = personCriteria.getAppId();
+		String appWideUniqueId = personCriteria.getAppWideUniqueId();
+		PersonType type = personCriteria.getType();
+		String prefix = personCriteria.getPrefix();
+		String allNames = personCriteria.getAllNames();
+		String firstName = personCriteria.getFirstName();
+		String middleName = personCriteria.getMiddleName();
+		String lastName = personCriteria.getLastName();
+		String suffix = personCriteria.getSuffix();
+		String nickName = personCriteria.getNickName();
+		String nationalId = personCriteria.getNationalId();
+		String economicCode = personCriteria.getEconomicCode();
+		String issueId = personCriteria.getIssueId();
+		String issueLocation = personCriteria.getIssueLocation();
+		String remarks = personCriteria.getRemarks();
+		Boolean active = personCriteria.getActive();
+		RelationVO relatesTo = personCriteria.getRelatesTo();
+		RelationVO relatesFrom = personCriteria.getRelatesFrom();
+		ContactInfoVO contactInfo = personCriteria.getContactInfo();
+		PersonGroupVO personGroups = personCriteria.getPersonGroups();
+		Set<Long> allowedOrganizationIds = personCriteria.getOrganizationIds();
+		String canonicalSearchName = personCriteria.getCanonicalSearchName();
+		
+		if(Validator.isNotNull( uuid )){
+			Predicate predicate = builder.equal(root.<String>get(Person_.uuid), uuid);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( appId )){
+			Predicate predicate = builder.equal(root.<String>get(Person_.appId), appId);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( appWideUniqueId )){
+			Predicate predicate = builder.equal(root.<String>get(Person_.appWideUniqueId), appWideUniqueId);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( type )){
+			Predicate predicate = builder.equal(root.<PersonType>get(Person_.type), type);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( prefix )){
+			Predicate predicate = builder.like(root.<String>get(Person_.prefix), "%" + prefix + "%");
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( allNames )){
+			Predicate predicate = builder.or(
+					builder.like(root.<String>get(Person_.firstNameLocal), "%" + allNames + "%"),
+					builder.like(root.<String>get(Person_.lastNameLocal), "%" + allNames + "%"),
+					builder.like(root.<String>get(Person_.nickNameLocal), "%" + allNames + "%"),
+					builder.like(root.<String>get(Person_.middleNameLocal), "%" + allNames + "%"),
+					builder.like(root.<String>get(Person_.firstNameEn), "%" + allNames + "%"),
+					builder.like(root.<String>get(Person_.lastNameEn), "%" + allNames + "%"),
+					builder.like(root.<String>get(Person_.nickNameEn), "%" + allNames + "%"),
+					builder.like(root.<String>get(Person_.middleNameEn), "%" + allNames + "%"));
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( firstName )){
+			Predicate predicate = builder.or(
+					builder.like(root.<String>get(Person_.firstNameLocal), "%" + firstName + "%"),
+					builder.like(root.<String>get(Person_.firstNameEn), "%" + firstName + "%"));
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( middleName )){
+			Predicate predicate = builder.or(
+					builder.like(root.<String>get(Person_.middleNameLocal), "%" + middleName + "%"),
+					builder.like(root.<String>get(Person_.middleNameEn), "%" + middleName + "%"));
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( lastName )){
+			Predicate predicate = builder.or(
+					builder.like(root.<String>get(Person_.lastNameLocal), "%" + lastName + "%"),
+					builder.like(root.<String>get(Person_.lastNameEn), "%" + lastName + "%"));
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( suffix )){
+			Predicate predicate = builder.or(
+					builder.like(root.<String>get(Person_.suffixLocal), "%" + suffix + "%"),
+					builder.like(root.<String>get(Person_.suffixEn), "%" + suffix + "%"));
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( nickName )){
+			Predicate predicate = builder.or(
+					builder.like(root.<String>get(Person_.nickNameLocal), "%" + nickName + "%"),
+					builder.like(root.<String>get(Person_.nickNameEn), "%" + nickName + "%"));
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( nationalId )){
+			Predicate predicate = builder.equal(root.<String>get(Person_.nationalId), nationalId);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( economicCode )){
+			Predicate predicate = builder.equal(root.<String>get(Person_.economicCode), economicCode);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( issueId )){
+			Predicate predicate = builder.equal(root.<String>get(Person_.issueId), issueId);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( issueLocation )){
+			Predicate predicate = builder.equal(root.<String>get(Person_.issueLocation), issueLocation);
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( remarks )){
+			Predicate predicate = builder.like(root.<String>get(Person_.remarks), "%" + remarks + "%");
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull( active )){
+			Predicate predicate = builder.equal(root.<Boolean>get(Person_.active), active);
+			predicateList.add(predicate);
+		}
+		
+		if(contactInfo != null && Validator.isNotNull( contactInfo.getCityCode() )){
+			Join<Person, ContactInfo> join = root.join(Person_.contactInfos);
+			
+			joins.put("contactInfos", join);
+			
+			Predicate predicate = builder.equal(join.<String>get(ContactInfo_.cityCode), contactInfo.getCityCode());
+			predicateList.add(predicate);
+		}
+		
+		if(relatesTo != null && (Validator.isNotNull( relatesTo.getAppWideTypeCode() ) || Validator.isNotNull( relatesTo.getToPerson() )  || Validator.isNotNull( relatesTo.getFromPerson() ))){
+			Join<Person, Relation> join = root.join(Person_.relatesTo, JoinType.LEFT);
+			
+			joins.put("relatesTo", join);
+			
+			Predicate predicate = builder.equal(join.<Boolean>get(Relation_.active), Boolean.TRUE);
+			predicateList.add(predicate);
+			
+//			if(Validator.isNotNull( relatesTo.getAppWideTypeCode() ) ){
+//				predicate = builder.equal(join.<String>get(Relation_.appWideTypeCode), relatesTo.getAppWideTypeCode());
+//				predicateList.add(predicate);
+//			}
+			
+			PersonVO toPerson = relatesTo.getToPerson();
+			
+			if(Validator.isNotNull(toPerson) && ( Validator.isNotNull(toPerson.getId()) || Validator.isNotNull(toPerson.getUuid()))){
+				Join<Relation, Person> toPersonJoin = join.join(Relation_.toPerson);
+				
+				joins.put("toPerson", toPersonJoin);
+				
+				predicate = builder.equal(toPersonJoin.<Boolean>get(Person_.active), Boolean.TRUE);
+				predicateList.add(predicate);
+				
+				if(Validator.isNotNull( toPerson.getId() ) ){
+					predicate = builder.equal(toPersonJoin.<Long>get(Person_.id), toPerson.getId());
+					predicateList.add(predicate);
+				}
+				
+				if(Validator.isNotNull( toPerson.getUuid() ) ){
+					predicate = builder.equal(toPersonJoin.<String>get(Person_.uuid), toPerson.getUuid());
+					predicateList.add(predicate);
+				}
+			}
+			
+			PersonVO fromPerson = relatesTo.getFromPerson();
+			
+			if(Validator.isNotNull(fromPerson) && ( Validator.isNotNull(fromPerson.getId()) || Validator.isNotNull(fromPerson.getUuid()))){
+				Join<Relation, Person> fromPersonJoin = join.join(Relation_.fromPerson);
+				
+				joins.put("fromPerson", fromPersonJoin);
+				
+				predicate = builder.equal(fromPersonJoin.<Boolean>get(Person_.active), Boolean.TRUE);
+				predicateList.add(predicate);
+				
+				if(Validator.isNotNull( fromPerson.getId() ) ){
+					predicate = builder.equal(fromPersonJoin.<Long>get(Person_.id), fromPerson.getId());
+					predicateList.add(predicate);
+				}
+				
+				if(Validator.isNotNull( fromPerson.getUuid() ) ){
+					predicate = builder.equal(fromPersonJoin.<String>get(Person_.uuid), fromPerson.getUuid());
+					predicateList.add(predicate);
+				}
+			}
+		}
+		
+		if(relatesFrom != null && (Validator.isNotNull( relatesFrom.getAppWideTypeCode() ) || Validator.isNotNull( relatesFrom.getToPerson() )  || Validator.isNotNull( relatesFrom.getFromPerson() ))){
+			Join<Person, Relation> join = root.join(Person_.relatesFrom, JoinType.LEFT);
+			
+			joins.put("relatesFrom", join);
+			
+			Predicate predicate = builder.equal(join.<Boolean>get(Relation_.active), Boolean.TRUE);
+			predicateList.add(predicate);
+			
+//			if(Validator.isNotNull( relatesFrom.getAppWideTypeCode() ) ){
+//				predicate = builder.equal(join.<String>get(Relation_.appWideTypeCode), relatesFrom.getAppWideTypeCode());
+//				predicateList.add(predicate);
+//			}
+			
+			PersonVO toPerson = relatesFrom.getToPerson();
+			
+			if(Validator.isNotNull(toPerson) && ( Validator.isNotNull(toPerson.getId()) || Validator.isNotNull(toPerson.getUuid()))){
+				Join<Relation, Person> toPersonJoin = join.join(Relation_.toPerson);
+				
+				joins.put("toPerson", toPersonJoin);
+				
+				predicate = builder.equal(toPersonJoin.<Boolean>get(Person_.active), Boolean.TRUE);
+				predicateList.add(predicate);
+				
+				if(Validator.isNotNull( toPerson.getId() ) ){
+					predicate = builder.equal(toPersonJoin.<Long>get(Person_.id), toPerson.getId());
+					predicateList.add(predicate);
+				}
+				
+				if(Validator.isNotNull( toPerson.getUuid() ) ){
+					predicate = builder.equal(toPersonJoin.<String>get(Person_.uuid), toPerson.getUuid());
+					predicateList.add(predicate);
+				}
+			}
+			
+			PersonVO fromPerson = relatesFrom.getFromPerson();
+			
+			if(Validator.isNotNull(fromPerson) && ( Validator.isNotNull(fromPerson.getId()) || Validator.isNotNull(fromPerson.getUuid()))){
+				Join<Relation, Person> fromPersonJoin = join.join(Relation_.fromPerson);
+				
+				joins.put("fromPerson", fromPersonJoin);
+				
+				predicate = builder.equal(fromPersonJoin.<Boolean>get(Person_.active), Boolean.TRUE);
+				predicateList.add(predicate);
+				
+				if(Validator.isNotNull( fromPerson.getId() ) ){
+					predicate = builder.equal(fromPersonJoin.<Long>get(Person_.id), fromPerson.getId());
+					predicateList.add(predicate);
+				}
+				
+				if(Validator.isNotNull( fromPerson.getUuid() ) ){
+					predicate = builder.equal(fromPersonJoin.<String>get(Person_.uuid), fromPerson.getUuid());
+					predicateList.add(predicate);
+				}
+			}
+		}
+		
+		//----------------------------------------------------------------
+		// Shipping Date
+		//----------------------------------------------------------------
+		LocalDate issueDateFrom = personCriteria.getIssueDateFrom();
+		LocalDate issueDateTo   = personCriteria.getIssueDateTo();
+		if (Validator.isNotNull(issueDateFrom) || Validator.isNotNull(issueDateTo)) {
+			
+			if(Validator.isNotNull(issueDateFrom)){
+				
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDate> get(Person_.issueDate), issueDateFrom);
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(issueDateTo)){
+				
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDate> get(Person_.issueDate), issueDateTo);
+				predicateList.add(predicate);
+			}
+		}
+		
+		//----------------------------------------------------------------
+		// Organization
+		//----------------------------------------------------------------
+		OrganizationVO organization = personCriteria.getOrganization();
+		if (organization != null) {
+			Join<Person, Organization> join = root.join(Person_.organization, JoinType.LEFT);
+			joins.put("organization", join);
+			if (Validator.isNotNull(organization.getId())) {
+				Predicate predicate = builder.equal(join.<Long> get(Organization_.id), organization.getId());
+				predicateList.add(predicate);
+			}
+		}
+		
+		// ----------------------------------------------------------------
+		// allowedOrganizationIds
+		// ----------------------------------------------------------------
+		if (Validator.isNull(allowedOrganizationIds)) {
+			if (allowedOrganizationIds == null) {
+				allowedOrganizationIds = new HashSet<>();
+			}
+			allowedOrganizationIds.add(0L);
+		}
+		
+		// ----------------------------------------------------------------
+		// canonicalSearchNameLocal
+		// ----------------------------------------------------------------
+		if (Validator.isNotNull(canonicalSearchName)) {
+			
+			String[] splited = canonicalSearchName.trim().split("\\s");
+
+			for (String str : splited) {
+				List<Predicate> orPredicates = new ArrayList<Predicate>();
+				orPredicates.add(builder.like(root.<String>get(Person_.canonicalSearchNameLocal), "%" + str + "%"));
+				orPredicates.add(builder.like(root.<String>get(Person_.canonicalSearchNameEn), "%" + str + "%"));
+				Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+				predicateList.add(predicate);
+			}
+		}
+		
+		Join<Person, Organization> organizationJoin = root.join(Person_.organization, JoinType.LEFT);
+		Predicate predicate = builder.or(organizationJoin.<Long> get(Organization_.id).in(allowedOrganizationIds));
+		predicateList.add(predicate);
+		
+		basePredicate((BaseCriteria) personCriteria, builder, root, predicateList);
+
+		// LOG
+		log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+	
+
+	@Override
+	public List<Person> findRelatedFrom(String personUuid, RelationType type, Long allowedOrgId, String term) throws ParvanDaoException {
+		log.trace("Entering findRelatedFrom personUuid={}, type={}, term={}", personUuid, type, term);
+		List<Person> list = null;
+		try {
+			
+			String query = "select fromPerson "+
+						   "from Person toPerson left join toPerson.relatesFrom rel "+
+						   "left join rel.fromPerson fromPerson where toPerson.uuid = :personUuid and fromPerson.organization.id = :allowedOrgId";
+
+
+			if (Validator.isNotNull(type)) {
+				query += " and rel.type = :type ";
+			}
+			
+			if (Validator.isNotNull(term)) {
+				query += " and fromPerson.canonicalSearchNameLocal like :term ";
+			}
+			
+			TypedQuery<Person> q = getEntityManager().createQuery(query, Person.class);
+			q.setParameter("personUuid", personUuid);
+			q.setParameter("allowedOrgId", allowedOrgId);
+			
+			if(Validator.isNotNull(term)){
+				q.setParameter("term", "%" + term + "%");
+			}
+			
+			if(Validator.isNotNull(type)){
+				q.setParameter("type", type);
+			}
+			
+			list = q.getResultList();
+
+			return list;
+			
+		} catch(Exception e) {
+			throw new ParvanDaoException("Error occurred while find RelatedFrom by personUuid : " + personUuid, e);
+		}
+	}
+	
+	@Override
+	public List<Person> findRelatedTo(String personUuid, RelationType type, Long allowedOrgId, String term) throws ParvanDaoException {
+		log.trace("Entering findRelatedTo personUuid={}, type={}, term={}", personUuid, type, term);
+		List<Person> list = null;
+		try {
+			
+			String query = "select toPerson "+
+						   "from Person fromPerson left join fromPerson.relatesTo rel "+
+						   "left join rel.toPerson toPerson where fromPerson.uuid = :personUuid and toPerson.organization.id = :allowedOrgId";
+
+			if (Validator.isNotNull(type)) {
+				query += " and rel.type = :type ";
+			}
+			
+			if (Validator.isNotNull(term)) {
+				query += " and toPerson.canonicalSearchNameLocal like :term ";
+			}
+			
+			TypedQuery<Person> q = getEntityManager().createQuery(query, Person.class);
+			q.setParameter("personUuid", personUuid);
+			q.setParameter("allowedOrgId", allowedOrgId);
+			
+			if(Validator.isNotNull(term)){
+				q.setParameter("term", "%" + term + "%");
+			}
+			
+			if(Validator.isNotNull(type)){
+				q.setParameter("type", type);
+			}
+			
+			list = q.getResultList();
+
+			return list;
+			
+		} catch(Exception e) {
+			throw new ParvanDaoException("Error occurred while find RelatedTo by personUuid : " + personUuid, e);
+		}
+	}
+
+	@Override
+	public PageList<Person> searchActivePeopleInOrganization(Long organizationId, String term, Integer start, Integer length, SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanDaoException {
+		
+		/*String cityCode = null;
+		if (crit.getContact() != null) {
+			cityCode = crit.getContact().getCity();
+		}*/
+		
+		FullTextEntityManager ftEntityManager = Search.getFullTextEntityManager(getEntityManager());
+		
+		QueryBuilder qb = ftEntityManager.getSearchFactory().buildQueryBuilder().forEntity(Person.class).get();
+		
+		org.apache.lucene.search.Query filterActiveQuery = qb.keyword()
+				.onField("active")
+				.matching("true")
+				.createQuery();
+		
+		org.apache.lucene.search.Query filterOrganizationQuery = qb.keyword()
+				.wildcard()
+				.onField("organization.parents")
+				.ignoreFieldBridge()
+				.matching( StringPool.STAR + '<' + organizationId.toString() + '>' + StringPool.STAR)
+				.createQuery();
+		
+		/*org.apache.lucene.search.Query filterActiveQuery;
+		if (crit.getActive() != null && crit.getActive()) {
+		} else {
+			filterActiveQuery = qb.all().createQuery();
+		}*/
+		
+		/*org.apache.lucene.search.Query filterCityQuery;
+		if (Validator.isNotNull(cityCode)) {
+			filterCityQuery = qb.keyword().onField("contact.city").matching(cityCode).createQuery();
+		} else {
+			filterCityQuery = qb.all().createQuery();
+		}*/
+		
+		String[] keywords = term.split(StringPool.SPACE);
+		
+		TermMatchingContext onFields = qb.keyword()
+				.wildcard()
+				.onFields(
+						"firstNameLocal",
+						"firstNameEn",
+						"middleNameLocal",
+						"middleNameEn",
+						"lastNameLocal",
+						"lastNameEn",
+						"nickNameLocal",
+						"nickNameEn",
+						"appWideUniqueId",
+						"nationalId",
+						"economicCode");
+		
+		StringBuilder sb = new StringBuilder();
+		BooleanJunction<BooleanJunction> junction = qb.bool();
+        for (String keyword : keywords) {
+        	sb.delete(0, sb.length());
+        	keyword = sb.append(StringPool.STAR).append(keyword).append(StringPool.STAR).toString();
+        	junction.must( onFields.matching(keyword + StringPool.STAR).createQuery() );
+        }
+		
+        org.apache.lucene.search.Query fullTextQuery = junction.createQuery();
+        
+		org.apache.lucene.search.Query finalQuery = qb.bool()
+				.must(filterOrganizationQuery)
+				.must(filterActiveQuery)
+				.must(fullTextQuery)
+				.createQuery();  
+		
+		Sort sort = new Sort(new SortField(sortCriterion, SortField.Type.STRING));
+		
+		FullTextQuery ftQuery = ftEntityManager.createFullTextQuery(finalQuery, Person.class);
+		ftQuery.setSort(sort);
+		
+		Query jpaQuery = ftQuery.setFirstResult(start).setMaxResults(length);
+		List<Person> result = jpaQuery.getResultList();
+		int total = ftQuery.getResultSize();
+		
+  		return new PageList<>(result, total);
+	}
+
+	@Override
+	public void index() throws ParvanDaoException {
+		FullTextEntityManager ftEntityManager = Search.getFullTextEntityManager(getEntityManager());
+	    try {
+			ftEntityManager.createIndexer(Person.class)
+						   .batchSizeToLoadObjects(25)
+						   .cacheMode(CacheMode.IGNORE)
+						   .threadsToLoadObjects(12)
+						   .idFetchSize(150)
+						   .transactionTimeout(1800)
+						   /*.progressMonitor(IndexingProgressMonitorMBean)*/
+						   .startAndWait();
+		} catch (InterruptedException e) {
+			throw new ParvanDaoException(e);
+		} catch (Exception e) {
+			throw new ParvanDaoException(e);
+		}
+	}
+	
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<Person> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateTo());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateTo());
+			predicateList.add(predicate);
+		}
+	}
+
+}

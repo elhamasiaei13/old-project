@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="layout">
+
+<head>
+    <title>Task Details</title>
+</head>
+
+<body>
+    <section class="content" layout:fragment="content">
+
+        <blockquote>
+            <p>
+                <i class="fa fa-tasks" aria-hidden="true"></i>
+                <i class="text" th:text="*{task.group.name}"></i>
+                <i class="fa fa-long-arrow-left" aria-hidden="true"></i>
+                <i class="text" th:text="*{task.id}"></i>
+                <i class="fa fa-long-arrow-left" aria-hidden="true"></i>
+                <i class="text" th:text="*{task.subject}"></i>
+            </p>
+        </blockquote>
+
+        <div id="section">
+            <form class="form-horizontal" th:object="${taskStatusHistoryVO}" th:action="@{/editTaskStatus/save}" method="post">
+
+                <h3>ویرایش تغییر وضعیت</h3>
+
+                <div class="form-group">
+                    <input th:field="*{id}" th:value="*{id}" hidden="hidden" />
+                    <input name="tasksId" th:value="${task.id}" hidden="hidden" />
+                    <textarea th:field="*{comment}" th:value="*{comment}" class="form-control" rows="15" />
+                </div>
+
+                <button class="btn btn-default" th:text="#{btn_add}"></button>
+                <a class="btn btn-default" th:text="#{btn_return}" th:href="@{'/taskDetails/' + ${task.id}}"></a>
+
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

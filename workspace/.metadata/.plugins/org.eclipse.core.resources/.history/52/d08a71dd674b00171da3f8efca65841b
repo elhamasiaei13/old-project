@@ -1,0 +1,139 @@
+package com.parvanpajooh.shipment.mvc;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.dandelion.datatables.core.ajax.ColumnDef;
+import com.github.dandelion.datatables.core.ajax.ColumnDef.SortDirection;
+import com.github.dandelion.datatables.core.ajax.DataSet;
+import com.github.dandelion.datatables.core.ajax.DatatablesCriterias;
+import com.github.dandelion.datatables.core.ajax.DatatablesResponse;
+import com.github.dandelion.datatables.extras.spring3.ajax.DatatablesParams;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.ecourier.mvc.EcBaseController;
+import com.parvanpajooh.shipment.model.criteria.PackingItemCriteria;
+import com.parvanpajooh.shipment.model.criteria.PackingItemStateCriteria;
+import com.parvanpajooh.shipment.service.PackingItemActionService;
+import com.parvanpajooh.shipment.service.PackingItemService;
+import com.parvanpajooh.shipment.service.PackingItemStateService;
+
+@Controller
+@RequestMapping("/packingItem")
+public class PackingItemController extends EcBaseController {
+	
+	@EJB(mappedName="java:global/ecourier-ear/shipment-ejb/PackingItemServiceImpl") 
+	private PackingItemService packingItemService;
+	
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/PackingItemStateServiceImpl")
+	private PackingItemStateService packingItemStateService;
+	
+	@EJB(mappedName = "java:global/ecourier-ear/shipment-ejb/PackingItemActionServiceImpl")
+	private PackingItemActionService packingItemActionService;
+
+	@RequestMapping(method = RequestMethod.GET)
+	public String show(HttpServletRequest request, Model model, Locale locale) throws ParvanServiceException {
+		
+		model.addAttribute("rightMenu", "packingitems");
+		return "packingitems";
+	}
+	
+	@RequestMapping(value="/paging", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<BaseVO> findAll(@DatatablesParams DatatablesCriterias criterias, PackingItemCriteria packingItemCriteria, HttpServletRequest request) {
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+//		String sortCriterion = columnDef.getName();
+		String sortCriterion = "waybillNumber";
+		
+		if("0".equals(sortCriterion)){
+			sortCriterion = null;
+		}
+		
+		if(columnDef.getSortDirection().equals(SortDirection.DESC)){
+			sortDirection = SortDirectionEnum.Descending;
+		}
+
+		DataSet<BaseVO> dataSet;
+		try {
+			List<BaseVO> rows = packingItemService.findByCriteria(getUserInfo(request), packingItemCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+			long totalRecords = packingItemService.countByCriteria(getUserInfo(request), packingItemCriteria);
+			dataSet = new DataSet<BaseVO>(rows, (long) rows.size(), totalRecords);
+		} catch (Exception e) {
+			log.error("error occured in packingItemType paging..." ,e);
+			e.printStackTrace();
+			dataSet = new DataSet<BaseVO>(new ArrayList<BaseVO>(), 0l, 0l);
+		}
+        return DatatablesResponse.build(dataSet, criterias);
+    }
+	
+	@RequestMapping(value="/states/paging", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<BaseVO> findAllPackingItemState(@DatatablesParams DatatablesCriterias criterias, PackingItemStateCriteria packingItemStateCriteria, HttpServletRequest request) {
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = columnDef.getName();
+		
+		if("0".equals(sortCriterion)){
+			sortCriterion = null;
+		}
+		
+		if(columnDef.getSortDirection().equals(SortDirection.DESC)){
+			sortDirection = SortDirectionEnum.Descending;
+		}
+
+		DataSet<BaseVO> dataSet;
+		try {
+			List<BaseVO> rows = packingItemStateService.findByCriteria(getUserInfo(request), packingItemStateCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+			long totalRecords = packingItemStateService.countByCriteria(getUserInfo(request), packingItemStateCriteria);
+			dataSet = new DataSet<BaseVO>(rows, (long) rows.size(), totalRecords);
+		} catch (Exception e) {
+			log.error("error occured in findAllShipmentState paging..." ,e);
+			e.printStackTrace();
+			dataSet = new DataSet<BaseVO>(new ArrayList<BaseVO>(), 0l, 0l);
+		}
+        return DatatablesResponse.build(dataSet, criterias);
+    }
+	
+	@RequestMapping(value="/actions/paging", method = RequestMethod.GET)
+	public @ResponseBody DatatablesResponse<BaseVO> findPackingItemActions(@DatatablesParams DatatablesCriterias criterias, PackingItemStateCriteria packingItemStateCriteria, HttpServletRequest request) {
+		int firstResult = criterias.getStart();
+		int maxResults = criterias.getLength();
+		ColumnDef columnDef = criterias.getSortedColumnDefs().get(0);
+		SortDirectionEnum sortDirection = SortDirectionEnum.Ascending;
+		String sortCriterion = columnDef.getName();
+		
+		if("0".equals(sortCriterion)){
+			sortCriterion = null;
+		}
+		
+		if(columnDef.getSortDirection().equals(SortDirection.DESC)){
+			sortDirection = SortDirectionEnum.Descending;
+		}
+
+		DataSet<BaseVO> dataSet;
+		try {
+			List<BaseVO> rows = packingItemStateService.findByCriteria(getUserInfo(request), packingItemStateCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+			long totalRecords = packingItemStateService.countByCriteria(getUserInfo(request), packingItemStateCriteria);
+			dataSet = new DataSet<BaseVO>(rows, (long) rows.size(), totalRecords);
+		} catch (Exception e) {
+			log.error("error occured in findAllShipmentState paging..." ,e);
+			e.printStackTrace();
+			dataSet = new DataSet<BaseVO>(new ArrayList<BaseVO>(), 0l, 0l);
+		}
+        return DatatablesResponse.build(dataSet, criterias);
+    }
+}

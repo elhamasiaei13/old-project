@@ -1,0 +1,77 @@
+/**
+ * 
+ */
+package com.parvanpajooh.waybillmanagement.domain.model.dto;
+
+import com.parvanpajooh.client.personmanagement.model.PersonManagementEnums.PersonType;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.model.dto.BaseDto;
+
+/**
+ * @author MO
+ *
+ */
+public class WaybillDto extends BaseDto {
+	
+	private static final long serialVersionUID = 5335976054601051530L;
+
+	private Long id;
+	
+	private String number;
+	
+	private String createUserName;
+	
+	private String updateUserName;
+	
+	// Consignee
+	private String consigneePersonUuid;
+	private PersonType consigneePersonType;
+	private String consigneeCountryName;
+	private String consigneeStateName;
+	private String consigneeCityName;
+	private String canonicalShipperName;
+	private String consigneeClientId;
+	private String consigneeContactJson;
+	private String consigneeName;
+	private String consigneeNationalId;
+	private String consigneeMobileNumber;
+	private String consigneeLandlineNumber;
+	private String consigneeCountryCode;
+	private String consigneeStateCode;
+	private String consigneeCityCode;
+	private String consigneePostalCode;
+	private String consigneeAddress;
+	private String consigneeNote;
+	private String canonicalConsigneeName;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getNumber() {
+		return number;
+	}
+
+	public void setNumber(String number) {
+		this.number = number;
+	}
+
+	public String getCreateUserName() {
+		return createUserName;
+	}
+
+	public void setCreateUserName(String createUserName) {
+		this.createUserName = createUserName;
+	}
+
+	public String getUpdateUserName() {
+		return updateUserName;
+	}
+
+	public void setUpdateUserName(String updateUserName) {
+		this.updateUserName = updateUserName;
+	}
+}

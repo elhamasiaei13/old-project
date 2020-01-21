@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:dt="http://github.com/dandelion/datatables"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout">
+
+<head>
+<title>Delete Membership</title>
+</head>
+
+<body>
+	<section class="content" layout:fragment="content">
+		<h2>Member List</h2>
+		<form action="#" class="form-inline"
+			th:action="@{/deleteMembership/save}" method="post">
+
+			<table>
+				<tr>
+					<th>Members</th>
+					<th>Types</th>
+				</tr>
+				<tr th:each="membership : ${memberships}">
+					<td hidden="true"><input type="text" name="groupId" th:value="${groupId}" /></td>
+					<td style="padding: 0 15px 0 15px;" th:text="${membership.member.firstName}+${membership.member.lastName}">firstName</td>
+					<td style="padding: 0 15px 0 15px;" th:each="type : ${types}" th:if="${type.id == membership.typeId.id}" th:text="${type.name}"></td>
+					<td style="padding: 0 15px 0 15px;">
+						<input type="checkbox" th:value="${membership.id}" id="checkListId" name="checkboxItems"/>
+					</td>
+				</tr>
+			</table>
+			<br></br> 
+			<br></br>
+			<td>
+				<button type="submit" class="btn btn-primary" onclick="confirm('Are you sure you want to delete this items?')" th:text="#{btn_delete}"></button>
+			</td>
+		</form>
+	</section>
+</body>
+</html>

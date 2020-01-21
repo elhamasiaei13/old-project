@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:dt="http://github.com/dandelion/datatables" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="filter-layout"
+	ddl:bundle-includes="bootstrapValidator,select2">
+
+<head>
+<title>OnetimeJob List</title>
+
+<style>
+.select-device-modal label {
+	margin-bottom: 0px;
+}
+
+.select-device-modal input {
+	width: auto;
+	height: 28px;
+}
+
+.select-device-modal .form-control {
+	width: auto;
+}
+
+.select-device-modal table.dataTable td {
+	padding: 1px 10px;
+}
+
+.select-device-modal .dataTables_filter label {
+	margin-bottom: 5px;
+}
+</style>
+</head>
+
+<body th:with="rightMenu='onetimeJobDisplay'">
+	<section layout:fragment="top-header" class="fixed-header">
+
+		<div class="ui-header-image pull-left">
+			<img data-src="holder.js/140x140" class="img-circle" alt="140x140" src="/stock2-web/resources/images/stack.png" th:src="@{/resources/images/stack.png}" style="width: 48px; height: 48px;" />
+		</div>
+		<div class="ui-header-title">
+			<div class="split-left">
+				<h3>
+					<small>View</small>
+				</h3>
+				<h3>onetimeJobs</h3>
+			</div>
+			<div class="split-right">
+				<a data-toggle="modal" onclick="createOnetimeJob();" class="btn btn-success">
+					<i class="fa fa-plus">&nbsp;&nbsp;</i>
+					<span th:text="#{onetimeJob.create}">ایجاد</span>
+				</a>
+			</div>
+		</div>
+
+	</section>
+
+	<!-- Main content -->
+	<!-- BODY -->
+	<section class="content" layout:fragment="content">
+		<div class="box box-primary">
+			<div class="box-header">
+				<h3 class="box-title" th:text="#{search}">جستجو</h3>
+				<div class="box-tools pull-right">
+					<button title="" data-widget="collapse" class="btn btn-primary btn-xs">
+						<i class="fa fa-minus"></i>
+					</button>
+				</div>
+			</div>
+			<div class="box-body" style="display: block;">
+				<dy:form entity="OnetimeJobDisplay" form="search" type="search" />
+			</div>
+			<!-- /.box-body -->
+		</div>
+
+		<div class="box">
+			<div class="box-body table-responsive">
+				<dy:table entity="OnetimeJobDisplay" table="list" customSearch="true" customObjectActions="true" />
+			</div>
+		</div>
+
+	</section>
+
+	<th:block layout:fragment="javascripts">
+		<script th:inline="javascript">
+			
+			var titleRetry = '<span class="label label-info"  th:remove="tag">Retry !</span>';
+			 
+			function onetimeJobDisplayRowActions(data, type, full) {
+				
+                var d = '<div style="width: 52px;"><a class="btn btn-xs btn-warning" title="' + titleRetry + '" onclick="retryJob('+ full.id +');" id="onetimeJobId"><i class="fa fa-refresh"></i></a> ';
+                d += '</div>';
+                return d;
+            }
+			
+            function getOnetimeJobDisplayExtraParams(aoData) {
+            	return {
+		    	    "data" : function(data){
+				    	customPush(data, 'applicationCode', $('#applicationCodeFilter').val());
+				    	customPush(data, 'createDate', $('#createDateFilter').val());
+				    	customPush(data, 'updateDate', $('#updateDateFilter').val());
+		    	    }
+		    	};
+            }
+
+            function retryJob(id){
+                var $btn = $(this);
+                    $btn.attr('disabled', true);
+                    $.post('/job-management-web/onetimeJobDisplay/retry/'+id ).done(function(data) {
+                        console.debug(data);
+                        if (data.status == 'success') {
+                            showTopleftGrowl('success', null, 'Retry Successful');
+                        } else if (data.status == 'ValidationException') {
+                            $('#addEmployeesModal .callout').text(data.invalidField + ' is required').removeClass('hide');
+                        } else if (data.status == 'ObjectExistsException') {
+                            $('#addEmployeesModal .callout').text(data.invalidField + ' is already exist').removeClass('hide');
+                        } else if (data.status == 'ErrorCode') {
+                            $('#addEmployeesModal .callout').text(messages[data.errorCode]).removeClass('hide');
+                        } else {
+                            console.debug(data.status);
+                            $('#addEmployeesModal .callout').text((data.message ? data.message : 'failed')).removeClass('hide');
+                        }
+                        $btn.attr('disabled', false);
+                    }).fail(function(jqXHR, textStatus, errorThrown) {
+                        failAjax(jqXHR, textStatus, errorThrown, 'retryJobBtn')
+                    });
+            }
+                
+
+			</script>
+	</th:block>
+</body>
+</html>
+S

@@ -1,0 +1,241 @@
+package com.parvanpajooh.transportationmanagement.model.vo;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.parvanpajooh.client.routemanagement.model.NodeMsg;
+import com.parvanpajooh.client.routemanagement.model.ZoneMsg;
+import com.parvanpajooh.client.routemanagement.model.enums.RouteEnums.TransferNodeType;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+
+/**
+ * 
+ * @author mehrdad
+ *
+ */
+
+public class ZoneVO extends BaseVO {
+
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3514503424317219728L;
+	
+	private String name;
+	
+	private String codeName;
+	
+	private String sortField;
+	
+	private Boolean active;
+	
+	private List<NodeVO> nodes;
+
+	private ZoneVO parent;
+
+	private List<ZoneVO> children;
+	
+	private TransferNodeType transferNodeType;
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the codeName
+	 */
+	public String getCodeName() {
+		return codeName;
+	}
+
+	/**
+	 * @param codeName the codeName to set
+	 */
+	public void setCodeName(String codeName) {
+		this.codeName = codeName;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the nodes
+	 */
+	public List<NodeVO> getNodes() {
+		return nodes;
+	}
+
+	/**
+	 * @param nodes the nodes to set
+	 */
+	public void setNodes(List<NodeVO> nodes) {
+		this.nodes = nodes;
+	}
+
+	/**
+	 * @return the parent
+	 */
+	public ZoneVO getParent() {
+		return parent;
+	}
+
+	/**
+	 * @param parent the parent to set
+	 */
+	public void setParent(ZoneVO parent) {
+		this.parent = parent;
+	}
+
+	/**
+	 * @return the children
+	 */
+	public List<ZoneVO> getChildren() {
+		return children;
+	}
+
+	/**
+	 * @param children the children to set
+	 */
+	public void setChildren(List<ZoneVO> children) {
+		this.children = children;
+	}
+
+	/**
+	 * @return the transferNodeType
+	 */
+	public TransferNodeType getTransferNodeType() {
+		return transferNodeType;
+	}
+
+	/**
+	 * @param transferNodeType the transferNodeType to set
+	 */
+	public void setTransferNodeType(TransferNodeType transferNodeType) {
+		this.transferNodeType = transferNodeType;
+	}
+
+	/**
+	 * @return the sortField
+	 */
+	public String getSortField() {
+		return sortField;
+	}
+
+	/**
+	 * @param sortField the sortField to set
+	 */
+	public void setSortField(String sortField) {
+		this.sortField = sortField;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public ZoneMsg toMsg() {
+		ZoneMsg msg = new ZoneMsg();
+
+		msg.setName(this.name);
+		msg.setCodeName(this.codeName);
+		msg.setSortField(this.sortField);
+		msg.setActive(this.active);
+		if (nodes != null) {
+			List<NodeMsg> nodeMsgs = new ArrayList<>(nodes.size());
+			for (NodeVO thisNodeVO : nodes) {
+				nodeMsgs.add(thisNodeVO.toMsg());
+			}
+			msg.setNodes(nodeMsgs);
+		}
+
+		if (parent != null) {
+			msg.setParent(this.parent.toMsg());
+		}
+
+		if (children != null) {
+			List<ZoneMsg> msgs = new ArrayList<>(children.size());
+			for (ZoneVO thisVO : children) {
+				msgs.add(thisVO.toMsg());
+			}
+			msg.setChildren(msgs);
+		}
+
+		if (transferNodeType != null) {
+			msg.setTransferNodeType(this.transferNodeType);
+		}
+
+		return msg;
+	}
+	
+	/**
+	 * 
+	 * @param msg
+	 * @return
+	 */
+	public static ZoneVO fromMsg(ZoneMsg msg) {
+		ZoneVO vo = new ZoneVO();
+
+		vo.setId(msg.getId());
+		vo.setName(msg.getName());
+		vo.setCodeName(msg.getCodeName());
+		vo.setSortField(msg.getSortField());
+		vo.setActive(msg.getActive());
+		
+		/*if (msg.getNodes() != null) {
+			vo.setNodes(nodes.fromMsg(msg.getNodes()));
+		}*/
+
+		if (msg.getParent() != null) {
+			vo.setParent(ZoneVO.fromMsg(msg.getParent()));
+		}
+
+		if (msg.getChildren() != null) {
+			List<ZoneVO> ecZoneVOs = new ArrayList<>(msg.getChildren().size());
+			for (ZoneMsg thisEcNodeVO : msg.getChildren()) {
+				ecZoneVOs.add(ZoneVO.fromMsg(thisEcNodeVO));
+			}
+			
+			vo.setChildren(ecZoneVOs);
+		}
+
+		if (msg.getTransferNodeType() != null) {
+			vo.setTransferNodeType(msg.getTransferNodeType());
+		}
+
+
+		return vo;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "ZoneVO [id=" + getId() + ", name=" + name + ", codeName=" + codeName + ", sortField=" + sortField
+				+ ", active=" + active + ", nodes=" + nodes + ", parent=" + parent + ", children=" + children
+				+ ", transferNodeType=" + transferNodeType + "]";
+	}
+	
+}

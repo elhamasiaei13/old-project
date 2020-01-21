@@ -1,0 +1,1138 @@
+{"entity":[
+    
+    {
+        "name": "TransportationSchedule",
+        "actions": [                    
+                    {"name": "modify", "url": "/transportationmanagement2-web/transportationSchedule/update", "enabled": true, "type": "object"},
+                    {"name": "delete", "url": "/transportationmanagement2-web/transportationSchedule/del", "enabled": true, "type": "object"},
+                    {"name": "bulkModify", "url": "/transportationmanagement2-web/transportationSchedule/preBulkEdit", "enabled": true, "type": "selectiveBatch", "icon": "fa fa-pencil", "nameKey" : "batch.update", "cssClass" : "btn-primary"},
+                    {"name": "view", "url": "/transportationmanagement2-web/transportationSchedule/", "enabled": false, "type": "object"},
+                    {"name": "paging", "url": "/transportationSchedule/paging", "enabled": true, "type": "table"}
+        ],
+        "fields": [
+                    {
+                        "name": "id",
+                        "dataType": "long",
+                        "order": 0,
+                        "size": 0,
+                        "inputType": "hidden",
+                        "title": "id",
+                        "hint": "id",
+                        "help": "",
+                        "defaultValue": "",
+                        "placeholder": "",
+                        "values": {},
+                        "data": [],
+                        "style": "",
+                        "cssClass": "",
+                        "sortable": true,
+                        "isId": true,
+                        "validators": [],
+                        "mask": "",
+                        "enabled": false
+                    },
+                    {
+                       	"name": "version",
+                       	"dataType": "long",
+                       	"order": 0,
+                       	"size": 0,
+                       	"inputType": "hidden",
+                       	"title": "",
+                       	"hint": "",
+                       	"help": "",
+                       	"defaultValue": "",
+                       	"placeholder": "",
+                       	"values": {},
+                       	"data": [],
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": false,
+                       	"isId": false,
+                       	"validators": [],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                    {
+                        "name": "createDate",
+                        "dataType": "date",
+                        "order": 0,
+                        "size": 0,
+                        "inputType": "hidden",
+                        "title": "createDate",
+                        "hint": "",
+                        "help": "",
+                        "defaultValue": "",
+                        "placeholder": "",
+                        "values": {},
+                        "data": [],
+                        "style": "",
+                        "cssClass": "",
+                        "sortable": true,
+                        "isId": false,
+                        "validators": [],
+                        "mask": "",
+                        "enabled": false
+                    },
+                    {
+                        "name": "updateDate",
+                        "dataType": "date",
+                        "order": 0,
+                        "size": 0,
+                        "inputType": "hidden",
+                        "title": "updateDate",
+                        "hint": "",
+                        "help": "",
+                        "defaultValue": "",
+                        "placeholder": "",
+                        "values": {},
+                        "data": [],
+                        "style": "",
+                        "cssClass": "",
+                        "sortable": true,
+                        "isId": false,
+                        "validators": [],
+                        "mask": "",
+                        "enabled": false
+                    },
+                    {
+			          	"name": "scheduled",
+			          	"dataType": "boolean",
+			          	"order": 0,
+			          	"size": 80,
+			          	"inputType": "checkbox",
+			          	"title": "transportationSchedule.scheduled",
+			          	"hint": "transportationSchedule.scheduled",
+			          	"help": "",
+			          	"placeholder": "",
+			          	"defaultValue": "",
+			          	"values": {
+			            	"sourceType": "inline",
+		            		"data": [
+		              			{
+		                			"value": "true"
+		              			}
+		            		]
+			          	},
+			          	"style": "",
+			          	"cssClass": "",
+			          	"sortable": true,
+			          	"isId": "",
+			          	"data": [],
+			          	"validators": [],
+			          	"mask": "",
+			          	"enabled": false
+                    },
+                    {
+                        "name": "remarks",
+                        "dataType": "string",
+                        "order": 0,
+                        "size": 80,
+                        "inputType": "textarea",
+                        "title": "transportationSchedule.remarks",
+                        "hint": "transportationSchedule.remarks",
+                        "help": "",
+                        "defaultValue": "",
+                        "placeholder": "",
+                        "values": {},
+                        "data": [],
+                        "style": "",
+                        "cssClass": "",
+                        "sortable": true,
+                        "isId": false,
+                        "validators":[],
+                        "mask": "",
+                        "enabled": false
+                    },
+                    {
+                        "name": "status",
+                    	"dataType": "string",
+                        "order": 0,
+                        "size": 150,
+                        "inputType": "select2",
+                        "title": "transportationSchedule.status",
+                        "hint": "transportationSchedule.status",
+                        "help": "",
+                        "placeholder": "",
+                        "defaultValue": "",
+                        "values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"text": "فعال", "value": "ACTIVE"},{"text": "غیر فعال", "value": "INACTIVE"},{"text": "انصراف", "value": "CANCELED"}]},
+                        "style": "",
+                        "cssClass": "",
+                        "sortable": true,
+                        "isId": "",
+                        "data": [],
+                         "validators":[{"name":"notempty", "attr": [{"messageKey": "error-required"}]}],
+                         "mask": "",
+                         "enabled": false
+                    },
+                   	{
+                       	"name": "departureDateInUtc",
+                       	"dataType": "string",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.departureDateInUtc",
+                       	"hint": "transportationSchedule.departureDateInUtc",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "departureTimeInUtc",
+                       	"dataType": "string",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.departureTimeInUtc",
+                       	"hint": "transportationSchedule.departureTimeInUtc",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "departureDateInOriginLocal",
+                       	"dataType": "string",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.departureDateInOriginLocal",
+                       	"hint": "transportationSchedule.departureDateInOriginLocal",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "departureTimeInOriginLocal",
+                       	"dataType": "string",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.departureTimeInOriginLocal",
+                       	"hint": "transportationSchedule.departureTimeInOriginLocal",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "departureDateFromInUtc",
+                       	"dataType": "date",
+                       	"order": 12,
+                       	"size": 100,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.departureDateFromInUtc",
+                       	"hint": "transportationSchedule.departureDateFromInUtc",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "departureDateToInUtc",
+                       	"dataType": "date",
+                       	"order": 12,
+                       	"size": 100,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.departureDateToInUtc",
+                       	"hint": "transportationSchedule.departureDateToInUtc",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "arrivalDateInUtc",
+                       	"dataType": "long",
+                       	"order": 12,
+                       	"size": 100,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.arrivalDateInUtc",
+                       	"hint": "transportationSchedule.arrivalDateInUtc",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "arrivalTimeInUtc",
+                       	"dataType": "date",
+                       	"order": 12,
+                       	"size": 100,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.arrivalTimeInUtc",
+                       	"hint": "transportationSchedule.arrivalTimeInUtc",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "arrivalDateFromInUtc",
+                       	"dataType": "date",
+                       	"order": 12,
+                       	"size": 100,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.arrivalDateFromInUtc",
+                       	"hint": "transportationSchedule.arrivalDateFromInUtc",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "arrivalDateToInUtc",
+                       	"dataType": "date",
+                       	"order": 12,
+                       	"size": 100,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.arrivalDateToInUtc",
+                       	"hint": "transportationSchedule.arrivalDateToInUtc",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "arrivalDateInDestinationLocal",
+                       	"dataType": "string",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.arrivalDateInDestinationLocal",
+                       	"hint": "transportationSchedule.arrivalDateInDestinationLocal",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "arrivalTimeInDestinationLocal",
+                       	"dataType": "string",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.arrivalTimeInDestinationLocal",
+                       	"hint": "transportationSchedule.arrivalTimeInDestinationLocal",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "totalWeight",
+                       	"dataType": "double",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.totalWeight",
+                       	"hint": "transportationSchedule.totalWeight",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "reservableWeight",
+                       	"dataType": "double",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.reservableWeight",
+                       	"hint": "transportationSchedule.reservableWeight",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "uldInfo",
+                       	"dataType": "string",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.uldInfo",
+                       	"hint": "transportationSchedule.uldInfo",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "transportation.id",
+                       	"dataType": "long",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.transportation",
+                       	"hint": "transportationSchedule.transportation",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "carrierCode",
+                       	"dataType": "string",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "select2",
+                       	"title": "transportationSchedule.carrier",
+                       	"hint": "transportationSchedule.carrier",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+	                    "values":{
+	                            "sourceType":"url",
+	                            "url":"/transportationmanagement2-web/transportationSchedule/carriers",
+	                            "allowClear":true,
+	                            "placeholder":"choose",
+	                            "exteraParam":[
+                        			  "'columns[1][data]': 'id'",
+                                      "start: (page - 1) * 20",
+                                      "length: 20",
+                                      "'order[1][column]': 1",
+                                  	  "'order[1][dir]': 'asc'",
+	                                  "term: term"
+	                            ],
+	                            "id":"function(obj) { return obj.carrierCode; }",
+	                            "formatResult":"function(aaData){return aaData.nameFa;}",
+	                            "formatSelection":"function(aaData){return aaData.nameFa;}",
+	                            "initSelectionUrl":"/transportationmanagement2-web/transportationSchedule/carrier",
+	                            "initSelectionExteraParam":[
+	                                  "accountNumber: id"
+	                            ]
+	                    },
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "transportation.carrierName",
+                       	"dataType": "long",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportation.carrier",
+                       	"hint": "transportation.carrier",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "transportation.fromNodeName",
+                       	"dataType": "string",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportation.fromNode",
+                       	"hint": "transportation.fromNode",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "transportation.fromNodeCode",
+                       	"dataType": "string",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportation.fromNode",
+                       	"hint": "transportation.fromNode",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "transportation.toNodeName",
+                       	"dataType": "string",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportation.toNode",
+                       	"hint": "transportation.toNode",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "transportation.toNodeCode",
+                       	"dataType": "string",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportation.toNode",
+                       	"hint": "transportation.toNode",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "transportation.transportationNumber",
+                       	"dataType": "long",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportation.transportationNumber",
+                       	"hint": "transportation.transportationNumber",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "vehicle.id",
+                       	"dataType": "long",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "transportationSchedule.vehicle",
+                       	"hint": "transportationSchedule.vehicle",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "vehicle.manufacturer",
+                       	"dataType": "long",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "vehicle.manufacturer",
+                       	"hint": "vehicle.manufacturer",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "vehicle.manufacturerModel",
+                       	"dataType": "long",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "vehicle.manufacturerModel",
+                       	"hint": "vehicle.manufacturerModel",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "vehicle.cargoOnly",
+                       	"dataType": "long",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "select2",
+                       	"title": "vehicle.cargoOnly",
+                       	"hint": "vehicle.cargoOnly",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {
+			            	"sourceType": "inline",
+		            		"data": [
+		              			{
+		                			"value": "true"
+		              			}
+		            		]
+			          	},
+			          	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "vehicle.carrierRegister",
+                       	"dataType": "long",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "text",
+                       	"title": "vehicle.carrierRegister",
+                       	"hint": "vehicle.carrierRegister",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": {},
+                       	"style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    },
+                   	{
+                       	"name": "vehicle.type",
+                       	"dataType": "long",
+                       	"order": 12,
+                       	"size": 200,
+                       	"inputType": "select2",
+                       	"title": "vehicle.type",
+                       	"hint": "vehicle.type",
+                       	"help": "",
+                       	"placeholder": "",
+                       	"defaultValue": "",
+                       	"values": { "sourceType": "inline", "data": [{"text": "&nbsp;", "value": ""},{"text": "هواپیما", "value": "AIRCRAFT"},{"text": "کشتی", "value": "SHIP"},{"text": "ون", "value": "VAN"},{"text": "کامیون", "value": "TRUCK"},{"text": "وانت", "value": "PICKUP_TRUCK"},{"text": "کامیونت", "value": "MINI_TRUCK"},{"text": "موتور", "value": "MOTORCYCLE"},{"text": "قطار", "value": "TRAIN"}] },
+                        "style": "",
+                       	"cssClass": "",
+                       	"sortable": true,
+                       	"isId": "",
+                       	"data": [],
+                       	"validators":[],
+                       	"mask": "",
+                       	"enabled": false
+                    }
+                ],
+        "forms": [
+                  {
+                    "name": "search",
+                    "type": "search",
+                    "fields": [
+                            {
+                                "name": "remarks",
+                                "order": 0,
+                                "size": 300,
+                                "inputType": "text",
+                                "validators": [],
+                                "enabled": true
+                            },
+                            {
+                                "name": "status",
+                                "order": 1,
+                                "validators":[],
+                                "enabled": true
+                            },
+                            {
+                                "name": "departureDateFromInUtc",
+                                "cssClass": "datePicker",
+                                "order": 1,
+                                "validators":[],
+                                "enabled": true
+                            },
+                            {
+                                "name": "departureDateToInUtc",
+                                "cssClass": "datePicker",
+                                "order": 1,
+                                "validators":[],
+                                "enabled": true
+                            },
+                            {
+                                "name": "arrivalDateFromInUtc",
+                                "cssClass": "datePicker",
+                                "order": 1,
+                                "validators":[],
+                                "enabled": true
+                            },
+                            {
+                                "name": "arrivalDateToInUtc",
+                                "cssClass": "datePicker",
+                                "order": 1,
+                                "validators":[],
+                                "enabled": true
+                            },
+                            {
+                                "name": "transportationSchedule.carrierCode",
+                                "order": 2,
+                                "validators":[],
+                                "enabled": true
+                            },
+                            {
+                                "name": "transportation.transportationNumber",
+                                "order": 3,
+                                "validators":[],
+                                "enabled": true
+                            },
+                            {
+                                "name": "vehicle.manufacturer",
+                                "order": 4,
+                                "validators":[],
+                                "enabled": true
+                            },
+                            {
+                                "name": "vehicle.manufacturerModel",
+                                "order": 5,
+                                "validators":[],
+                                "enabled": true
+                            },
+                            {
+                                "name": "vehicle.carrierRegister",
+                                "order": 6,
+                                "validators":[],
+                                "enabled": true
+                            },
+                            {
+                                "name": "vehicle.type",
+                                "order": 7,
+				              	"inputType": "select2",
+                                "validators":[],
+                                "enabled": true
+                            },
+                            {
+				              	"name": "vehicle.cargoOnly",
+				              	"order": 8,
+				              	"inputType": "select2",
+				              	"size": 100,
+				              	"values": {
+				                	"sourceType": "inline",
+				                	"data": [
+				                  	  {
+					                    "text": "&nbsp;",
+					                    "value": ""
+					                  },
+					                  {
+					                    "text": "بله",
+					                    "value": "true"
+					                  },
+					                  {
+					                    "text": "خیر",
+					                    "value": "false"
+					                  }
+				                	]
+				              	},
+				              	"enabled": true
+                            },
+                            {
+				              	"name": "scheduled",
+				              	"order": 9,
+				              	"inputType": "select2",
+				              	"size": 100,
+				              	"values": {
+				                	"sourceType": "inline",
+				                	"data": [
+				                  	{
+					                    "text": "&nbsp;",
+					                    "value": ""
+					                  },
+					                  {
+					                    "text": "بله",
+					                    "value": "true"
+					                  },
+					                  {
+					                    "text": "خیر",
+					                    "value": "false"
+					                  }
+				                	]
+				              	},
+				              	"enabled": true
+                            }
+                    ]
+         	},
+              {
+                  "name": "modify",
+                  "type": "modify",
+                  "fields": [
+                             {
+                                 "name": "id",
+                                 "enabled": true
+                             },
+                             {
+                                 "name": "version",
+                                 "enabled": true
+                             },
+                             {
+                                 "name": "status",
+                                 "enabled": true
+                             },
+                             {
+                                 "name": "scheduled",
+                                 "enabled": true
+                             },
+                             {
+                                 "name": "remarks",
+                                 "enabled": true
+                             }
+                             ]
+              },
+              {
+                  "name": "delete",
+                  "type": "delete",
+                  "fields": [
+                             {
+                                 "name": "id",
+                                 "enabled": true
+                             },
+                             {
+                                 "name": "version",
+                                 "enabled": true
+                             }
+                             ]
+              }
+        ],
+        "data-tables": [
+                  {
+                      "name": "list",
+                      "fields": [
+                                 {
+                                     "name": "createDate",
+                                     "order": 0,
+                                     "size": 130,
+                                     "enabled": true
+                                 },
+                                 {
+                                     "name": "updateDate",
+                                     "order": 0,
+                                     "size": 130,
+                                     "enabled": true
+                                 },
+                                 {
+	                                 "name": "transportation.carrierName",
+	                                 "order": 1,
+                                     "size": 80,
+	                                 "validators":[],
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "transportation.transportationNumber",
+	                                 "order": 2,
+                                     "size": 80,
+	                                 "validators":[],
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "vehicle.carrierRegister",
+	                                 "order": 3,
+                                     "size": 80,
+	                                 "validators":[],
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "vehicle.manufacturer",
+	                                 "order": 4,
+                                     "size": 100,
+	                                 "validators":[],
+	                                 "renderFunction": "manufacturerRender",
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "transportation.fromNodeCode",
+	                                 "order": 5,
+                                     "size": 80,
+	                                 "validators":[],
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "transportation.toNodeCode",
+	                                 "order": 6,
+                                     "size": 80,
+	                                 "validators":[],
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "departureDateInUtc",
+                                     "order": 7,
+                                     "size": 0,
+                                     "renderFunction": "dateShortRender",
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "departureTimeInUtc",
+                                     "order": 8,
+                                     "size": 0,
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "departureDateInOriginLocal",
+                                     "order": 9,
+                                     "size": 0,
+                                     "renderFunction": "dateShortRender",
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "departureTimeInOriginLocal",
+                                     "order": 10,
+                                     "size": 0,
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "departureDateFromInUtc",
+                                     "order": 11,
+                                     "size": 0,
+	                                 "enabled": false
+	                             },
+	                             {
+	                                 "name": "departureDateToInUtc",
+                                     "order": 12,
+                                     "size": 0,
+	                                 "enabled": false
+	                             },
+	                             {
+	                                 "name": "arrivalDateInUtc",
+                                     "order": 13,
+                                     "size": 0,
+                                     "renderFunction": "dateShortRender",
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "arrivalTimeInUtc",
+                                     "order": 14,
+                                     "size": 0,
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "arrivalDateInDestinationLocal",
+                                     "order": 15,
+                                     "size": 0,
+                                     "renderFunction": "dateShortRender",
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "arrivalTimeInDestinationLocal",
+                                     "order": 16,
+                                     "size": 0,
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "arrivalDateFromInUtc",
+                                     "order": 17,
+                                     "size": 0,
+	                                 "enabled": false
+	                             },
+	                             {
+	                                 "name": "arrivalDateToInUtc",
+                                     "order": 18,
+                                     "size": 0,
+	                                 "enabled": false
+	                             },
+	                             {
+	                                 "name": "reservableWeight",
+                                     "order": 19,
+                                     "size": 80,
+                                     "renderFunction": "thousandSeparator",
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "status",
+                                     "order": 20,
+                                     "size": 80,
+                                     "renderFunction": "statusRender",
+	                                 "enabled": true
+	                             },
+	                             {
+	                                 "name": "scheduled",
+                                     "order": 21,
+                                     "renderFunction": "booleanRender",
+	                                 "enabled": true
+                                 }
+                                 ]
+                  }
+        ]
+    }
+]}

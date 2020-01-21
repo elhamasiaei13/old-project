@@ -1,0 +1,17 @@
+package com.parvanpajooh.complaintmanagement.domain.service;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.ddd.domain.service.GenericDomainService;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.complaintmanagement.domain.model.Complaint;
+
+public interface ComplaintDomainService extends GenericDomainService<Complaint, Long> {
+
+	public PageList<Complaint> findComplaints(
+			int firstResult,
+			int maxResults, 
+			SortDirectionEnum sortDirection, 
+			String sortCriterion) throws ParvanServiceException;
+	
+}

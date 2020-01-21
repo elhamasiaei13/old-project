@@ -1,0 +1,68 @@
+package com.parvanpajooh.transportationmanagement.service.adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.carriermanagement.CarrierManagementApiRestClient;
+import com.parvanpajooh.client.carriermanagement.model.CarrierMsg;
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.transportationmanagement.model.vo.CarrierVO;
+import com.parvanpajooh.transportationmanagement.service.adapter.CarrierManagementServiceAdapter;
+
+@Stateless
+public class CarrierManagementServiceAdapterRest implements CarrierManagementServiceAdapter {
+
+	private CarrierManagementApiRestClient carrierManagementApiRestClient;
+
+	protected transient final Logger log = LoggerFactory.getLogger(getClass());
+
+	public CarrierManagementServiceAdapterRest() {
+		this.carrierManagementApiRestClient = new CarrierManagementApiRestClient();
+	}
+
+	@Override
+	public PageList<CarrierVO> findCarriers(String term, int page, int size) throws ParvanUnrecoverableException {
+		PageList<CarrierVO> carrierVOsPageList = null;
+		List<CarrierVO> carrierVOs = null; 
+		try {
+			PageList<CarrierMsg> carrierMsgsPageList = carrierManagementApiRestClient.findCarriers(term, page, size);
+			
+			if (carrierMsgsPageList != null) {
+				carrierVOs = new ArrayList<CarrierVO>();
+				for (CarrierMsg msg : carrierMsgsPageList.getElements()) {
+					CarrierVO carrierVO = new CarrierVO();
+					carrierVO.fromMsg(msg);
+					carrierVOs.add(carrierVO);
+				}
+			}
+			
+			carrierVOsPageList = new PageList<>(carrierVOs, carrierMsgsPageList.getTotal());
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findCarriers", e);
+		}
+		return carrierVOsPageList;
+	}
+
+	@Override
+	public CarrierVO findCarrierByCode(String carrierCode) throws ParvanUnrecoverableException {
+
+		CarrierVO carrierVO = null;
+		try {
+			CarrierMsg carrierMsg = carrierManagementApiRestClient.getCarrierByCarrierCode(carrierCode);
+
+			carrierVO = new CarrierVO();
+			carrierVO.fromMsg(carrierMsg);
+			
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findCarrierByCode", e);
+		}
+		return carrierVO;
+	}
+}

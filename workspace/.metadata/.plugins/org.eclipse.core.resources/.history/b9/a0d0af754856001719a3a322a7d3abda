@@ -1,0 +1,3320 @@
+/**
+ * 
+ */
+package com.parvanpajooh.shipment.dao.jpa;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Selection;
+import javax.persistence.metamodel.Metamodel;
+
+import org.hibernate.Hibernate;
+
+import com.parvanpajooh.commons.constants.StringPool;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.dao.jpa.GenericDaoJpa;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanDaoException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanException;
+import com.parvanpajooh.commons.platform.ejb.model.CurrentContext;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseCriteria;
+import com.parvanpajooh.commons.util.DateUtilV2;
+import com.parvanpajooh.commons.util.StringUtil;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.commons.util.ZoneIdUtil;
+import com.parvanpajooh.ecourier.model.enums.EcFreightNodeType;
+import com.parvanpajooh.ecourier.model.enums.EcTransferNodeType;
+import com.parvanpajooh.shipment.dao.ShipmentDao;
+import com.parvanpajooh.shipment.model.Attachment;
+import com.parvanpajooh.shipment.model.ChangeLogGroup;
+import com.parvanpajooh.shipment.model.ChangeLogGroup_;
+import com.parvanpajooh.shipment.model.DeliveryRequest;
+import com.parvanpajooh.shipment.model.DeliveryRequest_;
+import com.parvanpajooh.shipment.model.Forwarding;
+import com.parvanpajooh.shipment.model.Forwarding_;
+import com.parvanpajooh.shipment.model.PackingItem;
+import com.parvanpajooh.shipment.model.PackingItem_;
+import com.parvanpajooh.shipment.model.PaymentMethod;
+import com.parvanpajooh.shipment.model.PaymentMethod_;
+import com.parvanpajooh.shipment.model.PriceItem;
+import com.parvanpajooh.shipment.model.Shipment;
+import com.parvanpajooh.shipment.model.ShipmentNode;
+import com.parvanpajooh.shipment.model.ShipmentNode_;
+import com.parvanpajooh.shipment.model.ShipmentState;
+import com.parvanpajooh.shipment.model.ShipmentStateHistory;
+import com.parvanpajooh.shipment.model.ShipmentStateHistory_;
+import com.parvanpajooh.shipment.model.ShipmentState_;
+import com.parvanpajooh.shipment.model.Shipment_;
+import com.parvanpajooh.shipment.model.criteria.ShipmentCriteria;
+import com.parvanpajooh.shipment.model.enums.AttachmentType;
+import com.parvanpajooh.shipment.model.enums.ChargeParty;
+import com.parvanpajooh.shipment.model.enums.PaymentType;
+import com.parvanpajooh.shipment.model.enums.ShipmentGLedgerStatus;
+import com.parvanpajooh.shipment.model.enums.ShipmentType;
+import com.parvanpajooh.shipment.model.vo.ChangeLogGroupVO;
+import com.parvanpajooh.shipment.model.vo.DeliveryRequestVO;
+import com.parvanpajooh.shipment.model.vo.ForwardingVO;
+import com.parvanpajooh.shipment.model.vo.PackingItemVO;
+import com.parvanpajooh.shipment.model.vo.PaymentMethodVO;
+import com.parvanpajooh.shipment.model.vo.ShipmentNodeVO;
+import com.parvanpajooh.shipment.model.vo.ShipmentStateVO;
+
+/**
+ * @author MO
+ * @author mehrdad
+ * 
+ */
+public class ShipmentDaoJpa extends GenericDaoJpa<Shipment, Long> implements ShipmentDao {
+
+	public ShipmentDaoJpa() {
+		super(Shipment.class);
+	}
+
+	/**
+	 * Entity manager, injected by Spring using @PersistenceContext annotation
+	 * on setEntityManager()
+	 */
+	@PersistenceContext(unitName = PERSISTENCE_UNIT_NAME)
+	private EntityManager entityManager;
+
+	@Override
+	public Shipment getFullShipment(Long id) throws ParvanDaoException {
+
+		// LOG
+		log.debug("Entering getFullShipment( id={})", id);
+
+		Shipment shipment = null;
+
+		try {
+			// get record
+			shipment = this.entityManager.find(Shipment.class, id);
+
+			// check
+			if (shipment == null) {
+				throw new ObjectNotFoundException();
+			}
+
+			Hibernate.initialize(shipment.getPackingList());
+			Hibernate.initialize(shipment.getTransactions());
+
+		} catch (ParvanDaoException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting records by its ID.", e);
+		}
+
+		// LOG
+		log.debug("Leaving getgetFullShipment(): {}", shipment);
+
+		return shipment;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.platform.parvan.entityconfig.dao.GenericDao#findByCriteria
+	 * (com.parvanpajooh.platform.parvan.common.vo.BaseCriteria, int, int,
+	 * com.parvanpajooh.platform.parvan.common.enums.SortDirectionEnum,
+	 * java.lang.String)
+	 */
+	@SuppressWarnings("rawtypes")
+	public List<Shipment> findFullByCriteria(BaseCriteria cri, int firstResult, int maxResults,
+			SortDirectionEnum sortDirection, String sortCriterion) throws ParvanDaoException {
+		
+		//TODO: this method is not full-load, so rename method 
+		// LOG
+		log.debug(
+				"Entering findFullByCriteria( cri={} , firstResult={} , maxResults={} , sortDirection={} , sortCriterion={})",
+				new Object[] { cri, firstResult, maxResults, sortDirection, sortCriterion });
+
+		List<Shipment> list = null;
+
+		try {
+			
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+
+			// make criteria
+			CriteriaQuery<Shipment> criteria = builder.createQuery(Shipment.class);
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			Root<Shipment> root = criteria.from(Shipment.class);
+			criteria.distinct(true);
+			
+			Map<String, Join> joins = new HashMap<>();
+
+			List<Predicate> predicateList = buildPredicateList(cri, builder, metamodel, root, joins);
+
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+
+			if (sortCriterion != null) {
+				
+				String[] joinSort = StringUtil.split(sortCriterion, StringPool.PERIOD);
+				
+				if(joinSort.length > 1){
+					Join join = null;
+					
+					if(joinSort.length > 2){
+						
+						for (int i = 0; i < joinSort.length - 1; i++) {
+							join = joins.get(joinSort[i]);
+							
+							if(join == null){
+								if(i == 0)
+									join = root.join(joinSort[i], JoinType.LEFT);
+							}
+						}
+					}
+					else {
+						join = joins.get(joinSort[0]);
+						
+						if(join == null){
+							join = root.join(joinSort[0], JoinType.LEFT);
+						}
+					}
+					
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						criteria.orderBy(builder.asc(join.get(joinSort[joinSort.length - 1])));
+					}
+					
+					if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						criteria.orderBy(builder.desc(join.get(joinSort[joinSort.length - 1])));
+					}
+					
+				} else {
+					if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+						criteria.orderBy(builder.asc(root.get(sortCriterion)));
+					}
+					
+					if (sortDirection.equals(SortDirectionEnum.Descending)) {
+						criteria.orderBy(builder.desc(root.get(sortCriterion)));
+					}
+				}
+				
+			}
+
+			// make query
+			TypedQuery<Shipment> q = getEntityManager().createQuery(criteria);
+			q.setFirstResult(firstResult);
+			q.setMaxResults(maxResults);
+
+			// execute query
+			list = q.getResultList();
+			
+			/*
+			 * for (Shipment shipment : list) {
+			 * //Hibernate.initialize(shipment.getProduct());
+			 * Hibernate.initialize(shipment.getAssignedAgent()); }
+			 */
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting paged-list of records by criteria.", e);
+		}
+
+		// LOG
+		log.debug("Leaving findFullByCriteria(): {}", (list != null) ? list.size() : "NULL");
+
+		return list;
+	}
+	
+	@Override
+	public List<Shipment> findCompleteByCriteria(BaseCriteria cri) throws ParvanDaoException {
+		log.debug("Entering findFullByCriteria(cri={})", new Object[] {cri});
+		List<Shipment> list = null;
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+			// make criteria
+			CriteriaQuery<Shipment> criteria = builder.createQuery(Shipment.class);
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			Root<Shipment> root = criteria.from(Shipment.class);
+			criteria.distinct(true);
+			Map<String, Join> joins = new HashMap<>();
+			List<Predicate> predicateList = buildPredicateList(cri, builder, metamodel, root, joins);
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+			// make query
+			TypedQuery<Shipment> q = getEntityManager().createQuery(criteria);
+			// execute query
+			list = q.getResultList();
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting paged-list of records by criteria.", e);
+		}
+		log.debug("Leaving findCompleteByCriteria(): {}", (list != null) ? list.size() : "NULL");
+		return list;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.parvanpajooh.ecourier.dao.ShipmentDao#getActivityPerDay(com.parvanpajooh
+	 * .ecourier.model.criteria.ShipmentCriteria)
+	 */
+	@Override
+	public List<Tuple> getActivityPerDay(ShipmentCriteria cri) throws ParvanDaoException {
+
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+
+			// make criteria
+			CriteriaQuery<Tuple> criteria = builder.createQuery(Tuple.class);
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			Root<Shipment> root = criteria.from(Shipment.class);
+			criteria.multiselect(builder.count(root.get(Shipment_.id)),
+					builder.function("DATE", LocalDateTime.class, root.get(Shipment_.shippingDate)));
+			criteria.groupBy(builder.function("DATE", LocalDateTime.class, root.get(Shipment_.shippingDate)));
+			criteria.orderBy(builder.asc(root.get(Shipment_.shippingDate)));
+			
+			Map<String, Join> joins = new HashMap<>();
+
+			List<Predicate> predicateList = buildPredicateList(cri, builder, metamodel, root, joins);
+
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+
+			// make query
+			TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);
+			
+			// execute query
+			return q.getResultList();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting count of shipment activity by criteria.", e);
+		}
+
+	}
+	
+	@Override
+	public Tuple getShipmentsSummary(ShipmentCriteria shipmentCriteria) throws ParvanDaoException {
+		//LOG
+		log.debug("Entering getShipmentsSummary( shipmentCriteria={})", shipmentCriteria);
+		
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+	
+			// make criteria
+			CriteriaQuery<Tuple> criteria = builder.createQuery(Tuple.class);
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			Root<Shipment> root = criteria.from(Shipment.class);
+			
+			criteria.multiselect(builder.countDistinct(root.<Long>get(Shipment_.id)).alias("shipmentCount"), 
+					builder.sum(root.<Double>get(Shipment_.totalChargeableWeight)).alias("totalChargeableWeight"), 
+					builder.sum(root.<Double>get(Shipment_.totalGrossWeight)).alias("totalGrossWeight"), 
+					builder.sum(root.<Double>get(Shipment_.totalDeclaredValue)).alias("totalDeclaredValue"), 
+					builder.sum(root.<Integer>get(Shipment_.totalPieces)).alias("totalPieces"), 
+					builder.sum(root.<Double>get(Shipment_.totalAmount)).alias("totalAmount"));
+			
+			Map<String, Join> joins = new HashMap<>();
+	
+			List<Predicate> predicateList = buildPredicateList(shipmentCriteria, builder, metamodel, root, joins);
+			
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+	
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+	
+			// make query
+			Query q = getEntityManager().createQuery(criteria);
+	
+			// execute query
+			return (Tuple) q.getSingleResult();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while get shipments summary by criteria.", e);
+		}
+	}
+	
+	@Override
+	public List<Tuple> getShipmentsCountPer(Set<Long> agentIds, Integer month, List<ShipmentStateVO> currentState, List<ShipmentStateVO> notCurrentState, boolean isShipper, boolean isCity) throws ParvanDaoException {
+		
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+			
+			// make criteria
+			CriteriaQuery<Tuple> criteria = builder.createQuery(Tuple.class);
+			//Metamodel metamodel = getEntityManager().getMetamodel();
+			//EntityType<Shipment> Shipment_ = metamodel.entity(Shipment.class);
+			Root<Shipment> root = criteria.from(Shipment.class);
+			
+			String location = "State";
+			if(isCity){
+				location = "City";
+			}
+			
+			if(isShipper){
+				criteria.multiselect(builder.count(root.get(Shipment_.id)), root.get("shipper"+location+"Code"));
+				criteria.groupBy(root.get("shipper"+location+"Code"));
+			} else {
+				criteria.multiselect(builder.count(root.get(Shipment_.id)), root.get("consignee"+location+"Code"));
+				criteria.groupBy(root.get("consignee"+location+"Code"));
+			}
+			
+			criteria.orderBy(builder.asc(root.get(Shipment_.shippingDate)));
+			
+			List<Predicate> predicateList = new ArrayList<>();
+			
+			//--------------------------------------------------------------------------
+			// Not Current State
+			//--------------------------------------------------------------------------
+			if (Validator.isNotNull(notCurrentState)) {
+				Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+				List<Predicate> andPredicates = new ArrayList<>();
+				
+				for (ShipmentStateVO thisState : notCurrentState) {
+					if (Validator.isNotNull(thisState.getId())) {
+						Predicate predicate = builder.notEqual(join.<Long> get(ShipmentState_.id), thisState.getId());
+						andPredicates.add(predicate);
+					}
+					
+					if (Validator.isNotNull(thisState.getCode())) {
+						Predicate predicate = builder.notEqual(join.<String> get(ShipmentState_.code), thisState.getCode());
+						andPredicates.add(predicate);
+					}
+				}
+				
+				Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+				predicateList.add(predicate);
+			}
+			
+			//--------------------------------------------------------------------------
+			// Current State
+			//--------------------------------------------------------------------------
+			if (Validator.isNotNull(currentState)) {
+				Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+				List<Predicate> orPredicates = new ArrayList<>();
+				
+				for (ShipmentStateVO thisState : currentState) {
+					if (Validator.isNotNull(thisState.getId())) {
+						Predicate predicate = builder.equal(join.<Long> get(ShipmentState_.id), thisState.getId());
+						orPredicates.add(predicate);
+					}
+					
+					if (Validator.isNotNull(thisState.getCode())) {
+						Predicate predicate = builder.equal(join.<String> get(ShipmentState_.code), thisState.getCode());
+						orPredicates.add(predicate);
+					}
+					
+				}
+				
+				Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+				predicateList.add(predicate);
+			}
+			
+			UserInfo userInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+			LocalDateTime nowInUtc = LocalDateTime.now();
+			
+			// start date
+			LocalDateTime shippingDateFrom = DateUtilV2.getLocalizedFirstTimeOfMonthAsUtc(
+					nowInUtc, 
+					ZoneIdUtil.getZoneId(userInfo.getZoneId()), 
+					userInfo.getCalendar());
+			
+			// end date
+			LocalDateTime shippingDateTo = DateUtilV2.getLocalizedLastTimeOfMonthAsUtc(
+					nowInUtc, 
+					ZoneIdUtil.getZoneId(userInfo.getZoneId()), 
+					userInfo.getCalendar());
+			
+			if (Validator.isNotNull(shippingDateFrom) || Validator.isNotNull(shippingDateTo)) {
+				
+				if(Validator.isNotNull(shippingDateFrom)){
+					shippingDateFrom = shippingDateFrom.withNano(0); //TODO temporary solution due to ECD-1068
+					Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), shippingDateFrom);
+		    		predicateList.add(predicate);
+				}
+				
+				if(Validator.isNotNull(shippingDateTo)){
+					shippingDateTo = shippingDateTo.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند	
+					shippingDateTo = shippingDateTo.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند	
+					Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), shippingDateTo);
+					predicateList.add(predicate);
+				}
+				
+			}
+			
+			if(Validator.isNotNull(agentIds)){
+				if(isShipper){
+					List<Predicate> issueAgentPredicates = new ArrayList<>();
+					
+					for (Long childId : agentIds) {
+						Predicate predicate = builder.equal(root.<Long> get(Shipment_.issuingAgentId), childId);
+						issueAgentPredicates.add(predicate);
+					}
+					
+					Predicate orPredicate = builder.or(issueAgentPredicates.toArray(new Predicate[issueAgentPredicates.size()]));
+					predicateList.add(orPredicate);
+					
+				} else {
+					List<Predicate> consigneeAgentPredicates = new ArrayList<>();
+					
+					for (Long childId : agentIds) {
+						//Predicate predicate = builder.equal(root.<Long> get(Shipment_.currentAssignedAgentId), childId);
+						//consigneeAgentPredicates.add(predicate);
+					}
+					
+					Predicate orPredicate = builder.or(consigneeAgentPredicates.toArray(new Predicate[consigneeAgentPredicates.size()]));
+					predicateList.add(orPredicate);
+				}
+			}
+			
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+				
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+			
+			// make query
+			TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);
+			
+			// execute query
+			return q.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting count of shipment per city.", e);
+		}
+		
+	}
+	
+	@Override
+	public List<Tuple> getShipmentsCountPerCity(Set<Long> agentIds, Integer month, List<ShipmentStateVO> currentState, List<ShipmentStateVO> notCurrentState, boolean isShipper) throws ParvanDaoException {
+		
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+			
+			// make criteria
+			CriteriaQuery<Tuple> criteria = builder.createQuery(Tuple.class);
+			//Metamodel metamodel = getEntityManager().getMetamodel();
+			//EntityType<Shipment> Shipment_ = metamodel.entity(Shipment.class);
+			Root<Shipment> root = criteria.from(Shipment.class);
+			
+			if(isShipper){
+				criteria.multiselect(root.get(Shipment_.shipperCityCode), root.get(Shipment_.shippingDate));
+			} else {
+				criteria.multiselect(root.get(Shipment_.consigneeCityCode), root.get(Shipment_.shippingDate));
+			}
+			
+			criteria.orderBy(builder.asc(root.get(Shipment_.shippingDate)));
+			
+			List<Predicate> predicateList = new ArrayList<>();
+			
+			//--------------------------------------------------------------------------
+			// Not Current State
+			//--------------------------------------------------------------------------
+			if (Validator.isNotNull(notCurrentState)) {
+				Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+				List<Predicate> andPredicates = new ArrayList<>();
+				
+				for (ShipmentStateVO thisState : notCurrentState) {
+					if (Validator.isNotNull(thisState.getId())) {
+						Predicate predicate = builder.notEqual(join.<Long> get(ShipmentState_.id), thisState.getId());
+						andPredicates.add(predicate);
+					}
+					
+					if (Validator.isNotNull(thisState.getCode())) {
+						Predicate predicate = builder.notEqual(join.<String> get(ShipmentState_.code), thisState.getCode());
+						andPredicates.add(predicate);
+					}
+				}
+				
+				Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+				predicateList.add(predicate);
+			}
+			
+			//--------------------------------------------------------------------------
+			// Current State
+			//--------------------------------------------------------------------------
+			if (Validator.isNotNull(currentState)) {
+				Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+				List<Predicate> orPredicates = new ArrayList<>();
+				
+				for (ShipmentStateVO thisState : currentState) {
+					if (Validator.isNotNull(thisState.getId())) {
+						Predicate predicate = builder.equal(join.<Long> get(ShipmentState_.id), thisState.getId());
+						orPredicates.add(predicate);
+					}
+					
+					if (Validator.isNotNull(thisState.getCode())) {
+						Predicate predicate = builder.equal(join.<String> get(ShipmentState_.code), thisState.getCode());
+						orPredicates.add(predicate);
+					}
+				}
+				
+				Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+				predicateList.add(predicate);
+			}
+			
+			UserInfo userInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+			LocalDateTime nowInUtc = LocalDateTime.now();
+			
+			// start date
+			LocalDateTime shippingDateFrom = DateUtilV2.getLocalizedFirstTimeOfMonthAsUtc(
+					nowInUtc, 
+					ZoneIdUtil.getZoneId(userInfo.getZoneId()), 
+					userInfo.getCalendar());
+			
+			// end date
+			LocalDateTime shippingDateTo = DateUtilV2.getLocalizedLastTimeOfMonthAsUtc(
+					nowInUtc, 
+					ZoneIdUtil.getZoneId(userInfo.getZoneId()), 
+					userInfo.getCalendar());
+			
+			if (Validator.isNotNull(shippingDateFrom) || Validator.isNotNull(shippingDateTo)) {
+				
+				if(Validator.isNotNull(shippingDateFrom)){
+					shippingDateFrom = shippingDateFrom.withNano(0); //TODO temporary solution due to ECD-1068
+					Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), shippingDateFrom);
+					predicateList.add(predicate);
+				}
+				
+				if(Validator.isNotNull(shippingDateTo)){
+					shippingDateTo = shippingDateTo.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند	
+					shippingDateTo = shippingDateTo.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند	
+					Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), shippingDateTo);
+					predicateList.add(predicate);
+				}
+				
+			}
+			
+			if(Validator.isNotNull(agentIds)){
+				if(isShipper){
+					List<Predicate> issueAgentPredicates = new ArrayList<>();
+					
+					for (Long childId : agentIds) {
+						Predicate predicate = builder.equal(root.<Long> get(Shipment_.issuingAgentId), childId);
+						issueAgentPredicates.add(predicate);
+					}
+					
+					Predicate orPredicate = builder.or(issueAgentPredicates.toArray(new Predicate[issueAgentPredicates.size()]));
+					predicateList.add(orPredicate);
+					
+				} else {
+					List<Predicate> consigneeAgentPredicates = new ArrayList<>();
+					
+					for (Long childId : agentIds) {
+						/*Predicate predicate = builder.equal(root.<Long> get(Shipment_.currentAssignedAgentId), childId);
+						consigneeAgentPredicates.add(predicate);*/
+					}
+					
+					Predicate orPredicate = builder.or(consigneeAgentPredicates.toArray(new Predicate[consigneeAgentPredicates.size()]));
+					predicateList.add(orPredicate);
+				}
+			}
+			
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+				
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+			
+			// make query
+			TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);
+			
+			// execute query
+			return q.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting count of shipment per city.", e);
+		}
+		
+	}
+	
+	@Override
+	protected List<Predicate> buildPredicateList(BaseCriteria cri, CriteriaBuilder builder,
+			Metamodel metamodel, Root<Shipment> root, Map<String, Join> joins) throws ParvanException {
+
+		// LOG
+		log.debug("Entering buildPredicateList( ... )");
+
+		ShipmentCriteria shipmentCriteria = (ShipmentCriteria) cri;
+		List<Predicate> predicateList = new ArrayList<>();
+		
+		//----------------------------------------------------------------
+		// Pickup Number
+		//----------------------------------------------------------------
+		String pickupNumber = shipmentCriteria.getPickupNumber();
+		if (Validator.isNotNull(pickupNumber)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.pickupNumber), pickupNumber);
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Pickup Request
+		//----------------------------------------------------------------
+		String pickupRequestRemark = shipmentCriteria.getPickupRequestRemark();
+		if (Validator.isNotNull(pickupRequestRemark)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.pickupRequestRemark), pickupRequestRemark);
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Tracking Number
+		//----------------------------------------------------------------
+		String trackingNumber = shipmentCriteria.getTrackingNumber();
+		if (Validator.isNotNull(trackingNumber)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.trackingNumber), trackingNumber);
+			predicateList.add(predicate);
+		}
+
+		//----------------------------------------------------------------
+		// Signer Name
+		//----------------------------------------------------------------
+		String signerName = shipmentCriteria.getSignerName();
+		if (Validator.isNotNull(signerName)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.signerName), signerName);
+			predicateList.add(predicate);
+		}
+
+		//----------------------------------------------------------------
+		// Priority
+		//----------------------------------------------------------------
+		Integer priority = shipmentCriteria.getPriority();
+		if (Validator.isNotNull(priority)) {
+			Predicate predicate = builder.equal(root.<Integer> get(Shipment_.priority), priority);
+			predicateList.add(predicate);
+		}
+
+		//----------------------------------------------------------------
+		// Estimated Charge
+		//----------------------------------------------------------------
+		Double estimatedCharge = shipmentCriteria.getEstimatedCharge();
+		if (Validator.isNotNull(estimatedCharge)) {
+			Predicate predicate = builder.equal(root.<Double> get(Shipment_.estimatedCharge), estimatedCharge);
+			predicateList.add(predicate);
+		}
+
+		//----------------------------------------------------------------
+		// Total Weight
+		//----------------------------------------------------------------
+		Double totalGrossWeight = shipmentCriteria.getTotalGrossWeight();
+		if (Validator.isNotNull(totalGrossWeight)) {
+			Predicate predicate = builder.equal(root.<Double> get(Shipment_.totalGrossWeight), totalGrossWeight);
+			predicateList.add(predicate);
+		}
+
+		//----------------------------------------------------------------
+		// Chargeable Weight
+		//----------------------------------------------------------------
+		Double totalChargeableWeight = shipmentCriteria.getTotalChargeableWeight();
+		if (Validator.isNotNull(totalChargeableWeight)) {
+			Predicate predicate = builder.equal(root.<Double> get(Shipment_.totalChargeableWeight), totalChargeableWeight);
+			predicateList.add(predicate);
+		}
+
+		//----------------------------------------------------------------
+		// Total Declared Value
+		//----------------------------------------------------------------
+		Double totalDeclaredValue = shipmentCriteria.getTotalDeclaredValue();
+		if (Validator.isNotNull(totalDeclaredValue)) {
+			Predicate predicate = builder.equal(root.<Double> get(Shipment_.totalDeclaredValue), totalDeclaredValue);
+			predicateList.add(predicate);
+		}
+
+		//----------------------------------------------------------------
+		// Waybill Number
+		//----------------------------------------------------------------
+		String waybillNumber = shipmentCriteria.getWaybillNumber();
+		if (Validator.isNotNull(waybillNumber)) {
+			Predicate predicate;
+			if (waybillNumber.indexOf("*") != -1) {
+				waybillNumber = waybillNumber.replace("*", "%");
+				predicate = builder.like(root.<String> get(Shipment_.waybillNumber), waybillNumber);
+			} else {
+				predicate = builder.like(root.<String> get(Shipment_.waybillNumber), "%" + waybillNumber + "%");
+			}
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// All Numbers (WaybillNumber, PickupNumber, trackingNumber)
+		//----------------------------------------------------------------
+		String allNumber = shipmentCriteria.getAllNumber();
+		if (Validator.isNotNull(allNumber)) {
+			List<Predicate> orPredicates = new ArrayList<>();
+			
+			orPredicates.add(builder.like(root.<String> get(Shipment_.waybillNumber), allNumber));
+			orPredicates.add(builder.like(root.<String> get(Shipment_.pickupNumber), allNumber));
+			orPredicates.add(builder.like(root.<String> get(Shipment_.trackingNumber), allNumber));
+			
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+
+		//----------------------------------------------------------------
+		// Content Description
+		//----------------------------------------------------------------
+		String contentDescription = shipmentCriteria.getContentDescription();
+		if (Validator.isNotNull(contentDescription)) {
+			Predicate predicate = builder.like(root.<String> get(Shipment_.contentDescription), "%" + contentDescription + "%");
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Shipper Info
+		//----------------------------------------------------------------
+		String shipperName = shipmentCriteria.getShipperName();
+		if (Validator.isNotNull(shipperName)) {
+			Predicate predicate = builder.like(root.<String> get(Shipment_.shipperName), "%" + shipperName + "%");
+			predicateList.add(predicate);
+		}
+		
+		String shipperNationalId = shipmentCriteria.getShipperNationalId();
+		if (Validator.isNotNull(shipperNationalId)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.shipperNationalId), shipperNationalId);
+			predicateList.add(predicate);
+		}
+
+		String shipperMobileNumber = shipmentCriteria.getShipperMobileNumber();
+		if (Validator.isNotNull(shipperMobileNumber)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.shipperMobileNumber), shipperMobileNumber);
+			predicateList.add(predicate);
+		}
+		
+		String shipperLandlineNumber = shipmentCriteria.getShipperLandlineNumber();
+		if (Validator.isNotNull(shipperLandlineNumber)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.shipperLandlineNumber), shipperLandlineNumber);
+			predicateList.add(predicate);
+		}
+		
+		String shipperContactNumber = shipmentCriteria.getShipperContactNumber();
+		if (Validator.isNotNull(shipperContactNumber)) {
+			List<Predicate> orPredicates = new ArrayList<>();
+			
+			orPredicates.add(builder.equal(root.<String> get(Shipment_.shipperMobileNumber), shipperContactNumber));
+			orPredicates.add(builder.equal(root.<String> get(Shipment_.shipperLandlineNumber), shipperContactNumber));
+			
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+
+		String shipperCountry = shipmentCriteria.getShipperCountry();
+		if (Validator.isNotNull(shipperCountry)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.shipperCountryCode), shipperCountry);
+			predicateList.add(predicate);
+		}
+
+		String shipperState = shipmentCriteria.getShipperState();
+		if (Validator.isNotNull(shipperState)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.shipperStateCode), shipperState);
+			predicateList.add(predicate);
+		}
+
+		String shipperCity = shipmentCriteria.getShipperCity();
+		if (Validator.isNotNull(shipperCity)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.shipperCityCode), shipperCity);
+			predicateList.add(predicate);
+		}
+
+		String shipperPostalCode = shipmentCriteria.getShipperPostalCode();
+		if (Validator.isNotNull(shipperPostalCode)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.shipperPostalCode), shipperPostalCode);
+			predicateList.add(predicate);
+		}
+
+		String shipperAddress = shipmentCriteria.getShipperAddress();
+		if (Validator.isNotNull(shipperAddress)) {
+			Predicate predicate = builder.like(root.<String> get(Shipment_.shipperAddress), "%" + shipperAddress + "%");
+			predicateList.add(predicate);
+		}
+
+		String shipperNote = shipmentCriteria.getShipperNote();
+		if (Validator.isNotNull(shipperNote)) {
+			Predicate predicate = builder.like(root.<String> get(Shipment_.shipperNote), "%" + shipperNote + "%");
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Consignee Info
+		//----------------------------------------------------------------
+		String consigneeName = shipmentCriteria.getConsigneeName();
+		if (Validator.isNotNull(consigneeName)) {
+			Predicate predicate = builder.like(root.<String> get(Shipment_.consigneeName), "%" + consigneeName + "%");
+			predicateList.add(predicate);
+		}
+		
+		String consigneeNationalId = shipmentCriteria.getConsigneeNationalId();
+		if (Validator.isNotNull(consigneeNationalId)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.consigneeNationalId), consigneeNationalId);
+			predicateList.add(predicate);
+		}
+
+		String consigneeMobileNumber = shipmentCriteria.getConsigneeMobileNumber();
+		if (Validator.isNotNull(consigneeMobileNumber)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.consigneeMobileNumber), consigneeMobileNumber);
+			predicateList.add(predicate);
+		}
+		
+		String consigneeLandlineNumber = shipmentCriteria.getConsigneeLandlineNumber();
+		if (Validator.isNotNull(consigneeLandlineNumber)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.consigneeLandlineNumber), consigneeLandlineNumber);
+			predicateList.add(predicate);
+		}
+		
+		String consigneeContactNumber = shipmentCriteria.getConsigneeContactNumber();
+		if (Validator.isNotNull(consigneeContactNumber)) {
+			List<Predicate> orPredicates = new ArrayList<>();
+			
+			orPredicates.add(builder.equal(root.<String> get(Shipment_.consigneeMobileNumber), consigneeContactNumber));
+			orPredicates.add(builder.equal(root.<String> get(Shipment_.consigneeLandlineNumber), consigneeContactNumber));
+			
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+
+		
+		String consigneeCountry = shipmentCriteria.getConsigneeCountry();
+		if (Validator.isNotNull(consigneeCountry)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.consigneeCountryCode), consigneeCountry);
+			predicateList.add(predicate);
+		}
+
+		String consigneeState = shipmentCriteria.getConsigneeState();
+		if (Validator.isNotNull(consigneeState)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.consigneeStateCode), consigneeState);
+			predicateList.add(predicate);
+		}
+
+		String consigneeCity = shipmentCriteria.getConsigneeCity();
+		if (Validator.isNotNull(consigneeCity)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.consigneeCityCode), consigneeCity);
+			predicateList.add(predicate);
+		}
+
+		String consigneePostalCode = shipmentCriteria.getConsigneePostalCode();
+		if (Validator.isNotNull(consigneePostalCode)) {
+			Predicate predicate = builder.equal(root.<String> get(Shipment_.consigneePostalCode), consigneePostalCode);
+			predicateList.add(predicate);
+		}
+		String consigneeAddress = shipmentCriteria.getConsigneeAddress();
+		if (Validator.isNotNull(consigneeAddress)) {
+			Predicate predicate = builder.like(root.<String> get(Shipment_.consigneeAddress), "%" + consigneeAddress + "%");
+			predicateList.add(predicate);
+		}
+
+		String consigneeNote = shipmentCriteria.getConsigneeNote();
+		if (Validator.isNotNull(consigneeNote)) {
+			Predicate predicate = builder.like(root.<String> get(Shipment_.consigneeNote), "%" + consigneeNote + "%");
+			predicateList.add(predicate);
+		}
+
+		//----------------------------------------------------------------
+		// ShipmentGLedgerStatus
+		//----------------------------------------------------------------
+		ShipmentGLedgerStatus[] shipmentGLedgerStatus = shipmentCriteria.getShipmentGLedgerStatus();
+		if (Validator.isNotNull(shipmentGLedgerStatus)) {
+			List<Predicate> orPredicates = new ArrayList<>();
+			for (ShipmentGLedgerStatus thisShipmentGLedgerStatus : shipmentGLedgerStatus) {
+				Predicate predicate = builder.equal(root.<ShipmentGLedgerStatus> get(Shipment_.shipmentGLedgerStatus), thisShipmentGLedgerStatus);
+				orPredicates.add(predicate);
+			}
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Shipment Types
+		//----------------------------------------------------------------
+		ShipmentType[] shipmentType = shipmentCriteria.getShipmentType();
+		if (Validator.isNotNull(shipmentType)) {
+			List<Predicate> orPredicates = new ArrayList<>();
+			for (ShipmentType thisShipmentType : shipmentType) {
+				Predicate predicate = builder.equal(root.<ShipmentType> get(Shipment_.shipmentType), thisShipmentType);
+				orPredicates.add(predicate);
+			}
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+
+		//----------------------------------------------------------------
+		// Current State
+		//----------------------------------------------------------------
+		ShipmentStateVO currentState = shipmentCriteria.getCurrentState();
+		if (Validator.isNotNull(currentState)) {
+			Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+			joins.put("currentState", join);
+			if (Validator.isNotNull(currentState.getId())) {
+				Predicate predicate = builder.equal(join.<Long> get(ShipmentState_.id), currentState.getId());
+				predicateList.add(predicate);
+			}
+			if (Validator.isNotNull(currentState.getCode())) {
+				Predicate predicate = builder.equal(join.<String> get(ShipmentState_.code), currentState.getCode());
+				predicateList.add(predicate);
+			}
+		}
+
+		//----------------------------------------------------------------
+		// Packing Items
+		//----------------------------------------------------------------
+		PackingItemVO packingItem = shipmentCriteria.getPackingItem();
+		if (Validator.isNotNull(packingItem)) {
+			Join<Shipment, PackingItem> join = joins.get("packingList");
+			
+			if (Validator.isNotNull(packingItem.getId())) {
+				if(join == null){
+					join = root.join(Shipment_.packingList, JoinType.LEFT);
+				}
+				
+				Predicate predicate = builder.equal(join.<Long> get(PackingItem_.id), packingItem.getId());
+				predicateList.add(predicate);
+			}
+			if (Validator.isNotNull(packingItem.getLength())) {
+				if(join == null){
+					join = root.join(Shipment_.packingList, JoinType.LEFT);
+				}
+				
+				Predicate predicate = builder.equal(join.<Double> get(PackingItem_.length), packingItem.getLength());
+				predicateList.add(predicate);
+			}
+			if (Validator.isNotNull(packingItem.getHeight())) {
+				if(join == null){
+					join = root.join(Shipment_.packingList, JoinType.LEFT);
+				}
+				
+				Predicate predicate = builder.equal(join.<Double> get(PackingItem_.height), packingItem.getHeight());
+				predicateList.add(predicate);
+			}
+			if (Validator.isNotNull(packingItem.getWidth())) {
+				if(join == null){
+					join = root.join(Shipment_.packingList, JoinType.LEFT);
+				}
+				
+				Predicate predicate = builder.equal(join.<Double> get(PackingItem_.width), packingItem.getWidth());
+				predicateList.add(predicate);
+			}
+			if (Validator.isNotNull(packingItem.getDeclaredValue())) {
+				if(join == null){
+					join = root.join(Shipment_.packingList, JoinType.LEFT);
+				}
+				
+				Predicate predicate = builder.equal(join.<Double> get(PackingItem_.declaredValue), packingItem.getDeclaredValue());
+				predicateList.add(predicate);
+			}
+			
+			if (Validator.isNotNull(packingItem.getContents())) {
+				if(join == null){
+					join = root.join(Shipment_.packingList, JoinType.LEFT);
+				}
+				
+				Predicate predicate = builder.like(join.<String> get(PackingItem_.contents), "%" + packingItem.getContents() + "%");
+				predicateList.add(predicate);
+			}
+			
+			if(join != null){
+				joins.put("packingList", join);
+			}
+		}
+
+		//----------------------------------------------------------------
+		// Payment Method
+		//----------------------------------------------------------------
+		PaymentMethodVO paymentMethod = shipmentCriteria.getPaymentMethod();
+		if (Validator.isNotNull(paymentMethod)) {
+			Join<Shipment, PaymentMethod> join = joins.get("paymentMethod");
+			
+			if (Validator.isNotNull(paymentMethod.getId())) {
+				if(join == null){
+					join = root.join(Shipment_.paymentMethod);
+				}
+			
+				Predicate predicate = builder.equal(join.<Long> get(PaymentMethod_.id), paymentMethod.getId());
+				predicateList.add(predicate);
+			}
+			if (Validator.isNotNull(paymentMethod.getKey())) {
+				if(join == null){
+					join = root.join(Shipment_.paymentMethod);
+				}
+				
+				Predicate predicate = builder.equal(join.<String> get(PaymentMethod_.key), paymentMethod.getKey());
+				predicateList.add(predicate);
+			}
+			if (Validator.isNotNull(paymentMethod.getValue())) {
+				if(join == null){
+					join = root.join(Shipment_.paymentMethod);
+				}
+				
+				Predicate predicate = builder.equal(join.<String> get(PaymentMethod_.value), paymentMethod.getValue());
+				predicateList.add(predicate);
+			}
+			if (Validator.isNotNull(paymentMethod.getType())) {
+				if(join == null){
+					join = root.join(Shipment_.paymentMethod);
+				}
+				
+				Predicate predicate = builder.equal(join.<PaymentType> get(PaymentMethod_.type), paymentMethod.getType());
+				predicateList.add(predicate);
+			}
+			
+			if(join != null){
+				joins.put("paymentMethod", join);
+			}
+		}
+		//----------------------------------------------------------------
+		// Optional Services
+		//----------------------------------------------------------------
+		/* 
+		 * OptionalServiceVO optionalServices = shipmentCriteria.getOptionalServices();
+		 * if(Validator.isNotNull( optionalServices )){ Join<Shipment,
+		 * OptionalService> join = root.join("optionalServices");
+		 * 
+		 * if(Validator.isNotNull( optionalServices.getId() )){ Predicate
+		 * predicate = builder.equal(join.<Long>get(Shipment_.id"),
+		 * optionalServices.getId()); predicateList.add(predicate); }
+		 * 
+		 * if(Validator.isNotNull( optionalServices.getCode() )){ Predicate
+		 * predicate = builder.equal(join.<String>get(Shipment_.code"),
+		 * optionalServices.getCode()); predicateList.add(predicate); }
+		 * 
+		 * if(Validator.isNotNull( optionalServices.getDescription() )){
+		 * Predicate predicate = builder.like(join.<String>get(Shipment_.description"),
+		 * "%" + optionalServices.getDescription() + "%");
+		 * predicateList.add(predicate); }
+		 * }
+		 */
+		
+		//----------------------------------------------------------------
+		// Forwarding
+		//----------------------------------------------------------------
+		ForwardingVO forwarding = shipmentCriteria.getForwarding();
+		if (Validator.isNotNull(forwarding)) {
+			Join<Shipment, Forwarding> join = joins.get("forwarding");
+			if (Validator.isNotNull(forwarding.getId())) {
+				if(join == null){
+					join = root.join(Shipment_.forwarding);
+				}
+				
+				Predicate predicate = builder.equal(join.<Long> get(Forwarding_.id), forwarding.getId());
+				predicateList.add(predicate);
+			}
+			if (Validator.isNotNull(forwarding.getForwarderWaybillNumber())) {
+				if(join == null){
+					join = root.join(Shipment_.forwarding);
+				}
+				
+				Predicate predicate = builder.equal(join.<String> get(Forwarding_.forwarderWaybillNumber),
+						forwarding.getForwarderWaybillNumber());
+				predicateList.add(predicate);
+			}
+			
+			if(join != null){
+				joins.put("forwarding", join);
+			}
+		}
+
+		//----------------------------------------------------------------
+		// Delivery Requests
+		//----------------------------------------------------------------
+		DeliveryRequestVO deliveryRequest = shipmentCriteria.getDeliveryRequest();
+		if (Validator.isNotNull(deliveryRequest)) {
+			Join<Shipment, DeliveryRequest> join = joins.get("deliveryRequest");
+			if (Validator.isNotNull(deliveryRequest.getId())) {
+				if(join == null){
+					join = root.join(Shipment_.deliveryRequest);
+				}
+				
+				Predicate predicate = builder.equal(join.<Long> get(DeliveryRequest_.id), deliveryRequest.getId());
+				predicateList.add(predicate);
+			}
+			if (Validator.isNotNull(deliveryRequest.getRequestDate())) {
+				if(join == null){
+					join = root.join(Shipment_.deliveryRequest);
+				}
+				
+				Predicate predicate = builder.equal(join.<LocalDateTime> get(DeliveryRequest_.requestDate), deliveryRequest.getRequestDate());
+				predicateList.add(predicate);
+			}
+			if (Validator.isNotNull(deliveryRequest.getRemark())) {
+				if(join == null){
+					join = root.join(Shipment_.deliveryRequest);
+				}
+				
+				Predicate predicate = builder.equal(join.<String> get(DeliveryRequest_.remark), deliveryRequest.getRemark());
+				predicateList.add(predicate);
+			}
+			
+			if(join != null){
+				joins.put("deliveryRequest", join);
+			}
+		}
+
+		//----------------------------------------------------------------
+		// Change Log Groups
+		//----------------------------------------------------------------
+		ChangeLogGroupVO changeLogGroups = shipmentCriteria.getChangeLogGroups();
+		if (Validator.isNotNull(changeLogGroups)) {
+			Join<Shipment, ChangeLogGroup> join = joins.get("changeLogGroups");
+			if (Validator.isNotNull(changeLogGroups.getId())) {
+				if(join == null){
+					join = root.join(Shipment_.changeLogGroups);
+				}
+				
+				Predicate predicate = builder.equal(join.<Long> get(ChangeLogGroup_.id), changeLogGroups.getId());
+				predicateList.add(predicate);
+			}
+			if (Validator.isNotNull(changeLogGroups.getDate())) {
+				if(join == null){
+					join = root.join(Shipment_.changeLogGroups);
+				}
+				
+				Predicate predicate = builder.equal(join.<LocalDateTime> get(ChangeLogGroup_.date), changeLogGroups.getDate());
+				predicateList.add(predicate);
+			}
+			
+			if(join != null){
+				joins.put("changeLogGroups", join);
+			}
+		}
+
+		//----------------------------------------------------------------
+		// Agents
+		//----------------------------------------------------------------
+		
+		List<Predicate> agentPredicates = new ArrayList<>();
+		Long parentAgentId = shipmentCriteria.getParentAgentId();
+		Set<Long> agentChildrenIds = shipmentCriteria.getAgentChildrenIds();
+		/******** Issuing Agent **************/
+		Long issuingAgentId = shipmentCriteria.getIssuingAgentId();
+		if (Validator.isNotNull(issuingAgentId)) {
+			List<Predicate> issueAgentPredicates = new ArrayList<>();
+			if (Validator.isNotNull(issuingAgentId)) {
+				
+				Predicate predicate = builder.equal(root.<Long> get(Shipment_.issuingAgentId), issuingAgentId);
+				issueAgentPredicates.add(predicate);
+			}
+
+			if (Validator.isNotNull(parentAgentId) && Validator.isNotNull(parentAgentId)) {
+				Predicate predicate = builder.equal(root.<Long> get(Shipment_.issuingAgentId), parentAgentId);
+				issueAgentPredicates.add(predicate);
+				Predicate orPredicate = builder.or(issueAgentPredicates.toArray(new Predicate[issueAgentPredicates.size()]));
+				agentPredicates.add(orPredicate);
+			} else if (Validator.isNotNull(agentChildrenIds)) {
+				
+				// List<Predicate> predicates = new ArrayList<Predicate>();
+				for (Long childId : agentChildrenIds) {
+					Predicate predicate = builder.equal(root.<Long> get(Shipment_.issuingAgentId), childId);
+					issueAgentPredicates.add(predicate);
+				}
+				Predicate orPredicate = builder.or(issueAgentPredicates.toArray(new Predicate[issueAgentPredicates.size()]));
+				agentPredicates.add(orPredicate);
+			} else {
+				agentPredicates.addAll(issueAgentPredicates);
+			}
+			
+		}
+		/******** Assigned Agent **************/
+		Long currentAssignedAgentId = shipmentCriteria.getCurrentAssignedAgentId();
+		if (Validator.isNotNull(currentAssignedAgentId)) {
+			List<Predicate> currentAssignedAgentPredicates = new ArrayList<>();
+			/*if (Validator.isNotNull(currentAssignedAgentId)) {
+				Predicate predicate = builder.equal(root.<Long> get(Shipment_.currentAssignedAgentId), currentAssignedAgentId);
+				currentAssignedAgentPredicates.add(predicate);
+			}*/
+
+			/*if (Validator.isNotNull(parentAgentId) && Validator.isNotNull(parentAgentId)) {
+				Predicate predicate = builder.equal(root.<Long> get(Shipment_.currentAssignedAgentId), parentAgentId);
+				currentAssignedAgentPredicates.add(predicate);
+				Predicate orPredicate = builder.or(currentAssignedAgentPredicates
+						.toArray(new Predicate[currentAssignedAgentPredicates.size()]));
+				agentPredicates.add(orPredicate);
+			} else if (Validator.isNotNull(agentChildrenIds)) {
+				for (Long childId : agentChildrenIds) {
+					Predicate predicate = builder.equal(root.<Long> get(Shipment_.currentAssignedAgentId), childId);
+					currentAssignedAgentPredicates.add(predicate);
+				}
+				Predicate orPredicate = builder.or(currentAssignedAgentPredicates
+						.toArray(new Predicate[currentAssignedAgentPredicates.size()]));
+				agentPredicates.add(orPredicate);
+			} else {
+				agentPredicates.addAll(currentAssignedAgentPredicates);
+			}*/
+		}
+		
+		boolean agentOrSearch = shipmentCriteria.isAgentOrSearch();
+		if (agentOrSearch) {
+			Predicate orPredicate = builder.or(agentPredicates.toArray(new Predicate[agentPredicates.size()]));
+			predicateList.add(orPredicate);
+		} else {
+			predicateList.addAll(agentPredicates);
+		}
+		
+		/******** Assigned User **************/
+		Long currentAssignedUserId = shipmentCriteria.getCurrentAssignedUserId();
+		/*if (Validator.isNotNull(currentAssignedUserId)) {
+			Predicate predicate = builder.equal(root.<Long> get(Shipment_.currentAssignedUserId), currentAssignedUserId);
+			predicateList.add(predicate);
+		}*/
+		
+		//----------------------------------------------------------------
+		// Current Node
+		//----------------------------------------------------------------
+		Long notCurrentNodeId = shipmentCriteria.getNotCurrentNodeId();
+		/*Long currentNodeId = shipmentCriteria.getCurrentNodeId();
+		if (Validator.isNotNull(currentNodeId)) {
+			Predicate predicate = builder.equal(root.<Long> get(Shipment_.currentNodeId), currentNodeId);
+			predicateList.add(predicate);
+		}*/
+		
+		//----------------------------------------------------------------
+		// NOT Current Node
+		//----------------------------------------------------------------
+		/*else if (Validator.isNotNull(notCurrentNodeId)) {
+			Predicate predicate = builder.notEqual(root.<Long> get(Shipment_.currentNodeId), notCurrentNodeId);
+			predicateList.add(predicate);
+		}*/
+
+		//----------------------------------------------------------------
+		// Destination Node
+		//----------------------------------------------------------------
+		Long[] destinationNodeId = shipmentCriteria.getDestinationNodeId();
+		if (Validator.isNotNull(destinationNodeId)) {
+			List<Predicate> orPredicates = new ArrayList<>();
+			Join<Shipment, ShipmentNode> join = joins.get("shipmentNodes");
+			if(join == null){
+				join = root.join(Shipment_.shipmentNodes, JoinType.LEFT);
+			}
+			joins.put("shipmentNodes", join);
+			for (Long id : destinationNodeId) {
+				Predicate predicate = builder.equal(join.<Long> get(ShipmentNode_.nodeId), id);
+				orPredicates.add(predicate);
+			}
+			Predicate typePredicate = builder.equal(join.<EcTransferNodeType> get(ShipmentNode_.type), EcTransferNodeType.DESTINATION_HUB);
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(typePredicate);
+			predicateList.add(predicate);
+		}
+
+		//----------------------------------------------------------------
+		// ????????
+		//----------------------------------------------------------------
+		Map<String, String> orSearch = shipmentCriteria.getOrSearch();
+		if (Validator.isNotNull(orSearch)) {
+			Set<String> keys = orSearch.keySet();
+			List<Predicate> orPredicate = new ArrayList<>();
+			for (String key : keys) {
+				orPredicate.add(builder.equal(root.<String> get(key), orSearch.get(key)));
+			}
+			Predicate predicate = builder.or(orPredicate.toArray(new Predicate[orPredicate.size()]));
+			predicateList.add(predicate);
+		}
+
+		//----------------------------------------------------------------
+		// Origin Node
+		//----------------------------------------------------------------
+		Long originNodeId[] = shipmentCriteria.getOriginNodeId();
+		if (Validator.isNotNull(originNodeId)) {
+			List<Predicate> orPredicates = new ArrayList<Predicate>();
+			Join<Shipment, ShipmentNode> join = joins.get("shipmentNodes");
+			if(join == null){
+				join = root.join(Shipment_.shipmentNodes, JoinType.LEFT);
+			}
+			joins.put("shipmentNodes", join);
+			for (Long id : originNodeId) {
+				Predicate predicate = builder.equal(join.<Long> get(ShipmentNode_.nodeId), id);
+				orPredicates.add(predicate);
+			}
+			Predicate typePredicate = builder.equal(join.<EcTransferNodeType> get(ShipmentNode_.type), EcTransferNodeType.ORIGIN_HUB);
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(typePredicate);
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Charge Party
+		//----------------------------------------------------------------
+		ChargeParty[] chargeParty = shipmentCriteria.getChargeParty();
+		if (Validator.isNotNull(chargeParty)) {
+			List<Predicate> orPredicates = new ArrayList<>();
+			for (ChargeParty thisChargeParty : chargeParty) {
+				Predicate predicate = builder.equal(root.<ChargeParty> get(Shipment_.chargeParty), thisChargeParty);
+				orPredicates.add(predicate);
+			}
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Shipping Date
+		//----------------------------------------------------------------
+		LocalDateTime shippingDateFrom = shipmentCriteria.getShippingDateFrom();
+		LocalDateTime shippingDateTo   = shipmentCriteria.getShippingDateTo();
+		if (Validator.isNotNull(shippingDateFrom) || Validator.isNotNull(shippingDateTo)) {
+			
+			if(Validator.isNotNull(shippingDateFrom)){
+
+				shippingDateFrom = shippingDateFrom.withNano(0); //TODO temporary solution due to ECD-1068
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), shippingDateFrom);
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(shippingDateTo)){
+				shippingDateTo = shippingDateTo.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند	
+				shippingDateTo = shippingDateTo.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند	
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), shippingDateTo);
+				predicateList.add(predicate);
+			}
+			
+		}
+		
+		//----------------------------------------------------------------
+		// Last Change State Date
+		//----------------------------------------------------------------
+		LocalDateTime lastChangeStateDateTimeFrom = shipmentCriteria.getLastChangeStateDateFrom();
+		LocalDateTime lastChangeStateDateTimeTo   = shipmentCriteria.getLastChangeStateDateTo();
+		if (Validator.isNotNull(lastChangeStateDateTimeFrom) || Validator.isNotNull(lastChangeStateDateTimeTo)) {
+			
+			if(Validator.isNotNull(lastChangeStateDateTimeFrom)){
+				lastChangeStateDateTimeFrom = lastChangeStateDateTimeFrom.withNano(0); //TODO temporary solution due to ECD-1068
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Shipment_.lastChangeStateDate), lastChangeStateDateTimeFrom);
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(lastChangeStateDateTimeTo)){
+				lastChangeStateDateTimeTo = lastChangeStateDateTimeTo.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند	
+				lastChangeStateDateTimeTo = lastChangeStateDateTimeTo.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند	
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Shipment_.lastChangeStateDate), lastChangeStateDateTimeTo);
+				predicateList.add(predicate);
+			}
+			
+		}
+		
+		//----------------------------------------------------------------
+		// Update Date
+		//----------------------------------------------------------------
+		LocalDateTime updateDateTimeFrom = shipmentCriteria.getUpdateDateFrom();
+		LocalDateTime updateDateTimeTo   = shipmentCriteria.getUpdateDateTo();
+		if (Validator.isNotNull(updateDateTimeFrom) || Validator.isNotNull(updateDateTimeTo)) {
+			
+			if(Validator.isNotNull(updateDateTimeFrom)){
+				updateDateTimeFrom = updateDateTimeFrom.withNano(0); //TODO temporary solution due to ECD-1068
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Shipment_.updateDate), updateDateTimeFrom);
+	    		predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(updateDateTimeTo)){
+				updateDateTimeTo = updateDateTimeTo.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+				updateDateTimeTo = updateDateTimeTo.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Shipment_.updateDate), updateDateTimeTo);
+				predicateList.add(predicate);
+			}
+		}
+		
+		//----------------------------------------------------------------
+		// Waybill Number
+		//----------------------------------------------------------------
+		/******** From **************/
+		String waybillNumberFrom = shipmentCriteria.getWaybillNumberFrom();
+		if (Validator.isNotNull(waybillNumberFrom)) {
+			Predicate fromPredicate = builder.greaterThanOrEqualTo(root.<String>get(Shipment_.waybillNumber), waybillNumberFrom);
+			predicateList.add(fromPredicate);
+		}
+		/******** To **************/
+		String waybillNumberTo = shipmentCriteria.getWaybillNumberTo();
+		if (Validator.isNotNull(waybillNumberTo)) {
+			Predicate toPredicate = builder.lessThanOrEqualTo(root.<String>get(Shipment_.waybillNumber), waybillNumberTo);
+			predicateList.add(toPredicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Product
+		//----------------------------------------------------------------		
+		Long productId = shipmentCriteria.getProductId();
+		if (Validator.isNotNull(productId)) {
+			Predicate predicate = builder.equal(root.<Long> get(Shipment_.productId), productId);
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Payment reference no.
+		//----------------------------------------------------------------
+		String paymentReferenceInfo = shipmentCriteria.getPaymentReferenceInfo();
+		if (Validator.isNotNull(paymentReferenceInfo)) {
+			Predicate predicate;
+			if (paymentReferenceInfo.indexOf("*") != -1) {
+				paymentReferenceInfo = paymentReferenceInfo.replace("*", "%");
+				predicate = builder.like(root.<String> get(Shipment_.paymentReferenceInfo), paymentReferenceInfo);
+			} else {
+				predicate = builder.like(root.<String> get(Shipment_.paymentReferenceInfo), "%" + paymentReferenceInfo + "%");
+			}
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Forwarder reference no.
+		//----------------------------------------------------------------
+		String forwarderReferenceNumber = shipmentCriteria.getForwarderReferenceNumber();
+		if (Validator.isNotNull(forwarderReferenceNumber)) {
+			Predicate predicate;
+			if (forwarderReferenceNumber.indexOf("*") != -1) {
+				forwarderReferenceNumber = forwarderReferenceNumber.replace("*", "%");
+				predicate = builder.like(root.<String> get(Shipment_.forwarderReferenceNumber), forwarderReferenceNumber);
+			} else {
+				predicate = builder.like(root.<String> get(Shipment_.forwarderReferenceNumber), "%" + forwarderReferenceNumber + "%");
+			}
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Volumetric weight
+		//----------------------------------------------------------------
+		/******** From **************/
+		Double totalVolumetricWeightFrom = shipmentCriteria.getTotalVolumetricWeightFrom();
+        if (Validator.isNotNull(totalVolumetricWeightFrom)) {
+            Predicate fromPredicate = builder.greaterThanOrEqualTo(root.<Double>get(Shipment_.totalVolumetricWeight), totalVolumetricWeightFrom);
+            predicateList.add(fromPredicate);
+        }
+        /******** To **************/
+        Double totalVolumetricWeightTo   = shipmentCriteria.getTotalVolumetricWeightTo();
+        if (Validator.isNotNull(totalVolumetricWeightTo)) {
+            Predicate toPredicate = builder.lessThanOrEqualTo(root.<Double>get(Shipment_.totalVolumetricWeight), totalVolumetricWeightTo);
+            predicateList.add(toPredicate);
+        }
+		
+		//----------------------------------------------------------------
+		// Total weight
+		//----------------------------------------------------------------
+        /******** From **************/
+        Double totalGrossWeightFrom = shipmentCriteria.getTotalGrossWeightFrom();
+        if (Validator.isNotNull(totalGrossWeightFrom)) {
+            Predicate fromPredicate = builder.greaterThanOrEqualTo(root.<Double>get(Shipment_.totalGrossWeight), totalGrossWeightFrom);
+            predicateList.add(fromPredicate);
+        }
+        /******** To **************/
+        Double totalGrossWeightTo   = shipmentCriteria.getTotalGrossWeightTo();
+        if (Validator.isNotNull(totalGrossWeightTo)) {
+            Predicate toPredicate = builder.lessThanOrEqualTo(root.<Double>get(Shipment_.totalGrossWeight), totalGrossWeightTo);
+            predicateList.add(toPredicate);
+        }
+		
+		//----------------------------------------------------------------
+		// Chargeable weight
+		//----------------------------------------------------------------
+        /******** From **************/
+        Double totalChargeableWeightFrom = shipmentCriteria.getTotalChargeableWeightFrom();
+        if (Validator.isNotNull(totalChargeableWeightFrom)) {
+            Predicate fromPredicate = builder.greaterThanOrEqualTo(root.<Double>get(Shipment_.totalChargeableWeight), totalChargeableWeightFrom);
+            predicateList.add(fromPredicate);
+        }
+        /******** To **************/
+        Double totalChargeableWeightTo   = shipmentCriteria.getTotalChargeableWeightTo();
+        if (Validator.isNotNull(totalChargeableWeightTo)) {
+            Predicate toPredicate = builder.lessThanOrEqualTo(root.<Double>get(Shipment_.totalChargeableWeight), totalChargeableWeightTo);
+            predicateList.add(toPredicate);
+        }
+		
+		//----------------------------------------------------------------
+		// Total declared value
+		//----------------------------------------------------------------
+        /******** From **************/
+        Double totalDeclaredValueFrom = shipmentCriteria.getTotalDeclaredValueFrom();
+        if (totalDeclaredValueFrom != null) {
+            Predicate fromPredicate = builder.greaterThanOrEqualTo(root.<Double>get(Shipment_.totalDeclaredValue), totalDeclaredValueFrom);
+            predicateList.add(fromPredicate);
+        }
+        /******** To **************/
+        Double totalDeclaredValueTo   = shipmentCriteria.getTotalDeclaredValueTo();
+        if (totalDeclaredValueTo != null) {
+            Predicate toPredicate = builder.lessThanOrEqualTo(root.<Double>get(Shipment_.totalDeclaredValue), totalDeclaredValueTo);
+            predicateList.add(toPredicate);
+        }
+		
+		//----------------------------------------------------------------
+		// Shipper geolocation
+		//----------------------------------------------------------------
+        /******** Country **************/
+		String shipperCountryCode = shipmentCriteria.getShipperCountryCode();
+		String notShipperCountryCode = shipmentCriteria.getNotShipperCountryCode();
+		if (Validator.isNotNull(shipperCountryCode)) {
+			Predicate predicate = builder.equal(root.<String>get(Shipment_.shipperCountryCode), shipperCountryCode);
+			predicateList.add(predicate);
+		}
+		else if (Validator.isNotNull(notShipperCountryCode)) {
+			Predicate predicate = builder.notEqual(root.<String>get(Shipment_.shipperCountryCode), notShipperCountryCode);
+			predicateList.add(predicate);
+		}
+		/******** State **************/
+		String shipperStateCode = shipmentCriteria.getShipperStateCode();
+		String notShipperStateCode = shipmentCriteria.getNotShipperStateCode();
+		if (Validator.isNotNull(shipperStateCode)) {
+			Predicate predicate = builder.equal(root.<String>get(Shipment_.shipperStateCode), shipperStateCode);
+			predicateList.add(predicate);
+		}
+		else if (Validator.isNotNull(notShipperStateCode)) {
+			Predicate predicate = builder.notEqual(root.<String>get(Shipment_.shipperStateCode), notShipperStateCode);
+			predicateList.add(predicate);
+		}
+		/******** City **************/
+		String[] shipperCityCode = shipmentCriteria.getShipperCityCode();
+		String[] notShipperCityCode = shipmentCriteria.getNotShipperCityCode();
+		if (Validator.isNotNull(shipperCityCode)) {
+			List<Predicate> orPredicates = new ArrayList<>();
+			for (String thisCityCode : shipperCityCode) {
+				Predicate predicate = builder.equal(root.<String> get(Shipment_.shipperCityCode), thisCityCode);
+				orPredicates.add(predicate);
+			}
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		else if (Validator.isNotNull(notShipperCityCode)) {
+			List<Predicate> andPredicates = new ArrayList<>();
+			for (String thisCityCode : notShipperCityCode) {
+				Predicate predicate = builder.notEqual(root.<String> get(Shipment_.shipperCityCode), thisCityCode);
+				andPredicates.add(predicate);
+			}
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Consignee geolocation
+		//----------------------------------------------------------------
+		/******** Country **************/
+		String consigneeCountryCode = shipmentCriteria.getConsigneeCountryCode();
+		String notConsigneeCountryCode = shipmentCriteria.getNotConsigneeCountryCode();
+		if (Validator.isNotNull(consigneeCountryCode)) {
+			Predicate predicate = builder.equal(root.<String>get(Shipment_.consigneeCountryCode), consigneeCountryCode);
+			predicateList.add(predicate);
+		}
+		else if (Validator.isNotNull(notConsigneeCountryCode)) {
+			Predicate predicate = builder.notEqual(root.<String>get(Shipment_.consigneeCountryCode), notConsigneeCountryCode);
+			predicateList.add(predicate);
+		}
+		/******** State **************/
+		String consigneeStateCode = shipmentCriteria.getConsigneeStateCode();
+		String notConsigneeStateCode = shipmentCriteria.getNotConsigneeStateCode();
+		if (Validator.isNotNull(consigneeStateCode)) {
+			Predicate predicate = builder.equal(root.<String>get(Shipment_.consigneeStateCode), consigneeStateCode);
+			predicateList.add(predicate);
+		}
+		else if (Validator.isNotNull(notConsigneeStateCode)) {
+			Predicate predicate = builder.notEqual(root.<String>get(Shipment_.consigneeStateCode), notConsigneeStateCode);
+			predicateList.add(predicate);
+		}
+		/******** City **************/
+		String[] consigneeCityCode = shipmentCriteria.getConsigneeCityCode();
+		String[] notConsigneeCityCode = shipmentCriteria.getNotConsigneeCityCode();
+		if (Validator.isNotNull(consigneeCityCode)) {
+			List<Predicate> orPredicates = new ArrayList<>();
+			for (String thisCityCode : consigneeCityCode) {
+				Predicate predicate = builder.equal(root.<String> get(Shipment_.consigneeCityCode), thisCityCode);
+				orPredicates.add(predicate);
+			}
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		else if (Validator.isNotNull(notConsigneeCityCode)) {
+			List<Predicate> andPredicates = new ArrayList<>();
+			for (String thisCityCode : notConsigneeCityCode) {
+				Predicate predicate = builder.notEqual(root.<String> get(Shipment_.consigneeCityCode), thisCityCode);
+				andPredicates.add(predicate);
+			}
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		//----------------------------------------------------------------
+		// Shipper client
+		//----------------------------------------------------------------
+		String shipperPersonUuid = shipmentCriteria.getShipperPersonUuid();
+		if (Validator.isNotNull(shipperPersonUuid)) {
+			Predicate predicate = builder.equal(root.<String>get(Shipment_.shipperPersonUuid), shipperPersonUuid);
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Consignee client
+		//----------------------------------------------------------------
+		String consigneePersonUuid = shipmentCriteria.getConsigneePersonUuid();
+		if (Validator.isNotNull(consigneePersonUuid)) {
+			Predicate predicate = builder.equal(root.<String>get(Shipment_.consigneePersonUuid), consigneePersonUuid);
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// collection node
+		//----------------------------------------------------------------
+		Long collectionNodeId = shipmentCriteria.getCollectionNodeId();
+		if (Validator.isNotNull(collectionNodeId)) {
+			List<Predicate> andPredicates = new ArrayList<>();
+			Join<Shipment, ShipmentNode> join = joins.get("shipmentNodes");
+			if(join == null){
+				join = root.join(Shipment_.shipmentNodes, JoinType.LEFT);
+			}
+			joins.put("shipmentNodes", join);
+			andPredicates.add(builder.equal(join.<Long> get(ShipmentNode_.nodeId), collectionNodeId));
+			andPredicates.add(builder.equal(join.<EcTransferNodeType> get(ShipmentNode_.type), EcTransferNodeType.COLLECTION));
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// distribution node
+		//----------------------------------------------------------------
+		Long distributionNodeId = shipmentCriteria.getDistributionNodeId();
+		if (Validator.isNotNull(distributionNodeId)) {
+			Join<Shipment, ShipmentNode> join = joins.get("shipmentNodes");
+			
+			if(join == null){
+				join = root.join(Shipment_.shipmentNodes, JoinType.LEFT);
+			}
+			
+			List<Predicate> andPredicates = new ArrayList<>();
+			
+			andPredicates.add(builder.equal(join.<Long> get(ShipmentNode_.nodeId), distributionNodeId));
+			andPredicates.add(builder.equal(join.<EcTransferNodeType> get(ShipmentNode_.type), EcTransferNodeType.DISTRIBUTION));
+			
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+			
+			if(join != null){
+				joins.put("shipmentNodes", join);
+			}
+		}
+		
+		//----------------------------------------------------------------
+		// ShipmentNode
+		//----------------------------------------------------------------
+		ShipmentNodeVO[] shipmentNodes = shipmentCriteria.getShipmentNodes();
+		if (Validator.isNotNull(shipmentNodes) && shipmentNodes.length > 0) {
+			Join<Shipment, ShipmentNode> join = joins.get("shipmentNodes");
+			
+			if(join == null){
+				join = root.join(Shipment_.shipmentNodes, JoinType.LEFT);
+			}
+			
+			List<Predicate> orPredicates = new ArrayList<>();
+			for (ShipmentNodeVO thisShipmentNodeVO : shipmentNodes) {
+				
+				if(thisShipmentNodeVO == null){
+					continue;
+				}
+				
+				List<Predicate> andPredicates = new ArrayList<>();
+				
+				//nodeId
+				if(Validator.isNotNull(thisShipmentNodeVO.getNodeId())){
+					andPredicates.add(builder.equal(join.<Long> get(ShipmentNode_.nodeId), thisShipmentNodeVO.getNodeId()));
+				}
+				
+				//nodeCode
+				if(Validator.isNotNull(thisShipmentNodeVO.getNodeCode())){
+					andPredicates.add(builder.equal(join.<String> get(ShipmentNode_.nodeCode), thisShipmentNodeVO.getNodeCode()));
+				}
+				
+				//type
+				if(Validator.isNotNull(thisShipmentNodeVO.getType())){
+					andPredicates.add(builder.equal(join.<EcTransferNodeType> get(ShipmentNode_.type), thisShipmentNodeVO.getType()));
+				}
+				
+				//freightNodeType
+				if(Validator.isNotNull(thisShipmentNodeVO.getEcFreightNodeType())){
+					andPredicates.add(builder.equal(join.<EcFreightNodeType> get(ShipmentNode_.freightNodeType), thisShipmentNodeVO.getEcFreightNodeType()));
+				}
+				
+				Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+				orPredicates.add(predicate);
+			}
+			
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+			
+			if(join != null){
+				joins.put("shipmentNodes", join);
+			}
+		}
+		
+		//----------------------------------------------------------------
+		// NOT distribution EcTransferNodeType
+		//----------------------------------------------------------------
+		ShipmentNodeVO[] notShipmentNodes = shipmentCriteria.getNotShipmentNodes();
+		if (Validator.isNotNull(notShipmentNodes) && notShipmentNodes.length > 0) {
+			Join<Shipment, ShipmentNode> join = joins.get("shipmentNodes");
+			
+			if(join == null){
+				join = root.join(Shipment_.shipmentNodes, JoinType.LEFT);
+			}
+			
+			List<Predicate> andPredicates = new ArrayList<>();
+			for (ShipmentNodeVO thisShipmentNodeVO : notShipmentNodes) {
+				
+				if(thisShipmentNodeVO == null){
+					continue;
+				}
+				
+				//nodeId
+				if(Validator.isNotNull(thisShipmentNodeVO.getNodeId())){
+					andPredicates.add(builder.notEqual(join.<Long> get(ShipmentNode_.nodeId), thisShipmentNodeVO.getNodeId()));
+				}
+				
+				//nodeCode
+				if(Validator.isNotNull(thisShipmentNodeVO.getNodeCode())){
+					andPredicates.add(builder.notEqual(join.<String> get(ShipmentNode_.nodeCode), thisShipmentNodeVO.getNodeCode()));
+				}
+				
+				//type
+				if(Validator.isNotNull(thisShipmentNodeVO.getType())){
+					andPredicates.add(builder.notEqual(join.<EcTransferNodeType> get(ShipmentNode_.type), thisShipmentNodeVO.getType()));
+				}
+				
+				//freightNodeType
+				if(Validator.isNotNull(thisShipmentNodeVO.getEcFreightNodeType())){
+					andPredicates.add(builder.notEqual(join.<EcFreightNodeType> get(ShipmentNode_.freightNodeType), thisShipmentNodeVO.getEcFreightNodeType()));
+				}
+				
+			}
+			
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+			
+			if(join != null){
+				joins.put("shipmentNodes", join);
+			}
+		}
+		
+		//private EcFreightNodeType[] collectionNodeFreightTypes;
+		//private EcFreightNodeType[] notCollectionNodeFreightTypes;
+		
+		
+		//----------------------------------------------------------------
+		// Not Current Shipment States or Long[] notCurrentStateIds = shipmentCriteria.getNotCurrentStateIds();  or codes
+		//----------------------------------------------------------------
+		Join<Shipment, ShipmentState> currentStateJoin = null;
+		List<ShipmentStateVO> notCurrentState = shipmentCriteria.getNotCurrentState();
+		Long[] notCurrentStateIds = shipmentCriteria.getNotCurrentStateIds();
+		String[] notCurrentStateCodes = shipmentCriteria.getNotCurrentStateCodes();
+		
+		if (Validator.isNotNull(notCurrentState)) {
+			
+			if(currentStateJoin == null){
+				currentStateJoin = joins.get("currentState");
+			}
+			
+			if(currentStateJoin == null){
+				currentStateJoin = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+				joins.put("currentState", currentStateJoin);
+			}
+			
+			List<Predicate> andPredicates = new ArrayList<>();
+			for (ShipmentStateVO thisShipmentStateVO : notCurrentState) {
+				Predicate predicate = builder.notEqual(currentStateJoin.<String> get(ShipmentState_.code), thisShipmentStateVO.getCode());
+				andPredicates.add(predicate);
+			}
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		else if (Validator.isNotNull(notCurrentStateIds)) {
+			
+			if(currentStateJoin == null){
+				currentStateJoin = joins.get("currentState");
+			}
+			
+			if(currentStateJoin == null){
+				currentStateJoin = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+				joins.put("currentState", currentStateJoin);
+			}
+			
+			List<Predicate> andPredicates = new ArrayList<>();
+			for (Long id : notCurrentStateIds) {
+				Predicate predicate = builder.notEqual(currentStateJoin.<Long> get(ShipmentState_.id), id);
+				andPredicates.add(predicate);
+			}
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		else if (Validator.isNotNull(notCurrentStateCodes)) {
+			
+			if(currentStateJoin == null){
+				currentStateJoin = joins.get("currentState");
+			}
+			
+			if(currentStateJoin == null){
+				currentStateJoin = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+				joins.put("currentState", currentStateJoin);
+			}
+			
+			List<Predicate> andPredicates = new ArrayList<>();
+			for (String code : notCurrentStateCodes) {
+				Predicate predicate = builder.notEqual(currentStateJoin.<String> get(ShipmentState_.code), code);
+				andPredicates.add(predicate);
+			}
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// current shipmentState Ids or codes
+		//----------------------------------------------------------------
+		Long[] currentStateIds = shipmentCriteria.getCurrentStateIds();
+		String[] currentStateCodes = shipmentCriteria.getCurrentStateCodes();
+		if (Validator.isNotNull(currentStateIds)) {
+			
+			if(currentStateJoin == null){
+				currentStateJoin = joins.get("currentState");
+			}
+			
+			if(currentStateJoin == null){
+				currentStateJoin = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+				joins.put("currentState", currentStateJoin);
+			}
+			
+			List<Predicate> orPredicates = new ArrayList<>();
+			for (Long id : currentStateIds) {
+				Predicate predicate = builder.equal(currentStateJoin.<Long> get(ShipmentState_.id), id);
+				orPredicates.add(predicate);
+			}
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		else if (Validator.isNotNull(currentStateCodes)) {
+			
+			if(currentStateJoin == null){
+				currentStateJoin = joins.get("currentState");
+			}
+			
+			if(currentStateJoin == null){
+				currentStateJoin = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+				joins.put("currentState", currentStateJoin);
+			}
+			
+			List<Predicate> orPredicates = new ArrayList<>();
+			for (String code : currentStateCodes) {
+				Predicate predicate = builder.equal(currentStateJoin.<String> get(ShipmentState_.code), code);
+				orPredicates.add(predicate);
+			}
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		//----------------------------------------------------------------
+		// ShipmentStateHistory
+		//----------------------------------------------------------------
+		LocalDateTime shipmentStateHistoryDateFrom = shipmentCriteria.getShipmentStateHistoryDateFrom();
+		LocalDateTime shipmentStateHistoryDateTo = shipmentCriteria.getShipmentStateHistoryDateTo();
+		Long shipmentStateHistoryActingAgentIdmId = shipmentCriteria.getShipmentStateHistoryActingAgentIdmId();
+		Long shipmentStateHistoryCreateUserId = shipmentCriteria.getShipmentStateHistoryCreateUserId();
+		String[] shipmentActionCodes = shipmentCriteria.getShipmentActionCodes();
+		
+		if (Validator.isNotNull(shipmentStateHistoryDateFrom) || Validator.isNotNull(shipmentStateHistoryDateTo) || 
+				Validator.isNotNull(shipmentStateHistoryActingAgentIdmId) || Validator.isNotNull(shipmentStateHistoryCreateUserId) || Validator.isNotNull(shipmentActionCodes)) {
+			
+			Join<Shipment, ShipmentStateHistory> join = joins.get("shipmentStateHistories");
+			if(join == null){
+				join = root.join(Shipment_.shipmentStateHistories, JoinType.LEFT);
+			}
+			joins.put("shipmentStateHistories", join);
+			if (Validator.isNotNull(shipmentStateHistoryDateFrom)){
+
+				shipmentStateHistoryDateFrom = shipmentStateHistoryDateFrom.withNano(0); //TODO temporary solution due to ECD-1068
+				Predicate predicate = builder.greaterThanOrEqualTo(join.<LocalDateTime> get(ShipmentStateHistory_.date), shipmentStateHistoryDateFrom);
+				predicateList.add(predicate);
+			}
+			
+			if (Validator.isNotNull(shipmentStateHistoryDateTo)){
+				shipmentStateHistoryDateTo = shipmentStateHistoryDateTo.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+				shipmentStateHistoryDateTo = shipmentStateHistoryDateTo.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+				Predicate predicate = builder.lessThanOrEqualTo(join.<LocalDateTime> get(ShipmentStateHistory_.date), shipmentStateHistoryDateTo);
+				predicateList.add(predicate);
+			}
+			
+			if (Validator.isNotNull(shipmentActionCodes)){
+				
+				List<Predicate> orPredicates = new ArrayList<>();
+				for (String shipmentActionCode : shipmentActionCodes) {
+					Predicate predicate = builder.equal(join.<String>get(ShipmentStateHistory_.shipmentActionCode), shipmentActionCode);
+					orPredicates.add(predicate);
+				}
+				Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+				predicateList.add(predicate);
+			}
+			
+			if (Validator.isNotNull(shipmentStateHistoryCreateUserId)){
+				
+				Predicate predicate = builder.equal(join.<Long>get(ShipmentStateHistory_.createUserId), shipmentStateHistoryCreateUserId);
+				predicateList.add(predicate);
+			}
+			
+			if (Validator.isNotNull(shipmentStateHistoryActingAgentIdmId)){
+				Predicate predicate = builder.equal(join.<Long>get(ShipmentStateHistory_.actingAgentId), shipmentStateHistoryActingAgentIdmId);
+				predicateList.add(predicate);
+			}
+		}
+		//----------------------------------------------------------------
+		// settled
+		//----------------------------------------------------------------
+		Boolean settled = shipmentCriteria.getSettled();
+		if (Validator.isNotNull(settled)) {
+			Predicate predicate = builder.equal(root.<Boolean> get(Shipment_.settled), settled);
+			predicateList.add(predicate);
+		}
+		
+		basePredicate((BaseCriteria) shipmentCriteria, builder, root, predicateList);
+
+		// LOG
+		log.debug("Leaving buildPredicateList(): {}", predicateList.size());
+
+		return predicateList;
+	}
+
+	@Override
+	public Shipment findByPickupNumber(String pickupNumber) throws ParvanDaoException {
+		log.debug("Entering findByPickupNumber");
+
+		List<Shipment> shipments = null;
+
+		try {
+			// make query
+			TypedQuery<Shipment> q = getEntityManager().createQuery("select obj from Shipment obj where obj.pickupNumber = ? ", Shipment.class);
+
+			q.setParameter(1, pickupNumber);
+
+			// execute query
+			shipments = q.getResultList();
+
+			if (Validator.isNotNull(shipments)) {
+				if (shipments.size() == 1) {
+					return shipments.get(0);
+				} else {
+					throw new ParvanDaoException("more than one shipment found for pickupNumber " + pickupNumber + ".");
+				}
+			}
+
+			return null;
+
+		} catch (ParvanDaoException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("unknown exception occurred while findByPickupNumber.", e);
+		}
+	}
+
+	@Override
+	public Shipment findByWaybillNumber(String waybillNumber) throws ParvanDaoException {
+		log.debug("Entering findByWaybillNumber");
+
+		List<Shipment> shipments = null;
+
+		try {
+			// make query
+			TypedQuery<Shipment> q = getEntityManager().createQuery("select obj from Shipment obj where obj.waybillNumber = ? ", Shipment.class);
+
+			q.setParameter(1, waybillNumber);
+
+			// execute query
+			shipments = q.getResultList();
+
+			if (Validator.isNotNull(shipments)) {
+				if (shipments.size() == 1) {
+					return shipments.get(0);
+				} else {
+					throw new ParvanDaoException("more than one shipment found for waybillNumber " + waybillNumber + ".");
+				}
+			}
+
+			return null;
+
+		} catch (ParvanDaoException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("unknown exception occurred while findByWaybillNumber.", e);
+		}
+	}
+	
+	@Override
+	public Shipment findByForwarderReferenceNumber(String forwarderReferenceNumber) throws ParvanDaoException {
+		log.debug("Entering findByForwarderReferenceNumber");
+
+		List<Shipment> shipments = null;
+
+		try {
+			// make query
+			TypedQuery<Shipment> q = getEntityManager().createQuery("select obj from Shipment obj where obj.forwarderReferenceNumber = ? ", Shipment.class);
+
+			q.setParameter(1, forwarderReferenceNumber);
+
+			// execute query
+			shipments = q.getResultList();
+
+			if (Validator.isNotNull(shipments)) {
+				if (shipments.size() == 1) {
+					return shipments.get(0);
+				} else {
+					throw new ParvanDaoException("more than one shipment found for forwarderReferenceNumber " + forwarderReferenceNumber + ".");
+				}
+			}
+
+			return null;
+
+		} catch (ParvanDaoException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("unknown exception occurred while findByForwarderReferenceNumber.", e);
+		}
+	}
+	
+	@Override
+	public Shipment findByTrackingNumber(String trackingNumber) throws ParvanDaoException {
+		log.debug("Entering findByTrackingNumber");
+
+		List<Shipment> shipments = null;
+
+		try {
+			// make query
+			TypedQuery<Shipment> q = getEntityManager().createQuery("select obj from Shipment obj where obj.trackingNumber = ? ", Shipment.class);
+
+			q.setParameter(1, trackingNumber);
+
+			// execute query
+			shipments = q.getResultList();
+
+			if (Validator.isNotNull(shipments)) {
+				if (shipments.size() == 1) {
+					Shipment shipment = shipments.get(0);
+					return shipment;
+				} else {
+					throw new ParvanDaoException("more than one shipment found for trackingNumber " + trackingNumber + ".");
+				}
+			}
+
+			return null;
+
+		} catch (ParvanDaoException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("unknown exception occurred while findByTrackingNumber.", e);
+		}
+	}
+
+	@Override
+	public Shipment findFullByTrackingNumber(String trackingNumber) throws ParvanDaoException {
+		log.debug("Entering findByTrackingNumber");
+
+		List<Shipment> shipments = null;
+
+		try {
+			// make query
+			TypedQuery<Shipment> q = getEntityManager().createQuery("select obj from Shipment obj where obj.trackingNumber = ? ", Shipment.class);
+
+			q.setParameter(1, trackingNumber);
+
+			// execute query
+			shipments = q.getResultList();
+
+			if (Validator.isNotNull(shipments)) {
+				if (shipments.size() == 1) {
+					Shipment shipment = shipments.get(0);
+					return shipment;
+				} else {
+					throw new ParvanDaoException("more than one shipment found for trackingNumber " + trackingNumber
+							+ ".");
+				}
+			}
+
+			return null;
+
+		} catch (ParvanDaoException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("unknown exception occurred while findByTrackingNumber.", e);
+		}
+	}
+
+	@Override
+	public Shipment findFullByWaybillNumber(String waybillNumber) throws ParvanDaoException {
+		log.debug("Entering findFullByWaybillNumber(waybillNumber={})", waybillNumber);
+
+		List<Shipment> shipments = null;
+
+		try {
+			// make query
+			TypedQuery<Shipment> q = getEntityManager().createQuery("select obj from Shipment obj where obj.waybillNumber = ? ", Shipment.class);
+
+			q.setParameter(1, waybillNumber);
+
+			// execute query
+			shipments = q.getResultList();
+
+			if (Validator.isNotNull(shipments)) {
+				if (shipments.size() == 1) {
+
+					Shipment shipment = shipments.get(0);
+
+					Hibernate.initialize(shipment.getPackingList()); //TODO: why?
+
+					return shipments.get(0);
+				} else {
+					throw new ParvanDaoException("more than one shipment found for waybillNumber " + waybillNumber);
+				}
+			}
+
+			return null;
+
+		} catch (ParvanDaoException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("unknown exception occurred while findByWaybillNumber.", e);
+		}
+	}
+	
+	@Override
+	public List<Attachment> findAttachments(Long shipmentId, AttachmentType[] types) throws ParvanDaoException {
+		//LOG
+		log.debug("Entering findAttachments( shipmentId={}, types={})", shipmentId, types);
+		
+		try {
+			
+			StringBuilder query = new StringBuilder();
+			query.append("select attachment from Shipment shipment join shipment.attachments attachment ");
+			query.append(" where shipment.id = ? ");
+			
+			if(types != null){
+				
+				query.append(" and ( ");
+				int i=0;
+				for (AttachmentType thisAttachmentType : types) {
+					
+					if(i > 0){
+						query.append(" or ");
+					}
+					query.append(" attachment.type = '" + thisAttachmentType.name() + "' ");
+					
+					i++;
+				}
+				
+				query.append(" ) ");
+				
+			}
+			
+			TypedQuery<Attachment> q = getEntityManager().createQuery(query.toString(), Attachment.class);
+
+			q.setParameter(1, shipmentId);
+			
+			// execute query
+			return q.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while findAttachments", e);
+		}
+		
+	}
+	
+	@Override
+	public List<Tuple> countShipmentPerDay(Set<Long> agentIds, LocalDateTime fromDateTime, LocalDateTime toDateTime, List<ShipmentStateVO> currentState, List<ShipmentStateVO> notCurrentState) throws ParvanDaoException{
+		//LOG
+		log.debug("Entering countShipmentPerDay( agentIds={}, fromDateTime={}, toDateTime={}, currentState={}, notCurrentState={})", agentIds, fromDateTime, toDateTime, currentState, notCurrentState);
+				
+		// make criteria-builder
+		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+		
+		// make criteria
+		CriteriaQuery<Tuple> criteria = builder.createQuery(Tuple.class);
+		//Metamodel metamodel = getEntityManager().getMetamodel();
+		//EntityType<Shipment> Shipment_ = metamodel.entity(Shipment.class);
+		Root<Shipment> root = criteria.from(Shipment.class);
+		
+		Expression<LocalDateTime> dateTrunc = builder.function("date", LocalDateTime.class, root.get(Shipment_.shippingDate));
+		
+		criteria.multiselect(builder.count(root.get(Shipment_.id)), dateTrunc);
+		criteria.groupBy(dateTrunc);
+		
+		criteria.orderBy(builder.asc(root.get(Shipment_.shippingDate)));
+		
+		List<Predicate> predicateList = new ArrayList<>();
+		
+		//--------------------------------------------------------------------------
+		// Not Current State
+		//--------------------------------------------------------------------------
+		if (Validator.isNotNull(notCurrentState)) {
+			Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+			List<Predicate> andPredicates = new ArrayList<>();
+			
+			for (ShipmentStateVO thisState : notCurrentState) {
+				if (Validator.isNotNull(thisState.getId())) {
+					Predicate predicate = builder.notEqual(join.<Long> get(ShipmentState_.id), thisState.getId());
+					andPredicates.add(predicate);
+				}
+				
+				if (Validator.isNotNull(thisState.getCode())) {
+					Predicate predicate = builder.notEqual(join.<String> get(ShipmentState_.code), thisState.getCode());
+					andPredicates.add(predicate);
+				}
+			}
+			
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		//--------------------------------------------------------------------------
+		// Current State
+		//--------------------------------------------------------------------------
+		if (Validator.isNotNull(currentState)) {
+			Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+			List<Predicate> orPredicates = new ArrayList<>();
+			
+			for (ShipmentStateVO thisState : currentState) {
+				if (Validator.isNotNull(thisState.getId())) {
+					Predicate predicate = builder.equal(join.<Long> get(ShipmentState_.id), thisState.getId());
+					orPredicates.add(predicate);
+				}
+				
+				if (Validator.isNotNull(thisState.getCode())) {
+					Predicate predicate = builder.equal(join.<String> get(ShipmentState_.code), thisState.getCode());
+					orPredicates.add(predicate);
+				}
+				
+			}
+			
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(agentIds)){
+			List<Predicate> issueAgentPredicates = new ArrayList<>();
+			
+			for (Long childId : agentIds) {
+				Predicate predicate = builder.equal(root.<Long> get(Shipment_.issuingAgentId), childId);
+				issueAgentPredicates.add(predicate);
+			}
+			
+			Predicate orPredicate = builder.or(issueAgentPredicates.toArray(new Predicate[issueAgentPredicates.size()]));
+			predicateList.add(orPredicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Shipping Date
+		//----------------------------------------------------------------
+		if (Validator.isNotNull(fromDateTime) || Validator.isNotNull(toDateTime)) {
+			
+			if(Validator.isNotNull(fromDateTime)){
+				fromDateTime = fromDateTime.withNano(0); //TODO temporary solution due to ECD-1068
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), fromDateTime);
+	    		predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(toDateTime)){
+				toDateTime = toDateTime.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+				toDateTime = toDateTime.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), toDateTime);
+				predicateList.add(predicate);
+			}
+			
+		}
+		
+		if (predicateList.size() == 1) {
+			criteria.where(predicateList.get(0));
+			
+		} else if (predicateList.size() > 1) {
+			criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+		}
+		
+		// make query
+		TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);
+		
+		return q.getResultList();
+	}
+	
+	@Override
+	public List<Tuple> countShipmentPerMonth(Set<Long> agentIds, LocalDateTime fromDateTime, LocalDateTime toDateTime, List<ShipmentStateVO> currentState, List<ShipmentStateVO> notCurrentState) throws ParvanDaoException{
+		//LOG
+		log.debug("Entering countShipmentPerMonth( agentIds={}, fromDateTime={}, toDateTime={}, currentState={}, notCurrentState={})", agentIds, fromDateTime, toDateTime, currentState, notCurrentState);
+		
+		// make criteria-builder
+		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+		
+		// make criteria
+		CriteriaQuery<Tuple> criteria = builder.createQuery(Tuple.class);
+		//Metamodel metamodel = getEntityManager().getMetamodel();
+		//EntityType<Shipment> Shipment_ = metamodel.entity(Shipment.class);
+		Root<Shipment> root = criteria.from(Shipment.class);
+		
+		Expression<LocalDateTime> monthTrunc = builder.function("month", LocalDateTime.class, root.get(Shipment_.shippingDate));
+		Expression<LocalDateTime> yearTrunc = builder.function("year", LocalDateTime.class, root.get(Shipment_.shippingDate));
+		
+		criteria.multiselect(builder.count(root.get(Shipment_.id)), monthTrunc, yearTrunc);
+		criteria.groupBy(monthTrunc);
+		
+		criteria.orderBy(builder.asc(root.get(Shipment_.shippingDate)));
+		
+		List<Predicate> predicateList = new ArrayList<>();
+		
+		//--------------------------------------------------------------------------
+		// Not Current State
+		//--------------------------------------------------------------------------
+		if (Validator.isNotNull(notCurrentState)) {
+			Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+			List<Predicate> andPredicates = new ArrayList<>();
+			
+			for (ShipmentStateVO thisState : notCurrentState) {
+				if (Validator.isNotNull(thisState.getId())) {
+					Predicate predicate = builder.notEqual(join.<Long> get(ShipmentState_.id), thisState.getId());
+					andPredicates.add(predicate);
+				}
+				
+				if (Validator.isNotNull(thisState.getCode())) {
+					Predicate predicate = builder.notEqual(join.<String> get(ShipmentState_.code), thisState.getCode());
+					andPredicates.add(predicate);
+				}
+			}
+			
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		//--------------------------------------------------------------------------
+		// Current State
+		//--------------------------------------------------------------------------
+		if (Validator.isNotNull(currentState)) {
+			Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+			List<Predicate> orPredicates = new ArrayList<>();
+			
+			for (ShipmentStateVO thisState : currentState) {
+				if (Validator.isNotNull(thisState.getId())) {
+					Predicate predicate = builder.equal(join.<Long> get(ShipmentState_.id), thisState.getId());
+					orPredicates.add(predicate);
+				}
+				
+				if (Validator.isNotNull(thisState.getCode())) {
+					Predicate predicate = builder.equal(join.<String> get(ShipmentState_.code), thisState.getCode());
+					orPredicates.add(predicate);
+				}
+				
+			}
+			
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(agentIds)){
+			List<Predicate> issueAgentPredicates = new ArrayList<>();
+			
+			for (Long childId : agentIds) {
+				Predicate predicate = builder.equal(root.<Long> get(Shipment_.issuingAgentId), childId);
+				issueAgentPredicates.add(predicate);
+			}
+			
+			Predicate orPredicate = builder.or(issueAgentPredicates.toArray(new Predicate[issueAgentPredicates.size()]));
+			predicateList.add(orPredicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Shipping Date
+		//----------------------------------------------------------------
+		if (Validator.isNotNull(fromDateTime) || Validator.isNotNull(toDateTime)) {
+			
+			if(Validator.isNotNull(fromDateTime)){
+				fromDateTime = fromDateTime.withNano(0); //TODO temporary solution due to ECD-1068
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), fromDateTime);
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(toDateTime)){
+				toDateTime = toDateTime.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+				toDateTime = toDateTime.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), toDateTime);
+				predicateList.add(predicate);
+			}
+			
+		}
+		
+		if (predicateList.size() == 1) {
+			criteria.where(predicateList.get(0));
+			
+		} else if (predicateList.size() > 1) {
+			criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+		}
+		
+		// make query
+		TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);
+		
+		return q.getResultList();
+	}
+	
+	@Override
+	public List<Tuple> countShipmentPerProduct(Set<Long> agentIds, LocalDateTime fromDateTime, LocalDateTime toDateTime, List<ShipmentStateVO> currentState, List<ShipmentStateVO> notCurrentState) throws ParvanDaoException{
+		//LOG
+		log.debug("Entering countShipmentPerProduct( agentIds={}, fromDateTime={}, toDateTime={}, currentState={}, notCurrentState={})", agentIds, fromDateTime, toDateTime, currentState, notCurrentState);
+				
+		// make criteria-builder
+		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+		
+		// make criteria
+		CriteriaQuery<Tuple> criteria = builder.createQuery(Tuple.class);
+		//Metamodel metamodel = getEntityManager().getMetamodel();
+		//EntityType<Shipment> Shipment_ = metamodel.entity(Shipment.class);
+		Root<Shipment> root = criteria.from(Shipment.class);
+		
+		criteria.multiselect(builder.count(root.get(Shipment_.id)), root.get(Shipment_.productId), root.get(Shipment_.productVersion));
+		criteria.groupBy(root.get(Shipment_.productId));
+		
+		criteria.orderBy(builder.asc(root.get(Shipment_.shippingDate)));
+		
+		List<Predicate> predicateList = new ArrayList<>();
+		
+		//--------------------------------------------------------------------------
+		// Not Current State
+		//--------------------------------------------------------------------------
+		if (Validator.isNotNull(notCurrentState)) {
+			Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+			List<Predicate> andPredicates = new ArrayList<>();
+			
+			for (ShipmentStateVO thisState : notCurrentState) {
+				if (Validator.isNotNull(thisState.getId())) {
+					Predicate predicate = builder.notEqual(join.<Long> get(ShipmentState_.id), thisState.getId());
+					andPredicates.add(predicate);
+				}
+				
+				if (Validator.isNotNull(thisState.getCode())) {
+					Predicate predicate = builder.notEqual(join.<String> get(ShipmentState_.code), thisState.getCode());
+					andPredicates.add(predicate);
+				}
+			}
+			
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		//--------------------------------------------------------------------------
+		// Current State
+		//--------------------------------------------------------------------------
+		if (Validator.isNotNull(currentState)) {
+			Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+			List<Predicate> orPredicates = new ArrayList<>();
+			
+			for (ShipmentStateVO thisState : currentState) {
+				if (Validator.isNotNull(thisState.getId())) {
+					Predicate predicate = builder.equal(join.<Long> get(ShipmentState_.id), thisState.getId());
+					orPredicates.add(predicate);
+				}
+				
+				if (Validator.isNotNull(thisState.getCode())) {
+					Predicate predicate = builder.equal(join.<String> get(ShipmentState_.code), thisState.getCode());
+					orPredicates.add(predicate);
+				}
+				
+			}
+			
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		if(Validator.isNotNull(agentIds)){
+			List<Predicate> issueAgentPredicates = new ArrayList<>();
+			
+			for (Long childId : agentIds) {
+				Predicate predicate = builder.equal(root.<Long> get(Shipment_.issuingAgentId), childId);
+				issueAgentPredicates.add(predicate);
+			}
+			
+			Predicate orPredicate = builder.or(issueAgentPredicates.toArray(new Predicate[issueAgentPredicates.size()]));
+			predicateList.add(orPredicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Shipping Date
+		//----------------------------------------------------------------
+		if (Validator.isNotNull(fromDateTime) || Validator.isNotNull(toDateTime)) {
+			
+			if(Validator.isNotNull(fromDateTime)){
+				fromDateTime = fromDateTime.withNano(0); //TODO temporary solution due to ECD-1068
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), fromDateTime);
+	    		predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(toDateTime)){
+				toDateTime = toDateTime.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+				toDateTime = toDateTime.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), toDateTime);
+				predicateList.add(predicate);
+			}
+			
+		}
+		
+		if (predicateList.size() == 1) {
+			criteria.where(predicateList.get(0));
+			
+		} else if (predicateList.size() > 1) {
+			criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+		}
+		
+		// make query
+		TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);
+		
+		return q.getResultList();
+	}
+	
+	@Override
+	public List<Tuple> countShipmentPerState(Set<Long> agentIds, LocalDateTime fromDateTime, LocalDateTime toDateTime, List<String> currentState, List<String> notCurrentState, Long currentNodeId) throws ParvanDaoException{
+		//LOG
+		log.debug("Entering countShipmentPerState( agentIds={}, fromDateTime={}, toDateTime={}, currentState={}, notCurrentState={}, currentNodeId={})", agentIds, fromDateTime, toDateTime, currentState, notCurrentState, currentNodeId);
+		
+		// make criteria-builder
+		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+		
+		// make criteria
+		CriteriaQuery<Tuple> criteria = builder.createQuery(Tuple.class);
+		//Metamodel metamodel = getEntityManager().getMetamodel();
+		//EntityType<Shipment> Shipment_ = metamodel.entity(Shipment.class);
+		Root<Shipment> root = criteria.from(Shipment.class);
+		
+		criteria.multiselect(builder.count(root.get(Shipment_.id)), root.get(Shipment_.currentShipmentState).get("code"));
+		criteria.groupBy(root.get(Shipment_.currentShipmentState));
+		
+		criteria.orderBy(builder.asc(root.get(Shipment_.shippingDate)));
+		
+		List<Predicate> predicateList = new ArrayList<>();
+		
+		//--------------------------------------------------------------------------
+		// Not Current State
+		//--------------------------------------------------------------------------
+		if (Validator.isNotNull(notCurrentState)) {
+			Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+			List<Predicate> andPredicates = new ArrayList<>();
+			
+			for (String thisState : notCurrentState) {
+				Predicate predicate = builder.notEqual(join.<String> get(ShipmentState_.code), thisState);
+				andPredicates.add(predicate);
+			}
+			
+			Predicate predicate = builder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		//--------------------------------------------------------------------------
+		// Current State
+		//--------------------------------------------------------------------------
+		if (Validator.isNotNull(currentState)) {
+			Join<Shipment, ShipmentState> join = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+			List<Predicate> orPredicates = new ArrayList<>();
+			
+			for (String thisState : currentState) {
+				Predicate predicate = builder.equal(join.<String> get(ShipmentState_.code), thisState);
+				orPredicates.add(predicate);
+			}
+			
+			Predicate predicate = builder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+			predicateList.add(predicate);
+		}
+		
+		//--------------------------------------------------------------------------
+		// Current State
+		//--------------------------------------------------------------------------
+		/*if (Validator.isNotNull(currentNodeId)) {
+			
+			predicateList.add(builder.equal(root.<Long> get(Shipment_.currentShipmentState), currentNodeId));
+		}*/
+		
+		//--------------------------------------------------------------------------
+		// Issuing Agent
+		//--------------------------------------------------------------------------
+		if(Validator.isNotNull(agentIds)){
+			List<Predicate> agentPredicates = new ArrayList<>();
+			
+			List<Predicate> issueAgentPredicates = new ArrayList<>();
+			
+			for (Long childId : agentIds) {
+				Predicate predicate = builder.equal(root.<Long> get(Shipment_.issuingAgentId), childId);
+				issueAgentPredicates.add(predicate);
+			}
+			
+			Predicate orPredicate = builder.or(issueAgentPredicates.toArray(new Predicate[issueAgentPredicates.size()]));
+			agentPredicates.add(orPredicate);
+			
+			issueAgentPredicates = new ArrayList<>();
+			/*for (Long childId : agentIds) {
+				Predicate predicate = builder.equal(root.<Long> get(Shipment_.currentAssignedAgentId), childId);
+				issueAgentPredicates.add(predicate);
+			}*/
+			
+			orPredicate = builder.or(issueAgentPredicates.toArray(new Predicate[issueAgentPredicates.size()]));
+			agentPredicates.add(orPredicate);
+			
+			orPredicate = builder.or(agentPredicates.toArray(new Predicate[agentPredicates.size()]));
+			predicateList.add(orPredicate);
+		}
+		
+		//----------------------------------------------------------------
+		// Shipping Date
+		//----------------------------------------------------------------
+		if (Validator.isNotNull(fromDateTime) || Validator.isNotNull(toDateTime)) {
+			
+			if(Validator.isNotNull(fromDateTime)){
+				fromDateTime = fromDateTime.withNano(0); //TODO temporary solution due to ECD-1068
+				Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), fromDateTime);
+				predicateList.add(predicate);
+			}
+			
+			if(Validator.isNotNull(toDateTime)){
+				toDateTime = toDateTime.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+				toDateTime = toDateTime.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+				Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), toDateTime);
+				predicateList.add(predicate);
+			}
+			
+		}
+		
+		if (predicateList.size() == 1) {
+			criteria.where(predicateList.get(0));
+			
+		} else if (predicateList.size() > 1) {
+			criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+		}
+		
+		// make query
+		TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);
+		
+		return q.getResultList();
+	}
+	
+	@Override
+	public long countTuples(ShipmentCriteria shipmentCriteria) throws ParvanDaoException {
+		//LOG
+		log.debug("Entering countTuples( criteria={})", shipmentCriteria);
+		
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+			
+			// make criteria
+			CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			Root<Shipment> root = criteria.from(Shipment.class);
+			root.alias("ship");
+			
+			Map<String, Join> joins = new HashMap<>();
+
+			// ----------------------------------------------------------------
+			// build predicates
+			// ----------------------------------------------------------------
+			List<Predicate> predicateList = buildPredicateList(shipmentCriteria, builder, metamodel, root, joins);
+			
+			// ----------------------------------------------------------------
+			// make other joins and selectionList
+			// ----------------------------------------------------------------
+			_makeOtherJoinsAndGetSelectionForFullShipments(root, joins);
+			
+			criteria.select(builder.count(root));
+			
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+				
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+			
+			// make query
+			Query q = getEntityManager().createQuery(criteria);
+			
+			// execute query
+			return (long) q.getSingleResult();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting shipment's price items by criteria.", e);
+		}
+	}
+	
+	@Override
+	public List<Tuple> findTuples(
+			ShipmentCriteria shipmentCriteria, 
+			int firstResult,
+			int maxResults, 
+			SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanDaoException {
+		
+		//LOG
+		log.debug("Entering findTuples( criteria={}, firstResult={} , maxResults={} , sortDirection={} , sortCriterion={})", 
+				shipmentCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+		
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+			
+			// make criteria
+			CriteriaQuery<Tuple> criteria = builder.createQuery(Tuple.class);
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			Root<Shipment> root = criteria.from(Shipment.class);
+			root.alias("ship");
+			
+			Map<String, Join> joins = new HashMap<>();
+			
+			// ----------------------------------------------------------------
+			// build predicates
+			// ----------------------------------------------------------------
+			List<Predicate> predicateList = buildPredicateList(shipmentCriteria, builder, metamodel, root, joins);
+			
+			
+			// ----------------------------------------------------------------
+			// make other joins and selectionList
+			// ----------------------------------------------------------------
+			List<Selection<?>> selectionList;
+			selectionList = _makeOtherJoinsAndGetSelectionForFullShipments(root, joins);
+			
+			criteria.multiselect(selectionList);
+			
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+				
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+			
+			if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+				criteria.orderBy(builder.asc(root.get(sortCriterion)));
+			}
+			
+			if (sortDirection.equals(SortDirectionEnum.Descending)) {
+				criteria.orderBy(builder.desc(root.get(sortCriterion)));
+			}
+			
+			// make query
+			TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);
+			
+			q.setFirstResult(firstResult);
+			q.setMaxResults(maxResults);
+			
+			// execute query
+			return q.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting shipment's price items by criteria.", e);
+		}
+	}
+	
+	@Override
+	public long countShipmentIdsForSalesReport(
+			LocalDateTime issuingDateTimeFrom, 
+			LocalDateTime issuingDateTimeTo) throws ParvanDaoException {
+		
+		//LOG
+		log.debug("Entering countShipmentIdsForSalesReport( issuingDateTimeFrom={}, issuingDateTimeTo={})", 
+				issuingDateTimeFrom, issuingDateTimeTo);
+		
+		long count;
+		
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+			
+			// make criteria
+			CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+			//Metamodel metamodel = getEntityManager().getMetamodel();
+			Root<Shipment> root = criteria.from(Shipment.class);
+			criteria.select( builder.countDistinct(root));
+			
+			// ----------------------------------------------------------------
+			// build predicates
+			// ----------------------------------------------------------------
+			List<Predicate> predicateList = new ArrayList<>();
+			
+			//----------------------------------------------------------------
+			// Shipping Date
+			//----------------------------------------------------------------
+			LocalDateTime shippingDateFrom = issuingDateTimeFrom;
+			LocalDateTime shippingDateTo   = issuingDateTimeTo;
+			if (Validator.isNotNull(shippingDateFrom) || Validator.isNotNull(shippingDateTo)) {
+				
+				if(Validator.isNotNull(shippingDateFrom)){
+					shippingDateFrom = shippingDateFrom.withNano(0); //TODO temporary solution due to ECD-1068
+					Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), shippingDateFrom);
+					predicateList.add(predicate);
+				}
+				
+				if(Validator.isNotNull(shippingDateTo)){
+					shippingDateTo = shippingDateTo.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+					shippingDateTo = shippingDateTo.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+					Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), shippingDateTo);
+					predicateList.add(predicate);
+				}
+				
+			}
+			
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+				
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+			
+			// make query
+			Query q = getEntityManager().createQuery(criteria);
+    		
+    		// execute query
+    		Long countLong = (Long) q.getSingleResult();
+    		count = countLong.intValue();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting shipment's price items by criteria.", e);
+		}
+
+    	//LOG
+    	log.debug("Leaving countByCriteria(): {}", count);
+    	
+        return count;
+	}
+	
+	@Override
+	public List<Long> findShipmentIdsForSalesReport(
+			LocalDateTime issuingDateTimeFrom, 
+			LocalDateTime issuingDateTimeTo,
+			int firstResult,
+			int maxResults, 
+			SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanDaoException {
+		
+		//LOG
+		log.debug("Entering findShipmentIdsForSalesReport( issuingDateTimeFrom={}, issuingDateTimeTo={}, firstResult={} , maxResults={} , sortDirection={} , sortCriterion={})", 
+				issuingDateTimeFrom, issuingDateTimeTo, firstResult, maxResults, sortDirection, sortCriterion);
+		
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+			
+			// make criteria
+			CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+			Root<Shipment> root = criteria.from(Shipment.class);
+			criteria.distinct(true);
+			criteria.select(root.<Long>get("id"));
+			
+			// ----------------------------------------------------------------
+			// build predicates
+			// ----------------------------------------------------------------
+			List<Predicate> predicateList = new ArrayList<>();
+			
+			//----------------------------------------------------------------
+			// Shipping Date
+			//----------------------------------------------------------------
+			LocalDateTime shippingDateTimeFrom = issuingDateTimeFrom;
+			LocalDateTime shippingDateTimeTo   = issuingDateTimeTo;
+			if (Validator.isNotNull(shippingDateTimeFrom) || Validator.isNotNull(shippingDateTimeTo)) {
+				
+				if(Validator.isNotNull(shippingDateTimeFrom)){
+					shippingDateTimeFrom = shippingDateTimeFrom.withNano(0); //TODO temporary solution due to ECD-1068
+					Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), shippingDateTimeFrom);
+					predicateList.add(predicate);
+				}
+				
+				if(Validator.isNotNull(shippingDateTimeTo)){
+					shippingDateTimeTo = shippingDateTimeTo.withSecond(59); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+					shippingDateTimeTo = shippingDateTimeTo.withNano(999999999); //TODO temporary solution due to ECD-1068 اشکال در گزارش بر اساس تاریخ، وقتی که رکوردها در فاصله ساعت 23:59:00 تا 23:59:59 به وقت محلی ذخیره شده باشند
+					Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get(Shipment_.shippingDate), shippingDateTimeTo);
+					predicateList.add(predicate);
+				}
+				
+			}
+			
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+				
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+			
+			if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+				criteria.orderBy(builder.asc(root.get(sortCriterion)));
+			}
+			
+			if (sortDirection.equals(SortDirectionEnum.Descending)) {
+				criteria.orderBy(builder.desc(root.get(sortCriterion)));
+			}
+			
+			// make query
+			TypedQuery<Long> q = getEntityManager().createQuery(criteria);
+			
+			q.setFirstResult(firstResult);
+			q.setMaxResults(maxResults);
+			
+			// execute query
+			return q.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting shipments for salesReport.", e);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param root
+	 * @param joins
+	 * @return
+	 */
+	private List<Selection<?>> _makeOtherJoinsAndGetSelectionForFullShipments(
+			Root<Shipment> root, 
+			Map<String, Join> joins) {
+		
+		List<Selection<?>> selectionList = new ArrayList<>();
+
+		// packingList
+		Join<Shipment, PackingItem> joinPackingItem = joins.get("packingList");
+		if(joinPackingItem == null){
+			joinPackingItem  = root.join(Shipment_.packingList, JoinType.LEFT);
+		}
+		
+		// shipmentStateHistories
+		/*Join<Shipment, ShipmentStateHistory> joinShipmentStateHistory = joins.get("shipmentStateHistories");
+		if (joinShipmentStateHistory == null) {
+			joinShipmentStateHistory = root.join(Shipment_.shipmentStateHistories, JoinType.LEFT);
+		}*/
+		
+		// gunnies
+		// ignore 
+		
+		// paymentMethod
+		Join<Shipment, PaymentMethod> joinPaymentMethod = joins.get("paymentMethod");
+		if (joinPaymentMethod == null) {
+			joinPaymentMethod = root.join(Shipment_.paymentMethod, JoinType.LEFT);
+		}
+		
+		// currentState
+		Join<Shipment, ShipmentState> joinCurrentState = joins.get("currentState");
+		if (joinCurrentState == null) {
+			joinCurrentState = root.join(Shipment_.currentShipmentState, JoinType.LEFT);
+		}
+		
+		// forwarding
+		// ignore 
+		
+		// deliveryRequest
+		// ignore 
+		
+		// changeLogGroups
+		// ignore 
+		
+		// shipmentNodes
+		Join<Shipment, ShipmentNode> joinShipmentNode = joins.get("shipmentNodes");
+		if (joinShipmentNode == null) {
+			joinShipmentNode = root.join(Shipment_.shipmentNodes, JoinType.LEFT);
+		}
+		
+		// priceItems
+		Join<Shipment, PriceItem> joinPriceItem = joins.get("priceItems");
+		if (joinPriceItem == null) {
+			joinPriceItem = root.join(Shipment_.priceItems, JoinType.LEFT);
+		}
+		
+		// attachments
+		// ignore
+		
+		selectionList.add(root);
+		selectionList.add(joinPackingItem.alias("packingItem"));
+		//selectionList.add(joinShipmentStateHistory.alias("shipmentStateHistory"));
+		selectionList.add(joinPaymentMethod.alias("paymentMethod"));
+		selectionList.add(joinCurrentState.alias("currentState")); 
+		selectionList.add(joinShipmentNode.alias("shipmentNode")); 
+		selectionList.add(joinPriceItem.alias("priceItem")); 
+		
+		return selectionList;
+		
+	}
+
+	@Override
+	public List<Tuple> findPriceItems(ShipmentCriteria shipmentCriteria, int firstResult,
+			int maxResults, SortDirectionEnum sortDirection,
+			String sortCriterion) throws ParvanDaoException{
+		//LOG
+		log.debug("Entering findPriceItems( criteria={}, firstResult={} , maxResults={} , sortDirection={} , sortCriterion={})", 
+				shipmentCriteria, firstResult, maxResults, sortDirection, sortCriterion);
+		
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+
+			// make criteria
+			CriteriaQuery<Tuple> criteria = builder.createQuery(Tuple.class);
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			Root<Shipment> root = criteria.from(Shipment.class);
+			root.alias("ship");
+			
+			Map<String, Join> joins = new HashMap<String, Join>();
+
+			List<Predicate> predicateList = buildPredicateList(shipmentCriteria, builder, metamodel, root, joins);
+			
+			Join join = joins.get("priceItems");
+			if(join == null){
+				join  = root.join(Shipment_.priceItems, JoinType.LEFT);
+			}
+			
+			criteria.multiselect(root, join);
+
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+			
+			if (sortDirection.equals(SortDirectionEnum.Ascending)) {
+				criteria.orderBy(builder.asc(root.get(sortCriterion)));
+			}
+			
+			if (sortDirection.equals(SortDirectionEnum.Descending)) {
+				criteria.orderBy(builder.desc(root.get(sortCriterion)));
+			}
+
+			// make query
+			TypedQuery<Tuple> q = getEntityManager().createQuery(criteria);
+			
+			q.setFirstResult(firstResult);
+			q.setMaxResults(maxResults);
+			
+			// execute query
+			return q.getResultList();
+
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting shipment's price items by criteria.", e);
+		}
+	}
+	
+	@Override
+	public long countPriceItems(ShipmentCriteria shipmentCriteria) throws ParvanDaoException{
+		//LOG
+		log.debug("Entering countPriceItems( criteria={})", shipmentCriteria);
+		
+		try {
+			// make criteria-builder
+			CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
+			
+			// make criteria
+			CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+			Metamodel metamodel = getEntityManager().getMetamodel();
+			Root<Shipment> root = criteria.from(Shipment.class);
+			root.alias("ship");
+			
+			Map<String, Join> joins = new HashMap<String, Join>();
+			
+			List<Predicate> predicateList = buildPredicateList(shipmentCriteria, builder, metamodel, root, joins);
+			
+			Join join = joins.get("priceItems");
+			if(join == null){
+				join  = root.join(Shipment_.priceItems);
+			}
+			
+			criteria.select(builder.count(join));
+			
+			if (predicateList.size() == 1) {
+				criteria.where(predicateList.get(0));
+				
+			} else if (predicateList.size() > 1) {
+				criteria.where(builder.and(predicateList.toArray(new Predicate[predicateList.size()])));
+			}
+			
+			// make query
+			Query q = getEntityManager().createQuery(criteria);
+			
+			// execute query
+			return (long) q.getSingleResult();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting shipment's price items by criteria.", e);
+		}
+	}
+	
+	@Override
+	public List<PackingItem> findPackingItems(Long shipmentId) throws ParvanDaoException{
+		//LOG
+		log.debug("Entering findPackingItems( shipmentId={})", shipmentId);
+		
+		try {
+			
+			StringBuilder query = new StringBuilder();
+			query.append("select packingItems from Shipment shipment join shipment.packingList packingItems ");
+			query.append(" where shipment.id = ? ");
+			
+			TypedQuery<PackingItem> q = getEntityManager().createQuery(query.toString(), PackingItem.class);
+
+			q.setParameter(1, shipmentId);
+			
+			// execute query
+			return q.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while findPackingItems", e);
+		}
+	}
+
+	@Override
+	public List<Object[]> getTopIssuingAgents() throws ParvanDaoException {
+		
+		try {
+			String nativeQuery = "select count(s.waybillNumber), s.issuingAgentId, aa.idmId, aa.fullName from shipment_tbl s join agentactor_tbl aa on s.issuingAgentId = aa.id where s.shippingDate >= ? group by s.issuingAgentId order by count(s.waybillNumber) desc" ;
+			
+			// start date
+			UserInfo userInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+			LocalDateTime nowInUtc = LocalDateTime.now();
+			LocalDateTime shippingDateFrom = DateUtilV2.getLocalizedFirstTimeOfMonthAsUtc(
+					nowInUtc, 
+					ZoneIdUtil.getZoneId(userInfo.getZoneId()), 
+					userInfo.getCalendar());
+			
+			// make query
+			Query q = getEntityManager().createNativeQuery(nativeQuery);
+			q.setParameter(1, shippingDateFrom);
+			
+			q.setMaxResults(10);
+			
+			// execute query
+			return q.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting count of shipment per issuer agent.", e);
+		}
+		
+	}
+	
+	@Override
+	public List<Object[]> getTopDeliverAgents() throws ParvanDaoException {
+		
+		try {
+			String nativeQuery = "select count(s.waybillNumber), s.currentAssignedAgentId, aa.idmId, aa.fullName from shipment_tbl s join agentactor_tbl aa on s.currentAssignedAgentId = aa.id where s.shippingDate >= ? and s.currentStateId = 10 group by s.currentAssignedAgentId order by count(s.waybillNumber) desc" ;
+			
+			// start date
+			UserInfo userInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+			LocalDateTime nowInUtc = LocalDateTime.now();
+			LocalDateTime shippingDateFrom = DateUtilV2.getLocalizedFirstTimeOfMonthAsUtc(
+					nowInUtc, 
+					ZoneIdUtil.getZoneId(userInfo.getZoneId()), 
+					userInfo.getCalendar());
+			
+			// make query
+			Query q = getEntityManager().createNativeQuery(nativeQuery);
+			q.setParameter(1, shippingDateFrom);
+			
+			q.setMaxResults(10);
+			
+			// execute query
+			return q.getResultList();
+			
+		} catch (Exception e) {
+			throw new ParvanDaoException("Error occurred while getting count of shipment per deliver agent.", e);
+		}
+		
+	}
+
+	@Override
+	public List<Shipment> findUnsettled(Long userId, PaymentType paymentType, ChargeParty chargeParty, String actionCode) throws ParvanDaoException {
+		
+		List<Shipment> shipments = null;
+    	
+		try {
+			
+			//get user info from current context
+			UserInfo userInfo = (UserInfo) CurrentContext.getCurrentUserInfo().get();
+			
+			// make query
+			StringBuilder sb = new StringBuilder();
+			sb.append("SELECT distinct s FROM Shipment s ");
+			sb.append("LEFT JOIN s.currentState cs ");
+			sb.append("LEFT JOIN s.shipmentStateHistories ssh ");
+			sb.append("WHERE cs.code <> 'VOIDED' ");
+			sb.append("AND cs.code <> 'RETURNED' ");
+			sb.append("AND ssh.shipmentActionCode = ? ");
+			sb.append("AND ssh.createUserId = ? ");
+			sb.append("AND s.paymentMethod.type = ? ");
+			sb.append("AND s.chargeParty = ? ");
+			sb.append("AND s.settled <> 1 ");
+			sb.append("AND s.tenantId = ? ");
+			
+			TypedQuery<Shipment> q = getEntityManager().createQuery(sb.toString(), Shipment.class);
+
+			q.setParameter(1, actionCode);
+			q.setParameter(2, userId);
+			q.setParameter(3, paymentType);
+			q.setParameter(4, chargeParty);
+			q.setParameter(5, userInfo.getTenantId());
+
+			// execute query
+			shipments = q.getResultList();
+		} catch (Exception e) {
+			throw new ParvanDaoException("error in findUnsettled", e);
+		}
+
+		return shipments;
+	}
+	
+	/**
+	 * 
+	 * @param clazz
+	 * @param c
+	 * @return
+	 */
+	public static <T> List<T> _castList(Class<? extends T> clazz, Collection<?> c) {
+	    List<T> r = new ArrayList<T>(c.size());
+	    for(Object o: c)
+	      r.add(clazz.cast(o));
+	    return r;
+	}
+	
+	@Override
+	protected void basePredicate(BaseCriteria cri, CriteriaBuilder builder, Root<Shipment> root, List<Predicate> predicateList) {
+
+		if (Validator.isNotNull(cri.getCreateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("createUserId"), cri.getCreateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateUserId())) {
+			Predicate predicate = builder.equal(root.<String> get("updateUserId"), cri.getUpdateUserId());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getCreateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("createDate"), cri.getCreateDateTo());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateFrom())) {
+			Predicate predicate = builder.greaterThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateFrom());
+			predicateList.add(predicate);
+		}
+
+		if (Validator.isNotNull(cri.getUpdateDateTo())) {
+			Predicate predicate = builder.lessThanOrEqualTo(root.<LocalDateTime> get("updateDate"), cri.getUpdateDateTo());
+			predicateList.add(predicate);
+		}
+	}
+}

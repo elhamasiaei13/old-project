@@ -1,0 +1,49 @@
+package com.parvanpajooh.shipment.service.impl;
+
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericLocalServiceImpl;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.shipment.dao.ShipmentActionDao;
+import com.parvanpajooh.shipment.model.ShipmentAction;
+import com.parvanpajooh.shipment.model.criteria.ShipmentActionCriteria;
+import com.parvanpajooh.shipment.service.ShipmentActionLocalService;
+
+@Stateless
+public class PackingItemActionLocalServiceImpl extends GenericLocalServiceImpl<ShipmentAction, Long> implements
+		ShipmentActionLocalService {
+
+	static final Logger log = LoggerFactory.getLogger(PackingItemActionLocalServiceImpl.class);
+
+	@SuppressWarnings("unused")
+	private ShipmentActionDao shipmentActionDao;
+
+	@Inject
+	public void setShipmentActionDao(ShipmentActionDao shipmentActionDao) {
+		this.dao = shipmentActionDao;
+		this.shipmentActionDao = shipmentActionDao;
+	}
+
+	@Override
+	public ShipmentAction get(String actionCode) throws ParvanServiceException {
+		ShipmentActionCriteria criteria = new ShipmentActionCriteria();
+		criteria.setCode(actionCode);
+		List<ShipmentAction> actionsList = findByCriteria(criteria);
+		if (Validator.isNotNull(actionsList)) {
+			if (actionsList.size() == 1) {
+				return actionsList.get(0);
+			} else {
+				throw new ParvanServiceException("more that one ShipmentAction for action of type " + actionCode + " found");
+			}
+		} else {
+			throw new ParvanServiceException("no ShipmentAction of type " + actionCode + " exists");
+		}
+	}
+}

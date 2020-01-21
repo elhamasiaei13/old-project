@@ -1,0 +1,178 @@
+package com.parvanpajooh.client.geomanagement.model.criteria;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.common.BaseMsg;
+import com.parvanpajooh.client.rateandroute.model.GeoEntityMsg;
+import com.parvanpajooh.client.rateandroute.model.enums.RateAndRouteEnums.FreightNodeType;
+
+/**
+ * @author ali
+ * @author mehrdad
+ *
+ */
+public class NodeCriteriaMsg extends BaseMsg {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7240289780498224634L;
+	
+	private String codeName;
+	
+	private String name;
+	
+	private String otherNames;
+	
+	private String allNames;
+	
+	private FreightNodeType[] freightType;
+	
+	private Boolean active;
+	
+	//private Boolean hasAgent;
+	
+	//private AgentVO agent;
+	
+	private GeoEntityMsg geoEntity;
+
+	/**
+	 * @return the codeName
+	 */
+	public String getCodeName() {
+		return codeName;
+	}
+
+	/**
+	 * @param codeName the codeName to set
+	 */
+	public void setCodeName(String codeName) {
+		this.codeName = codeName;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the otherNames
+	 */
+	public String getOtherNames() {
+		return otherNames;
+	}
+
+	/**
+	 * @param otherNames the otherNames to set
+	 */
+	public void setOtherNames(String otherNames) {
+		this.otherNames = otherNames;
+	}
+
+	/**
+	 * @return the allNames
+	 */
+	public String getAllNames() {
+		return allNames;
+	}
+
+	/**
+	 * @param allNames the allNames to set
+	 */
+	public void setAllNames(String allNames) {
+		this.allNames = allNames;
+	}
+
+	/**
+	 * @return the freightTypes
+	 */
+	public FreightNodeType[] getFreightType() {
+		return freightType;
+	}
+
+	/**
+	 * @param freightTypes the freightTypes to set
+	 */
+	public void setFreightType(FreightNodeType[] freightTypes) {
+		this.freightType = freightTypes;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the geoEntity
+	 */
+	public GeoEntityMsg getGeoEntity() {
+		return geoEntity;
+	}
+
+	/**
+	 * @param geoEntity the geoEntity to set
+	 */
+	public void setGeoEntity(GeoEntityMsg geoEntity) {
+		this.geoEntity = geoEntity;
+	}
+
+	/**
+	 * @return the hasAgent
+	 */
+	/*public Boolean getHasAgent() {
+		return hasAgent;
+	}*/
+
+	/**
+	 * @param hasAgent the hasAgent to set
+	 */
+	/*public void setHasAgent(Boolean hasAgent) {
+		this.hasAgent = hasAgent;
+	}*/
+
+	/**
+	 * @return the agent
+	 */
+	/*public AgentVO getAgent() {
+		return agent;
+	}*/
+
+	/**
+	 * @param agent the agent to set
+	 */
+	/*public void setAgent(AgentVO agent) {
+		this.agent = agent;
+	}*/
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("codeName", codeName)
+			.add("name", name)
+			.add("otherNames", otherNames)
+			.add("freightTypes", freightType)
+			.add("active", active)
+			//.add("hasAgent", hasAgent)
+			.add("geoEntity", geoEntity)
+			//.add("agent", agent)
+			.toString();
+	}
+
+}

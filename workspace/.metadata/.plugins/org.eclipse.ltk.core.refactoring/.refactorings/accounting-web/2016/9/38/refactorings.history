@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;accounting-web/src/main/webapp/WEB-INF/templates/fiscal-years.html&apos; to &apos;fiscalYears.html&apos;" description="Rename resource &apos;fiscal-years.html&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/main/webapp/WEB-INF/templates/fiscal-years.html" name="fiscalYears.html" stamp="1473932609442" updateReferences="true"/>
+</session>

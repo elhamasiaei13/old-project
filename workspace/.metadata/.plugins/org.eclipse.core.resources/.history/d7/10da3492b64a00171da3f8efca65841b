@@ -1,0 +1,203 @@
+package com.parvanpajooh.personmanagement.service.impl;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.client.common.PageList;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.platform.ejb.service.impl.GenericServiceImpl;
+import com.parvanpajooh.personmanagement.model.Person;
+import com.parvanpajooh.personmanagement.model.enums.RelationType;
+import com.parvanpajooh.personmanagement.model.vo.PersonVO;
+import com.parvanpajooh.personmanagement.service.PersonLocalService;
+import com.parvanpajooh.personmanagement.service.PersonService;
+
+/**
+ * @author ali
+ * @author MO
+ * 
+ */
+@Stateless
+public class PersonServiceImpl extends GenericServiceImpl<Person, Long> implements PersonService {
+
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(PersonServiceImpl.class);
+
+	private PersonLocalService personLocalService;
+
+	@Inject
+	public void setPersonLocalService(PersonLocalService personLocalService) {
+		this.localService = personLocalService;
+		this.personLocalService = personLocalService;
+	}
+
+	@Override
+	public PersonVO getCompletePerson(UserInfo ecUserInfo, Long id) throws ParvanServiceException {
+		log.debug("Entering getCompletePerson(ecUserInfo={}, id={})", ecUserInfo, id);
+
+		PersonVO personVO = null;
+
+		try {
+			// get entity
+			Person person = personLocalService.get(id);
+
+			personVO = person.toVO();
+
+		} catch (Exception e) {
+			log.error("Error occurred while getting Complete Person by its ID.", e);
+			throw new ParvanUnrecoverableException(
+					"Error occurred while getting Complete Person by its ID.", e);
+		}
+		
+		log.debug("Leaving getCompletePerson(ecUserInfo={}, id={})", ecUserInfo, id);
+
+		return personVO;
+	}
+
+	@Override
+	public void importPersons(UserInfo ecUserInfo, InputStream excelIS) throws ParvanServiceException {
+		log.debug("Entering importPersons(ecUserInfo={}, excelIS=...)", ecUserInfo);
+		
+		try {
+			// import persons
+			personLocalService.importPersons(excelIS);
+			
+		} catch (ParvanServiceException e) {
+			throw e;
+			
+		} catch (Exception e) {
+			log.error("Error occurred while importing Persons.", e);
+			throw new ParvanUnrecoverableException("Error occurred while importing Persons.", e);
+		}
+		
+		log.debug("Leaving importPersons(ecUserInfo={}, excelIS=...)", ecUserInfo);
+	}
+
+	@Override
+	public PageList<PersonVO> searchActivePeopleInOrganization(UserInfo userInfo, Long organizationId, String term,
+			Integer start, Integer length, SortDirectionEnum sortDirection, String sortCriterion)
+			throws ParvanServiceException {
+		PageList<Person> result = personLocalService.searchActivePeopleInOrganization(organizationId, term, start, length, sortDirection, sortCriterion);
+		List<Person> people = result.getElements();
+		List<PersonVO> peopleVO = new ArrayList<>(people.size()); 
+		for (Person person : people) {
+			peopleVO.add(person.toVOLite());
+		}
+		return new PageList<>(peopleVO, result.getTotal());
+	}
+	
+	@Override
+	public void index(UserInfo userInfo) throws ParvanServiceException {
+		personLocalService.index();
+	}
+
+	@Override
+	public PersonVO getByUuid(UserInfo userInfo, String uuid) throws ParvanServiceException {
+		return personLocalService.getByUuid(uuid).toVOLite();
+	}
+
+	@Override
+	public Map<String, String> getPersonsByUuids(UserInfo userInfo, List<String> uuids) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering getPersonsByUuids( userInfo={} , uuids={})", userInfo , uuids);
+
+		Map<String, String> personsMap = null;
+
+		try {
+
+			// get persons by uuids
+			personsMap = personLocalService.getPersonsByUuids(uuids);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getting persons by uuids", e);
+		}
+
+		return personsMap;
+		
+	}
+
+	@Override
+	public JSONObject createPerson(UserInfo userInfo, JSONObject data) throws ParvanServiceException{
+		log.debug("Entering createPerson(userInfo={} , data={})", userInfo , data);
+
+		JSONObject personData = null;
+
+		try {
+			personData = personLocalService.createPerson(data);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while create person with json data", e);
+		}
+
+		return personData;
+	}
+
+	@Override
+	public JSONObject findPersonAndUserByUuid(UserInfo userInfo, String uuid) throws ParvanServiceException {
+		log.debug("Entering createPerson(userInfo={} , uuid={})", userInfo , uuid);
+
+		JSONObject personData = null;
+
+		try {
+			personData = personLocalService.findPersonAndUserByUuid(uuid);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while find person with uuid", e);
+		}
+
+		return personData;
+	}
+
+	@Override
+	public List<PersonVO> findRelatedFrom(UserInfo userInfo, String personUuid, RelationType type, String term) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering findRelatedFrom( userInfo={} , personUuid={}, type={}, term={})", userInfo , personUuid, type, term);
+
+		List<Person> persons = null;
+		List<PersonVO> personVOs = null;
+
+		try {
+
+			// find relatedfrom by personUuid and type
+			persons = personLocalService.findRelatedFrom(personUuid,type,term);
+			
+			personVOs = new ArrayList<>();
+			for (Person person : persons) {
+				personVOs.add(person.toVOLite());
+			}
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findRelatedFrom by person uuid", e);
+		}
+		return personVOs;
+	}
+}

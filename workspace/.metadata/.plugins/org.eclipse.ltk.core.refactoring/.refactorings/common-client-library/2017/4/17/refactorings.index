@@ -1,0 +1,24 @@
+1492945933398	Copy packages
+1492945956866	Rename package 'com.parvanpajooh.client.logesticmanagement.copy'
+1492946011292	Rename package 'com.parvanpajooh.client.logesticmanagement.model.copy'
+1492946027774	Rename package 'com.parvanpajooh.client.logesticmanagement.service.copy'
+1492946334109	Rename type 'LogesticManagementApiRestClient'
+1492946446927	Delete element
+1492946460146	Rename type 'UldMsg'
+1492946545680	Rename type 'LogesticManagementApi'
+1492946844004	Delete element
+1492951176416	Copy compilation unit
+1493451388487	Rename package 'com.parvanpajooh.client.rootmanagement'
+1493451408711	Rename package 'com.parvanpajooh.client.rootmanagement.service'
+1493451421562	Rename package 'com.parvanpajooh.client.rootmanagement.model'
+1493451455937	Rename type 'RootManagementApi'
+1493451472412	Rename type 'RootManagementApiRestClient'
+1493451477284	Copy compilation unit
+1493451507877	Copy compilation unit
+1493451546849	Copy compilation units
+1493451626383	Copy compilation units
+1493451979406	Copy compilation unit
+1493451994127	Rename type 'RateAndRouteEnums'
+1493453914892	Copy compilation unit
+1493454000722	Copy compilation unit
+1493454400961	Copy compilation unit

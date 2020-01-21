@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;AccountTypeVO.java&apos; to &apos;accounting-ejb/src/main/java/com.parvanpajooh.accounting.model.vo&apos;&#x0A;- Original project: &apos;accounting-ejb&apos;&#x0A;- Destination element: &apos;accounting-ejb/src/main/java/com.parvanpajooh.accounting.model.vo&apos;&#x0A;- Original element: &apos;com.parvanpajooh.accounting.model.vo.AccountTypeVO.java&apos;" description="Copy compilation unit" destination="/src\/main\/java&lt;com.parvanpajooh.accounting.model.vo" element1="/src\/main\/java&lt;com.parvanpajooh.accounting.model.vo{AccountTypeVO.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1479042560713" units="1" version="1.0"/>
+</session>

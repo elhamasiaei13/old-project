@@ -1,0 +1,58 @@
+1465452185814	Delete element
+1465452541189	Rename resource 'sample-ds.xml'
+1465454189438	Rename type 'Sample'
+1465454394932	Copy compilation unit
+1465454409871	Copy compilation unit
+1465455328506	Rename type 'SampleVO'
+1465455514149	Copy compilation unit
+1465455529179	Copy compilation unit
+1465458238714	Delete element
+1465459623164	Rename type 'SampleDao'
+1465459648330	Copy compilation unit
+1465459661422	Copy compilation unit
+1465460016150	Rename type 'SampleDaoJpa'
+1465460075751	Rename type 'SampleCriteria'
+1465460210108	Rename local variable 'sampleCriteria'
+1465460267709	Copy compilation unit
+1465460298279	Copy compilation unit
+1465460823064	Rename type 'SampleLocalService'
+1465460845947	Rename type 'SampleService'
+1465460922531	Copy compilation unit
+1465460956027	Copy compilation unit
+1465460970375	Copy compilation unit
+1465460990149	Copy compilation unit
+1465461203896	Rename local variable 'sample'
+1465461307594	Rename type 'SampleLocalServiceImpl'
+1465461332427	Rename field 'sampleLocalService'
+1465461387672	Rename type 'SampleServiceImpl'
+1465461432405	Copy compilation unit
+1465461448048	Copy compilation unit
+1465461471217	Copy compilation unit
+1465461488527	Copy compilation unit
+1465461554493	Rename field 'sampleDao'
+1465461757067	Rename field 'sampleDao'
+1465464426893	Copy compilation unit
+1465465611225	Copy compilation unit
+1465466490104	Copy compilation unit
+1465466884593	Copy compilation unit
+1465467709086	Copy compilation unit
+1465467938744	Copy compilation unit
+1465468926469	Copy compilation unit
+1465468996149	Copy compilation unit
+1465469046875	Copy compilation unit
+1465469131396	Rename type 'AccoutType'
+1465469204340	Copy compilation unit
+1465469398508	Copy compilation unit
+1465469451820	Rename type 'VoucherRawDaoJpa'
+1465469517756	Copy compilation unit
+1465470084393	Rename local variable 'sample'
+1465470121645	Rename local variable 'sampleVO'
+1465621208674	Rename local variable 'sampleVO'
+1465621215743	Rename local variable 'sample'
+1465621291105	Rename local variable 'samples'
+1465621304662	Rename local variable 'thisSample'
+1465638864923	Rename local variable 'sampleVO'
+1465639013910	Rename local variable 'sample'
+1465639576883	Rename field 'sampleDao'
+1465639603681	Rename method 'setSampleDao'
+1465647743917	Copy compilation unit

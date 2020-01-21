@@ -1,0 +1,98 @@
+package com.parvanpajooh.transportationmanagement.model.vo;
+
+import com.google.common.base.MoreObjects;
+import com.parvanpajooh.client.carriermanagement.model.CarrierMsg;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+
+/**
+ * @author dev-06
+ *
+ */
+public class CarrierVO extends BaseVO {
+
+	private static final long serialVersionUID = 1L;
+
+	private Long id;
+
+	private String nameEn;
+	
+	private String nameFa;
+	
+	private String carrierCode;
+	
+	private String carrierPrefix;
+
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getNameEn() {
+		return nameEn;
+	}
+
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
+	}
+
+	public String getNameFa() {
+		return nameFa;
+	}
+
+	public void setNameFa(String nameFa) {
+		this.nameFa = nameFa;
+	}
+
+	public String getCarrierCode() {
+		return carrierCode;
+	}
+
+	public void setCarrierCode(String carrierCode) {
+		this.carrierCode = carrierCode;
+	}
+
+	public String getCarrierPrefix() {
+		return carrierPrefix;
+	}
+
+	public void setCarrierPrefix(String carrierPrefix) {
+		this.carrierPrefix = carrierPrefix;
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+				.add("id", id)
+				.add("nameFa", nameFa)
+				.add("nameEn", nameEn)
+				.add("carrierCode", carrierCode)
+				.add("carrierPrefix", carrierPrefix)
+				.toString();
+				
+	}
+
+	public CarrierMsg toMsg() {
+		CarrierMsg msg = new CarrierMsg();
+		msg.setId(this.id);
+		msg.setCarrierCode(this.carrierCode);
+		msg.setCarrierPrefix(this.carrierPrefix);
+		msg.setNameEn(this.nameEn);
+		msg.setNameFa(this.nameFa);
+		
+		return msg;
+	}
+
+	public void fromMsg(CarrierMsg msg) {
+
+		this.id = msg.getId();
+		this.carrierCode = msg.getCarrierCode();
+		this.carrierPrefix = msg.getCarrierPrefix();
+		this.nameEn = msg.getNameEn();
+		this.nameFa = msg.getNameFa();
+	}
+
+}

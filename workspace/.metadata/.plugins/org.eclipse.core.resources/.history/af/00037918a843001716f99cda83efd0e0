@@ -1,0 +1,516 @@
+package com.parvanpajooh.identitymanagement2.model;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.parvanpajooh.commons.platform.ejb.model.BaseModel;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.identitymanagement2.model.enums.Calendar;
+import com.parvanpajooh.identitymanagement2.model.vo.RoleVO;
+import com.parvanpajooh.identitymanagement2.model.vo.UserGroupVO;
+import com.parvanpajooh.identitymanagement2.model.vo.UserVO;
+
+/**
+ * @author moosa
+ * @author ali
+ *
+ */
+@Entity
+@XmlRootElement
+@Table(name = "user_tbl")
+public class User extends BaseModel {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -4036378126742804100L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	
+	@NotNull
+	@NotEmpty
+	private String userName;
+
+	private String password;
+
+	@NotNull
+	@NotEmpty
+	private String firstName;
+
+	@NotNull
+	@NotEmpty
+	private String lastName;
+	
+	@NotNull
+	@NotEmpty
+	private String uuid;
+	
+	private String personUuid;
+
+	private String displayName;
+
+	private String canonicalSearchName;
+
+	private String locale;
+
+	private String zoneId;
+
+	@Enumerated(EnumType.STRING)
+	private Calendar calendar;
+
+	private String email;
+	
+	private String mobile;
+
+	private boolean active;
+
+	private String remarks;
+
+	@ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+	@JoinTable(name="user_role", 
+		joinColumns=@JoinColumn(name="user_id"), 
+		inverseJoinColumns=@JoinColumn(name = "role_id")
+	)
+    private Set<Role> roles = new HashSet<Role>();
+
+	@ManyToOne
+	@JoinColumn(name = "userGroupId", referencedColumnName = "id")
+	private UserGroup userGroup;
+
+	@Version
+	private Integer version;
+
+	@Override
+	public UserVO toVOLite() {
+		UserVO vo = new UserVO();
+
+		vo.setId(this.id);
+		vo.setUserName(this.userName);
+		vo.setActive(this.active);
+		vo.setPassword(this.password);
+		vo.setFirstName(this.firstName);
+		vo.setLastName(this.lastName);
+		vo.setDisplayName(this.displayName);
+		vo.setCanonicalSearchName(this.canonicalSearchName);
+		vo.setLocale(this.locale);
+		vo.setZoneId(this.zoneId);
+		vo.setCalendar(this.calendar.toString());
+		vo.setVersion(this.version);
+		vo.setEmail(this.email);
+		vo.setRemarks(this.remarks);
+		vo.setUuid(this.uuid);
+		vo.setPersonUuid(this.personUuid);
+		vo.setActive(this.active);
+		
+		if (Validator.isNotNull(this.roles)) {
+			Set<RoleVO> roleSet = new HashSet<>(roles.size());
+			for (Role role : this.roles) {
+				roleSet.add(role.toVOLite());
+			}
+			vo.setRoles(roleSet);
+		}
+		
+		if (Validator.isNotNull(this.userGroup)) {
+
+			UserGroupVO userGroupVO = this.userGroup.toVOLite();
+			vo.setUserGroup(userGroupVO);
+		}
+
+
+		setAuditToVO(vo);
+
+		return vo;
+	}
+
+	@Override
+	public UserVO toVO() {
+
+		UserVO userVO = (UserVO) toVOLite();
+		
+		if (Validator.isNotNull(this.roles)) {
+
+			Set<RoleVO> set = new HashSet<RoleVO>();
+
+			for (Role employee : this.roles) {
+				set.add(employee.toVOLite());
+			}
+			userVO.setRoles(set);
+		}
+
+		return userVO;
+	}
+
+	@Override
+	public void fromVO(BaseVO baseVO) {
+
+		UserVO vo = (UserVO) baseVO;
+
+		this.id = vo.getId();
+		this.userName = vo.getUserName();
+		this.password = vo.getPassword();
+		this.firstName = vo.getFirstName();
+		this.lastName = vo.getLastName();
+		this.displayName = vo.getDisplayName();
+		this.canonicalSearchName = vo.getCanonicalSearchName();
+		this.locale = vo.getLocale();
+		this.zoneId = vo.getZoneId();
+		this.calendar = Calendar.valueOf(vo.getCalendar());
+		this.email = vo.getEmail();
+		this.mobile = vo.getMobile();
+		this.remarks = vo.getRemarks();
+		this.version = vo.getVersion();
+		this.active = vo.isActive();
+		this.uuid = vo.getUuid();			
+		this.personUuid = vo.getPersonUuid();
+
+		getAuditFromVO(vo);
+	}
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the userName
+	 */
+	public String getUserName() {
+		return userName;
+	}
+
+	/**
+	 * @param userName
+	 *            the userName to set
+	 */
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * @param password
+	 *            the password to set
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	/**
+	 * @return the firstName
+	 */
+	public String getFirstName() {
+		return firstName;
+	}
+
+	/**
+	 * @param firstName
+	 *            the firstName to set
+	 */
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	/**
+	 * @return the lastName
+	 */
+	public String getLastName() {
+		return lastName;
+	}
+
+	/**
+	 * @param lastName
+	 *            the lastName to set
+	 */
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	/**
+	 * @return the displayName
+	 */
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	/**
+	 * @param displayName
+	 *            the displayName to set
+	 */
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	/**
+	 * @return the canonicalSearchName
+	 */
+	public String getCanonicalSearchName() {
+		return canonicalSearchName;
+	}
+
+	/**
+	 * @param canonicalSearchName
+	 *            the canonicalSearchName to set
+	 */
+	public void setCanonicalSearchName(String canonicalSearchName) {
+		this.canonicalSearchName = canonicalSearchName;
+	}
+
+	/**
+	 * @return the locale
+	 */
+	public String getLocale() {
+		return locale;
+	}
+
+	/**
+	 * @param locale the locale to set
+	 */
+	public void setLocale(String locale) {
+		this.locale = locale;
+	}
+
+	/**
+	 * @return the zoneId
+	 */
+	public String getZoneId() {
+		return zoneId;
+	}
+
+	/**
+	 * @param zoneId the zoneId to set
+	 */
+	public void setZoneId(String zoneId) {
+		this.zoneId = zoneId;
+	}
+
+	/**
+	 * @return the calendar
+	 */
+	public Calendar getCalendar() {
+		return calendar;
+	}
+
+	/**
+	 * @param calendar
+	 *            the calendar to set
+	 */
+	public void setCalendar(Calendar calendar) {
+		this.calendar = calendar;
+	}
+
+	/**
+	 * @return the roles
+	 */
+	public Set<Role> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * @param roles
+	 *            the roles to set
+	 */
+	public void setRoles(Set<Role> roles) {
+		this.roles = roles;
+	}
+
+    public boolean addRole(Role role) {
+        return getRoles().add(role);
+    }
+
+    public boolean removeRole(Role role) {
+        return getRoles().remove(role);
+    }
+
+	/**
+	 * @return the userGroup
+	 */
+	public UserGroup getUserGroup() {
+		return userGroup;
+	}
+
+	/**
+	 * @param userGroup the userGroup to set
+	 */
+	public void setUserGroup(UserGroup userGroup) {
+		this.userGroup = userGroup;
+	}
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @param email
+	 *            the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	/**
+	 * @return the mobile
+	 */
+	public String getMobile() {
+		return mobile;
+	}
+
+	/**
+	 * @param mobile the mobile to set
+	 */
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	/**
+	 * @return the remarks
+	 */
+	public String getRemarks() {
+		return remarks;
+	}
+
+	/**
+	 * @param remarks
+	 *            the remarks to set
+	 */
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * @param active
+	 *            the active to set
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the version
+	 */
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version
+	 *            the version to set
+	 */
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	/**
+	 * @return the uuid
+	 */
+	public String getUuid() {
+		return uuid;
+	}
+
+	/**
+	 * @param uuid the uuid to set
+	 */
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	/**
+	 * @return the personUuid
+	 */
+	public String getPersonUuid() {
+		return personUuid;
+	}
+
+	/**
+	 * @param personUuid the personUuid to set
+	 */
+	public void setPersonUuid(String personUuid) {
+		this.personUuid = personUuid;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", userName=" + userName + ", firstName=" + firstName + ", lastName=" + lastName
+				+ ", uuid=" + uuid + ", displayName=" + displayName + ", canonicalSearchName=" + canonicalSearchName
+				+ ", locale=" + locale + ", zoneId=" + zoneId + ", calendar=" + calendar + ", email=" + email
+				+ ", active=" + active + ", version=" + version + "]";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof User)) {
+			return false;
+		}
+
+		final User obj = (User) o;
+
+		return new EqualsBuilder().append(this.id, obj.getId()).isEquals();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(-970989579, 1884842917).append(this.id).toHashCode();
+	}
+
+}

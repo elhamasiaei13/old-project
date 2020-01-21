@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workingSetManager>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1461661410368_2" label="issuemanager" name="issuemanager">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/issuemanager-web" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/issuemanager" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/issuemanager-ejb" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/issuemanager-ear" type="4"/>
+</workingSet>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1462597054552_3" label="agilefant-parent" name="agilefant-parent"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1465451847037_3" label="accounting" name="accounting"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1466855794964_4" label="identitymanagement2" name="identitymanagement2">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/theme" type="4"/>
+</workingSet>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1470723315297_5" label="agentmanagement" name="agentmanagement"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1472021745342_6" label="stock2" name="stock2"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1475327358061_7" label="stock2-rest" name="stock2-rest">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/stock2-rest" type="4"/>
+</workingSet>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1477140356181_8" label="job-management" name="job-management"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1479195041393_9" label="creditcustomer" name="creditcustomer"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1479384105763_10" label="customercontract" name="customercontract">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/settlement-web" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/settlement-rest" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/common-crosscutting-ejb" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/settlement" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/settlement-ejb" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/settlement-ear" type="4"/>
+</workingSet>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1482323037993_11" label="taskmanagement" name="taskmanagement"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1485603205126_12" label="sample" name="sample"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1492001606902_13" label="logesticmanagement" name="logesticmanagement"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1492508124336_14" label="siteservices" name="siteservices"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1492845776020_15" label="transportationManagement" name="transportationManagement"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1493288648806_16" label="routeManagement" name="routeManagement"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1493290825439_17" label="routemanagement" name="routemanagement"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1493292100295_18" label="rateAndRoute" name="rateAndRoute">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/siteservices-web" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/rateAndRoute-ear" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/rateAndRoute-ejb" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/siteservices-rest" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/siteservices" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/rateAndRoute" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/siteservices-ejb" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/siteservices-ear" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/rateAndRoute-rest" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/rateAndRoute-web" type="4"/>
+</workingSet>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1494743964630_19" label="transportationmanagement2" name="transportationmanagement2">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/routemanagement-ear" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/routemanagement-ejb" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/routemanagement-rest" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/routemanagement-web" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/routemanagement" type="4"/>
+</workingSet>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1495518973264_20" label="geomanagement" name="geomanagement"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1497337951298_21" label="complaintmanagement" name="complaintmanagement">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/complaintmanagement-rest" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/complaintmanagement-ejb" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/complaintmanagement-ear" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/complaintmanagement" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/complaintmanagement-web" type="4"/>
+</workingSet>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1456144533137_0" label="Window Working Set" name="Aggregate for window 1456144533136"/>
+</workingSetManager>

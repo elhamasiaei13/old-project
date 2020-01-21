@@ -1,0 +1,22 @@
+1461577314239	Rename local variable 'memberCriteria'
+1461742387793	Rename field 'taskAssignmentId'
+1461750477440	Copy compilation unit
+1461751620770	Delete element
+1461760727596	Rename field 'group'
+1461824014653	Copy compilation unit
+1461824159223	Copy compilation unit
+1461824179034	Rename type 'TaskStatusHistory'
+1461826621027	Delete element
+1461826633875	Delete element
+1461827486843	Rename field 'taskAssignment'
+1462005228579	Rename field 'changeAssignToComment'
+1462005546328	Rename method 'editTaskAssignment'
+1462005642567	Rename method 'editTaskAssignment'
+1462008157575	Copy compilation unit
+1462008236661	Copy compilation unit
+1462009264594	Rename method 'editTaskStatus'
+1462009507634	Change method 'addTaskStatus'
+1462009628044	Change method 'addTaskStatus'
+1462010399914	Change method 'addTaskStatus'
+1462016793382	Change method 'addTaskAssignment'
+1462016824793	Change method 'addTaskAssignment'

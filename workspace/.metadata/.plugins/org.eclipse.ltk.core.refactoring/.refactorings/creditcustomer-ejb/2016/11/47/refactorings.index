@@ -1,0 +1,41 @@
+1479195126234	Delete element
+1479195129650	Delete element
+1479195136025	Delete element
+1479195139370	Delete element
+1479195143217	Delete element
+1479195311876	Delete element
+1479195317912	Delete element
+1479195322829	Delete element
+1479195342710	Delete elements
+1479195354563	Delete elements
+1479195369192	Delete elements
+1479195375519	Delete elements
+1479195385713	Delete elements
+1479195480526	Rename type 'AmUserInfo'
+1479200988473	Rename type 'AccountNumber'
+1479202683609	Rename resource 'agentmanagement-ds.xml'
+1479206902060	Rename type 'AccountNumberLocalServiceImpl'
+1479206918364	Rename type 'AccountNumberServiceImpl'
+1479206928750	Rename type 'AccountNumberLocalService'
+1479206940619	Rename type 'AccountNumberService'
+1479209146570	Rename type 'AccountNumberDaoJpa'
+1479209181756	Rename type 'AccountNumberDao'
+1479209244760	Rename type 'AccountNumberCriteria'
+1479209695330	Rename type 'AccountNumberVO'
+1479217215193	Copy compilation unit
+1479217244990	Copy compilation unit
+1479279751524	Copy compilation unit
+1479279794060	Copy compilation unit
+1479279850704	Copy compilation unit
+1479279870713	Copy compilation unit
+1479369288839	Copy compilation units
+1479369375228	Copy compilation units
+1479369875146	Copy compilation unit
+1479369967038	Copy compilation unit
+1479370527607	Rename local variable 'agentDtos'
+1479370577895	Rename local variable 'employeeDto'
+1479370614529	Copy compilation units
+1479370913666	Rename local variable 'personVO'
+1479374348411	Rename local variable 'employeeDto'
+1479382005324	Rename local variable 'baseVO'
+1479382096460	Rename local variable 'baseVO'

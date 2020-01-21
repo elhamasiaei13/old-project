@@ -1,0 +1,151 @@
+package com.parvanpajooh.sample.model.vo;
+
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.parvanpajooh.common.vo.BaseVO;
+
+@XmlRootElement
+public class SampleVO extends BaseVO {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5971686629027277987L;
+
+	private Long id;
+	
+	private String title;
+	
+	private String titleEn;
+	private String USER_NAME;
+	private String PASSWORD;
+	private String titleEn;
+	private String titleEn;
+	
+//	private int indexInParent;
+//	
+//	private boolean active;
+//	
+//	private List<String> roles;
+//	
+//	private SampleVO parent;
+//
+//	private List<SampleVO> children;
+	
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * @param title the title to set
+	 */
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	/**
+	 * @return the indexInParent
+	 */
+	public int getIndexInParent() {
+		return indexInParent;
+	}
+
+	/**
+	 * @param indexInParent the indexInParent to set
+	 */
+	public void setIndexInParent(int indexInParent) {
+		this.indexInParent = indexInParent;
+	}
+
+	/**
+	 * @return the roles
+	 */
+	public List<String> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * @param roles the roles to set
+	 */
+	public void setRoles(List<String> roles) {
+		this.roles = roles;
+	}
+
+	/**
+	 * @return the parent
+	 */
+	@XmlElement(name = "parent")
+	public SampleVO getParent() {
+		return parent;
+	}
+
+	/**
+	 * @param parent the parent to set
+	 */
+	public void setParent(SampleVO parent) {
+		this.parent = parent;
+	}
+
+	/**
+	 * @return the children
+	 */
+	@XmlElement(name = "children")
+	public List<SampleVO> getChildren() {
+		return children;
+	}
+
+	/**
+	 * @param children the children to set
+	 */
+	public void setChildren(List<SampleVO> children) {
+		this.children = children;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+	
+	/**
+	 * @return the titleEn
+	 */
+	public String getTitleEn() {
+		return titleEn;
+	}
+
+	/**
+	 * @param titleEn the titleEn to set
+	 */
+	public void setTitleEn(String titleEn) {
+		this.titleEn = titleEn;
+	}
+}

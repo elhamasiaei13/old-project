@@ -1,0 +1,142 @@
+package com.parvanpajooh.siteservices.mvc;
+
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+import com.parvanpajooh.common.auth.UserInfoLoader;
+import com.parvanpajooh.common.util.ParamUtil;
+import com.parvanpajooh.commons.enums.SortDirectionEnum;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ObjectNotFoundException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+import com.parvanpajooh.commons.platform.ejb.model.vo.BaseVO;
+import com.parvanpajooh.commons.util.Validator;
+import com.parvanpajooh.routemanagement.mvc.base.RarBaseController;
+import com.parvanpajooh.routemanagement.service.ZoneService;
+
+@ControllerAdvice
+public class GlobalController extends RarBaseController {
+	
+	//@EJB(mappedName="java:global/ecourier-ear/ecourier-ejb/NodeServiceImpl") 
+	//private NodeService nodeService;
+	
+//	@EJB(mappedName="java:global/rateAndRoute-ear/rateAndRoute-ejb/CarrierServiceImpl") 
+//	private CarrierService carrierService;
+//	
+//	@EJB(mappedName="java:global/rateAndRoute-ear/rateAndRoute-ejb/RateTypeServiceImpl") 
+//	private RateTypeService rateTypeService;
+//	
+//	@EJB(mappedName="java:global/rateAndRoute-ear/rateAndRoute-ejb/ProductServiceImpl") 
+//	private ProductService productService;
+	
+	@EJB(mappedName="java:global/routemanagement-ear/routemanagement-ejb/ZoneServiceImpl") 
+	private ZoneService zoneService;
+	
+	@ModelAttribute("userInfo")
+	public UserInfo populateUserInfo(HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+
+		UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+		
+		return userInfo;
+	}
+	
+	
+	@ModelAttribute("rateTypes")
+	public List<BaseVO> loadRateTypes(HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+		@SuppressWarnings("unchecked")
+		List<BaseVO> rateTypes = (List<BaseVO>) request.getSession().getAttribute("rateTypes");
+		
+		boolean doRefresh = ParamUtil.getBoolean(request, "doRefresh", false);
+		
+		if(Validator.isNull(rateTypes) || doRefresh){
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+//			rateTypes = rateTypeService.findAll(userInfo);
+			rateTypes = new ArrayList<BaseVO>();
+			request.getSession().setAttribute("rateTypes", rateTypes);
+		}
+		
+		return rateTypes;
+	}
+	
+	@ModelAttribute("products")
+	public List<BaseVO> loadProducts(HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+		@SuppressWarnings("unchecked")
+		List<BaseVO> products = (List<BaseVO>) request.getSession().getAttribute("products");
+		
+		boolean doRefresh = ParamUtil.getBoolean(request, "doRefresh", false);
+		
+		if(Validator.isNull(products) || doRefresh){
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+//			products = productService.findAll(userInfo, 0, 1000, SortDirectionEnum.Ascending, "name");
+			products = new ArrayList<BaseVO>();
+			
+			request.getSession().setAttribute("products", products);
+		}
+		
+		return products;
+	}
+	
+	@ModelAttribute("carriers")
+	public List<BaseVO> loadCarriers(HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+		@SuppressWarnings("unchecked")
+		List<BaseVO> carriers = (List<BaseVO>) request.getSession().getAttribute("carriers");
+		
+		boolean doRefresh = ParamUtil.getBoolean(request, "doRefresh", false);
+		
+		if(Validator.isNull(carriers) || doRefresh){
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+//			carriers = carrierService.findAll(userInfo);
+			carriers = new ArrayList<BaseVO>();
+			request.getSession().setAttribute("carriers", carriers);
+		}
+		
+		return carriers;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@ModelAttribute("zones")
+	public List<BaseVO> zones(HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+		 	
+		List<BaseVO> zones = (List<BaseVO>) request.getSession().getAttribute("zones");
+		
+		boolean doRefresh = ParamUtil.getBoolean(request, "doRefresh", false);
+		
+		if(Validator.isNull(zones) || doRefresh){
+			UserInfo userInfo = UserInfoLoader.getInstance().getUserInfo();
+			
+			zones = zoneService.findAll(userInfo);
+			
+			request.getSession().setAttribute("zones", zones);
+		}
+
+		return zones;
+	}
+	
+	@ModelAttribute("timeZones")
+	public List<String> loadTimeZones(HttpServletRequest request) throws ObjectNotFoundException, ParvanServiceException {
+		@SuppressWarnings("unchecked")
+		List<String> timeZones = (List<String>) request.getSession().getAttribute("timeZones");
+		
+		boolean doRefresh = ParamUtil.getBoolean(request, "doRefresh", false);
+		
+		if(Validator.isNull(timeZones) || doRefresh){
+			
+			Set<String> zoneIds = ZoneId.getAvailableZoneIds();
+			
+			request.getSession().setAttribute("timeZones", new ArrayList<String>(zoneIds));
+		}
+		
+		return timeZones;
+	}
+}

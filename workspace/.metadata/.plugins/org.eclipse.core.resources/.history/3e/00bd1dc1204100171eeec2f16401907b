@@ -1,0 +1,63 @@
+/**
+ * 
+ */
+package com.parvanpajooh.client.geomanagement.model;
+
+import com.parvanpajooh.client.common.BaseMsg;
+
+/**
+ * @author mehrdad
+ *
+ */
+public class GeoLocationMsg extends BaseMsg {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	private Long id;
+	
+	private Double geoLat;
+	
+	private Double geoLng;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Double getGeoLat() {
+		return geoLat;
+	}
+
+	public void setGeoLat(Double geoLat) {
+		this.geoLat = geoLat;
+	}
+
+	public Double getGeoLng() {
+		return geoLng;
+	}
+
+	public void setGeoLng(Double geoLng) {
+		this.geoLng = geoLng;
+	}
+
+	@Override
+	public String toString() {
+		return "GeoLocationVO [id=" + getId() + ", geoLat=" + geoLat + ", geoLng="
+				+ geoLng + "]";
+	}
+	
+	
+
+}

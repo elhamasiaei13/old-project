@@ -1,0 +1,136 @@
+package com.parvanpajooh.agentmanagement.service.impl;
+
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.parvanpajooh.agentmanagement.model.vo.CityInfoVO;
+import com.parvanpajooh.agentmanagement.model.vo.NodeVO;
+import com.parvanpajooh.agentmanagement.service.GeoManagementLocalService;
+import com.parvanpajooh.agentmanagement.service.GeoManagementService;
+import com.parvanpajooh.agentmanagement.service.RateAndRouteLocalService;
+import com.parvanpajooh.agentmanagement.service.RateAndRouteService;
+import com.parvanpajooh.commons.platform.ejb.ddd.application.AbstractServiceImpl;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanServiceException;
+import com.parvanpajooh.commons.platform.ejb.exceptions.ParvanUnrecoverableException;
+import com.parvanpajooh.commons.platform.ejb.model.UserInfo;
+
+/**
+ * 
+ * @author
+ *
+ */
+@Stateless
+public class GeoManagementServiceImpl extends AbstractServiceImpl implements GeoManagementService {
+	/**
+	 * Log variable for all child classes.
+	 */
+	static final Logger log = LoggerFactory.getLogger(GeoManagementServiceImpl.class);
+
+	@Inject
+	private GeoManagementLocalService geoManagementLocalService;
+
+	@Override
+	public List<CityInfoVO> findCitiesByNameOrShortCode(UserInfo userInfo,String term, int firstResult, int maxResults, String sortDirection, String sortCriterion) throws ParvanServiceException {
+
+		// LOG
+		log.debug("Entering findCitiesByNameOrShortCode( userInfo={} , term={})", userInfo, term);
+
+		List<CityInfoVO> voList = null;
+
+		try {
+
+			// find Cities By name or shortCode
+			voList = geoManagementLocalService.findCitiesByNameOrShortCode(term, firstResult, maxResults, sortDirection, sortCriterion);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findCitiesByNameOrShortCode", e);
+		}
+
+		// LOG
+		log.debug("Leaving findCitiesByNameOrShortCode: ret={}", (voList != null) ? voList.size() : "NULL");
+
+		return voList;
+	}
+
+	@Override
+	public List<NodeVO> findNodesBy(UserInfo userInfo, String term, String cityShortCode, int firstResult, int maxResults, String sortDirection,
+			String sortCriterion) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering findNodesBy( userInfo={} , term={},cityShortCode={})", userInfo, term,cityShortCode);
+
+		List<NodeVO> voList = null;
+
+		try {
+
+			// find nodes By cityShortCode , otherNames , name and codeName
+			voList = geoManagementLocalService.findNodesBy(term,cityShortCode, firstResult, maxResults, sortDirection, sortCriterion);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while findNodesBy", e);
+		}
+
+		// LOG
+		log.debug("Leaving findNodesBy: ret={}", (voList != null) ? voList.size() : "NULL");
+
+		return voList;
+		
+	}
+
+	@Override
+	public CityInfoVO getCityByShortCode(UserInfo userInfo, String shortCode) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering getCityByShortCode( userInfo={} , cityShortCode={})", userInfo, shortCode);
+
+		CityInfoVO cityInfoVO = null;
+
+		try {
+
+			// get City By shortCode
+			cityInfoVO = rateAndRouteLocalService.getCityByShortCode(shortCode);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getCityByShortCode", e);
+		}
+
+		return cityInfoVO;		
+	}
+	
+	@Override
+	public NodeVO getNode(UserInfo userInfo, Long id) throws ParvanServiceException {
+		
+		// LOG
+		log.debug("Entering getNode( userInfo={} , id={})", userInfo, id);
+
+		NodeVO nodeVO = null;
+
+		try {
+
+			// get Node By id
+			nodeVO = rateAndRouteLocalService.getNode(id);
+
+		} catch (ParvanServiceException e) {
+			throw e;
+
+		} catch (Exception e) {
+			throw new ParvanUnrecoverableException("Error occurred while getNode", e);
+		}
+
+		return nodeVO;		
+	}
+}

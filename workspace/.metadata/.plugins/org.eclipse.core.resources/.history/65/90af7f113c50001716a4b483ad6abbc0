@@ -1,0 +1,20 @@
+package com.parvanpajooh.client.complaintmanagement.model;
+
+public final class ComplaintManagementEnums {
+	
+	public enum UldForm {
+
+		PALLET, CONTAINER;
+	}
+	
+	public enum VehicleType {
+		AIRCRAFT ,
+		SHIP ,
+		VAN ,
+		TRUCK ,
+		PICKUP_TRUCK ,
+		MINI_TRUCK ,
+		MOTORCYCLE ,
+		TRAIN ;
+	}
+}

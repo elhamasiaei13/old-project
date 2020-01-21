@@ -1,0 +1,20 @@
+package com.parvanpajooh.sample.model;
+
+import javax.annotation.Generated;
+import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.StaticMetamodel;
+
+@Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
+@StaticMetamodel(Sample.class)
+public abstract class Sample_ extends com.parvanpajooh.ecourier.model.BaseModel_ {
+
+	public static volatile SingularAttribute<Sample, String> TITLE_EN;
+	public static volatile SingularAttribute<Sample, String> PASSWORD;
+	public static volatile SingularAttribute<Sample, String> TITLE;
+	public static volatile SingularAttribute<Sample, Long> ID;
+	public static volatile SingularAttribute<Sample, String> USER_NAME;
+	public static volatile SingularAttribute<Sample, String> LAST_NAME;
+	public static volatile SingularAttribute<Sample, String> FIRST_NAME;
+
+}
+
