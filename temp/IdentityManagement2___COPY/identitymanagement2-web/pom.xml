@@ -24,7 +24,7 @@
 
 	<properties>
 		<!-- Spring version -->
-		<version.spring>4.1.6.RELEASE</version.spring>
+		<version.spring>5.2.3.RELEASE</version.spring>
 		<version.spring.security>4.0.0.RELEASE</version.spring.security>
 
 		<!-- Spring Third Party dependencies -->
