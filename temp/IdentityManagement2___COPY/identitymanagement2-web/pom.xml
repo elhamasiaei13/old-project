@@ -25,7 +25,7 @@
 	<properties>
 		<!-- Spring version -->
 		<version.spring>4.1.6.RELEASE</version.spring>
-		<version.spring.security>4.0.0.RELEASE</version.spring.security>
+		<version.spring.security>5.2.1.RELEASE</version.spring.security>
 
 		<!-- Spring Third Party dependencies -->
 		<version.aopalliance>1.0</version.aopalliance>
